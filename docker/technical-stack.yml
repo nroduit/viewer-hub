@@ -1,0 +1,23 @@
+name: technical-stack-local
+
+services:
+
+  eureka:
+#    image: springcloud/eureka:latest
+    image: taskbeez/eureka-server:master
+    container_name: technical-stack_eureka
+    ports:
+      - "8761:8761"
+
+  config-server:
+    #    image:  springcloud/configserver:latest
+    image: hyness/spring-cloud-config-server:4.1
+    container_name: technical-stack_config-server
+    environment:
+      SPRING_PROFILES_ACTIVE: native
+    depends_on:
+      - eureka
+    volumes:
+      - ./config-server:/config
+    ports:
+      - "8888:8888"

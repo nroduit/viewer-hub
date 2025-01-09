@@ -1,0 +1,113 @@
+# - Info
+info:
+  component: weasis-manager
+  app:
+    name: weasis-manager
+    description: Weasis Manager
+  environment: ${ENVIRONMENT}
+
+# - Spring
+spring:
+  application:
+    name: weasis-manager
+    version: '@project.version@'
+  profiles:
+    active: oidc, connectors, environment-override, package, cryptography
+  cloud:
+    aws:
+      # Region
+      region:
+        static: eu-west-1
+      s3:
+        path-style-access-enabled: true # Used for s3 resources
+        endpoint: ${S3_ENDPOINT}
+        bucket:
+          name: ${S3_BUCKET_NAME}
+      # Aws Credentials (set here because of default aws s3 resource loader)
+      credentials:
+        access-key: ${S3_ACCESS_KEY}
+        secret-key: ${S3_SECRET_KEY}
+    config:
+      discovery:
+        enabled: false
+      fail-fast: true
+      name: ${spring.application.name}
+      label: ${ENVIRONMENT}
+      uri: ${CONFIGSERVER_URI}
+  config:
+    import: 'configserver:'
+  main:
+    allow-bean-definition-overriding: true
+  datasource:
+    url: 'jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}'
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      pool-name: weasis-manager
+      minimum-idle: 5
+      maximum-pool-size: 10
+      idle-timeout: 20000
+      max-lifetime: 60000
+  liquibase:
+    enabled: true
+    change-log: classpath:db/changelog/db.changelog-master.yaml
+#    In order to still use the unique hibernate_sequence, otherwise we should create a sequence table_name_seq for
+#  each tables
+  jpa:
+    properties:
+      hibernate:
+        id:
+          db_structure_naming_strategy: legacy
+
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 100MB
+      max-request-size: 100MB
+
+# - Logs
+logging:
+  level:
+    org:
+      weasis: INFO
+
+# - Eureka
+eureka:
+  client:
+    fetch-registry: true
+    register-with-eureka: true
+    service-url:
+      defaultZone: ${EUREKA_CLIENT_SERVICE_URL_DEFAULT_ZONE}
+
+# - Weasis-manager
+weasis-manager:
+  # - Server Url
+  server:
+    url: ${BACKEND_URI}
+  # - Resources package in s3
+  resources-packages:
+    weasis:
+      path: '${weasis-manager.resources-packages.path}/weasis'
+      package:
+        path: '${weasis-manager.resources-packages.path}/weasis/package'
+      i18n:
+        path: '${weasis-manager.resources-packages.path}/weasis/i18n'
+      mapping-minimal-version:
+        path: '${weasis-manager.resources-packages.path}/weasis/mapping-minimal-version.json'
+
+server:
+# Enable response compression: currently not working
+  compression:
+    enabled: true
+  # The comma-separated list of mime types that should be compressed
+    mime-types: application/xml #  text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json,application/xml
+#    min-response-size: 1000000 # => 1 Mo : currently not working as response is chunk encoded and no content-length is sent
+  use-relative-redirects: true
+
+#  - Weasis
+weasis:
+  config:
+    filename:
+      properties: config.properties
+      json: base.json

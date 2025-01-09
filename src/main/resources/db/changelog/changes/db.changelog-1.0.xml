@@ -1,0 +1,428 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.0.xsd">
+
+  <changeSet author="weasis-manager" id="1.0-1">
+    <preConditions onFail="MARK_RAN">
+      <not>
+        <tableExists tableName="target"/>
+      </not>
+    </preConditions>
+    <createTable tableName="target">
+      <column name="id" type="BIGINT" autoIncrement="true">
+        <constraints nullable="false" primaryKey="true" primaryKeyName="target_pkey"/>
+      </column>
+      <column name="name" type="VARCHAR(100)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="type" type="VARCHAR(100)">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+  </changeSet>
+
+  <changeSet author="weasis-manager" id="1.0-2">
+    <preConditions onFail="MARK_RAN">
+      <not>
+        <indexExists tableName="target" indexName="target_name_uindex"/>
+      </not>
+    </preConditions>
+    <createIndex indexName="target_name_uindex" tableName="target" unique="true">
+      <column name="name"/>
+    </createIndex>
+  </changeSet>
+
+  <changeSet author="weasis-manager" id="1.0-3">
+    <preConditions onFail="MARK_RAN">
+      <not>
+        <indexExists tableName="target" indexName="target_upper_name_index"/>
+      </not>
+    </preConditions>
+    <createIndex indexName="target_upper_name_index" tableName="target">
+      <column name="upper(name::text)"/>
+    </createIndex>
+  </changeSet>
+
+  <changeSet author="weasis-manager" id="1.0-4">
+    <preConditions onFail="MARK_RAN">
+      <not>
+        <tableExists tableName="groups"/>
+      </not>
+    </preConditions>
+    <createTable tableName="groups">
+      <column name="group_id" type="BIGINT">
+        <constraints nullable="false" primaryKey="true" primaryKeyName="groups_pkey"></constraints>
+      </column>
+      <column name="member_id" type="BIGINT">
+        <constraints nullable="false" primaryKey="true" primaryKeyName="groups_pkey"></constraints>
+      </column>
+    </createTable>
+  </changeSet>
+
+  <changeSet author="weasis-manager" id="1.0-5">
+    <preConditions onFail="MARK_RAN">
+      <not>
+        <indexExists tableName="groups" indexName="groups_group_id_index"/>
+      </not>
+    </preConditions>
+    <createIndex indexName="groups_group_id_index" tableName="groups">
+      <column name="group_id"/>
+    </createIndex>
+  </changeSet>
+
+  <changeSet author="weasis-manager" id="1.0-6">
+    <preConditions onFail="MARK_RAN">
+      <not>
+        <indexExists tableName="groups" indexName="groups_member_id_index"/>
+      </not>
+    </preConditions>
+    <createIndex indexName="groups_member_id_index" tableName="groups">
+      <column name="member_id"/>
+    </createIndex>
+  </changeSet>
+
+  <changeSet author="weasis-manager" id="1.0-7">
+    <preConditions onFail="MARK_RAN">
+      <not>
+        <foreignKeyConstraintExists foreignKeyName="groups_group_id_fkey"/>
+      </not>
+    </preConditions>
+    <addForeignKeyConstraint baseColumnNames="group_id" baseTableName="groups"
+      constraintName="groups_group_id_fkey" deferrable="false"
+      initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id"
+      referencedTableName="target" validate="true"/>
+  </changeSet>
+
+  <changeSet author="weasis-manager" id="1.0-8">
+    <preConditions onFail="MARK_RAN">
+      <not>
+        <foreignKeyConstraintExists foreignKeyName="groups_member_id_fkey"/>
+      </not>
+    </preConditions>
+    <addForeignKeyConstraint baseColumnNames="member_id" baseTableName="groups"
+      constraintName="groups_member_id_fkey" deferrable="false"
+      initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id"
+      referencedTableName="target" validate="true"/>
+  </changeSet>
+
+  <changeSet author="weasis-manager" id="1.0-9">
+    <preConditions onFail="MARK_RAN">
+      <not>
+        <tableExists tableName="launch_config"/>
+      </not>
+    </preConditions>
+    <createTable tableName="launch_config">
+      <column name="id" type="BIGINT" autoIncrement="true">
+        <constraints nullable="false" primaryKey="true" primaryKeyName="launch_config_pkey"/>
+      </column>
+      <column name="name" type="VARCHAR(100)">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+  </changeSet>
+
+  <changeSet author="weasis-manager" id="1.0-10">
+    <preConditions onFail="MARK_RAN">
+      <not>
+        <indexExists tableName="launch_config" indexName="launch_config_name_uindex" />
+      </not>
+    </preConditions>
+    <createIndex indexName="launch_config_name_uindex" tableName="launch_config" unique="true">
+      <column name="name"/>
+    </createIndex>
+  </changeSet>
+
+  <changeSet author="weasis-manager" id="1.0-11">
+    <preConditions onFail="MARK_RAN">
+      <not>
+        <tableExists tableName="launch_preferred"/>
+      </not>
+    </preConditions>
+    <createTable tableName="launch_preferred">
+      <column name="id" type="BIGINT" autoIncrement="true">
+        <constraints nullable="false" primaryKey="true" primaryKeyName="launch_preferred_pkey"/>
+      </column>
+      <column name="name" type="VARCHAR(100)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="type" type="VARCHAR(100)" defaultValue="-">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+  </changeSet>
+
+  <changeSet author="weasis-manager" id="1.0-12">
+    <preConditions onFail="MARK_RAN">
+      <not>
+        <indexExists tableName="launch_preferred" indexName="launch_preferred_name_uindex" />
+      </not>
+    </preConditions>
+    <createIndex indexName="launch_preferred_name_uindex" tableName="launch_preferred" unique="true">
+      <column name="name"/>
+    </createIndex>
+  </changeSet>
+
+  <changeSet author="weasis-manager" id="1.0-13">
+    <preConditions onFail="MARK_RAN">
+      <not>
+        <tableExists tableName="launch"/>
+      </not>
+    </preConditions>
+    <createTable tableName="launch">
+      <column name="target_id" type="BIGINT">
+        <constraints nullable="false" primaryKey="true" primaryKeyName="launch_pkey"></constraints>
+      </column>
+      <column name="launch_config_id" type="BIGINT">
+        <constraints nullable="false" primaryKey="true" primaryKeyName="launch_pkey"></constraints>
+      </column>
+      <column name="launch_preferred_id" type="BIGINT">
+        <constraints nullable="false" primaryKey="true" primaryKeyName="launch_pkey"></constraints>
+      </column>
+      <column name="selection" type="VARCHAR(600)">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+  </changeSet>
+
+  <changeSet author="weasis-manager" id="1.0-14">
+    <preConditions onFail="MARK_RAN">
+      <not>
+        <foreignKeyConstraintExists foreignKeyName="launch_target_id_fkey"/>
+      </not>
+    </preConditions>
+    <addForeignKeyConstraint baseColumnNames="target_id" baseTableName="launch"
+      constraintName="launch_target_id_fkey" deferrable="false"
+      initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id"
+      referencedTableName="target" validate="true"/>
+  </changeSet>
+
+  <changeSet author="weasis-manager" id="1.0-15">
+    <preConditions onFail="MARK_RAN">
+      <not>
+        <foreignKeyConstraintExists foreignKeyName="launch_launch_config_id_fkey"/>
+      </not>
+    </preConditions>
+    <addForeignKeyConstraint baseColumnNames="launch_config_id" baseTableName="launch"
+      constraintName="launch_launch_config_id_fkey" deferrable="false"
+      initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id"
+      referencedTableName="launch_config" validate="true"/>
+  </changeSet>
+
+  <changeSet author="weasis-manager" id="1.0-16">
+    <preConditions onFail="MARK_RAN">
+      <not>
+        <foreignKeyConstraintExists foreignKeyName="launch_launch_preferred_id_fkey"/>
+      </not>
+    </preConditions>
+    <addForeignKeyConstraint baseColumnNames="launch_preferred_id" baseTableName="launch"
+      constraintName="launch_launch_preferred_id_fkey" deferrable="false"
+      initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id"
+      referencedTableName="launch_preferred" validate="true"/>
+  </changeSet>
+
+  <changeSet author="weasis-manager" id="1.0-17">
+    <preConditions onFail="MARK_RAN">
+      <not>
+        <tableExists tableName="module"/>
+      </not>
+    </preConditions>
+    <createTable tableName="module">
+      <column name="id" type="BIGINT" autoIncrement="true">
+        <constraints nullable="false" primaryKey="true" primaryKeyName="module_pkey"/>
+      </column>
+      <column name="name" type="VARCHAR(100)">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+  </changeSet>
+
+  <changeSet author="weasis-manager" id="1.0-18">
+    <preConditions onFail="MARK_RAN">
+      <not>
+        <tableExists tableName="profile"/>
+      </not>
+    </preConditions>
+    <createTable tableName="profile">
+      <column name="id" type="BIGINT" autoIncrement="true">
+        <constraints nullable="false" primaryKey="true" primaryKeyName="profile_pkey"/>
+      </column>
+      <column name="name" type="VARCHAR(100)">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+  </changeSet>
+
+  <changeSet author="weasis-manager" id="1.0-19">
+    <preConditions onFail="MARK_RAN">
+      <not>
+        <tableExists tableName="preference"/>
+      </not>
+    </preConditions>
+    <createTable tableName="preference">
+      <column name="id" type="BIGINT" autoIncrement="true">
+        <constraints nullable="false" primaryKey="true" primaryKeyName="preference_pkey"/>
+      </column>
+      <column name="target_id" type="BIGINT">
+        <constraints nullable="false"/>
+      </column>
+      <column name="module_id" type="BIGINT">
+        <constraints nullable="false"/>
+      </column>
+      <column name="content" type="VARCHAR"/>
+      <column name="profile_id" type="BIGINT">
+        <constraints nullable="false"/>
+      </column>
+      <column name="creation_date" type="TIMESTAMP"/>
+      <column name="update_date" type="TIMESTAMP"/>
+    </createTable>
+  </changeSet>
+
+  <changeSet author="weasis-manager" id="1.0-20">
+    <preConditions onFail="MARK_RAN">
+      <not>
+        <foreignKeyConstraintExists foreignKeyName="preference_module_id_fkey"/>
+      </not>
+    </preConditions>
+    <addForeignKeyConstraint baseColumnNames="module_id" baseTableName="preference"
+      constraintName="preference_module_id_fkey" deferrable="false"
+      initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id"
+      referencedTableName="module" validate="true"/>
+  </changeSet>
+
+  <changeSet author="weasis-manager" id="1.0-21">
+    <preConditions onFail="MARK_RAN">
+      <not>
+        <foreignKeyConstraintExists foreignKeyName="preference_profile_id_fkey"/>
+      </not>
+    </preConditions>
+    <addForeignKeyConstraint baseColumnNames="profile_id" baseTableName="preference"
+      constraintName="preference_profile_id_fkey" deferrable="false"
+      initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id"
+      referencedTableName="profile" validate="true"/>
+  </changeSet>
+
+  <changeSet author="weasis-manager" id="1.0-22">
+    <preConditions onFail="MARK_RAN">
+      <not>
+        <foreignKeyConstraintExists foreignKeyName="preference_target_id_fkey"/>
+      </not>
+    </preConditions>
+    <addForeignKeyConstraint baseColumnNames="target_id" baseTableName="preference"
+      constraintName="preference_target_id_fkey" deferrable="false"
+      initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id"
+      referencedTableName="target" validate="true"/>
+  </changeSet>
+
+  <changeSet author="weasis-manager" id="1.0-23">
+    <preConditions onFail="MARK_RAN">
+      <not>
+        <indexExists tableName="preference" indexName="preference_target_id_index" />
+      </not>
+    </preConditions>
+    <createIndex indexName="preference_target_id_index" tableName="preference">
+      <column name="target_id"/>
+    </createIndex>
+  </changeSet>
+
+  <changeSet author="weasis-manager" id="1.0-24">
+    <preConditions onFail="MARK_RAN">
+      <not>
+        <sequenceExists sequenceName="hibernate_sequence" />
+      </not>
+    </preConditions>
+    <createSequence cacheSize="1" cycle="false" incrementBy="1" maxValue="9223372036854775807" minValue="1" sequenceName="hibernate_sequence" startValue="1"/>
+  </changeSet>
+
+  <changeSet author="weasis-manager" id="1.0-25">
+    <preConditions onFail="MARK_RAN">
+      <not>
+        <indexExists tableName="preference" indexName="preference_module_id_index" />
+      </not>
+    </preConditions>
+    <createIndex indexName="preference_module_id_index" tableName="preference">
+      <column name="module_id"/>
+    </createIndex>
+  </changeSet>
+
+  <changeSet author="weasis-manager" id="1.0-26">
+    <preConditions onFail="MARK_RAN">
+      <not>
+        <indexExists tableName="preference" indexName="preference_profile_id_index" />
+      </not>
+    </preConditions>
+    <createIndex indexName="preference_profile_id_index" tableName="preference">
+      <column name="profile_id"/>
+    </createIndex>
+  </changeSet>
+
+  <changeSet author="weasis-manager" id="1.0-27">
+    <preConditions onFail="MARK_RAN">
+      <not>
+        <indexExists tableName="preference" indexName="preference_uindex" />
+      </not>
+    </preConditions>
+    <createIndex indexName="preference_uindex" tableName="preference" unique="true">
+      <column name="target_id"/>
+      <column name="profile_id"/>
+      <column name="module_id"/>
+    </createIndex>
+  </changeSet>
+
+  <changeSet author="weasis-manager" id="1.0-28">
+    <preConditions onFail="MARK_RAN">
+      <not>
+        <indexExists tableName="profile" indexName="profile_name_uindex" />
+      </not>
+    </preConditions>
+    <createIndex indexName="profile_name_uindex" tableName="profile" unique="true">
+      <column name="name"/>
+    </createIndex>
+  </changeSet>
+
+  <changeSet author="weasis-manager" id="1.0-29">
+    <preConditions onFail="MARK_RAN">
+      <not>
+        <indexExists tableName="module" indexName="module_name_uindex" />
+      </not>
+    </preConditions>
+    <createIndex indexName="module_name_uindex" tableName="module" unique="true">
+      <column name="name"/>
+    </createIndex>
+  </changeSet>
+
+  <changeSet author="weasis-manager" id="1.0-30">
+    <preConditions onFail="MARK_RAN">
+      <not>
+        <indexExists tableName="launch" indexName="launch_launch_preferred_id_index" />
+      </not>
+    </preConditions>
+    <createIndex indexName="launch_launch_preferred_id_index" tableName="launch" >
+      <column name="launch_preferred_id"/>
+    </createIndex>
+  </changeSet>
+
+  <changeSet author="weasis-manager" id="1.0-31">
+    <preConditions onFail="MARK_RAN">
+      <not>
+        <indexExists tableName="launch" indexName="launch_target_id_index" />
+      </not>
+    </preConditions>
+    <createIndex indexName="launch_target_id_index" tableName="launch" >
+      <column name="target_id"/>
+    </createIndex>
+  </changeSet>
+
+  <changeSet author="weasis-manager" id="1.0-32">
+    <preConditions onFail="MARK_RAN">
+      <not>
+        <indexExists tableName="launch" indexName="launch_launch_config_id_index" />
+      </not>
+    </preConditions>
+    <createIndex indexName="launch_launch_config_id_index" tableName="launch" >
+      <column name="launch_config_id"/>
+    </createIndex>
+  </changeSet>
+
+
+</databaseChangeLog>

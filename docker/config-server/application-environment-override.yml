@@ -1,0 +1,9 @@
+# - Adapt Weasis properties to environment
+environment-override:
+  override:
+    default:
+      weasis.name: name for default
+      weasis.copyrights: local
+    dicomizer:
+      weasis.name: name for dicomizer
+      weasis.copyrights: local

@@ -1,0 +1,45 @@
+name: keycloak-local
+
+services:
+
+  # Postgres SQL for Keycloak
+  keycloak-db:
+    image: postgres:17-alpine
+    container_name: keycloak_db
+    volumes:
+      - keycloak_db_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: keycloak_db
+      POSTGRES_USER: keycloak_db_user
+      POSTGRES_PASSWORD: keycloak_db_password
+
+  # Keycloak
+  keycloak:
+    image: keycloak/keycloak:26.0
+    container_name: keycloak
+    command:
+      - start
+      - --import-realm
+    environment:
+      KC_HOSTNAME: localhost
+      KC_HOSTNAME_STRICT_BACKCHANNEL: false
+      KC_HTTP_ENABLED: true
+      KC_HOSTNAME_STRICT_HTTPS: false
+      KC_HEALTH_ENABLED: true
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://keycloak-db/keycloak_db
+      KC_DB_USERNAME: keycloak_db_user
+      KC_DB_PASSWORD: keycloak_db_password
+    volumes:
+      - ./keycloak/import.json:/opt/keycloak/data/import/weasis-manager-realm.json
+    ports:
+      - 8085:8080
+    restart: always
+    depends_on:
+      - keycloak-db
+
+volumes:
+  keycloak_db_data:
+    driver: local

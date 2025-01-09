@@ -1,0 +1,13 @@
+# - Weasis-manager
+weasis-manager:
+  resources-packages:
+    path: /resources/packages
+
+#  - Weasis
+weasis:
+  #  - Weasis package versions
+  package:
+    version:
+      default:
+        number: 3.8.2
+        qualifier: # example: -MGR

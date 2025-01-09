@@ -1,0 +1,5 @@
+# - Cryptography
+cryptography:
+  enabled: false
+  password: password
+  salt: salt

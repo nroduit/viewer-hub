@@ -1,0 +1,7 @@
+/* CSS for component LaunchGrid */
+
+/* When detecting a duplicate between launches of selected target and belongsTo/memberOf */
+td.duplicate {
+    background-color: coral;
+    color: black;
+}

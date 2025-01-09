@@ -1,0 +1,16 @@
+spring:
+  security:
+    oauth2:
+      client:
+        registration:
+          keycloak:
+            client-id: weasis-manager
+            client-secret: peLDyVHEpxTQ1A4GZZzQGK5xsPetlTrV
+            authorization-grant-type: authorization_code
+            redirect-uri: '${BACKEND_URI}/login/oauth2/code/{registrationId}'
+            scope:
+              - openid
+        provider:
+          keycloak:
+            issuer-uri: http://localhost:8085/realms/weasis-manager
+            jwk-set-uri: http://localhost:8085/realms/weasis-manager/protocol/openid-connect/certs

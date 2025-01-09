@@ -1,0 +1,25 @@
+
+services:
+
+  # Postgres SQL
+  weasis-manager-db:
+    image: postgres:17-alpine
+    container_name:  weasis-manager_db
+    ports:
+      - "45101:5432"
+
+  # Redis Cache
+  weasis-manager-cache:
+    container_name: weasis-manager_cache
+    image: redis:7
+    ports:
+      - "6379:6379"
+
+  # Minio for using S3 cloud storage API minio:latest
+  minio-storage:
+    image: minio/minio:RELEASE.2024-10-29T16-01-48Z
+    container_name: weasis-manager_minio
+    command: server --console-address ":9090" /resources
+    ports:
+      - "9080:9000"
+      - "9090:9090"

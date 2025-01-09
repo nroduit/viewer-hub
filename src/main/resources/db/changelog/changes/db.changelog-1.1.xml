@@ -1,0 +1,207 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.0.xsd">
+
+    <changeSet author="weasis-manager" id="1.1-1">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="package_version"/>
+            </not>
+        </preConditions>
+        <createTable tableName="package_version">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="package_version_pkey"/>
+            </column>
+            <column name="version_number" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="qualifier" type="VARCHAR(255)"/>
+            <column name="i18n_version" type="VARCHAR(255)"/>
+            <column name="description" type="VARCHAR(255)"/>
+            <column name="created_date" type="TIMESTAMP"/>
+            <column name="last_update" type="TIMESTAMP"/>
+            <column name="created_by" type="VARCHAR(255)"/>
+            <column name="modified_by" type="VARCHAR(255)"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="weasis-manager" id="1.1-2">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists indexName="package_version_version_qualifier_unique_idx"/>
+            </not>
+        </preConditions>
+        <sql>
+            CREATE UNIQUE INDEX package_version_version_qualifier_unique_idx ON package_version (version_number, qualifier) WHERE qualifier IS NOT NULL;
+        </sql>
+    </changeSet>
+
+    <changeSet author="weasis-manager" id="1.1-3">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists indexName="package_version_qualifier_idx"/>
+            </not>
+        </preConditions>
+        <sql>
+            CREATE UNIQUE INDEX package_version_qualifier_idx ON package_version (version_number) WHERE qualifier IS NULL;
+        </sql>
+    </changeSet>
+
+    <changeSet author="weasis-manager" id="1.1-4">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="override_config"/>
+            </not>
+        </preConditions>
+        <createTable tableName="override_config">
+            <column name="package_version_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="override_config_pkey"></constraints>
+            </column>
+            <column name="launch_config_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="override_config_pkey"></constraints>
+            </column>
+            <column name="target_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="override_config_pkey"></constraints>
+            </column>
+            <column name="created_date" type="TIMESTAMP"/>
+            <column name="last_update" type="TIMESTAMP"/>
+            <column name="created_by" type="VARCHAR(255)"/>
+            <column name="modified_by" type="VARCHAR(255)"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="weasis-manager" id="1.1-5">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="override_config_package_version_id_fkey"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="package_version_id" baseTableName="override_config"
+                                 constraintName="override_config_package_version_id_fkey" deferrable="false"
+                                 initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
+                                 referencedColumnNames="id"
+                                 referencedTableName="package_version" validate="true"/>
+    </changeSet>
+
+    <changeSet author="weasis-manager" id="1.1-6">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="override_config_launch_config_id_fkey"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="launch_config_id" baseTableName="override_config"
+                                 constraintName="override_config_launch_config_id_fkey" deferrable="false"
+                                 initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
+                                 referencedColumnNames="id"
+                                 referencedTableName="launch_config" validate="true"/>
+    </changeSet>
+
+    <changeSet author="weasis-manager" id="1.1-7">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="override_config_target_id_fkey"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="target_id" baseTableName="override_config"
+                                 constraintName="override_config_target_id_fkey" deferrable="false"
+                                 initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
+                                 referencedColumnNames="id"
+                                 referencedTableName="target" validate="true"/>
+    </changeSet>
+
+    <changeSet author="weasis-manager" id="1.1-8">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="weasis_property"/>
+            </not>
+        </preConditions>
+        <createTable tableName="weasis_property">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="weasis_property_pkey"/>
+            </column>
+            <column name="override_config_package_version_id" type="BIGINT"/>
+            <column name="override_config_launch_config_id" type="BIGINT"/>
+            <column name="override_config_target_id" type="BIGINT"/>
+            <column name="property_code" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="property_value" type="VARCHAR(2000)"/>
+            <column name="description" type="VARCHAR(255)"/>
+            <column name="default_property_value" type="VARCHAR(2000)"/>
+            <column name="type" type="VARCHAR(255)"/>
+            <column name="category" type="VARCHAR(255)"/>
+            <column name="java_type" type="VARCHAR(255)"/>
+            <column name="created_date" type="TIMESTAMP"/>
+            <column name="last_update" type="TIMESTAMP"/>
+            <column name="created_by" type="VARCHAR(255)"/>
+            <column name="modified_by" type="VARCHAR(255)"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="weasis-manager" id="1.1-9">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="weasis_property_override_config_id_fkey"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint
+                baseColumnNames="override_config_package_version_id,override_config_launch_config_id,override_config_target_id"
+                baseTableName="weasis_property"
+                constraintName="weasis_property_override_config_id_fkey" deferrable="false"
+                initiallyDeferred="false" onDelete="CASCADE" onUpdate="RESTRICT"
+                referencedColumnNames="package_version_id,launch_config_id,target_id"
+                referencedTableName="override_config" validate="true"/>
+    </changeSet>
+
+    <changeSet author="weasis-manager" id="1.1-10">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="target"/>
+            <sqlCheck expectedResult="0">SELECT COUNT(*)
+                                         FROM target
+                                         WHERE name = 'DEFAULT'
+                                           AND type = 'DEFAULT';</sqlCheck>
+        </preConditions>
+        <insert tableName="target">
+            <column name="id" valueComputed="nextval('hibernate_sequence')"/>
+            <column name="name" value="DEFAULT"/>
+            <column name="type" value="DEFAULT"/>
+        </insert>
+    </changeSet>
+
+    <changeSet author="weasis-manager" id="1.1-11">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="launch_config"/>
+            <sqlCheck expectedResult="0">SELECT COUNT(*)
+                                         FROM launch_config
+                                         WHERE name = 'default';</sqlCheck>
+        </preConditions>
+        <insert tableName="launch_config">
+            <column name="id" valueComputed="nextval('hibernate_sequence')"/>
+            <column name="name" value="default"/>
+        </insert>
+    </changeSet>
+
+    <changeSet author="weasis-manager" id="1.1-12">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="i18n"/>
+            </not>
+        </preConditions>
+        <createTable tableName="i18n">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="i18n_pkey"/>
+            </column>
+            <column name="version_number" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="qualifier" type="VARCHAR(255)"/>
+            <column name="description" type="VARCHAR(255)"/>
+            <column name="created_date" type="TIMESTAMP"/>
+            <column name="last_update" type="TIMESTAMP"/>
+            <column name="created_by" type="VARCHAR(255)"/>
+            <column name="modified_by" type="VARCHAR(255)"/>
+        </createTable>
+    </changeSet>
+
+</databaseChangeLog>

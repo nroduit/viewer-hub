@@ -1,0 +1,61 @@
+/*
+ *  Copyright (c) 2022-2024 Weasis Team and other contributors.
+ *
+ *  This program and the accompanying materials are made available under the terms of the Eclipse
+ *  Public License 2.0 which is available at https://www.eclipse.org/legal/epl-2.0, or the Apache
+ *  License, Version 2.0 which is available at https://www.apache.org/licenses/LICENSE-2.0.
+ *
+ *  SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
+ *
+ */
+
+package org.weasis.manager.back.service;
+
+import jakarta.validation.Valid;
+import org.weasis.manager.back.model.WeasisIHESearchCriteria;
+import org.weasis.manager.back.model.WeasisSearchCriteria;
+
+/**
+ * Service dealing with cryptography
+ */
+public interface CryptographyService {
+
+	/**
+	 * Encode a string depending on the salt and password provided
+	 * @param toEncode String to encode
+	 * @return encoded String
+	 */
+	String encode(String toEncode);
+
+	/**
+	 * Decode a string depending on the salt and password provided
+	 * @param toDecode String to decode
+	 * @return decoded String
+	 */
+	String decode(String toDecode);
+
+	/**
+	 * Encode WeasisSearchCriteria values
+	 * @param weasisSearchCriteria values to encode
+	 */
+	void encode(@Valid WeasisSearchCriteria weasisSearchCriteria);
+
+	/**
+	 * Decode WeasisSearchCriteria values
+	 * @param weasisSearchCriteria values to decode
+	 */
+	void decode(WeasisSearchCriteria weasisSearchCriteria);
+
+	/**
+	 * Encode WeasisIHESearchCriteria values
+	 * @param weasisIHESearchCriteria values to encode
+	 */
+	void encode(@Valid WeasisIHESearchCriteria weasisIHESearchCriteria);
+
+	/**
+	 * Decode WeasisIHESearchCriteria values
+	 * @param weasisIHESearchCriteria values to decode
+	 */
+	void decode(WeasisIHESearchCriteria weasisIHESearchCriteria);
+
+}
