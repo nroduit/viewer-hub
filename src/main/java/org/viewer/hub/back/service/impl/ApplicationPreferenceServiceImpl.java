@@ -21,6 +21,7 @@ import org.viewer.hub.back.entity.PreferenceEntity;
 import org.viewer.hub.back.entity.ProfileEntity;
 import org.viewer.hub.back.entity.TargetEntity;
 import org.viewer.hub.back.enums.OperationType;
+import org.viewer.hub.back.enums.TargetType;
 import org.viewer.hub.back.repository.ModuleRepository;
 import org.viewer.hub.back.repository.PreferenceRepository;
 import org.viewer.hub.back.repository.ProfileRepository;
@@ -168,8 +169,23 @@ public class ApplicationPreferenceServiceImpl implements ApplicationPreferenceSe
 	private PreferenceEntity buildNewApplicationPreference(String user, Long profileId, Long moduleId,
 			String preference) throws SQLException {
 		PreferenceEntity preferenceEntity = new PreferenceEntity();
-		preferenceEntity
-			.setTarget(this.targetRepository.findOptionalByNameIgnoreCase(user).orElseThrow(SQLException::new));
+
+		// Find existing target or build new one
+		TargetEntity targetEntity;
+		Optional<TargetEntity> optionalTargetEntity = this.targetRepository.findOptionalByNameIgnoreCase(user);
+		if (optionalTargetEntity.isPresent()) {
+			targetEntity = optionalTargetEntity.get();
+		}
+		else {
+			targetEntity = new TargetEntity();
+			targetEntity.setName(user);
+			targetEntity.setType(TargetType.USER);
+			targetEntity = targetRepository.saveAndFlush(targetEntity);
+			LOG.info("User %s has been created as USER target".formatted(user));
+		}
+
+		// Build preference
+		preferenceEntity.setTarget(targetEntity);
 		preferenceEntity.setProfile(this.profileRepository.findById(profileId).orElseThrow(SQLException::new));
 		preferenceEntity.setModule(this.moduleRepository.findById(moduleId).orElseThrow(SQLException::new));
 		preferenceEntity.setContent(preference);

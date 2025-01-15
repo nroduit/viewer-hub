@@ -68,9 +68,8 @@ public class CryptographyServiceImpl implements CryptographyService {
 				decoded = encryptor.decrypt(toDecode);
 			}
 			catch (Exception e) {
-				LOG.info("Error when decrypting %s:%s".formatted(toDecode, e));
+				LOG.debug("Decrypting %s not done:%s".formatted(toDecode, e));
 			}
-
 		}
 		return decoded;
 	}

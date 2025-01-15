@@ -79,7 +79,7 @@ class PackageServiceImplTest {
 	private PackageServiceImpl packageService;
 
 	@NotNull
-	private static Set<String> buildAvailableWeasisManagerPackageVersions() {
+	private static Set<String> buildAvailableWeasisPackageVersions() {
 		return Set.of("4.0.3-TEST", "3.8.2-MGR", "4.0.2-TEST", "4.0.2-MGR", "3.8.2-TEST", "4.0.1", "4.1.0-MGR", "4.5.0",
                 "4.5.0.1-MGR", "4.5.0.2-TEST");
 	}
@@ -159,18 +159,17 @@ class PackageServiceImplTest {
 	}
 
 	@Test
-	void when_retrieveAvailableWeasisManagerPackageVersions_should_retrieveFolderNamesInWeasisPackage()
+	void when_retrieveAvailableWeasisPackageVersions_should_retrieveFolderNamesInWeasisPackage()
 			throws IOException, URISyntaxException {
 		// Call method
-		Set<String> availableWeasisManagerPackageVersions = this.packageService
-			.retrieveAvailableWeasisManagerPackageVersions(Files.list(Paths.get(
+		Set<String> availableWeasisPackageVersions = this.packageService
+			.retrieveAvailableWeasisPackageVersions(Files.list(Paths.get(
 					Objects.requireNonNull(Thread.currentThread().getContextClassLoader().getResource("weasis/package"))
 						.toURI())));
 
 		// Test results
-		assertThat(availableWeasisManagerPackageVersions.size()).isEqualTo(10);
-		assertThat(availableWeasisManagerPackageVersions.containsAll(buildAvailableWeasisManagerPackageVersions()))
-			.isTrue();
+		assertThat(availableWeasisPackageVersions.size()).isEqualTo(10);
+		assertThat(availableWeasisPackageVersions.containsAll(buildAvailableWeasisPackageVersions())).isTrue();
 	}
 
 	@Test
@@ -196,7 +195,7 @@ class PackageServiceImplTest {
 	void when_determiningAvailablePackageVersionMapping_should_mapCoherentVersions() {
 
 		// init data
-		Set<String> availableWeasisManagerPackageVersions = buildAvailableWeasisManagerPackageVersions();
+		Set<String> availableWeasisPackageVersions = buildAvailableWeasisPackageVersions();
 		List<MinimalReleaseVersion> minimalReleaseVersions = buildMinimalReleaseVersions();
 
 		// To compare
@@ -204,7 +203,7 @@ class PackageServiceImplTest {
 
 		// Call method
 		Map<String, String> availablePackageVersionMapping = this.packageService
-			.determineAvailablePackageVersionMapping(availableWeasisManagerPackageVersions, minimalReleaseVersions);
+			.determineAvailablePackageVersionMapping(availableWeasisPackageVersions, minimalReleaseVersions);
 
 		// Test results
 		assertThat(availablePackageVersionMapping.size()).isEqualTo(48);
@@ -215,10 +214,9 @@ class PackageServiceImplTest {
 	void when_refreshingAvailablePackageVersionMapping_should_updateDbAndCache() throws FileNotFoundException {
 		// Mock
 		Mockito.when(this.s3Service.doesS3KeyExists(any())).thenReturn(true);
-		ReflectionTestUtils.setField(this.packageService, "weasisManagerResourcesPackagesWeasisPackagePath",
+		ReflectionTestUtils.setField(this.packageService, "viewerHubResourcesPackagesWeasisPackagePath",
 				"/resources/packages/weasis/package");
-		ReflectionTestUtils.setField(this.packageService,
-				"weasisManagerResourcesPackagesWeasisMappingMinimalVersionPath",
+		ReflectionTestUtils.setField(this.packageService, "viewerHubResourcesPackagesWeasisMappingMinimalVersionPath",
 				"/resources/packages/weasis/mapping-minimal-version.json");
 		Mockito.when(this.s3Service.retrieveS3KeysFromPrefix(any()))
 			.thenReturn(Set.of("resources/packages/weasis/package/4.1.0-QUALIFIER/test"));

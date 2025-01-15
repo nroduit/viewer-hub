@@ -28,7 +28,7 @@ import org.viewer.hub.back.util.SecurityUtil;
  * UI content when the user is not authorized to see the view.
  */
 @Route(NotAuthorizedScreen.ROUTE)
-@PageTitle("Weasis-manager - Not authorized")
+@PageTitle("Viewer-Hub - Not authorized")
 @CssImport(value = "./styles/shared-styles.css")
 @SuppressWarnings("serial")
 public class NotAuthorizedScreen extends FlexLayout {
@@ -79,7 +79,7 @@ public class NotAuthorizedScreen extends FlexLayout {
 		notAuthorizedLayout.setJustifyContentMode(JustifyContentMode.CENTER);
 		notAuthorizedLayout.setAlignItems(Alignment.CENTER);
 
-		notAuthorizedLayout.add(new H1("Weasis-manager"));
+		notAuthorizedLayout.add(new H1("Viewer-Hub"));
 		notAuthorizedLayout.add(new H1("Not Authorized"));
 
 		// logout button

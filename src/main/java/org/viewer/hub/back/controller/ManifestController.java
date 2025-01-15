@@ -97,7 +97,7 @@ public class ManifestController {
 	private static void logManifestRetrieval(HttpServletRequest request, Manifest manifest, String key,
 			LocalDateTime startRetrieveManifest) {
 		if (manifest != null && manifest.getStartManifestRequest() != null) {
-            LOG.info("Manifest with key %s has been retrieved".formatted(key),
+			LOG.info("Manifest with key %s has been retrieved".formatted(key),
 					kv("weasis.manifest.launch.time",
 							DateTimeUtil.retrieveDurationFromDateTimeInMs(manifest.getStartManifestRequest())),
 					kv("manifest.build.time", manifest.getBuildDuration()),

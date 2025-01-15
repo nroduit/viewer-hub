@@ -98,11 +98,11 @@ public class PackageServiceImpl implements PackageService {
 	@Value("${weasis.package.version.default.qualifier}")
 	private String defaultPackageVersionQualifier;
 
-	@Value("${weasis-manager.resources-packages.weasis.package.path}")
-	private String weasisManagerResourcesPackagesWeasisPackagePath;
+	@Value("${viewer-hub.resources-packages.weasis.package.path}")
+	private String viewerHubResourcesPackagesWeasisPackagePath;
 
-	@Value("${weasis-manager.resources-packages.weasis.mapping-minimal-version.path}")
-	private String weasisManagerResourcesPackagesWeasisMappingMinimalVersionPath;
+	@Value("${viewer-hub.resources-packages.weasis.mapping-minimal-version.path}")
+	private String viewerHubResourcesPackagesWeasisMappingMinimalVersionPath;
 
 	// Services
 	private final CacheService cacheService;
@@ -147,22 +147,22 @@ public class PackageServiceImpl implements PackageService {
 		// Check if json file containing the mapping of minimal versions is present
 		if (this.doesMappingMinimalVersionFileExists()) {
 
-			// Retrieve list of available weasis-manager package versions
-			Set<String> availableWeasisManagerPackageVersions = this.retrieveS3AvailableWeasisManagerPackageVersions();
+			// Retrieve list of available Weasis package versions
+			Set<String> availableWeasisPackageVersions = this.retrieveS3AvailableWeasisPackageVersions();
 
 			// Read mapping minimal version from existing releases
 			List<MinimalReleaseVersion> minimalReleaseVersions = this
-				.retrieveS3MinimalReleaseVersions(this.weasisManagerResourcesPackagesWeasisMappingMinimalVersionPath);
+				.retrieveS3MinimalReleaseVersions(this.viewerHubResourcesPackagesWeasisMappingMinimalVersionPath);
 
 			// Check if a package version is missing in DB and add it if necessary
-			this.refreshPackageVersionInDb(availableWeasisManagerPackageVersions, minimalReleaseVersions);
+			this.refreshPackageVersionInDb(availableWeasisPackageVersions, minimalReleaseVersions);
 
 			// Refresh cache
-			this.refreshPackageVersionCache(this.determineAvailablePackageVersionMapping(
-					availableWeasisManagerPackageVersions, minimalReleaseVersions));
+			this.refreshPackageVersionCache(this.determineAvailablePackageVersionMapping(availableWeasisPackageVersions,
+					minimalReleaseVersions));
 
 			// Load configurations properties in db if not already present
-			this.loadS3ConfigurationPropertiesInDb(availableWeasisManagerPackageVersions);
+			this.loadS3ConfigurationPropertiesInDb(availableWeasisPackageVersions);
 		}
 	}
 
@@ -171,7 +171,7 @@ public class PackageServiceImpl implements PackageService {
 		try (fileData) {
 			if (versionToUpload != null && !versionToUpload.isBlank()) {
 				// Determine the output directory key where the zip file will be uploaded
-				Path outDir = Paths.get(this.weasisManagerResourcesPackagesWeasisPackagePath).resolve(versionToUpload);
+				Path outDir = Paths.get(this.viewerHubResourcesPackagesWeasisPackagePath).resolve(versionToUpload);
 
 				// Upload version package in S3,zip resource folder, check if the
 				// mapping-minimal-version.json file should be updated with a more
@@ -298,17 +298,17 @@ public class PackageServiceImpl implements PackageService {
 	}
 
 	/**
-	 * Retrieve in S3 available weasis manager package version
+	 * Retrieve in S3 available Weasis package version
 	 * @return Set of versions available
 	 */
-	private Set<String> retrieveS3AvailableWeasisManagerPackageVersions() {
-		return this.s3Service.retrieveS3KeysFromPrefix(this.weasisManagerResourcesPackagesWeasisPackagePath)
+	private Set<String> retrieveS3AvailableWeasisPackageVersions() {
+		return this.s3Service.retrieveS3KeysFromPrefix(this.viewerHubResourcesPackagesWeasisPackagePath)
 			.stream()
 			.filter(Objects::nonNull)
 			.map(key -> {
 				// Transform resources/packages/weasis/package/4.1.0-QUALIFIER/... en
 				// 4.1.0-QUALIFIER/....
-				String versionFolderKeys = key.substring(this.weasisManagerResourcesPackagesWeasisPackagePath.length());
+				String versionFolderKeys = key.substring(this.viewerHubResourcesPackagesWeasisPackagePath.length());
 				// Transform 4.1.0-QUALIFIER/... en 4.1.0-QUALIFIER
 				return versionFolderKeys.substring(0, versionFolderKeys.indexOf("/"));
 			})
@@ -333,20 +333,20 @@ public class PackageServiceImpl implements PackageService {
 			ComparableVersion maxVersionToImport = this.retrieveMaxReleaseVersion(toImportFilePath);
 			// Read mapping minimal version from existing file and get max release version
 			ComparableVersion maxVersionExisting = this
-				.retrieveMaxReleaseVersion(this.weasisManagerResourcesPackagesWeasisMappingMinimalVersionPath);
+				.retrieveMaxReleaseVersion(this.viewerHubResourcesPackagesWeasisMappingMinimalVersionPath);
 
 			// If max release version is the file to import: replace the previous file
 			if (maxVersionToImport != null && maxVersionExisting != null
 					&& maxVersionToImport.compareTo(maxVersionExisting) > 0) {
 				// Replace file
 				return this.s3Service.copyS3ObjectFromTo(toImportFilePath,
-						this.weasisManagerResourcesPackagesWeasisMappingMinimalVersionPath);
+						this.viewerHubResourcesPackagesWeasisMappingMinimalVersionPath);
 			}
 		}
 		else {
 			// Copy directly the file in the resources package folder
 			return this.s3Service.copyS3ObjectFromTo(toImportFilePath,
-					this.weasisManagerResourcesPackagesWeasisMappingMinimalVersionPath);
+					this.viewerHubResourcesPackagesWeasisMappingMinimalVersionPath);
 		}
 		return CompletableFuture.completedFuture(null);
 	}
@@ -620,7 +620,7 @@ public class PackageServiceImpl implements PackageService {
 	 * @return true if the file is present
 	 */
 	private boolean doesMappingMinimalVersionFileExists() {
-		return this.s3Service.doesS3KeyExists(this.weasisManagerResourcesPackagesWeasisMappingMinimalVersionPath);
+		return this.s3Service.doesS3KeyExists(this.viewerHubResourcesPackagesWeasisMappingMinimalVersionPath);
 	}
 
 	@Override
@@ -726,17 +726,16 @@ public class PackageServiceImpl implements PackageService {
 		// group is default
 		if (Objects.equals(overrideConfigEntity.getLaunchConfig().getName(), LaunchConfigType.DEFAULT.getCode())
 				&& Objects.equals(overrideConfigEntity.getTarget().getType(), TargetType.DEFAULT)) {
-			return this.s3Service
-				.deleteS3Objects("%s/%s%s".formatted(this.weasisManagerResourcesPackagesWeasisPackagePath,
-						overrideConfigEntity.getPackageVersion().getVersionNumber(),
-						overrideConfigEntity.getPackageVersion().getQualifier() == null ? StringUtil.EMPTY_STRING
-								: overrideConfigEntity.getPackageVersion().getQualifier()));
+			return this.s3Service.deleteS3Objects("%s/%s%s".formatted(this.viewerHubResourcesPackagesWeasisPackagePath,
+					overrideConfigEntity.getPackageVersion().getVersionNumber(),
+					overrideConfigEntity.getPackageVersion().getQualifier() == null ? StringUtil.EMPTY_STRING
+							: overrideConfigEntity.getPackageVersion().getQualifier()));
 		}
 		// Case delete only the config version selected (properties file) only if the
 		// group is default
 		else if (Objects.equals(overrideConfigEntity.getTarget().getType(), TargetType.DEFAULT)) {
 			return this.s3Service.deleteS3Objects("%s/%s%s%s/%s%s%s".formatted(
-					this.weasisManagerResourcesPackagesWeasisPackagePath,
+					this.viewerHubResourcesPackagesWeasisPackagePath,
 					overrideConfigEntity.getPackageVersion().getVersionNumber(),
 					overrideConfigEntity.getPackageVersion().getQualifier() == null ? StringUtil.EMPTY_STRING
 							: overrideConfigEntity.getPackageVersion().getQualifier(),
@@ -748,10 +747,10 @@ public class PackageServiceImpl implements PackageService {
 
 	/**
 	 * Check if a package version is missing in DB and add it if necessary
-	 * @param availableWeasisManagerPackageVersions versions to evaluate
+	 * @param availableWeasisPackageVersions versions to evaluate
 	 * @param minimalReleaseVersions minimal release versions
 	 */
-	private void refreshPackageVersionInDb(Set<String> availableWeasisManagerPackageVersions,
+	private void refreshPackageVersionInDb(Set<String> availableWeasisPackageVersions,
 			List<MinimalReleaseVersion> minimalReleaseVersions) {
 		// Retrieve all package versions in db
 		List<PackageVersionEntity> existingVersionsInDb = this.packageVersionRepository.findAll();
@@ -762,7 +761,7 @@ public class PackageServiceImpl implements PackageService {
 			.toList();
 
 		// Retrieve the versions available in the weasis/package but not set in the db
-		List<String> versionsNotExistingInDb = new ArrayList<>(availableWeasisManagerPackageVersions.stream()
+		List<String> versionsNotExistingInDb = new ArrayList<>(availableWeasisPackageVersions.stream()
 			.filter(Objects::nonNull)
 			.filter(av -> !formattedExistingVersionsInDb.contains(av))
 			.toList());
@@ -817,12 +816,12 @@ public class PackageServiceImpl implements PackageService {
 
 	/**
 	 * Retrieve directory names of the available versions of Weasis installed in
-	 * weasis-manager
+	 * Viewer-Hub
 	 * @param streamPaths Path of the directories
 	 * @return Names of the directories
 	 */
 	@NotNull
-	Set<String> retrieveAvailableWeasisManagerPackageVersions(Stream<Path> streamPaths) {
+	Set<String> retrieveAvailableWeasisPackageVersions(Stream<Path> streamPaths) {
 		return streamPaths.filter(Files::isDirectory)
 			.map(Path::getFileName)
 			.map(Path::toString)
@@ -832,13 +831,13 @@ public class PackageServiceImpl implements PackageService {
 	/**
 	 * Load S3 configurations properties in db if not already present
 	 */
-	private void loadS3ConfigurationPropertiesInDb(Set<String> availableWeasisManagerPackageVersions) {
+	private void loadS3ConfigurationPropertiesInDb(Set<String> availableWeasisPackageVersions) {
 		// Retrieve default launch_config and target
 		LaunchConfigEntity defaultLaunchConfig = this.launchConfigRepository
 			.findByNameIgnoreCase(LaunchConfigType.DEFAULT.getCode());
 		TargetEntity defaultTarget = this.targetService.retrieveTargetByName(TargetType.DEFAULT.getCode());
 		// Loop on folder paths
-		availableWeasisManagerPackageVersions.forEach(availableVersion -> {
+		availableWeasisPackageVersions.forEach(availableVersion -> {
 			Set<OverrideConfigEntity> overrideConfigEntities = new HashSet<>();
 			PackageVersionEntity packageVersionEntity = this.retrievePackageVersionEntity(availableVersion);
 
@@ -851,7 +850,7 @@ public class PackageServiceImpl implements PackageService {
 			// Config folder key for this version
 			String configFolderKey = StringUtil.pathWithS3Separator(
 					Paths
-						.get(this.weasisManagerResourcesPackagesWeasisPackagePath, availableVersion,
+						.get(this.viewerHubResourcesPackagesWeasisPackagePath, availableVersion,
 								PropertiesFileName.PATH_CONF_FOLDER)
 						.toString());
 
@@ -892,32 +891,32 @@ public class PackageServiceImpl implements PackageService {
 	 * @param overrideConfigEntities Properties to evaluate
 	 */
 	private void adaptPropertiesByEnvironment(Set<OverrideConfigEntity> overrideConfigEntities) {
-		if (this.environmentOverrideProperties.getOverride() != null){
-		overrideConfigEntities.forEach(p -> {
-			if (this.environmentOverrideProperties.getOverride().containsKey(p.getLaunchConfig().getName())) {
-				this.environmentOverrideProperties.getOverride()
-					.get(p.getLaunchConfig().getName())
-					.keySet()
-					.forEach(epc -> {
-						if (p.getWeasisPropertyEntities()
-							.stream()
-							.anyMatch(wpe -> Objects.equals(wpe.getCode(), epc))) {
-							p.getWeasisPropertyEntities()
+		if (this.environmentOverrideProperties.getOverride() != null) {
+			overrideConfigEntities.forEach(p -> {
+				if (this.environmentOverrideProperties.getOverride().containsKey(p.getLaunchConfig().getName())) {
+					this.environmentOverrideProperties.getOverride()
+						.get(p.getLaunchConfig().getName())
+						.keySet()
+						.forEach(epc -> {
+							if (p.getWeasisPropertyEntities()
 								.stream()
-								.filter(wpe -> Objects.equals(wpe.getCode(), epc))
-								.findFirst()
-								.ifPresent(weasisPropertyEntityToModify -> {
-									String envOverrideValue = this.environmentOverrideProperties.getOverride()
-										.get(p.getLaunchConfig().getName())
-										.get(epc);
-									// Environment override: value + default value
-									weasisPropertyEntityToModify.setValue(envOverrideValue);
-									weasisPropertyEntityToModify.setDefaultValue(envOverrideValue);
-								});
-						}
-					});
-			}
-		});
+								.anyMatch(wpe -> Objects.equals(wpe.getCode(), epc))) {
+								p.getWeasisPropertyEntities()
+									.stream()
+									.filter(wpe -> Objects.equals(wpe.getCode(), epc))
+									.findFirst()
+									.ifPresent(weasisPropertyEntityToModify -> {
+										String envOverrideValue = this.environmentOverrideProperties.getOverride()
+											.get(p.getLaunchConfig().getName())
+											.get(epc);
+										// Environment override: value + default value
+										weasisPropertyEntityToModify.setValue(envOverrideValue);
+										weasisPropertyEntityToModify.setDefaultValue(envOverrideValue);
+									});
+							}
+						});
+				}
+			});
 		}
 	}
 
@@ -1113,39 +1112,40 @@ public class PackageServiceImpl implements PackageService {
 
 	/**
 	 * Retrieve the mapping between the different versions requested and the available
-	 * package installed in weasis-manager depending on minimal versions of releases
-	 * @param availableWeasisManagerPackageVersions List of available weasis-manager
-	 * package versions
+	 * Weasis package installed in Viewer-Hub depending on minimal versions of releases
+	 * @param availableWeasisPackageVersions List of available Weasis package versions
 	 * @param minimalReleaseVersions Mapping between release and its minimal version
-	 * @return mapping between the different versions requested and the available package
-	 * installed in weasis-manager depending on minimal versions of releases
+	 * @return mapping between the different versions requested and the available Weasis
+	 * package installed in Viewer-Hub depending on minimal versions of releases
 	 */
-	Map<String, String> determineAvailablePackageVersionMapping(Set<String> availableWeasisManagerPackageVersions,
+	Map<String, String> determineAvailablePackageVersionMapping(Set<String> availableWeasisPackageVersions,
 			List<MinimalReleaseVersion> minimalReleaseVersions) {
 
 		// Retrieve the different qualifiers
-		Set<String> qualifiers = this.retrieveDistinctQualifiers(availableWeasisManagerPackageVersions);
+		Set<String> qualifiers = this.retrieveDistinctQualifiers(availableWeasisPackageVersions);
 
 		// Retrieve a map by qualifiers containing a reverse order list of available
-		// package installed in weasis-manager
+		// Weasis package installed in Viewer-Hub
 		Map<String, Set<ComparableVersion>> reverseOrderedComparableVersionAvailableMapByQualifier = retrieveReverseOrderedComparableVersionAvailableMapByQualifier(
-				availableWeasisManagerPackageVersions, qualifiers);
+				availableWeasisPackageVersions, qualifiers);
 
 		// Determine the mapping between the different versions released and the available
-		// packages installed in weasis-manager depending on minimal versions of releases
+		// Weasis packages installed in Viewer-Hub depending on minimal versions of
+		// releases
 		return retrieveAvailablePackageVersionMapping(minimalReleaseVersions, qualifiers,
 				reverseOrderedComparableVersionAvailableMapByQualifier);
 	}
 
 	/**
 	 * Determine the mapping between the different versions released and the available
-	 * packages installed in weasis-manager depending on minimal versions of releases
+	 * packages installed in Viewer-Hub depending on minimal versions of releases
 	 * @param minimalReleaseVersions Mapping between release and its minimal version
-	 * @param qualifiers The different qualifiers of packages installed in weasis-manager
+	 * @param qualifiers The different qualifiers of Weasis packages installed in
+	 * Viewer-Hub
 	 * @param reverseOrderedComparableVersionAvailableMapByQualifier Map by qualifiers
-	 * containing a reverse order list of available package installed in weasis-manager
+	 * containing a reverse order list of available package installed in Viewer-Hub
 	 * @return the mapping between the different versions released and the available
-	 * packages installed in weasis-manager depending on minimal versions of releases
+	 * packages installed in Viewer-Hub depending on minimal versions of releases
 	 */
 	private static Map<String, String> retrieveAvailablePackageVersionMapping(
 			List<MinimalReleaseVersion> minimalReleaseVersions, Set<String> qualifiers,
@@ -1162,7 +1162,7 @@ public class PackageServiceImpl implements PackageService {
 	 * Evaluate available package version mapping depending on qualifier and minimal
 	 * release version
 	 * @param reverseOrderedComparableVersionAvailableMapByQualifier Map by qualifiers
-	 * containing a reverse order list of available package installed in weasis-manager
+	 * containing a reverse order list of available Weasis package installed in Viewer-Hub
 	 * @param availablePackageVersionMapping Available package version map to fill
 	 * @param qualifier Qualifier
 	 * @param minimalReleaseVersionToEvaluate Minimal release version to evaluate
@@ -1195,7 +1195,7 @@ public class PackageServiceImpl implements PackageService {
 					av.toString().substring(0, av.toString().indexOf(StringUtil.DOT))))
 			.collect(Collectors.toCollection(LinkedHashSet::new));
 
-		// Find the latest version installed in weasis-manager above the minimal version
+		// Find the latest version installed in Viewer-Hub above the minimal version
 		// of the release
 		ComparableVersion comparableVersion = availableVersionsToCompare.stream()
 			.filter(Objects::nonNull)
@@ -1244,24 +1244,23 @@ public class PackageServiceImpl implements PackageService {
 
 	/**
 	 * Retrieve a map by qualifiers containing a reverse order list of available package
-	 * installed in weasis-manager
-	 * @param availableWeasisManagerPackageVersions List of available weasis-manager
-	 * package versions installed in weasis-manager
-	 * @param qualifiers The different qualifiers of packages installed in weasis-manager
+	 * installed in Viewer-Hub
+	 * @param availableWeasisPackageVersions List of available weasis package versions
+	 * installed in Viewer-Hub
+	 * @param qualifiers The different qualifiers of packages installed in Viewer-Hub
 	 * @return map by qualifiers containing a reverse order list of available package
-	 * installed in weasis-manager
+	 * installed in Viewer-Hub
 	 */
 	private static Map<String, Set<ComparableVersion>> retrieveReverseOrderedComparableVersionAvailableMapByQualifier(
-			Set<String> availableWeasisManagerPackageVersions, Set<String> qualifiers) {
+			Set<String> availableWeasisPackageVersions, Set<String> qualifiers) {
 		Map<String, Set<ComparableVersion>> reverseOrderedComparableVersionMapByQualifier = new HashMap<>();
 		qualifiers.forEach(qualifier -> {
 			Set<ComparableVersion> comparableVersionsAvailableForSpecificQualifierReverseOrder = Objects
 				.equals(PackageUtil.NO_QUALIFIER, qualifier)
 						// Qualifiers without Hyphen
-						? retrieveReverseOrderAvailablePackageVersionWithoutHyphen(
-								availableWeasisManagerPackageVersions)
+						? retrieveReverseOrderAvailablePackageVersionWithoutHyphen(availableWeasisPackageVersions)
 						// Qualifiers with Hyphen
-						: retrieveReverseOrderAvailablePackageVersionWithHyphen(availableWeasisManagerPackageVersions,
+						: retrieveReverseOrderAvailablePackageVersionWithHyphen(availableWeasisPackageVersions,
 								qualifier);
 
 			reverseOrderedComparableVersionMapByQualifier.put(qualifier,
@@ -1273,15 +1272,15 @@ public class PackageServiceImpl implements PackageService {
 	/**
 	 * Retrieve reverse order available package versions with hyphen containing the
 	 * qualifier in parameter
-	 * @param availableWeasisManagerPackageVersions List of available weasis-manager *
-	 * package versions installed in weasis-manager
+	 * @param availableWeasisPackageVersions List of available weasis * package versions
+	 * installed in Viewer-Hub
 	 * @param qualifier Qualifier to evaluate
 	 * @return reverse order available package versions with hyphen containing the
 	 * qualifier in parameter
 	 */
 	private static LinkedHashSet<ComparableVersion> retrieveReverseOrderAvailablePackageVersionWithHyphen(
-			Set<String> availableWeasisManagerPackageVersions, String qualifier) {
-		return availableWeasisManagerPackageVersions.stream()
+			Set<String> availableWeasisPackageVersions, String qualifier) {
+		return availableWeasisPackageVersions.stream()
 			.filter(v -> v.contains(qualifier))
 			.map(va -> va.substring(0, va.indexOf(qualifier)))
 			.map(ComparableVersion::new)
@@ -1291,13 +1290,13 @@ public class PackageServiceImpl implements PackageService {
 
 	/**
 	 * Reverse order available package versions without hyphen
-	 * @param availableWeasisManagerPackageVersions List of available weasis-manager * *
-	 * package versions installed in weasis-manager
+	 * @param availableWeasisPackageVersions List of available weasis * * package versions
+	 * installed in Viewer-Hub
 	 * @return reverse order available package versions without hyphen
 	 */
 	private static LinkedHashSet<ComparableVersion> retrieveReverseOrderAvailablePackageVersionWithoutHyphen(
-			Set<String> availableWeasisManagerPackageVersions) {
-		return availableWeasisManagerPackageVersions.stream()
+			Set<String> availableWeasisPackageVersions) {
+		return availableWeasisPackageVersions.stream()
 			.filter(v -> !v.contains(StringUtil.HYPHEN))
 			.map(ComparableVersion::new)
 			.sorted(Comparator.reverseOrder())
@@ -1306,20 +1305,20 @@ public class PackageServiceImpl implements PackageService {
 
 	/**
 	 * Retrieve the different qualifiers
-	 * @param availableWeasisManagerPackageVersions List of available weasis-manager
-	 * package versions installed in weasis-manager
-	 * @return the different qualifiers from installed package in weasis-manager
+	 * @param availableWeasisPackageVersions List of available weasis package versions
+	 * installed in Viewer-Hub
+	 * @return the different qualifiers from installed package in Viewer-Hub
 	 */
-	private Set<String> retrieveDistinctQualifiers(Set<String> availableWeasisManagerPackageVersions) {
+	private Set<String> retrieveDistinctQualifiers(Set<String> availableWeasisPackageVersions) {
 		// Qualifiers with Hyphen
-		Set<String> qualifiers = availableWeasisManagerPackageVersions.stream()
+		Set<String> qualifiers = availableWeasisPackageVersions.stream()
 			.filter(av -> av.contains(StringUtil.HYPHEN))
 			.map(v -> v.substring(v.indexOf(StringUtil.HYPHEN)))
 			.collect(Collectors.toSet());
 
 		// No qualifiers
-		if (this.doesExistAvailablePackageWithoutQualifierAndDefaultQualifierNotFilled(
-				availableWeasisManagerPackageVersions)) {
+		if (this
+			.doesExistAvailablePackageWithoutQualifierAndDefaultQualifierNotFilled(availableWeasisPackageVersions)) {
 			qualifiers.add(PackageUtil.NO_QUALIFIER);
 		}
 
@@ -1327,16 +1326,16 @@ public class PackageServiceImpl implements PackageService {
 	}
 
 	/**
-	 * Check if in the available package installed in weasis-manager, some package are
-	 * without qualifier like xx.xx.xx and default package version is null or blank
-	 * @param availableWeasisManagerPackageVersions List of available weasis-manager *
-	 * package versions installed in weasis-manager
+	 * Check if in the available package installed in Viewer-Hub, some package are without
+	 * qualifier like xx.xx.xx and default package version is null or blank
+	 * @param availableWeasisPackageVersions List of available Weasis * package versions
+	 * installed in Viewer-Hub
 	 * @return true if such kind of package exists and default package version is null or
 	 * blank
 	 */
 	private boolean doesExistAvailablePackageWithoutQualifierAndDefaultQualifierNotFilled(
-			Set<String> availableWeasisManagerPackageVersions) {
-		return !availableWeasisManagerPackageVersions.stream()
+			Set<String> availableWeasisPackageVersions) {
+		return !availableWeasisPackageVersions.stream()
 			.filter(av -> !av.contains(StringUtil.HYPHEN))
 			.collect(Collectors.toSet())
 			.isEmpty()

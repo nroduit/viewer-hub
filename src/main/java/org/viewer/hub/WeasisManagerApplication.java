@@ -23,7 +23,7 @@ import org.viewer.hub.back.config.properties.EnvironmentOverrideProperties;
 import org.viewer.hub.back.config.properties.WeasisPackageDefaultConfigurationProperties;
 
 @SpringBootApplication
-@EnableVaadin(value = "org.weasis.manager")
+@EnableVaadin(value = "org.viewer.hub")
 @EnableAsync
 @EnableConfigurationProperties({ ConnectorConfigurationProperties.class,
 		WeasisPackageDefaultConfigurationProperties.class, EnvironmentOverrideProperties.class })

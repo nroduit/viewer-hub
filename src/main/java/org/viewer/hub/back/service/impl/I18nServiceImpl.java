@@ -54,8 +54,8 @@ import static org.viewer.hub.back.constant.PropertiesFileName.ZIP_EXTENSION;
 @RefreshScope
 public class I18nServiceImpl implements I18nService {
 
-	@Value("${weasis-manager.resources-packages.weasis.i18n.path}")
-	private String weasisManagerResourcesPackagesWeasisI18nPath;
+	@Value("${viewer-hub.resources-packages.weasis.i18n.path}")
+	private String viewerHubResourcesPackagesWeasisI18nPath;
 
 	// Services
 	private final I18nRepository i18nRepository;
@@ -75,16 +75,16 @@ public class I18nServiceImpl implements I18nService {
 	// Every 24h
 	@Scheduled(fixedRate = 24 * 60 * 60 * 1000)
 	public void refreshAvailableI18nVersion() {
-		// Retrieve list of available weasis-manager i18n versions and check if a i18n
+		// Retrieve list of available weasis i18n versions and check if a i18n
 		// version is missing in DB: add it if necessary
-		this.refreshI18nVersionsInDb(this.retrieveS3AvailableWeasisManagerI18nPackageVersions());
+		this.refreshI18nVersionsInDb(this.retrieveS3AvailableWeasisI18nPackageVersions());
 	}
 
 	@Override
 	public void handleI18nVersionToUpload(InputStream fileData, String fileName) {
 		try (fileData) {
 			// Create output directory where the zip file will be uploaded
-			Path outDir = Paths.get(this.weasisManagerResourcesPackagesWeasisI18nPath)
+			Path outDir = Paths.get(this.viewerHubResourcesPackagesWeasisI18nPath)
 				.resolve(fileName.substring(I18N_PATTERN_NAME.length(), fileName.indexOf(ZIP_EXTENSION)));
 
 			// Upload files in S3
@@ -163,17 +163,17 @@ public class I18nServiceImpl implements I18nService {
 	}
 
 	/**
-	 * Retrieve in S3 available weasis manager i18n versions
+	 * Retrieve in S3 available Weasis i18n versions
 	 * @return Set of versions available
 	 */
-	private Set<String> retrieveS3AvailableWeasisManagerI18nPackageVersions() {
-		return this.s3Service.retrieveS3KeysFromPrefix(this.weasisManagerResourcesPackagesWeasisI18nPath)
+	private Set<String> retrieveS3AvailableWeasisI18nPackageVersions() {
+		return this.s3Service.retrieveS3KeysFromPrefix(this.viewerHubResourcesPackagesWeasisI18nPath)
 			.stream()
 			.filter(Objects::nonNull)
 			.map(key -> {
 				// Transform resources/packages/weasis/i18n/4.0.0-QUALIFIER/... en
 				// 4.0.0-QUALIFIER/....
-				String versionFolderKeys = key.substring(this.weasisManagerResourcesPackagesWeasisI18nPath.length());
+				String versionFolderKeys = key.substring(this.viewerHubResourcesPackagesWeasisI18nPath.length());
 				// Transform 4.1.0-QUALIFIER/... en 4.1.0-QUALIFIER
 				return versionFolderKeys.substring(0, versionFolderKeys.indexOf("/"));
 			})
@@ -242,15 +242,15 @@ public class I18nServiceImpl implements I18nService {
 	private CompletableFuture<DeleteObjectsResponse> deleteResourceI18nVersionInS3(I18nEntity i18nEntity) {
 		// Delete the entire i18n version folder
 		return this.s3Service.deleteS3Objects(
-				"%s/%s%s".formatted(this.weasisManagerResourcesPackagesWeasisI18nPath, i18nEntity.getVersionNumber(),
+				"%s/%s%s".formatted(this.viewerHubResourcesPackagesWeasisI18nPath, i18nEntity.getVersionNumber(),
 						i18nEntity.getQualifier() == null ? StringUtil.EMPTY_STRING : i18nEntity.getQualifier()));
 	}
 
 	/**
 	 * Check if a i18n version is missing in DB and add it if necessary
-	 * @param availableWeasisManagerI18nVersions versions to evaluate
+	 * @param availableWeasisI18nVersions versions to evaluate
 	 */
-	private void refreshI18nVersionsInDb(Set<String> availableWeasisManagerI18nVersions) {
+	private void refreshI18nVersionsInDb(Set<String> availableWeasisI18nVersions) {
 		// Retrieve all i18n versions in db
 		List<I18nEntity> existingVersionsInDb = this.i18nRepository.findAll();
 
@@ -260,7 +260,7 @@ public class I18nServiceImpl implements I18nService {
 			.toList();
 
 		// Retrieve the versions available in the weasis/i18n but not set in the db
-		List<String> versionsNotExistingInDb = new ArrayList<>(availableWeasisManagerI18nVersions.stream()
+		List<String> versionsNotExistingInDb = new ArrayList<>(availableWeasisI18nVersions.stream()
 			.filter(Objects::nonNull)
 			.filter(av -> !formattedExistingVersionsInDb.contains(av))
 			.toList());

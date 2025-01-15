@@ -63,7 +63,7 @@ public class UIServiceInitListener implements VaadinServiceInitListener {
 
 		// Root view
 		boolean isRootView = Objects.equals(event.getNavigationTarget().getName(),
-				"org.weasis.manager.front.views.preferences.application.ApplicationPreferencesView");
+				"org.viewer.hub.front.views.preferences.application.ApplicationPreferencesView");
 
 		if (SecurityUtil.isUserLoggedIn() && !SecurityUtil.isAccessGranted(event.getNavigationTarget())) {
 			// If root requested

@@ -41,8 +41,8 @@ public class DisplayServiceImpl implements DisplayService {
 
 	private final ManifestService manifestService;
 
-	@Value("${weasis-manager.server.url}")
-	private String weasisManagerServerUrl;
+	@Value("${viewer-hub.server.url}")
+	private String viewerHubServerUrl;
 
 	@Autowired
 	public DisplayServiceImpl(final CacheService cacheService, final ManifestService manifestService) {
@@ -138,7 +138,7 @@ public class DisplayServiceImpl implements DisplayService {
 	private String retrieveDicomGetManifestCommand(String key) {
 		// Url to retrieve the manifest corresponding to the key
 		UriComponentsBuilder uriBuilderRetrieveManifest = UriComponentsBuilder
-			.fromHttpUrl("%s%s".formatted(this.weasisManagerServerUrl, EndPoint.MANIFEST_PATH))
+			.fromHttpUrl("%s%s".formatted(this.viewerHubServerUrl, EndPoint.MANIFEST_PATH))
 			// Manifest key
 			.queryParam(ParamName.KEY, key);
 
@@ -153,10 +153,10 @@ public class DisplayServiceImpl implements DisplayService {
 	 */
 	private String retrieveWeasisConfigCommand(SearchCriteria searchCriteria) {
 		UriComponentsBuilder uriBuilderLaunchConfig = UriComponentsBuilder
-			.fromHttpUrl("%s%s".formatted(this.weasisManagerServerUrl, EndPoint.LAUNCH_CONFIG_PATH));
+			.fromHttpUrl("%s%s".formatted(this.viewerHubServerUrl, EndPoint.LAUNCH_CONFIG_PATH));
 		// Preference Url
 		// TODO: not necessary ? already handle in launch config endpoint ?
-		// .queryParam("pro", "weasis.pref.url+" + weasisManagerServerUrl +
+		// .queryParam("pro", "weasis.pref.url+" + viewerHubServerUrl +
 		// EndPoint.PREFERENCES_PATH);
 
 		// Add additional params if existing in initial request

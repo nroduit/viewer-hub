@@ -132,7 +132,7 @@ public class DbConnectorQueryServiceImpl implements DbConnectorQueryService {
 			.query(connector.getDbConnector().getQuery().getSelect() + DbQueryConstant.AND + searchColumnName
 					+ inParamName, parameters, new BeanPropertyRowMapper<>(DbConnectorResult.class));
 
-		// Route to weasis-manager default db
+		// Route to Viewer-Hub default db
 		this.currentTenant.clear();
 
 		// Transform results found to patients

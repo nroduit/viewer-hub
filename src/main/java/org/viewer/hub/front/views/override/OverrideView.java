@@ -341,15 +341,13 @@ public class OverrideView extends AbstractView {
 
 	// TODO: refresh not working
 	public void clearUploadedFileAndRefresh() {
-		// ui.access(() -> {
-		// TODO refresh and clear list not working if user doesn't click on refresh button
-		// or click to remove uploaded file:
-		this.packageVersionUpload.getPackageVersionFileUpload().clearFileList();
-		// packageVersionUpload.getPackageVersionToUploadTextField().clear();
-        this.packageOverrideGrid.getOverrideDataProvider().refreshAll();
-		// ui.getPage().reload();
-		//// ui.navigate(OverrideView.class);
-		// });
+		getUI().ifPresent(ui -> ui.access(() -> {
+			// TODO refresh and clear list not working if user doesn't click on refresh
+			// button
+			// or click to remove uploaded file:
+			this.packageVersionUpload.getPackageVersionFileUpload().clearFileList();
+			this.packageOverrideGrid.getOverrideDataProvider().refreshAll();
+		}));
 	}
 
 }

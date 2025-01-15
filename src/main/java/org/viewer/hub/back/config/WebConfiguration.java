@@ -44,8 +44,8 @@ import java.util.List;
 @EnableWebMvc
 public class WebConfiguration implements WebMvcConfigurer {
 
-	@Value("${weasis-manager.resources-packages.weasis.path}")
-	private String weasisManagerResourcesPackagesWeasisPath;
+	@Value("${viewer-hub.resources-packages.weasis.path}")
+	private String viewerHubResourcesPackagesWeasisPath;
 
 	private final S3ClientConfigurationProperties s3config;
 
@@ -104,7 +104,7 @@ public class WebConfiguration implements WebMvcConfigurer {
 				// Retrieve the s3 resource
 				Resource s3Resource = WebConfiguration.this.resourceLoader
 					.getResource("s3://%s%s/%s".formatted(WebConfiguration.this.s3config.getBucket(),
-							WebConfiguration.this.weasisManagerResourcesPackagesWeasisPath, resourcePath));
+							WebConfiguration.this.viewerHubResourcesPackagesWeasisPath, resourcePath));
 				if (s3Resource.exists() && s3Resource.isReadable()) {
 					return s3Resource;
 				}

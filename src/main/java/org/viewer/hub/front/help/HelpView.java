@@ -27,7 +27,7 @@ import org.viewer.hub.front.layouts.MainLayout;
 import java.io.IOException;
 
 @Route(value = HelpView.ROUTE, layout = MainLayout.class)
-@PageTitle("Weasis Manager - Help")
+@PageTitle("Viewer Hub - Help")
 @Tag("help-view")
 @Uses(Icon.class)
 public class HelpView extends VerticalLayout {

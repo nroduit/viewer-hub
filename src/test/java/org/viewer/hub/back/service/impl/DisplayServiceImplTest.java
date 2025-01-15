@@ -40,7 +40,7 @@ class DisplayServiceImplTest {
 	@BeforeEach
 	public void setUp() {
 		this.displayService = new DisplayServiceImpl(this.cacheServiceMock, this.manifestServiceMock);
-		ReflectionTestUtils.setField(this.displayService, "weasisManagerServerUrl", "http://test.com");
+		ReflectionTestUtils.setField(this.displayService, "viewerHubServerUrl", "http://test.com");
 	}
 
 	@Test

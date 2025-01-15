@@ -25,10 +25,10 @@ public interface PackageService {
 
 	/**
 	 * Used to refresh in the cache: - the mapping between the installed Weasis package
-	 * versions in the weasis manager and the version to used when launching Weasis. The
-	 * mapping will take the latest available version installed in the weasis-manager
-	 * according to the minimal release version - update the table package_version if a
-	 * version is missing compared to the available packages
+	 * versions in Viewer Hub and the version to used when launching Weasis. The mapping
+	 * will take the latest available version installed in the Viewer-Hub according to the
+	 * minimal release version - update the table package_version if a version is missing
+	 * compared to the available packages
 	 */
 	void refreshAvailablePackageVersion() throws IOException, URISyntaxException;
 

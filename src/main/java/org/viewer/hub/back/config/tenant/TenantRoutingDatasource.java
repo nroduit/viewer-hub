@@ -31,17 +31,17 @@ import java.util.Objects;
 @Component
 public class TenantRoutingDatasource extends AbstractRoutingDataSource {
 
-	private final String weasisManagerDataSourceUrl;
+	private final String viewerHubDataSourceUrl;
 
-	private final String weasisManagerDataSourceUserName;
+	private final String viewerHubDataSourceUserName;
 
-	private final String weasisManagerDataSourcePassword;
+	private final String viewerHubDataSourcePassword;
 
-	private final String weasisManagerDataSourceDriverClassName;
+	private final String viewerHubDataSourceDriverClassName;
 
-	private final String weasisManagerDataSourceHikariPoolName;
+	private final String viewerHubDataSourceHikariPoolName;
 
-	private final long weasisManagerDataSourceHikariIdleTimeout;
+	private final long viewerHubDataSourceHikariIdleTimeout;
 
 	private final TenantIdentifierResolver tenantIdentifierResolver;
 
@@ -51,38 +51,36 @@ public class TenantRoutingDatasource extends AbstractRoutingDataSource {
 	 * Constructor.
 	 * @param tenantIdentifierResolver TenantIdentifierResolver
 	 * @param connectorConfigurationProperties Connector Configuration Properties
-	 * @param weasisManagerDataSourceUrl DataSource Url for weasis-manager
-	 * @param weasisManagerDataSourceUserName DataSourceUserName for weasis-manager
-	 * @param weasisManagerDataSourcePassword DataSourcePassword for weasis-manager
-	 * @param weasisManagerDataSourceDriverClassName DataSourceDriverClassName for
-	 * weasis-manager
-	 * @param weasisManagerDataSourceHikariPoolName DataSourceHikariPoolName for
-	 * weasis-manager
-	 * @param weasisManagerDataSourceHikariIdleTimeout DataSourceHikariIdleTimeout for
-	 * weasis-manager
+	 * @param viewerHubDataSourceUrl DataSource Url for viewer-hub
+	 * @param viewerHubDataSourceUserName DataSourceUserName for viewer-hub
+	 * @param viewerHubDataSourcePassword DataSourcePassword for viewer-hub
+	 * @param viewerHubDataSourceDriverClassName DataSourceDriverClassName for
+	 * @param viewerHubDataSourceHikariPoolName DataSourceHikariPoolName for viewer-hub
+	 * @param viewerHubDataSourceHikariIdleTimeout DataSourceHikariIdleTimeout for
+	 * viewer-hub
 	 */
 	@Autowired
 	TenantRoutingDatasource(TenantIdentifierResolver tenantIdentifierResolver,
 			ConnectorConfigurationProperties connectorConfigurationProperties,
-			@Value("${spring.datasource.url}") String weasisManagerDataSourceUrl,
-			@Value("${spring.datasource.username}") String weasisManagerDataSourceUserName,
-			@Value("${spring.datasource.password}") String weasisManagerDataSourcePassword,
-			@Value("${spring.datasource.driver-class-name}") String weasisManagerDataSourceDriverClassName,
-			@Value("${spring.datasource.hikari.pool-name}") String weasisManagerDataSourceHikariPoolName,
-			@Value("${spring.datasource.hikari.idle-timeout}") long weasisManagerDataSourceHikariIdleTimeout) {
+			@Value("${spring.datasource.url}") String viewerHubDataSourceUrl,
+			@Value("${spring.datasource.username}") String viewerHubDataSourceUserName,
+			@Value("${spring.datasource.password}") String viewerHubDataSourcePassword,
+			@Value("${spring.datasource.driver-class-name}") String viewerHubDataSourceDriverClassName,
+			@Value("${spring.datasource.hikari.pool-name}") String viewerHubDataSourceHikariPoolName,
+			@Value("${spring.datasource.hikari.idle-timeout}") long viewerHubDataSourceHikariIdleTimeout) {
 		this.tenantIdentifierResolver = tenantIdentifierResolver;
 		this.connectorConfigurationProperties = connectorConfigurationProperties;
 
-		// Weasis manager database config
-		this.weasisManagerDataSourceUrl = weasisManagerDataSourceUrl;
-		this.weasisManagerDataSourceUserName = weasisManagerDataSourceUserName;
-		this.weasisManagerDataSourcePassword = weasisManagerDataSourcePassword;
-		this.weasisManagerDataSourceDriverClassName = weasisManagerDataSourceDriverClassName;
-		this.weasisManagerDataSourceHikariPoolName = weasisManagerDataSourceHikariPoolName;
-		this.weasisManagerDataSourceHikariIdleTimeout = weasisManagerDataSourceHikariIdleTimeout;
+		// Viewer Hub database config
+		this.viewerHubDataSourceUrl = viewerHubDataSourceUrl;
+		this.viewerHubDataSourceUserName = viewerHubDataSourceUserName;
+		this.viewerHubDataSourcePassword = viewerHubDataSourcePassword;
+		this.viewerHubDataSourceDriverClassName = viewerHubDataSourceDriverClassName;
+		this.viewerHubDataSourceHikariPoolName = viewerHubDataSourceHikariPoolName;
+		this.viewerHubDataSourceHikariIdleTimeout = viewerHubDataSourceHikariIdleTimeout;
 
-		// Set the weasis-manager application database
-		this.setDefaultTargetDataSource(this.createWeasisManagerDataSource());
+		// Set the viewer-hub application database
+		this.setDefaultTargetDataSource(this.createViewerHubDataSource());
 
 		// Set the different db connectors to the tenants routing
 		this.fillTargetDataSourcesFromProperties(connectorConfigurationProperties);
@@ -136,15 +134,14 @@ public class TenantRoutingDatasource extends AbstractRoutingDataSource {
 	}
 
 	/**
-	 * Create Hikari datasource for weasis-manager
+	 * Create Hikari datasource for viewer-hub
 	 * @return Datasource created
 	 */
-	private DataSource createWeasisManagerDataSource() {
-		HikariDataSource dataSource = (HikariDataSource) this.createDataSource(
-				this.weasisManagerDataSourceDriverClassName, this.weasisManagerDataSourceUrl,
-				this.weasisManagerDataSourceUserName, this.weasisManagerDataSourcePassword,
-				this.weasisManagerDataSourceHikariPoolName);
-		dataSource.setIdleTimeout(this.weasisManagerDataSourceHikariIdleTimeout);
+	private DataSource createViewerHubDataSource() {
+		HikariDataSource dataSource = (HikariDataSource) this.createDataSource(this.viewerHubDataSourceDriverClassName,
+				this.viewerHubDataSourceUrl, this.viewerHubDataSourceUserName, this.viewerHubDataSourcePassword,
+				this.viewerHubDataSourceHikariPoolName);
+		dataSource.setIdleTimeout(this.viewerHubDataSourceHikariIdleTimeout);
 		return dataSource;
 	}
 

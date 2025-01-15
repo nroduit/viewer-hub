@@ -25,14 +25,14 @@ import java.util.Map;
 @Configuration
 public class FreemarkerConfiguration implements BeanPostProcessor {
 
-	@Value("${weasis-manager.server.url}")
-	private String weasisManagerServerUrl;
+	@Value("${viewer-hub.server.url}")
+	private String viewerHubServerUrl;
 
 	@Override
 	public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
 		if (bean instanceof FreeMarkerConfigurer configurer) {
 			Map<String, Object> sharedVariables = new HashMap<>();
-			sharedVariables.put("weasisManagerServerUrl", this.weasisManagerServerUrl);
+			sharedVariables.put("viewerHubServerUrl", this.viewerHubServerUrl);
 			configurer.setFreemarkerVariables(sharedVariables);
 		}
 		else if (bean instanceof FreeMarkerViewResolver resolver) {
