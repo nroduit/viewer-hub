@@ -29,11 +29,11 @@ import org.viewer.hub.back.config.properties.WeasisPackageDefaultConfigurationPr
 		WeasisPackageDefaultConfigurationProperties.class, EnvironmentOverrideProperties.class })
 @EnableCaching
 @EnableScheduling
-public class WeasisManagerApplication {
+public class ViewerHubApplication {
 
 	public static void main(String[] args) {
 
-		SpringApplication.run(WeasisManagerApplication.class, args);
+		SpringApplication.run(ViewerHubApplication.class, args);
 	}
 
 }
