@@ -108,7 +108,7 @@ As an example, you can import the file "dicom-example" located in the folders "d
   -DDB_NAME=viewer-hub
   -DDB_USER=viewer-hub
   -DDB_PASSWORD=viewer-hub
-  -DCONFIGSERVER_URI=http://configdecrypt:987654321@localhost:38888
+  -DCONFIGSERVER_URI=http://localhost:8888
   -DS3_ACCESS_KEY=access-key
   -DS3_SECRET_KEY=secret-key
   -DS3_ENDPOINT=http://localhost:9080
