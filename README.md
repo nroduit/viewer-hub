@@ -1,6 +1,6 @@
 ﻿
-# Weasis-Manager
-Weasis-Manager allow to manage Weasis viewers on an IT Infrastructure. 
+# Viewer-Hub
+Viewer-Hub allows to manage various viewers on a IT Infrastructure. 
 
 ## Architecture
 ![architecture.png](src/main/resources/documentation/architecture.png)
@@ -14,7 +14,7 @@ Weasis-Manager allow to manage Weasis viewers on an IT Infrastructure.
 - Creation of versions of Weasis launched only for certain groups
 - Live changed of Weasis properties 
 - Versions management of i18n translations used by Weasis
-- Compatibility management between versions of Weasis installed on clients and versions of resources uploaded in Weasis-Manager (storage on Minio S3 + cache)
+- Compatibility management between versions of Weasis installed on clients and versions of resources uploaded in Viewer-Hub (storage on Minio S3 + cache)
 - Pacs connectors management
 - Retrieve OAuth2 tokens on IDP to enable Weasis to authenticate on dcm4chee pacs
 - Cryptography of launch urls
@@ -105,14 +105,14 @@ As an example, you can import the file "dicom-example" located in the folders "d
   -DBACKEND_URI=http://localhost:8081
   -DDB_HOST=localhost
   -DDB_PORT=45101
-  -DDB_NAME=weasis-manager
-  -DDB_USER=weasis-manager
-  -DDB_PASSWORD=weasis-manager
-  -DCONFIGSERVER_URI=http://localhost:8888
+  -DDB_NAME=viewer-hub
+  -DDB_USER=viewer-hub
+  -DDB_PASSWORD=viewer-hub
+  -DCONFIGSERVER_URI=http://configdecrypt:987654321@localhost:38888
   -DS3_ACCESS_KEY=access-key
   -DS3_SECRET_KEY=secret-key
   -DS3_ENDPOINT=http://localhost:9080
-  -DS3_BUCKET_NAME=weasis-manager-bucket
+  -DS3_BUCKET_NAME=viewer-hub-bucket
   -DBACKEND_URI=http://localhost:8081
 ```
 - Then clean/install + run...
@@ -132,7 +132,7 @@ Password: weasis-manager-password
 
 ## Eureka
 
-Once weasis-manager launched, it is possible to see the registration of the service at this address:
+Once viewer-hub launched, it is possible to see the registration of the service at this address:
 ```
 http://localhost:8761
 ```

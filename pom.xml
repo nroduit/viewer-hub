@@ -15,12 +15,12 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <!-- Weasis Manager -->
-    <artifactId>weasis-manager</artifactId>
-    <groupId>org.weasis.manager</groupId>
+    <!-- Viewer Hub -->
+    <artifactId>viewer-hub</artifactId>
+    <groupId>org.viewer.hub</groupId>
     <name>${project.artifactId}</name>
     <version>${revision}</version>
-    <description>Weasis Manager</description>
+    <description>Viewer Hub</description>
 
     <!-- Properties -->
     <properties>
@@ -41,13 +41,13 @@
         <ojdbc.version>23.3.0.23.09</ojdbc.version>
         <jackson.version>2.15.3</jackson.version>
         <h2.version>2.2.224</h2.version>
-        <vaadin.version>24.5.3</vaadin.version>
+        <vaadin.version>24.6.1</vaadin.version>
         <weasis-dicom-tools.version>5.29.0.2</weasis-dicom-tools.version>
         <maven.artifact.version>3.8.6</maven.artifact.version>
-        <node.version>v20.3.1</node.version>
+        <node.version>v23.6.0</node.version>
         <awssdk.version>2.21.29</awssdk.version>
         <springdoc-openapi-ui.version>1.7.0</springdoc-openapi-ui.version>
-        <io.awspring.cloud.version>3.2.0-M1</io.awspring.cloud.version>
+        <io.awspring.cloud.version>3.2.1</io.awspring.cloud.version>
         <lombok.version>1.18.30</lombok.version>
         <maven-compiler-plugin.version>3.12.1</maven-compiler-plugin.version>
         <spring-boot-maven-plugin.version>3.2.3</spring-boot-maven-plugin.version>
@@ -664,7 +664,7 @@
                         <configuration>
                             <excludes>
                                 <exclude>**/weasis/**/*</exclude>
-                                <exclude>**/org/weasis/manager/front/**/*</exclude>
+                                <exclude>**/org/viewer/hub/front/**/*</exclude>
                             </excludes>
                         </configuration>
                     </plugin>
