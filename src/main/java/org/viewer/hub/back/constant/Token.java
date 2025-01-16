@@ -16,7 +16,7 @@ package org.viewer.hub.back.constant;
 public class Token {
 
 	// Name of the resource in the access token for retrieving roles
-	public static final String RESOURCE_NAME = "weasis-manager";
+	public static final String RESOURCE_NAME = "viewer-hub";
 
 	// Access token resource access
 	public static final String RESOURCE_ACCESS = "resource_access";

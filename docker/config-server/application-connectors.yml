@@ -35,7 +35,7 @@ connector:
         transfer-syntax-uid: '*'
       # --------   For dicom ----------
       dicom-connector:
-        calling-aet: WEASIS-MANAGER
+        calling-aet: VIEWER-HUB
         aet: DCM4CHEE
         host: localhost
         port: 11112

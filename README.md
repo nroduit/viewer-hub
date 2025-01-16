@@ -48,8 +48,8 @@ http://localhost:9090
 with
 
 ```
-User: weasis-manager
-Password: weasis-manager
+User: viewer-hub
+Password: viewer-hub
 ```
 
 - Once logged, go to Administrator -> Buckets and fill the bucket name with "weasis-manager-bucket", then create the bucket.
@@ -74,9 +74,9 @@ Password: admin
 
 When launching Keycloak with the docker-compose file keycloak.yml in the docker folder, a configuration 
 is directly imported in the keycloak container. This configuration will create: 
-- a realm "weasis-manager"
-- a client "weasis-manager" in order for the manager to connect with the authorization grant type "authorization_code"
-- a user "weasis-manager-user" which will have a role "admin" associated in order to access to the different "secured" views of the manager
+- a realm "viewer-hub"
+- a client "viewer-hub" in order for the manager to connect with the authorization grant type "authorization_code"
+- a user "viewer-hub-user" which will have a role "admin" associated in order to access to the different "secured" views of the application
 
 
 ## Dcm4chee 
@@ -117,17 +117,17 @@ As an example, you can import the file "dicom-example" located in the folders "d
 ```
 - Then clean/install + run...
 
-## Weasis-manager
+## Viewer Hub
 
-In order to access to weasis-manager: 
+In order to access to viewer-hub: 
 ```
 http://localhost:8081
 ```
 with
 
 ```
-User: weasis-manager-user
-Password: weasis-manager-password
+User: viewer-hub-user
+Password: password
 ```
 
 ## Eureka

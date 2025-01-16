@@ -7,18 +7,18 @@ include:
 
 services:
 
-  # Postgres SQL for Weasis Manager
-  weasis-manager-db:
+  # Postgres SQL for Viewer Hub
+  viewer-hub-db:
     environment:
-      POSTGRES_DB: weasis-manager
-      POSTGRES_USER: weasis-manager
-      POSTGRES_PASSWORD: weasis-manager
+      POSTGRES_DB: viewer-hub
+      POSTGRES_USER: viewer-hub
+      POSTGRES_PASSWORD: viewer-hub
 
   # Minio for using S3 cloud storage API minio:latest
   minio-storage:
     environment:
-      MINIO_ROOT_USER: weasis-manager
-      MINIO_ROOT_PASSWORD: weasis-manager
+      MINIO_ROOT_USER: viewer-hub
+      MINIO_ROOT_PASSWORD: viewer-hub
       AWS_ACCESS_KEY_ID: access-key
       AWS_SECRET_ACCESS_KEY: secret-key
     volumes:
@@ -33,9 +33,9 @@ services:
       - ./readwrite-policy.json:/tmp/readwrite-policy.json
     entrypoint: >
       /bin/sh -c "
-      /usr/bin/mc alias set myminio http://minio-storage:9000 weasis-manager weasis-manager;
-      if ! /usr/bin/mc ls myminio/weasis-manager-bucket >/dev/null 2>&1; then
-        /usr/bin/mc mb myminio/weasis-manager-bucket;
+      /usr/bin/mc alias set myminio http://minio-storage:9000 viewer-hub viewer-hub;
+      if ! /usr/bin/mc ls myminio/viewer-hub-bucket >/dev/null 2>&1; then
+        /usr/bin/mc mb myminio/viewer-hub-bucket;
         /usr/bin/mc admin policy create myminio readwrite /tmp/readwrite-policy.json;
         /usr/bin/mc admin accesskey create myminio --policy=/tmp/readwrite-policy.json --access-key=access-key --secret-key=secret-key;
       fi &&
@@ -44,4 +44,4 @@ services:
 
 volumes:
   minio_storage:
-    name: local_weasis_manager_minio
+    name: local_viewer_hub_minio
