@@ -1,6 +1,6 @@
 # Cryptographie 
 
-Dans Weasis Manager pour lancer la visionneuse Weasis, une url contenant des critères de recherche dans des "query parameters" est utilisée.
+Dans viewer-hub pour lancer la visionneuse Weasis, une url contenant des critères de recherche dans des "query parameters" est utilisée.
 
 Il est possible d'encrypter ces paramètres de recherche lors du lancement de la visionneuse Weasis afin de ne pas transmettre en clair certaines données sensibles (ex: identifiant du patient).
 
@@ -16,4 +16,4 @@ cryptography:
   salt: 
 ```
 
-Le même algorithme de chiffrement doit être utilisé côté client (chiffrage) et côté weasis-manager(déchiffrage).
+Le même algorithme de chiffrement doit être utilisé côté client (chiffrage) et côté viewer-hub(déchiffrage).

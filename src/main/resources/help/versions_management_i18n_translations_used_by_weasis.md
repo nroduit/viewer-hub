@@ -8,7 +8,7 @@ Le nom du fichier a importer doit avoir le format "weasis-i18n-dist-X.X.X-SNAPSH
 
 Les fichiers zip de traduction a importer sont présents ici: https://github.com/nroduit/weasis-i18n
 
-Dans Weasis Manager la gestion des packages de traduction se situe au niveau de l'onglet "Translation".
+Dans Viewer Hub la gestion des packages de traduction se situe au niveau de l'onglet "Translation".
 
 L'import décompressera le fichier zip et chargera sur le minio S3 les ressources de traduction.
 

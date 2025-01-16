@@ -2,7 +2,7 @@
 
 ## Import manuelle d'une version de Weasis
 
-Une version de Weasis peut être importée manuellement dans Weasis Manager dans l'onglet "Package"
+Une version de Weasis peut être importée manuellement dans Viewer Hub dans l'onglet "Package"
 
 Le fichier a importer doit avoir un nom de ce format "weasis-native xxx.zip".
 

@@ -1,6 +1,6 @@
 # Création et association de groupes
 
-Afin de pouvoir gérer plus facilement le parc informatique, Weasis Manager permet de créer et d'associer des groupes d'utilisateurs ou de machines.
+Afin de pouvoir gérer plus facilement le parc informatique, Viewer Hub permet de créer et d'associer des groupes d'utilisateurs ou de machines.
 
 Les utilisateurs, machines, groupe d'utilisateurs, groupe de machines sont représentés par des "targets".
 

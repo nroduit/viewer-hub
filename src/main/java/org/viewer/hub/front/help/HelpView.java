@@ -99,7 +99,7 @@ public class HelpView extends VerticalLayout {
 		i18nTranslationsFeature.getElement().setAttribute("router-ignore", true);
 
 		// Compatibility management between versions of Weasis installed on clients
-		// and versions of resources uploaded in Weasis-Manager (storage on Minio S3 +
+		// and versions of resources uploaded in Viewer Hub (storage on Minio S3 +
 		// cache)
 		Anchor compatibilityFeature = new Anchor(new StreamResource("compatibility_management_weasis_versions.md",
 				() -> getClass().getResourceAsStream("/help/compatibility_management_weasis_versions.md")),

@@ -37,7 +37,7 @@ docker compose -p imaging_hub -f docker-compose.yml -f docker-compose.local.yml 
 
 ## Minio
 
-The service "create-bucket" in docker-compose.local.yml will launch the creation of a bucket and an access key for weasis-manager.
+The service "create-bucket" in docker-compose.local.yml will launch the creation of a bucket and an access key for viewer-hub.
 
 It is also possible to create the bucket/access key manually:
 
@@ -52,7 +52,7 @@ User: viewer-hub
 Password: viewer-hub
 ```
 
-- Once logged, go to Administrator -> Buckets and fill the bucket name with "weasis-manager-bucket", then create the bucket.
+- Once logged, go to Administrator -> Buckets and fill the bucket name with "viewer-hub-bucket", then create the bucket.
 
 ![minio_bucket_creation.png](src/main/resources/documentation/minio_bucket_creation.png)
 
