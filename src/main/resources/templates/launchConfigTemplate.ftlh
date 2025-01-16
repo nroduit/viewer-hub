@@ -51,7 +51,7 @@
 
 		<!-- i18n version property -->
 		<#if i18nVersion?has_content>
-		<property name="weasis.i18n" value="${weasisManagerServerUrl}/weasis/i18n/${i18nVersion!?trim}" />
+		<property name="weasis.i18n" value="${viewerHubServerUrl}/weasis/i18n/${i18nVersion!?trim}" />
 		</#if>
 
 		<#macro setProperty property>

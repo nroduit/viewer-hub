@@ -1,6 +1,6 @@
 spring:
   application:
-    name: weasis-manager
+    name: viewer-hub
   cloud:
     config:
       enabled: false
@@ -13,8 +13,7 @@ spring:
       repositories:
         enabled: false
 
-# TODO to remove?
-weasis-manager:
+viewer-hub:
   server:
     url: ${BACKEND_URI}
 weasis:

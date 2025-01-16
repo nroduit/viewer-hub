@@ -44,8 +44,8 @@ Minio is an open-source object storage server compatible with Amazon S3 APIs. It
 Access the Minio console at: http://localhost:9090
 
 Use the following credentials:
-- User: `weasis-manager`
-- Password: `weasis-manager`
+- User: `viewer-hub`
+- Password: `viewer-hub`
 
 ## Eureka
 
@@ -75,15 +75,15 @@ Use the following credentials:
 - User: `admin`
 - Password: `changeit`
 
-## Weasis Manager
+## Viewer Hub
 
-Weasis Manager is a web application that manages the resources required by the different versions of Weasis.
+Viewer Hub is a web application that manages the resources required by the different versions of Weasis.
 
-Access the Weasis Manager console at: http://localhost:8081
+Access the Viewer Hub console at: http://localhost:8081
 
 Use the following credentials:
-- User: `weasis-manager-user`
-- Password: `weasis-manager-password`
+- User: `viewer-hub-user`
+- Password: `password`
 
 ## Launch Weasis from your own web application
 
