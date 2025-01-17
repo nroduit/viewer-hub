@@ -10,15 +10,15 @@ Ce fichier indique également quelle version de traduction doit être utilisé (
 
 ## Cache
 
-Lors de l'upload d'une nouvelle version dans Weasis Manager ou au démarrage de l'application (dans le cas où le fichier de compatibilité est déjà présent sur le S3), Weasis Manager construira à partir du fichier de compatibilité les différentes combinaisons possibles entre les versions installées dans Weasis Manager et les releases possibles de Weasis.
+Lors de l'upload d'une nouvelle version dans Viewer Hub ou au démarrage de l'application (dans le cas où le fichier de compatibilité est déjà présent sur le S3), Viewer Hub construira à partir du fichier de compatibilité les différentes combinaisons possibles entre les versions installées dans Viewer Hub et les releases possibles de Weasis.
 
 Ces combinaisons seront stockées dans un cache redis. Ce cache est actuellement rafraichi toutes les 24h.
 
-Ainsi lors du lancement de Weasis par un client, Weasis Manager connaitra directement quelle version, i18n et quelles ressources utiliser pour lancer Weasis sur le poste uilisateur.
+Ainsi lors du lancement de Weasis par un client, Viewer Hub connaitra directement quelle version, i18n et quelles ressources utiliser pour lancer Weasis sur le poste uilisateur.
 
 ## Minio/S3
 
-En important une nouvelle version de Weasis dans le manager, si le fichier de compatibilité est plus récent, Weasis Manager remplacera le fichier de compatibilité présent sur le S3. Ce fichier de compatibilité sera renommé sur S3 "mapping-minimal-version.json"
+En important une nouvelle version de Weasis dans le manager, si le fichier de compatibilité est plus récent, Viewer Hub remplacera le fichier de compatibilité présent sur le S3. Ce fichier de compatibilité sera renommé sur S3 "mapping-minimal-version.json"
 
-Pour comparer si ce fichier de mapping est plus récent, Weasis Manager comparera le numéro de version de la dernière release.
+Pour comparer si ce fichier de mapping est plus récent, Viewer Hub comparera le numéro de version de la dernière release.
 

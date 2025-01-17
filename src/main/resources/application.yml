@@ -1,15 +1,15 @@
 # - Info
 info:
-  component: weasis-manager
+  component: viewer-hub
   app:
-    name: weasis-manager
-    description: Weasis Manager
+    name: viewer-hub
+    description: Viewer Hub
   environment: ${ENVIRONMENT}
 
 # - Spring
 spring:
   application:
-    name: weasis-manager
+    name: viewer-hub
     version: '@project.version@'
   profiles:
     active: oidc, connectors, environment-override, package, cryptography
@@ -44,11 +44,13 @@ spring:
     password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
     hikari:
-      pool-name: weasis-manager
+      pool-name: viewer-hub
       minimum-idle: 5
       maximum-pool-size: 10
-      idle-timeout: 20000
-      max-lifetime: 60000
+      idle-timeout: 300000
+      max-lifetime: 270000 # 4 minutes 30 secondes
+      validation-timeout: 3000
+      connection-test-query: SELECT 1
   liquibase:
     enabled: true
     change-log: classpath:db/changelog/db.changelog-master.yaml
@@ -80,21 +82,21 @@ eureka:
     service-url:
       defaultZone: ${EUREKA_CLIENT_SERVICE_URL_DEFAULT_ZONE}
 
-# - Weasis-manager
-weasis-manager:
+# - Viewer-hub
+viewer-hub:
   # - Server Url
   server:
     url: ${BACKEND_URI}
   # - Resources package in s3
   resources-packages:
     weasis:
-      path: '${weasis-manager.resources-packages.path}/weasis'
+      path: '${viewer-hub.resources-packages.path}/weasis'
       package:
-        path: '${weasis-manager.resources-packages.path}/weasis/package'
+        path: '${viewer-hub.resources-packages.path}/weasis/package'
       i18n:
-        path: '${weasis-manager.resources-packages.path}/weasis/i18n'
+        path: '${viewer-hub.resources-packages.path}/weasis/i18n'
       mapping-minimal-version:
-        path: '${weasis-manager.resources-packages.path}/weasis/mapping-minimal-version.json'
+        path: '${viewer-hub.resources-packages.path}/weasis/mapping-minimal-version.json'
 
 server:
 # Enable response compression: currently not working

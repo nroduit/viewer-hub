@@ -1,5 +1,5 @@
-# - Weasis-manager
-weasis-manager:
+# - Viewer Hub
+viewer-hub:
   resources-packages:
     path: /resources/packages
 

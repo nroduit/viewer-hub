@@ -33,7 +33,7 @@ services:
       KC_DB_USERNAME: keycloak_db_user
       KC_DB_PASSWORD: keycloak_db_password
     volumes:
-      - ./keycloak/import.json:/opt/keycloak/data/import/weasis-manager-realm.json
+      - ./keycloak/import.json:/opt/keycloak/data/import/viewer-hub-realm.json
     ports:
       - 8085:8080
     restart: always

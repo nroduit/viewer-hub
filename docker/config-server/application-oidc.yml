@@ -4,7 +4,7 @@ spring:
       client:
         registration:
           keycloak:
-            client-id: weasis-manager
+            client-id: viewer-hub
             client-secret: peLDyVHEpxTQ1A4GZZzQGK5xsPetlTrV
             authorization-grant-type: authorization_code
             redirect-uri: '${BACKEND_URI}/login/oauth2/code/{registrationId}'
@@ -12,5 +12,5 @@ spring:
               - openid
         provider:
           keycloak:
-            issuer-uri: http://localhost:8085/realms/weasis-manager
-            jwk-set-uri: http://localhost:8085/realms/weasis-manager/protocol/openid-connect/certs
+            issuer-uri: http://localhost:8085/realms/viewer-hub
+            jwk-set-uri: http://localhost:8085/realms/viewer-hub/protocol/openid-connect/certs

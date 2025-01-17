@@ -1,6 +1,6 @@
 # Lancement de la visionneuse
 
-Les différents clients de weasis-manager (actuellement Compacs, Xplore, les pacs dcm4chee) souhaitant lancer la visionneuse Weasis peuvent le faire de plusieurs manières.
+Les différents clients de viewer-hub (actuellement Compacs, Xplore, les pacs dcm4chee) souhaitant lancer la visionneuse Weasis peuvent le faire de plusieurs manières.
 
 Profile IHE IID: https://www.ihe.net/uploadedFiles/Documents/Radiology/IHE_RAD_Suppl_IID.pdf
 
@@ -8,10 +8,10 @@ Profile IHE IID: https://www.ihe.net/uploadedFiles/Documents/Radiology/IHE_RAD_S
 Le lancement non authentifié est actuellement utilisé par Compacs, Xplore de manière transitoire en attendant la migration des différentes applications pour effectuer des appels sécurisés.
 
 ### Lancement standard
-Url de lancement: {{weasis-manager base url }/display/weasis
+Url de lancement: {{viewer-hub base url }/display/weasis
 
 ### Lancement en utilisant le profil IHE IID
-Url de lancement: {{weasis-manager base url }/display/IHEInvokeImageDisplay
+Url de lancement: {{viewer-hub base url }/display/IHEInvokeImageDisplay
 
 
 
@@ -19,10 +19,10 @@ Url de lancement: {{weasis-manager base url }/display/IHEInvokeImageDisplay
 Le lancement de manière authentifié est utilisé actuellement par les pacs dcm4chee, notamment pour transmettre le token oauth2 à Weasis (par l'intermédiaire du manifest) qui lui permettra des récupérer les examens demandés sur les pacs.
 
 ### Lancement standard
-Url de lancement: {{weasis-manager base url }/display/auth/weasis
+Url de lancement: {{viewer-hub base url }/display/auth/weasis
 
 ### Lancement en utilisant le profil IHE IID
-Url de lancement: {{weasis-manager base url }/display/auth/IHEInvokeImageDisplay
+Url de lancement: {{viewer-hub base url }/display/auth/IHEInvokeImageDisplay
 
 
 
