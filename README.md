@@ -3,7 +3,7 @@
 ViewerHub allows to manage various viewers on a IT Infrastructure. 
 
 ## Architecture
-![architecture.png](src/main/resources/documentation/architecture.png)
+![architecture.svg](src/main/resources/documentation/architecture.svg)
 
 ## Main functionalities
 - Launch of Weasis viewers (several launch endpoints, including IHE IID Profile-compatible launch)
@@ -53,12 +53,7 @@ Password: viewer-hub
 ```
 
 - Once logged, go to Administrator -> Buckets and fill the bucket name with "viewer-hub-bucket", then create the bucket.
-
-![minio_bucket_creation.png](src/main/resources/documentation/minio_bucket_creation.png)
-
 - Then go to User -> Access Keys and create the access key "access-key" with the secret key "secret-key"
-
-![minio_access_key.png](src/main/resources/documentation/minio_access_key.png)
 
 ## Keycloak
 
@@ -87,9 +82,7 @@ http://localhost:8080/dcm4chee-arc/ui2/en/study/study
 ```
 
 As an example, you can import the file "dicom-example" located in the folders "docker -> dcm4chee" by using the dcm4chee interface.
-
-![dcm4chee_upload_action.png](src/main/resources/documentation/dcm4chee_upload_action.png)
-![dcm4chee_upload_selection.png](src/main/resources/documentation/dcm4chee_upload_selection.png)
+("More functions" -> "Upload DICOM Object" -> "Select the STOW-RS server": "DCM4CHEE")
 
 ## Run configuration
 
