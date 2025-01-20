@@ -1,0 +1,22 @@
+# IntelliJ project files
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Ignore Maven files
+target/
+
+# Vaadin
+.npmrc
+package.json
+package-lock.json
+webpack.config.js
+webpack.generated.js
+tsconfig.json
+node_modules/
+/frontend/generated/
+types.d.ts
+pnpmfile.js
+pnpm-lock.yaml
+/src/main/bundles/
