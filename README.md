@@ -1,6 +1,6 @@
 ﻿
-# Viewer-Hub
-Viewer-Hub allows to manage various viewers on a IT Infrastructure. 
+# ViewerHub
+ViewerHub allows to manage various viewers on a IT Infrastructure. 
 
 ## Architecture
 ![architecture.svg](src/main/resources/documentation/architecture.svg)
@@ -17,7 +17,7 @@ https://weasis.org/en/viewer-hub/index.html
 - Creation of versions of Weasis launched only for certain groups
 - Live changed of Weasis properties 
 - Versions management of i18n translations used by Weasis
-- Compatibility management between versions of Weasis installed on clients and versions of resources uploaded in Viewer-Hub (storage on Minio S3 + cache)
+- Compatibility management between versions of Weasis installed on clients and versions of resources uploaded in ViewerHub (storage on Minio S3 + cache)
 - Pacs connectors management
 - Retrieve OAuth2 tokens on IDP to enable Weasis to authenticate on dcm4chee pacs
 - Cryptography of launch urls
@@ -40,7 +40,7 @@ docker compose -p imaging_hub -f docker-compose.yml -f docker-compose.local.yml 
 
 ## Minio
 
-The service "create-bucket" in docker-compose.local.yml will launch the creation of a bucket and an access key for viewer-hub.
+The service "create-bucket" in docker-compose.local.yml will launch the creation of a bucket and an access key for ViewerHub.
 
 It is also possible to create the bucket/access key manually:
 
@@ -128,7 +128,7 @@ Password: password
 
 ## Eureka
 
-Once viewer-hub launched, it is possible to see the registration of the service at this address:
+Once ViewerHub launched, it is possible to see the registration of the service at this address:
 ```
 http://localhost:8761
 ```
