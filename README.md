@@ -5,6 +5,9 @@ Viewer-Hub allows to manage various viewers on a IT Infrastructure.
 ## Architecture
 ![architecture.svg](src/main/resources/documentation/architecture.svg)
 
+## Documentation
+https://weasis.org/en/viewer-hub/index.html
+
 ## Main functionalities
 - Launch of Weasis viewers (several launch endpoints, including IHE IID Profile-compatible launch)
 - Creation and association of user or machine groups
