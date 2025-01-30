@@ -72,7 +72,7 @@ spring:
 logging:
   level:
     org:
-      weasis: INFO
+      viewer: INFO
 
 # - Eureka
 eureka:
