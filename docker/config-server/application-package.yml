@@ -1,7 +1,8 @@
 # - Viewer Hub
 viewer-hub:
   resources-packages:
-    path: /resources/packages
+    # - Prefix used to store objects in S3 bucket: should not start by "/"
+    path: resources/packages
 
 #  - Weasis
 weasis:

@@ -308,7 +308,7 @@ public class PackageServiceImpl implements PackageService {
 			.map(key -> {
 				// Transform resources/packages/weasis/package/4.1.0-QUALIFIER/... en
 				// 4.1.0-QUALIFIER/....
-				String versionFolderKeys = key.substring(this.viewerHubResourcesPackagesWeasisPackagePath.length());
+				String versionFolderKeys = key.substring(this.viewerHubResourcesPackagesWeasisPackagePath.length() + 1);
 				// Transform 4.1.0-QUALIFIER/... en 4.1.0-QUALIFIER
 				return versionFolderKeys.substring(0, versionFolderKeys.indexOf("/"));
 			})

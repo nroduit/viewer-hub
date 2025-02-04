@@ -173,7 +173,7 @@ public class I18nServiceImpl implements I18nService {
 			.map(key -> {
 				// Transform resources/packages/weasis/i18n/4.0.0-QUALIFIER/... en
 				// 4.0.0-QUALIFIER/....
-				String versionFolderKeys = key.substring(this.viewerHubResourcesPackagesWeasisI18nPath.length());
+				String versionFolderKeys = key.substring(this.viewerHubResourcesPackagesWeasisI18nPath.length() + 1);
 				// Transform 4.1.0-QUALIFIER/... en 4.1.0-QUALIFIER
 				return versionFolderKeys.substring(0, versionFolderKeys.indexOf("/"));
 			})
