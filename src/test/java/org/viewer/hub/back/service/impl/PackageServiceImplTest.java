@@ -81,7 +81,7 @@ class PackageServiceImplTest {
 	@NotNull
 	private static Set<String> buildAvailableWeasisPackageVersions() {
 		return Set.of("4.0.3-TEST", "3.8.2-MGR", "4.0.2-TEST", "4.0.2-MGR", "3.8.2-TEST", "4.0.1", "4.1.0-MGR", "4.5.0",
-                "4.5.0.1-MGR", "4.5.0.2-TEST");
+				"4.5.0.1-MGR", "4.5.0.2-TEST");
 	}
 
 	@NotNull
@@ -111,7 +111,7 @@ class PackageServiceImplTest {
 		toCompare.put("4.0.2-TEST", "4.0.3-TEST");
 		toCompare.put("4.0.0-MGR", "4.0.2-MGR");
 		toCompare.put("4.0.1-MGR", "4.0.2-MGR");
-        toCompare.put("4.5.0.2-MGR", "4.5.0.1-MGR");
+		toCompare.put("4.5.0.2-MGR", "4.5.0.1-MGR");
 		toCompare.put("3.6.1-TEST", null);
 		toCompare.put("3.7.1-TEST", "3.8.2-TEST");
 		toCompare.put("3.7.0-MGR", "3.8.2-MGR");
@@ -125,13 +125,13 @@ class PackageServiceImplTest {
 		toCompare.put("3.6.1-NO_QUALIFIER", null);
 		toCompare.put("3.7.1-MGR", "3.8.2-MGR");
 		toCompare.put("3.7.0-NO_QUALIFIER", null);
-        toCompare.put("4.5.0.2-NO_QUALIFIER", "4.5.0");
-        toCompare.put("4.5.0.1-NO_QUALIFIER", "4.5.0");
+		toCompare.put("4.5.0.2-NO_QUALIFIER", "4.5.0");
+		toCompare.put("4.5.0.1-NO_QUALIFIER", "4.5.0");
 		toCompare.put("4.0.2-MGR", "4.0.2-MGR");
 		toCompare.put("3.6.2-TEST", null);
 		toCompare.put("3.8.2-TEST", "3.8.2-TEST");
 		toCompare.put("4.1.0-TEST", null);
-        toCompare.put("4.5.0-TEST", "4.5.0.2-TEST");
+		toCompare.put("4.5.0-TEST", "4.5.0.2-TEST");
 		toCompare.put("4.1.0-MGR", "4.1.0-MGR");
 		toCompare.put("3.8.0-MGR", "3.8.2-MGR");
 		toCompare.put("4.0.3-MGR", "4.0.2-MGR");
@@ -143,17 +143,17 @@ class PackageServiceImplTest {
 		toCompare.put("4.0.1-TEST", "4.0.3-TEST");
 		toCompare.put("3.6.0-MGR", null);
 		toCompare.put("3.8.0-NO_QUALIFIER", null);
-        toCompare.put("3.6.2-MGR", null);
-        toCompare.put("3.8.1-MGR", "3.8.2-MGR");
-        toCompare.put("3.8.1-TEST", "3.8.2-TEST");
-        toCompare.put("4.5.0.1-MGR", "4.5.0.1-MGR");
-        toCompare.put("4.0.1-NO_QUALIFIER", "4.0.1");
-        toCompare.put("4.5.0-MGR", "4.5.0.1-MGR");
-        toCompare.put("3.8.2-NO_QUALIFIER", null);
-        toCompare.put("4.0.0-NO_QUALIFIER", "4.0.1");
-        toCompare.put("3.6.0-TEST", null);
-        toCompare.put("3.7.0-TEST", "3.8.2-TEST");
-        toCompare.put("3.8.0-TEST", "3.8.2-TEST");
+		toCompare.put("3.6.2-MGR", null);
+		toCompare.put("3.8.1-MGR", "3.8.2-MGR");
+		toCompare.put("3.8.1-TEST", "3.8.2-TEST");
+		toCompare.put("4.5.0.1-MGR", "4.5.0.1-MGR");
+		toCompare.put("4.0.1-NO_QUALIFIER", "4.0.1");
+		toCompare.put("4.5.0-MGR", "4.5.0.1-MGR");
+		toCompare.put("3.8.2-NO_QUALIFIER", null);
+		toCompare.put("4.0.0-NO_QUALIFIER", "4.0.1");
+		toCompare.put("3.6.0-TEST", null);
+		toCompare.put("3.7.0-TEST", "3.8.2-TEST");
+		toCompare.put("3.8.0-TEST", "3.8.2-TEST");
 		toCompare.put("4.5.0.1-TEST", "4.5.0.2-TEST");
 		return toCompare;
 	}
@@ -215,9 +215,9 @@ class PackageServiceImplTest {
 		// Mock
 		Mockito.when(this.s3Service.doesS3KeyExists(any())).thenReturn(true);
 		ReflectionTestUtils.setField(this.packageService, "viewerHubResourcesPackagesWeasisPackagePath",
-				"/resources/packages/weasis/package");
+				"resources/packages/weasis/package");
 		ReflectionTestUtils.setField(this.packageService, "viewerHubResourcesPackagesWeasisMappingMinimalVersionPath",
-				"/resources/packages/weasis/mapping-minimal-version.json");
+				"resources/packages/weasis/mapping-minimal-version.json");
 		Mockito.when(this.s3Service.retrieveS3KeysFromPrefix(any()))
 			.thenReturn(Set.of("resources/packages/weasis/package/4.1.0-QUALIFIER/test"));
 		Mockito.when(this.s3Service.retrieveS3Object(any()))
@@ -244,12 +244,14 @@ class PackageServiceImplTest {
 		packageVersionEntity402MGR.setVersionNumber("4.0.2");
 		packageVersionEntity402MGR.setQualifier("-MGR");
 
-		Mockito.when(this.cacheService.getPackageVersion(Mockito.eq("4.0.3-MGR"))).thenReturn(packageVersionEntity402MGR);
+		Mockito.when(this.cacheService.getPackageVersion(Mockito.eq("4.0.3-MGR")))
+			.thenReturn(packageVersionEntity402MGR);
 		Mockito.when(this.cacheService.getPackageVersion(Mockito.eq("4.0.2" + PackageUtil.NO_QUALIFIER)))
 			.thenReturn(packageVersionEntity401);
 		Mockito.when(this.cacheService.getPackageVersion(Mockito.eq("4.0.3" + PackageUtil.NO_QUALIFIER)))
 			.thenReturn(packageVersionEntity401);
-		Mockito.when(this.cacheService.getPackageVersion(Mockito.eq("4.0.2-MGR"))).thenReturn(packageVersionEntity402MGR);
+		Mockito.when(this.cacheService.getPackageVersion(Mockito.eq("4.0.2-MGR")))
+			.thenReturn(packageVersionEntity402MGR);
 		ReflectionTestUtils.setField(this.packageService, "defaultPackageVersionNumber", "4.0.2");
 
 		// Call and test method

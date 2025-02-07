@@ -103,7 +103,7 @@ public class WebConfiguration implements WebMvcConfigurer {
 					throws IOException {
 				// Retrieve the s3 resource
 				Resource s3Resource = WebConfiguration.this.resourceLoader
-					.getResource("s3://%s%s/%s".formatted(WebConfiguration.this.s3config.getBucket(),
+					.getResource("s3://%s/%s/%s".formatted(WebConfiguration.this.s3config.getBucket(),
 							WebConfiguration.this.viewerHubResourcesPackagesWeasisPath, resourcePath));
 				if (s3Resource.exists() && s3Resource.isReadable()) {
 					return s3Resource;
