@@ -82,7 +82,7 @@ public class DownloadResource {
 			// Retrieve objects with key prefix in parameter
 			ListObjectsV2Request listObjectsV2Request = ListObjectsV2Request.builder()
 				.bucket(this.s3config.getBucket())
-				.prefix(StringUtil.prefixWithoutStartingWithS3Separator(prefix))
+				.prefix(prefix)
 				.build();
 
 			// As response is limited to max 1000 objects (cf maxKeys): use

@@ -68,13 +68,4 @@ public class StringUtil {
 		return path != null ? path.replace("\\", "/") : null;
 	}
 
-	/**
-	 * Ensure that the prefix will not start with / separator
-	 * @param prefix Prefix to transform
-	 * @return Prefix updated
-	 */
-	public static String prefixWithoutStartingWithS3Separator(String prefix) {
-		return prefix != null && prefix.startsWith("/") ? prefix.substring(1) : prefix;
-	}
-
 }
