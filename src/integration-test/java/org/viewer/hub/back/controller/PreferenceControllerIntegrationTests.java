@@ -153,7 +153,7 @@ class PreferenceControllerIntegrationTests {
 				.param("user", "user")
 				.param("profile", "default")
 				.param("module", "weasis")
-				.accept(MediaType.APPLICATION_XML_VALUE))
+				.accept(MediaType.TEXT_PLAIN_VALUE))
 			.andExpect(MockMvcResultMatchers.status().isOk())
 			.andExpect(MockMvcResultMatchers.content().string("weasis"));
 	}
@@ -187,7 +187,7 @@ class PreferenceControllerIntegrationTests {
 				.param("user", "")
 				.param("profile", "")
 				.param("module", "")
-				.accept(MediaType.APPLICATION_XML_VALUE))
+				.accept(MediaType.TEXT_PLAIN_VALUE))
 			.andExpect(MockMvcResultMatchers.status().isBadRequest());
 	}
 
@@ -288,7 +288,7 @@ class PreferenceControllerIntegrationTests {
 				.param("user", "user")
 				.param("profile", "default")
 				.param("module", "weasis")
-				.contentType(MediaType.APPLICATION_XML_VALUE)
+				.contentType(MediaType.TEXT_PLAIN_VALUE)
 				.content("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><preferences></preferences>"))
 			.andExpect(MockMvcResultMatchers.status().isCreated());
 	}
@@ -323,7 +323,7 @@ class PreferenceControllerIntegrationTests {
 				.param("user", "")
 				.param("profile", "")
 				.param("module", "")
-				.contentType(MediaType.APPLICATION_XML_VALUE))
+				.contentType(MediaType.TEXT_PLAIN_VALUE))
 			.andExpect(MockMvcResultMatchers.status().isBadRequest());
 	}
 
