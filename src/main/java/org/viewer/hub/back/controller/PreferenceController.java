@@ -32,6 +32,7 @@ import org.viewer.hub.back.enums.OperationType;
 import org.viewer.hub.back.service.ApplicationPreferenceService;
 
 import java.sql.SQLException;
+import java.util.Locale;
 
 /**
  * Resource class for Weasis Preferences (application and modules)
@@ -102,7 +103,7 @@ public class PreferenceController {
 	 * @return the Weasis module preferences for a given user as well as for a given
 	 * Weasis profile and a Weasis module
 	 */
-	@GetMapping(produces = { MediaType.APPLICATION_XML_VALUE })
+	@GetMapping(produces = { MediaType.TEXT_PLAIN_VALUE })
 	public ResponseEntity<String> getWeasisPreferences(@RequestParam(value = PARAM_USER, required = false) String user,
 			@RequestParam(value = PARAM_PROFILE, required = false) String profile,
 			@RequestParam(value = PARAM_MODULE, required = false) String module) throws SQLException {
@@ -182,12 +183,12 @@ public class PreferenceController {
 	 * @param is Weasis module preferences to store
 	 * @return ResponseEntity<String>
 	 */
-	@PostMapping(consumes = { MediaType.APPLICATION_XML_VALUE })
+	@PostMapping(consumes = { MediaType.TEXT_PLAIN_VALUE })
 	public ResponseEntity<String> updateWeasisPreferences(
 			@RequestParam(value = PARAM_USER, required = false) String user,
 			@RequestParam(value = PARAM_PROFILE, required = false) String profile,
-			@RequestParam(value = PARAM_MODULE, required = false) String module, @RequestBody String preferences)
-			throws SQLException {
+			@RequestParam(value = PARAM_MODULE, required = false) String module,
+			@RequestBody @NotBlank String preferences) throws SQLException {
 		LOG.debug("updateWeasisPreferences");
 		ResponseEntity<String> response = null;
 
@@ -198,6 +199,11 @@ public class PreferenceController {
 
 		if (userIsEmpty && profileIsEmpty && moduleIsEmpty) {
 			throw new ParameterException("User, profile and module are empty");
+		}
+
+		// Force user to uppercase
+		if (!userIsEmpty) {
+			user = user.toUpperCase(Locale.ROOT);
 		}
 
 		OperationType operationType = this.applicationPreferenceService.updateWeasisPreferences(user, profile, module,
