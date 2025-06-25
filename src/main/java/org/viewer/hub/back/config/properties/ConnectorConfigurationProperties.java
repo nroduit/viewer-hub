@@ -13,7 +13,6 @@ package org.viewer.hub.back.config.properties;
 
 import jakarta.validation.Valid;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.context.properties.bind.ConstructorBinding;
 import org.springframework.validation.annotation.Validated;
 import org.viewer.hub.back.model.property.ConnectorProperty;
 
@@ -21,7 +20,7 @@ import java.util.LinkedHashMap;
 
 /**
  * Used to retrieve the different connector configuration properties from config server
- * (DB, DICOM, DICOM WEB)
+ * (DB, DICOM, DICOM_WEB)
  */
 @ConfigurationProperties(prefix = "connector")
 @Validated
@@ -34,7 +33,6 @@ public class ConnectorConfigurationProperties {
 	 * Constructor
 	 * @param config corresponds to the mapping of properties with the config server
 	 */
-	@ConstructorBinding
 	public ConnectorConfigurationProperties(LinkedHashMap<String, ConnectorProperty> config) {
 		// Populate id for Connector property
 		config.forEach((key, connectorProperty) -> connectorProperty.setId(key));

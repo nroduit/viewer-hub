@@ -17,6 +17,7 @@ import org.viewer.hub.back.entity.PackageVersionEntity;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
+import java.util.List;
 
 /**
  * Service managing package versions
@@ -63,8 +64,8 @@ public interface PackageService {
 	void handlePackageVersionToUpload(InputStream fileData, String versionToUpload);
 
 	/**
-	 * Determine the version to upload: check if the weasis-native zip file to import has
-	 * the appropriate version format in the property weasis.version of the file
+	 * Determine the version to upload: check if the zip file to import has the
+	 * appropriate version format in the property weasis.version of the file
 	 * config.properties and if yes return the version filled otherwise null
 	 * @param fileData InputStream corresponding to the zip file to extract
 	 * @return null if incorrect format of the version, otherwise return the version to
@@ -78,5 +79,27 @@ public interface PackageService {
 	 * @return PackageVersionEntity found
 	 */
 	PackageVersionEntity retrievePackageVersion(Long packageVersionId);
+
+	/**
+	 * Check if the version number already exists and has already been uploaded on the
+	 * server
+	 * @param version Version to evaluate
+	 */
+	boolean doesVersionNumberAlreadyExists(String version);
+
+	/**
+	 * Retrieve the list of PackageVersion depending on the version number in parameter
+	 * @param version Version to evaluate
+	 * @return List of PackageVersion found
+	 */
+	List<PackageVersionEntity> retrievePackageVersionByVersionNumber(String version);
+
+	/**
+	 * Check if the import of the package version is coherent: version already installed
+	 * or incoherent version compatibility file
+	 * @param fileData Import to check
+	 * @return true if the import is coherent
+	 */
+	boolean isImportCoherent(InputStream fileData);
 
 }

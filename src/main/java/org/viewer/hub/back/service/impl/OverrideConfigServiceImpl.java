@@ -11,6 +11,7 @@
 
 package org.viewer.hub.back.service.impl;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -22,12 +23,14 @@ import org.viewer.hub.back.entity.OverrideConfigEntity;
 import org.viewer.hub.back.entity.OverrideConfigEntityPK;
 import org.viewer.hub.back.entity.PackageVersionEntity;
 import org.viewer.hub.back.entity.TargetEntity;
+import org.viewer.hub.back.entity.WeasisPropertyEntity;
 import org.viewer.hub.back.enums.TargetType;
 import org.viewer.hub.back.repository.OverrideConfigRepository;
 import org.viewer.hub.back.repository.TargetRepository;
 import org.viewer.hub.back.repository.specification.OverrideConfigSpecification;
 import org.viewer.hub.back.service.OverrideConfigService;
-import org.viewer.hub.front.views.override.component.OverrideConfigFilter;
+import org.viewer.hub.back.util.PageUtil;
+import org.viewer.hub.front.views.bundle.override.component.OverrideConfigFilter;
 
 import java.util.Collections;
 import java.util.Objects;
@@ -55,7 +58,7 @@ public class OverrideConfigServiceImpl implements OverrideConfigService {
 	}
 
 	@Override
-	public OverrideConfigEntity update(OverrideConfigEntity overrideConfig) {
+	public OverrideConfigEntity createUpdate(OverrideConfigEntity overrideConfig) {
 		OverrideConfigEntityPK overrideConfigEntityPK = new OverrideConfigEntityPK();
 		overrideConfigEntityPK.setPackageVersionId(overrideConfig.getPackageVersion().getId());
 		overrideConfigEntityPK.setLaunchConfigId(overrideConfig.getLaunchConfig().getId());
@@ -141,6 +144,17 @@ public class OverrideConfigServiceImpl implements OverrideConfigService {
 			// No filter
 			overrideConfigsFound = this.overrideConfigRepository.findAll(pageable);
 		}
+		else if (StringUtils.isNotBlank(filter.getWeasisProfile())) {
+			// Create the specification, query the override_config table and filter
+			// depending on the value of weasis profile
+			Specification<OverrideConfigEntity> overrideConfigSpecification = new OverrideConfigSpecification(filter);
+			overrideConfigsFound = PageUtil
+				.convertToPage(this.overrideConfigRepository.findAll(overrideConfigSpecification)
+					.stream()
+					.filter(o -> doesOverrideConfigPropertyContainsCodeFilter(o, "weasis.profile",
+							filter.getWeasisProfile()))
+					.toList(), pageable);
+		}
 		else {
 			// Create the specification and query the override_config table
 			Specification<OverrideConfigEntity> overrideConfigSpecification = new OverrideConfigSpecification(filter);
@@ -156,6 +170,17 @@ public class OverrideConfigServiceImpl implements OverrideConfigService {
 		if (!filter.hasFilter()) {
 			// No filter
 			countOverrideConfigs = (int) this.overrideConfigRepository.count();
+		}
+		else if (StringUtils.isNotBlank(filter.getWeasisProfile())) {
+			// Create the specification, query the override config table and filter
+			// depending on the value of weasis profile
+			Specification<OverrideConfigEntity> overrideConfigSpecification = new OverrideConfigSpecification(filter);
+			countOverrideConfigs = this.overrideConfigRepository.findAll(overrideConfigSpecification)
+				.stream()
+				.filter(o -> doesOverrideConfigPropertyContainsCodeFilter(o, "weasis.profile",
+						filter.getWeasisProfile()))
+				.toList()
+				.size();
 		}
 		else {
 			// Create the specification and query the override config table
@@ -193,6 +218,50 @@ public class OverrideConfigServiceImpl implements OverrideConfigService {
 	@Transactional
 	public void deleteOverrideConfigEntity(OverrideConfigEntity overrideConfigEntity) {
 		this.overrideConfigRepository.delete(overrideConfigEntity);
+	}
+
+	@Override
+	@Transactional
+	public OverrideConfigEntity modifyTarget(OverrideConfigEntity overrideConfigEntity, TargetEntity targetEntity) {
+		OverrideConfigEntity overrideConfigEntityModified = new OverrideConfigEntity();
+		overrideConfigEntityModified.setLaunchConfig(overrideConfigEntity.getLaunchConfig());
+		overrideConfigEntityModified.setPackageVersion(overrideConfigEntity.getPackageVersion());
+		overrideConfigEntityModified.setTarget(targetEntity);
+		OverrideConfigEntityPK overrideConfigEntityPK = new OverrideConfigEntityPK();
+		overrideConfigEntityPK.setPackageVersionId(overrideConfigEntity.getPackageVersion().getId());
+		overrideConfigEntityPK.setLaunchConfigId(overrideConfigEntity.getLaunchConfig().getId());
+		overrideConfigEntityPK.setTargetId(targetEntity.getId());
+		overrideConfigEntityModified.setOverrideConfigEntityPK(overrideConfigEntityPK);
+
+		// Fill the link between the property and the new overrideConfig before saving
+		overrideConfigEntity.getWeasisPropertyEntities()
+			.forEach(p -> overrideConfigEntityModified.getWeasisPropertyEntities().add(WeasisPropertyEntity.copy(p)));
+		overrideConfigEntityModified.getWeasisPropertyEntities()
+			.forEach(p -> p.setOverrideConfigEntity(overrideConfigEntityModified));
+
+		// Replace entity
+		OverrideConfigEntity overrideConfigUpdated = this.overrideConfigRepository.save(overrideConfigEntityModified);
+		this.overrideConfigRepository.delete(overrideConfigEntity);
+
+		return overrideConfigUpdated;
+	}
+
+	/**
+	 * Check if the override config contains a property with the code in parameter and if
+	 * the value of this code contains a part of the filter in parameter
+	 * @param overrideConfigEntity Override Config to evaluate
+	 * @param code Code of the property to look for
+	 * @param filter Filter to check
+	 * @return true if the filter is part of the value of the property
+	 */
+	private static boolean doesOverrideConfigPropertyContainsCodeFilter(OverrideConfigEntity overrideConfigEntity,
+			String code, String filter) {
+		WeasisPropertyEntity w = overrideConfigEntity.getWeasisPropertyEntities()
+			.stream()
+			.filter(p -> Objects.equals(p.getCode(), code))
+			.findFirst()
+			.orElse(null);
+		return w != null && w.getValue() != null && w.getValue().contains(filter);
 	}
 
 }

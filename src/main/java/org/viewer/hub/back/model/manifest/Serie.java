@@ -16,6 +16,13 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.HashSet;
@@ -23,6 +30,12 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@Setter
+@Getter
+@Builder
+@AllArgsConstructor
+@EqualsAndHashCode
+@ToString
 public class Serie implements Serializable {
 
 	@Serial
@@ -66,104 +79,6 @@ public class Serie implements Serializable {
 		this.modality = modality;
 		this.wadoTransferSyntaxUID = wadoTransferSyntaxUID;
 		this.wadoCompressionRate = wadoCompressionRate;
-	}
-
-	public Set<Instance> getInstances() {
-		return this.instances;
-	}
-
-	public void setInstances(Set<Instance> instances) {
-		this.instances = instances;
-	}
-
-	public String getSeriesInstanceUID() {
-		return this.seriesInstanceUID;
-	}
-
-	public void setSeriesInstanceUID(String seriesInstanceUID) {
-		this.seriesInstanceUID = seriesInstanceUID;
-	}
-
-	public String getSeriesDescription() {
-		return this.seriesDescription;
-	}
-
-	public void setSeriesDescription(String seriesDescription) {
-		this.seriesDescription = seriesDescription;
-	}
-
-	public Integer getSeriesNumber() {
-		return this.seriesNumber;
-	}
-
-	public void setSeriesNumber(Integer seriesNumber) {
-		this.seriesNumber = seriesNumber;
-	}
-
-	public String getModality() {
-		return this.modality;
-	}
-
-	public void setModality(String modality) {
-		this.modality = modality;
-	}
-
-	public String getWadoTransferSyntaxUID() {
-		return this.wadoTransferSyntaxUID;
-	}
-
-	public void setWadoTransferSyntaxUID(String wadoTransferSyntaxUID) {
-		this.wadoTransferSyntaxUID = wadoTransferSyntaxUID;
-	}
-
-	public Integer getWadoCompressionRate() {
-		return this.wadoCompressionRate;
-	}
-
-	public void setWadoCompressionRate(Integer wadoCompressionRate) {
-		this.wadoCompressionRate = wadoCompressionRate;
-	}
-
-	public String getDirectDownloadThumbnail() {
-		return this.directDownloadThumbnail;
-	}
-
-	public void setDirectDownloadThumbnail(String directDownloadThumbnail) {
-		this.directDownloadThumbnail = directDownloadThumbnail;
-	}
-
-	@Override
-	public boolean equals(Object o) {
-		if (this == o) {
-			return true;
-		}
-		if (o == null || this.getClass() != o.getClass()) {
-			return false;
-		}
-		Serie serie = (Serie) o;
-		return Objects.equals(this.instances, serie.instances)
-				&& Objects.equals(this.seriesInstanceUID, serie.seriesInstanceUID)
-				&& Objects.equals(this.seriesDescription, serie.seriesDescription)
-				&& Objects.equals(this.seriesNumber, serie.seriesNumber)
-				&& Objects.equals(this.modality, serie.modality)
-				&& Objects.equals(this.wadoTransferSyntaxUID, serie.wadoTransferSyntaxUID)
-				&& Objects.equals(this.wadoCompressionRate, serie.wadoCompressionRate)
-				&& Objects.equals(this.directDownloadThumbnail, serie.directDownloadThumbnail);
-	}
-
-	@Override
-	public int hashCode() {
-		return Objects.hash(this.instances, this.seriesInstanceUID, this.seriesDescription, this.seriesNumber,
-				this.modality, this.wadoTransferSyntaxUID, this.wadoCompressionRate, this.directDownloadThumbnail);
-	}
-
-	@Override
-	public String toString() {
-		return "Serie{" + "instances=" + this.instances + ", seriesInstanceUID='" + this.seriesInstanceUID + '\''
-				+ ", seriesDescription='" + this.seriesDescription + '\'' + ", seriesNumber=" + this.seriesNumber
-				+ ", modality='" + this.modality + '\'' + ", wadoTransferSyntaxUID='" + this.wadoTransferSyntaxUID
-				+ '\'' + ", wadoCompressionRate=" + this.wadoCompressionRate + ", directDownloadThumbnail='"
-				+ this.directDownloadThumbnail + '\'' + '}';
 	}
 
 	/**

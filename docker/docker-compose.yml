@@ -1,3 +1,6 @@
+version: '3.7'
+
+name: viewer-hub
 
 services:
 
@@ -23,3 +26,16 @@ services:
     ports:
       - "9080:9000"
       - "9090:9090"
+
+  # Nexus used to store the package versions of Weasis
+  nexus:
+    image: sonatype/nexus3:3.78.0-alpine
+    volumes:
+      - "nexus-data:/sonatype-work"
+    ports:
+      - "8086:8081"
+      - "8085:8085"
+
+volumes:
+  nexus-data:
+    name: local_viewer_hub_nexus

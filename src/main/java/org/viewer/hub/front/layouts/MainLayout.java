@@ -11,24 +11,40 @@
 
 package org.viewer.hub.front.layouts;
 
-import com.vaadin.flow.component.Component;
+import com.vaadin.componentfactory.ToggleButton;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.applayout.AppLayout;
+import com.vaadin.flow.component.applayout.DrawerToggle;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.dependency.Uses;
+import com.vaadin.flow.component.html.Footer;
+import com.vaadin.flow.component.html.H1;
+import com.vaadin.flow.component.html.Header;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.SvgIcon;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.orderedlayout.FlexLayout;
-import com.vaadin.flow.router.Route;
-import com.vaadin.flow.router.RouterLayout;
-import org.springframework.security.access.annotation.Secured;
+import com.vaadin.flow.component.orderedlayout.Scroller;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.sidenav.SideNav;
+import com.vaadin.flow.component.sidenav.SideNavItem;
+import com.vaadin.flow.router.Layout;
+import com.vaadin.flow.server.auth.AnonymousAllowed;
+import com.vaadin.flow.server.menu.MenuConfiguration;
+import com.vaadin.flow.server.menu.MenuEntry;
+import com.vaadin.flow.spring.annotation.UIScope;
+import com.vaadin.flow.theme.lumo.LumoUtility;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import org.vaadin.lineawesome.LineAwesomeIcon;
+import org.viewer.hub.back.constant.EndPoint;
 import org.viewer.hub.back.util.SecurityUtil;
-import org.viewer.hub.front.components.Menu;
-import org.viewer.hub.front.help.HelpView;
-import org.viewer.hub.front.views.association.AssociationView;
-import org.viewer.hub.front.views.i18n.I18nView;
-import org.viewer.hub.front.views.override.OverrideView;
-import org.viewer.hub.front.views.preference.application.ApplicationPreferencesView;
+import org.viewer.hub.front.components.ToggleButtonTheme;
+
+import java.util.List;
 
 /** The main layout. Contains the navigation menu. */
 @NpmPackage(value = "@polymer/iron-icons", version = "3.0.1")
@@ -36,42 +52,110 @@ import org.viewer.hub.front.views.preference.application.ApplicationPreferencesV
 @JsModule("@vaadin/vaadin-lumo-styles/badge.js")
 @CssImport(value = "./styles/shared-styles.css")
 @CssImport(value = "./styles/empty.css", include = "lumo-badge")
-@Route(value = "mainLayout")
-@SuppressWarnings("serial")
 @Uses(Icon.class)
-@Secured({ "ROLE_admin" })
-public class MainLayout extends FlexLayout implements RouterLayout {
+@Uses(ToggleButton.class)
+@Layout
+@AnonymousAllowed
+@UIScope
+public class MainLayout extends AppLayout {
 
-	private final Menu menu;
+	private H1 viewTitle;
 
 	public MainLayout() {
-		this.setSizeFull();
-		this.setClassName("main-layout");
+		setPrimarySection(Section.DRAWER);
+		addDrawerContent();
+		addHeaderContent();
+	}
 
-		this.menu = new Menu();
+	private void addHeaderContent() {
+		DrawerToggle toggle = new DrawerToggle();
+		toggle.setAriaLabel("Menu toggle");
 
-		// Add secured Menu
-		this.addSecuredMenu(ApplicationPreferencesView.class, ApplicationPreferencesView.VIEW_NAME,
-				new Icon(VaadinIcon.CHART_GRID));
-		this.addSecuredMenu(AssociationView.class, AssociationView.VIEW_NAME, new Icon(VaadinIcon.LINK));
-		this.addSecuredMenu(OverrideView.class, OverrideView.VIEW_NAME, new Icon(VaadinIcon.PACKAGE));
-		this.addSecuredMenu(I18nView.class, I18nView.VIEW_NAME, new Icon(VaadinIcon.GLOBE));
-		this.addSecuredMenu(HelpView.class, HelpView.VIEW_NAME, new Icon(VaadinIcon.INFO_CIRCLE));
+		viewTitle = new H1();
+		viewTitle.addClassNames(LumoUtility.FontSize.LARGE, LumoUtility.Margin.NONE);
 
-		// Add menu to the layout
-		this.add(this.menu);
+		addToNavbar(true, toggle, viewTitle);
+	}
+
+	private void addDrawerContent() {
+		Span appName = new Span("Viewer-Hub");
+		appName.addClassNames(LumoUtility.FontWeight.SEMIBOLD, LumoUtility.FontSize.LARGE);
+		Header header = new Header(appName);
+
+		Scroller scroller = new Scroller(createNavigation());
+
+		addToDrawer(header, scroller, createFooter());
+	}
+
+	private SideNav createNavigation() {
+		SideNav nav = new SideNav();
+
+		// SideNav for Weasis
+		SideNavItem weasisLink = new SideNavItem("Weasis");
+		// weasisLink.setPrefixComponent(new Image("logo/weasis.svg", "Weasis"));
+
+		// Menu for Weasis: not filtered yet by application
+		List<MenuEntry> menuEntries = MenuConfiguration.getMenuEntries();
+		menuEntries.forEach(entry -> {
+			if (entry.menuClass() != null && SecurityUtil.isAccessGranted(entry.menuClass())) {
+				if (entry.icon() != null) {
+					weasisLink.addItem(new SideNavItem(entry.title(), entry.path(), new SvgIcon(entry.icon())));
+				}
+				else {
+					weasisLink.addItem(new SideNavItem(entry.title(), entry.path()));
+				}
+			}
+		});
+
+		nav.addItem(weasisLink);
+
+		return nav;
+	}
+
+	private Footer createFooter() {
+		Footer layout = new Footer();
+
+		// logout menu item
+		Button logoutButton = new Button("Logout", LineAwesomeIcon.SIGN_OUT_ALT_SOLID.create());
+		logoutButton.addClickListener(event -> SecurityUtil.signOut());
+		logoutButton.setSizeFull();
+		logoutButton.addThemeVariants(ButtonVariant.MATERIAL_CONTAINED);
+
+		VerticalLayout themeLayout = new VerticalLayout(/* createIconSwagger(), */ new ToggleButtonTheme(),
+				logoutButton);
+		themeLayout.getElement().getStyle().set("align-items", "center");
+		layout.add(themeLayout);
+
+		return layout;
 	}
 
 	/**
-	 * Build and add secured menus
-	 * @param securedClass View to secure
-	 * @param viewName Name of the view
-	 * @param icon Icon to apply to the menu
+	 * Create the swagger icon and link to the correct url
 	 */
-	private void addSecuredMenu(Class<? extends Component> securedClass, String viewName, Icon icon) {
-		if (SecurityUtil.isAccessGranted(securedClass)) {
-			this.menu.addView(securedClass, viewName, icon);
-		}
+	private Icon createIconSwagger() {
+		Icon swaggerIcon = new Icon(VaadinIcon.COMPILE);
+		swaggerIcon.getStyle().set("margin-right", "20px");
+
+		// Redirect to spring doc/swagger
+		swaggerIcon.getElement().addEventListener("click", e -> {
+			ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString();
+			UI.getCurrent()
+				.getPage()
+				.open(String.format("%s%s", ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString(),
+						EndPoint.SPRING_DOC_PATH), "_blank");
+		});
+
+		return swaggerIcon;
+	}
+
+	@Override
+	protected void afterNavigation() {
+		super.afterNavigation();
+		viewTitle.setText(getCurrentPageTitle());
+	}
+
+	private String getCurrentPageTitle() {
+		return MenuConfiguration.getPageHeader(getContent()).orElse("");
 	}
 
 }

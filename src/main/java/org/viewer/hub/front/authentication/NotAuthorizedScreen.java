@@ -14,7 +14,6 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
@@ -29,8 +28,6 @@ import org.viewer.hub.back.util.SecurityUtil;
  */
 @Route(NotAuthorizedScreen.ROUTE)
 @PageTitle("Viewer-Hub - Not authorized")
-@CssImport(value = "./styles/shared-styles.css")
-@SuppressWarnings("serial")
 public class NotAuthorizedScreen extends FlexLayout {
 
 	// View route

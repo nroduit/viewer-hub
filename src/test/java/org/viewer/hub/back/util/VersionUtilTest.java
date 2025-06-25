@@ -45,4 +45,29 @@ class VersionUtilTest {
 		assertThat(toTest).isBlank();
 	}
 
+	@Test
+	void should_return4_when_countDigitsGroupsOf4Groups() {
+		assertThat(VersionUtil.countDigitsGroups("4.2.0.3")).isEqualTo(4);
+	}
+
+	@Test
+	void should_return3_when_countDigitsGroupsOf3GroupsWithoutQualifier() {
+		assertThat(VersionUtil.countDigitsGroups("4.2.0")).isEqualTo(3);
+	}
+
+	@Test
+	void should_return3_when_countDigitsGroupsOf3GroupsWithQualifier() {
+		assertThat(VersionUtil.countDigitsGroups("4.2.0-SNAPSHOT")).isEqualTo(3);
+	}
+
+	@Test
+	void should_extract3GroupsDigitsOf4GroupsDigitsVersion_whenGiving4GroupsDigitsWithoutQualifier() {
+		assertThat(VersionUtil.extract3GroupsDigitsOf4GroupsDigitsVersion("4.2.0.4")).isEqualTo("4.2.0");
+	}
+
+	@Test
+	void should_extract3GroupsDigitsOf4GroupsDigitsVersion_whenGiving4GroupsDigitsWithQualifier() {
+		assertThat(VersionUtil.extract3GroupsDigitsOf4GroupsDigitsVersion("4.2.0.4-SNAPSHOT")).isEqualTo("4.2.0");
+	}
+
 }

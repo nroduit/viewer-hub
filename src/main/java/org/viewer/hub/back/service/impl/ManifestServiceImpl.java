@@ -16,8 +16,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
-import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
 import org.springframework.stereotype.Service;
 import org.viewer.hub.back.enums.IHERequestType;
 import org.viewer.hub.back.model.SearchCriteria;
@@ -27,6 +25,7 @@ import org.viewer.hub.back.model.manifest.Manifest;
 import org.viewer.hub.back.service.CacheService;
 import org.viewer.hub.back.service.ConnectorQueryService;
 import org.viewer.hub.back.service.ManifestService;
+import org.viewer.hub.back.service.SecurityService;
 import org.viewer.hub.back.util.DateTimeUtil;
 
 import java.util.Set;
@@ -43,7 +42,7 @@ public class ManifestServiceImpl implements ManifestService {
 
 	private final ConnectorQueryService connectorQueryService;
 
-	private final OAuth2AuthorizedClientService oAuth2AuthorizedClientService;
+	private final SecurityService securityService;
 
 	/**
 	 * Autowired constructor
@@ -52,14 +51,19 @@ public class ManifestServiceImpl implements ManifestService {
 	 */
 	@Autowired
 	public ManifestServiceImpl(final CacheService cacheService, final ConnectorQueryService connectorQueryService,
-			final OAuth2AuthorizedClientService oAuth2AuthorizedClientService) {
+			final SecurityService securityService) {
 		this.cacheService = cacheService;
 		this.connectorQueryService = connectorQueryService;
-		this.oAuth2AuthorizedClientService = oAuth2AuthorizedClientService;
+		this.securityService = securityService;
 	}
 
 	@Override
 	@Async
+	// TODO currently security context propagation not working in @ASync methods call
+	// Normally should work like this
+	// https://www.baeldung.com/spring-security-async-principal-propagation
+	// instead of propagating the authentication parameter in the methods calls
+	// When working should use SecurityContextHolder.getContext().getAuthentication()
 	public void buildManifest(String key, @Valid SearchCriteria searchCriteria, Authentication authentication) {
 		// Build the manifest depending on the configured connectors
 		Manifest manifest = searchCriteria instanceof WeasisIHESearchCriteria
@@ -97,9 +101,6 @@ public class ManifestServiceImpl implements ManifestService {
 		manifest.setBuildInProgress(true);
 		this.cacheService.putManifestIfAbsent(key, manifest);
 
-		// If authenticated: set access token to use it when building manifest
-		manifest.setAccessToken(this.retrieveAccessToken(authentication));
-
 		// TODO: addGeneralViewerMessage...
 		// TODO: decrypt..
 		// TODO: doBuildQuery...
@@ -107,46 +108,34 @@ public class ManifestServiceImpl implements ManifestService {
 		// Sop Instance Uid
 		if (!searchCriteria.getObjectUID().isEmpty()) {
 			this.connectorQueryService.buildFromSopInstanceUids(manifest, searchCriteria.getObjectUID(),
-					searchCriteria.getArchive());
+					searchCriteria.getArchive(), authentication);
 		}
 		// Series Instance Uid
 		if (!searchCriteria.getSeriesUID().isEmpty()) {
 			this.connectorQueryService.buildFromSeriesInstanceUids(manifest, searchCriteria.getSeriesUID(),
-					searchCriteria.getArchive());
+					searchCriteria.getArchive(), authentication);
 		}
 		// Accession Number
 		if (!searchCriteria.getAccessionNumber().isEmpty()) {
 			this.connectorQueryService.buildFromStudyAccessionNumbers(manifest, searchCriteria.getAccessionNumber(),
-					searchCriteria.getArchive());
+					searchCriteria.getArchive(), authentication);
 		}
 		// Study Uid
 		if (!searchCriteria.getStudyUID().isEmpty()) {
 			this.connectorQueryService.buildFromStudyInstanceUids(manifest, searchCriteria.getStudyUID(),
-					searchCriteria.getArchive());
+					searchCriteria.getArchive(), authentication);
 		}
 		// Patient Id
 		if (!searchCriteria.getPatientID().isEmpty()) {
-			this.connectorQueryService.buildFromPatientIds(manifest, searchCriteria.getPatientID(), searchCriteria);
+			this.connectorQueryService.buildFromPatientIds(manifest, searchCriteria.getPatientID(), searchCriteria,
+					authentication);
 		}
+
+		// Handle authentication
+		this.securityService.handleManifestAuthentication(manifest, authentication);
 
 		// manifest built
 		return manifest;
-	}
-
-	/**
-	 * If authenticated: retrieve the access token to use it when building the manifest
-	 * @param authentication Authentication
-	 * @return access token found
-	 */
-	private String retrieveAccessToken(Authentication authentication) {
-		String accessTokenFound = null;
-		if (authentication != null) {
-			OAuth2AuthorizedClient authorizedClient = this.oAuth2AuthorizedClientService
-				.loadAuthorizedClient("keycloak", authentication.getName());
-			accessTokenFound = authorizedClient != null && authorizedClient.getAccessToken() != null
-					? authorizedClient.getAccessToken().getTokenValue() : null;
-		}
-		return accessTokenFound;
 	}
 
 	/**
@@ -170,25 +159,25 @@ public class ManifestServiceImpl implements ManifestService {
 		manifest.setBuildInProgress(true);
 		this.cacheService.putManifestIfAbsent(key, manifest);
 
-		// If authenticated: set access token to use it when building manifest
-		manifest.setAccessToken(this.retrieveAccessToken(authentication));
-
 		// Study level
 		if (searchCriteria.getRequestType() == IHERequestType.STUDY) {
 			if (!searchCriteria.getAccessionNumber().isEmpty()) {
 				this.connectorQueryService.buildFromStudyAccessionNumbers(manifest, searchCriteria.getAccessionNumber(),
-						searchCriteria.getArchive());
+						searchCriteria.getArchive(), authentication);
 			}
 			else if (!searchCriteria.getStudyUID().isEmpty()) {
 				this.connectorQueryService.buildFromStudyInstanceUids(manifest, searchCriteria.getStudyUID(),
-						searchCriteria.getArchive());
+						searchCriteria.getArchive(), authentication);
 			}
 		}
 		// Patient level
 		else if (searchCriteria.getRequestType() == IHERequestType.PATIENT) {
 			this.connectorQueryService.buildFromPatientIds(manifest, Set.of(searchCriteria.getPatientID()),
-					searchCriteria);
+					searchCriteria, authentication);
 		}
+
+		// Handle authentication
+		this.securityService.handleManifestAuthentication(manifest, authentication);
 
 		// Manifest built
 		return manifest;

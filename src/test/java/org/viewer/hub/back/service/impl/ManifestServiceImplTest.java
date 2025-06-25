@@ -11,16 +11,18 @@
 
 package org.viewer.hub.back.service.impl;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
+import org.mockito.MockitoAnnotations;
 import org.viewer.hub.back.enums.IHERequestType;
 import org.viewer.hub.back.model.WeasisIHESearchCriteria;
 import org.viewer.hub.back.model.WeasisSearchCriteria;
 import org.viewer.hub.back.service.CacheService;
 import org.viewer.hub.back.service.ConnectorQueryService;
-import org.viewer.hub.back.service.ManifestService;
+import org.viewer.hub.back.service.SecurityService;
 
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -29,17 +31,28 @@ class ManifestServiceImplTest {
 
 	private final CacheService cacheServiceMock = Mockito.mock(CacheService.class);
 
-	private final ConnectorQueryService connectorQueryService = Mockito.mock(ConnectorQueryService.class);
+	private final ConnectorQueryService connectorQueryServiceMock = Mockito.mock(ConnectorQueryService.class);
 
-	private final OAuth2AuthorizedClientService oAuth2AuthorizedClientService = Mockito
-		.mock(OAuth2AuthorizedClientService.class);
+	@Mock
 
-	private ManifestService manifestService;
+	private SecurityService securityServiceMock;
+
+	private ManifestServiceImpl manifestService;
+
+	AutoCloseable openMocks;
 
 	@BeforeEach
 	public void setUp() {
-		this.manifestService = new ManifestServiceImpl(this.cacheServiceMock, this.connectorQueryService,
-				this.oAuth2AuthorizedClientService);
+
+		openMocks = MockitoAnnotations.openMocks(this);
+
+		this.manifestService = new ManifestServiceImpl(this.cacheServiceMock, this.connectorQueryServiceMock,
+				this.securityServiceMock);
+	}
+
+	@AfterEach
+	void tearDown() throws Exception {
+		openMocks.close();
 	}
 
 	@Test
@@ -67,8 +80,8 @@ class ManifestServiceImplTest {
 		this.manifestService.buildManifest("testWithoutIHE", weasisSearchCriteria, null);
 
 		// Test results
-		Mockito.verify(this.connectorQueryService, Mockito.atLeastOnce())
-			.buildFromSopInstanceUids(Mockito.any(), Mockito.any(), Mockito.any());
+		Mockito.verify(this.connectorQueryServiceMock, Mockito.atLeastOnce())
+			.buildFromSopInstanceUids(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
 	}
 
 	@Test
@@ -82,8 +95,8 @@ class ManifestServiceImplTest {
 		this.manifestService.buildManifest("testWithoutIHE", weasisSearchCriteria, null);
 
 		// Test results
-		Mockito.verify(this.connectorQueryService, Mockito.atLeastOnce())
-			.buildFromSeriesInstanceUids(Mockito.any(), Mockito.any(), Mockito.any());
+		Mockito.verify(this.connectorQueryServiceMock, Mockito.atLeastOnce())
+			.buildFromSeriesInstanceUids(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
 	}
 
 	@Test
@@ -97,8 +110,8 @@ class ManifestServiceImplTest {
 		this.manifestService.buildManifest("testWithoutIHE", weasisSearchCriteria, null);
 
 		// Test results
-		Mockito.verify(this.connectorQueryService, Mockito.atLeastOnce())
-			.buildFromStudyAccessionNumbers(Mockito.any(), Mockito.any(), Mockito.any());
+		Mockito.verify(this.connectorQueryServiceMock, Mockito.atLeastOnce())
+			.buildFromStudyAccessionNumbers(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
 	}
 
 	@Test
@@ -112,8 +125,8 @@ class ManifestServiceImplTest {
 		this.manifestService.buildManifest("testWithoutIHE", weasisSearchCriteria, null);
 
 		// Test results
-		Mockito.verify(this.connectorQueryService, Mockito.atLeastOnce())
-			.buildFromStudyInstanceUids(Mockito.any(), Mockito.any(), Mockito.any());
+		Mockito.verify(this.connectorQueryServiceMock, Mockito.atLeastOnce())
+			.buildFromStudyInstanceUids(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
 	}
 
 	@Test
@@ -127,8 +140,8 @@ class ManifestServiceImplTest {
 		this.manifestService.buildManifest("testWithoutIHE", weasisSearchCriteria, null);
 
 		// Test results
-		Mockito.verify(this.connectorQueryService, Mockito.atLeastOnce())
-			.buildFromPatientIds(Mockito.any(), Mockito.any(), Mockito.any());
+		Mockito.verify(this.connectorQueryServiceMock, Mockito.atLeastOnce())
+			.buildFromPatientIds(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
 	}
 
 	@Test
@@ -157,8 +170,8 @@ class ManifestServiceImplTest {
 		this.manifestService.buildManifest("testWithIHE", weasisIHESearchCriteria, null);
 
 		// Test results
-		Mockito.verify(this.connectorQueryService, Mockito.atLeastOnce())
-			.buildFromStudyAccessionNumbers(Mockito.any(), Mockito.any(), Mockito.any());
+		Mockito.verify(this.connectorQueryServiceMock, Mockito.atLeastOnce())
+			.buildFromStudyAccessionNumbers(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
 	}
 
 	@Test
@@ -173,8 +186,8 @@ class ManifestServiceImplTest {
 		this.manifestService.buildManifest("testWithIHE", weasisIHESearchCriteria, null);
 
 		// Test results
-		Mockito.verify(this.connectorQueryService, Mockito.atLeastOnce())
-			.buildFromStudyInstanceUids(Mockito.any(), Mockito.any(), Mockito.any());
+		Mockito.verify(this.connectorQueryServiceMock, Mockito.atLeastOnce())
+			.buildFromStudyInstanceUids(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
 	}
 
 	@Test
@@ -189,8 +202,8 @@ class ManifestServiceImplTest {
 		this.manifestService.buildManifest("testWithIHE", weasisIHESearchCriteria, null);
 
 		// Test results
-		Mockito.verify(this.connectorQueryService, Mockito.never())
-			.buildFromStudyInstanceUids(Mockito.any(), Mockito.any(), Mockito.any());
+		Mockito.verify(this.connectorQueryServiceMock, Mockito.never())
+			.buildFromStudyInstanceUids(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
 	}
 
 	@Test
@@ -205,8 +218,8 @@ class ManifestServiceImplTest {
 		this.manifestService.buildManifest("testWithIHE", weasisIHESearchCriteria, null);
 
 		// Test results
-		Mockito.verify(this.connectorQueryService, Mockito.atLeastOnce())
-			.buildFromPatientIds(Mockito.any(), Mockito.any(), Mockito.any());
+		Mockito.verify(this.connectorQueryServiceMock, Mockito.atLeastOnce())
+			.buildFromPatientIds(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
 	}
 
 	@Test

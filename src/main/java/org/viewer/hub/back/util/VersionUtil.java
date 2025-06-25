@@ -36,4 +36,30 @@ public class VersionUtil {
 		return null;
 	}
 
+	/**
+	 * Method to count groups of digits separated by dots
+	 * @param version to evaluate
+	 */
+	public static int countDigitsGroups(String version) {
+		// Split the string by "."
+		String[] groups = version.split("\\.");
+		return groups.length;
+	}
+
+	/**
+	 * Retrieve the 3 first groups of digits of a 4 digits version
+	 * @param version Version to evaluate
+	 * @return 3 first groups of digits
+	 */
+	public static String extract3GroupsDigitsOf4GroupsDigitsVersion(String version) {
+		// Regular expression to match the first three groups of digits
+		Pattern pattern = Pattern.compile("^(\\w+\\.\\w+\\.\\w+)");
+		Matcher matcher = pattern.matcher(version);
+
+		if (matcher.find()) {
+			return matcher.group(1); // Return the matched portion
+		}
+		return ""; // Return empty if no match
+	}
+
 }

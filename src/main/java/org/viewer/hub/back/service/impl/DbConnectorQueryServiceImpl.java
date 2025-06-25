@@ -153,7 +153,7 @@ public class DbConnectorQueryServiceImpl implements DbConnectorQueryService {
 			// Patients
 			patients = dbConnectorResults.stream()
 				.map(rs -> new Patient(rs.getPatientId(), rs.getPatientName(), rs.getPatientBirthDate(),
-						DicomPatientSex.valueOf(rs.getPatientSex())))
+						rs.getPatientSex() != null ? DicomPatientSex.valueOf(rs.getPatientSex()) : null))
 				.collect(Collectors.toSet());
 
 			// Studies
@@ -168,8 +168,8 @@ public class DbConnectorQueryServiceImpl implements DbConnectorQueryService {
 				.forEach(study -> study.setSeries(dbConnectorResults.stream()
 					.filter(rs -> Objects.equals(rs.getStudyInstanceUid(), study.getStudyInstanceUID()))
 					.map(rss -> new Serie(rss.getSeriesInstanceUid(), rss.getSeriesDescription(), rss.getSeriesNumber(),
-							rss.getModality(), connector.getWado().getTransferSyntaxUid(),
-							connector.getWado().getCompressionRate()))
+							rss.getModality(), connector.getWeasis().getManifest().getTransferSyntaxUid(),
+							connector.getWeasis().getManifest().getCompressionRate()))
 					.collect(Collectors.toSet()))));
 
 			// Instance

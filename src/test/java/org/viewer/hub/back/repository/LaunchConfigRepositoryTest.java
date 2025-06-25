@@ -15,6 +15,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.viewer.hub.back.entity.LaunchConfigEntity;
 
 import java.util.Arrays;
@@ -32,6 +34,9 @@ public class LaunchConfigRepositoryTest {
 
 	@Autowired
 	private LaunchConfigRepository repository;
+
+	@MockBean
+	ClientRegistrationRepository clientRegistrationRepository;
 
 	/**
 	 * Test save and find by id.

@@ -11,6 +11,8 @@
 
 package org.viewer.hub.back.model.version;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.viewer.hub.back.util.VersionUtil;
 
 import java.util.Objects;
@@ -18,6 +20,8 @@ import java.util.Objects;
 /**
  * Model which represents the different versions released with its minimal native version
  */
+@Setter
+@Getter
 public class MinimalReleaseVersion {
 
 	private String releaseVersion;
@@ -41,30 +45,6 @@ public class MinimalReleaseVersion {
 	public MinimalReleaseVersion(String releaseVersion, String minimalVersion, String i18nVersion) {
 		this.releaseVersion = releaseVersion;
 		this.minimalVersion = minimalVersion;
-		this.i18nVersion = i18nVersion;
-	}
-
-	public String getReleaseVersion() {
-		return this.releaseVersion;
-	}
-
-	public void setReleaseVersion(String releaseVersion) {
-		this.releaseVersion = releaseVersion;
-	}
-
-	public String getMinimalVersion() {
-		return this.minimalVersion;
-	}
-
-	public void setMinimalVersion(String minimalVersion) {
-		this.minimalVersion = minimalVersion;
-	}
-
-	public String getI18nVersion() {
-		return this.i18nVersion;
-	}
-
-	public void setI18nVersion(String i18nVersion) {
 		this.i18nVersion = i18nVersion;
 	}
 

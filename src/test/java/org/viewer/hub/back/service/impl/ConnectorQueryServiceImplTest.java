@@ -23,15 +23,16 @@ import org.viewer.hub.back.enums.ConnectorType;
 import org.viewer.hub.back.enums.QueryLevelType;
 import org.viewer.hub.back.model.WeasisSearchCriteria;
 import org.viewer.hub.back.model.manifest.Manifest;
-import org.viewer.hub.back.model.property.AuthenticationProperty;
-import org.viewer.hub.back.model.property.BasicAuthenticationProperty;
+import org.viewer.hub.back.model.property.ConnectorDicomWebProperty;
 import org.viewer.hub.back.model.property.ConnectorProperty;
+import org.viewer.hub.back.model.property.ConnectorWadoProperty;
 import org.viewer.hub.back.model.property.DbConnectorProperty;
 import org.viewer.hub.back.model.property.DbConnectorQueryProperty;
+import org.viewer.hub.back.model.property.DicomConnectorDimseProperty;
 import org.viewer.hub.back.model.property.DicomConnectorProperty;
-import org.viewer.hub.back.model.property.OAuth2AuthenticationProperty;
+import org.viewer.hub.back.model.property.DicomWebConnectorProperty;
 import org.viewer.hub.back.model.property.SearchCriteriaProperty;
-import org.viewer.hub.back.model.property.WadoConnectorProperty;
+import org.viewer.hub.back.model.property.WeasisConnectorProperty;
 import org.viewer.hub.back.service.DbConnectorQueryService;
 import org.viewer.hub.back.service.DicomConnectorQueryService;
 
@@ -64,39 +65,89 @@ class ConnectorQueryServiceImplTest {
 		// Mock connectorConfigurationProperties
 		LinkedHashMap<String, ConnectorProperty> config = new LinkedHashMap<>();
 
-		WadoConnectorProperty wadoConnectorProperty = new WadoConnectorProperty(
-				new AuthenticationProperty(false, new OAuth2AuthenticationProperty("url"),
-						new BasicAuthenticationProperty("url", "login", "password")),
-				"transferSyntaxUid", 0, true, "additionnalParameters", null, null);
-
 		DbConnectorQueryProperty dbConnectorQueryProperty = new DbConnectorQueryProperty("select",
 				"accessionNumberColumn", "patientIdColumn", "studyInstanceUidColumn", "serieInstanceUidColumn",
 				"sopInstanceUidColumn");
-		DbConnectorProperty dbConnectorProperty = new DbConnectorProperty("user", "password", "uri", "driver",
-				dbConnectorQueryProperty);
+		DbConnectorProperty dbConnectorProperty = DbConnectorProperty.builder()
+			.user("user")
+			.password("password")
+			.uri("uri")
+			.driver("driver")
+			.query(dbConnectorQueryProperty)
+			.build();
 
-		DicomConnectorProperty dicomConnectorProperty = new DicomConnectorProperty("callingAet", "aet", "host", 1, null,
-				null, null);
+		DicomConnectorProperty dicomConnectorProperty = DicomConnectorProperty.builder()
+			.dimse(DicomConnectorDimseProperty.builder()
+				.callingAet("callingAet")
+				.aet("aet")
+				.host("host")
+				.port(1)
+				.build())
+			.wado(ConnectorWadoProperty.builder().build())
+			.build();
+
+		DicomWebConnectorProperty dicomWebConnectorProperty = DicomWebConnectorProperty.builder()
+			.wadoRs(ConnectorDicomWebProperty.builder().build())
+			.qidoRs(ConnectorDicomWebProperty.builder().build())
+			.build();
 
 		SearchCriteriaProperty searchCriteria = new SearchCriteriaProperty(new HashSet<>());
 
-		ConnectorProperty connectorPropertyDbA = new ConnectorProperty("idDbA", ConnectorType.DB,
-				new SearchCriteriaProperty(new HashSet<>()), wadoConnectorProperty, dbConnectorProperty,
-				dicomConnectorProperty);
-		ConnectorProperty connectorPropertyDbb = new ConnectorProperty("idDbB", ConnectorType.DB,
-				new SearchCriteriaProperty(new HashSet<>()), wadoConnectorProperty, dbConnectorProperty,
-				dicomConnectorProperty);
-		ConnectorProperty connectorPropertyDicomA = new ConnectorProperty("idDicomA", ConnectorType.DICOM,
-				new SearchCriteriaProperty(new HashSet<>()), wadoConnectorProperty, dbConnectorProperty,
-				dicomConnectorProperty);
-		ConnectorProperty connectorPropertyDicomB = new ConnectorProperty("idDicomB", ConnectorType.DICOM,
-				new SearchCriteriaProperty(new HashSet<>()), wadoConnectorProperty, dbConnectorProperty,
-				dicomConnectorProperty);
+		ConnectorProperty connectorPropertyDbA = ConnectorProperty.builder()
+			.id("idDbA")
+			.type(ConnectorType.DB)
+			.searchCriteria(new SearchCriteriaProperty(new HashSet<>()))
+			.weasis(WeasisConnectorProperty.builder().build())
+			.dbConnector(dbConnectorProperty)
+			.dicomConnector(dicomConnectorProperty)
+			.dicomWebConnector(dicomWebConnectorProperty)
+			.build();
+
+		ConnectorProperty connectorPropertyDbb = ConnectorProperty.builder()
+			.id("idDbB")
+			.type(ConnectorType.DB)
+			.searchCriteria(new SearchCriteriaProperty(new HashSet<>()))
+			.weasis(WeasisConnectorProperty.builder().build())
+			.dbConnector(dbConnectorProperty)
+			.dicomConnector(dicomConnectorProperty)
+			.dicomWebConnector(dicomWebConnectorProperty)
+			.build();
+
+		ConnectorProperty connectorPropertyDicomA = ConnectorProperty.builder()
+			.id("idDicomA")
+			.type(ConnectorType.DICOM)
+			.searchCriteria(new SearchCriteriaProperty(new HashSet<>()))
+			.weasis(WeasisConnectorProperty.builder().build())
+			.dbConnector(dbConnectorProperty)
+			.dicomConnector(dicomConnectorProperty)
+			.dicomWebConnector(dicomWebConnectorProperty)
+			.build();
+
+		ConnectorProperty connectorPropertyDicomB = ConnectorProperty.builder()
+			.id("idDicomB")
+			.type(ConnectorType.DICOM)
+			.searchCriteria(new SearchCriteriaProperty(new HashSet<>()))
+			.weasis(WeasisConnectorProperty.builder().build())
+			.dbConnector(dbConnectorProperty)
+			.dicomConnector(dicomConnectorProperty)
+			.dicomWebConnector(dicomWebConnectorProperty)
+			.build();
+
+		ConnectorProperty connectorPropertyDicomWebA = ConnectorProperty.builder()
+			.id("idDicomWebA")
+			.type(ConnectorType.DICOM_WEB)
+			.searchCriteria(new SearchCriteriaProperty(new HashSet<>()))
+			.weasis(WeasisConnectorProperty.builder().build())
+			.dbConnector(dbConnectorProperty)
+			.dicomConnector(dicomConnectorProperty)
+			.dicomWebConnector(dicomWebConnectorProperty)
+			.build();
 
 		config.put("idDbA", connectorPropertyDbA);
 		config.put("idDbB", connectorPropertyDbb);
 		config.put("idDicomA", connectorPropertyDicomA);
 		config.put("idDicomB", connectorPropertyDicomB);
+		config.put("idDicomWebA", connectorPropertyDicomWebA);
 
 		Mockito.when(this.connectorConfigurationPropertiesMock.getConnectors()).thenReturn(config);
 
@@ -157,13 +208,14 @@ class ConnectorQueryServiceImplTest {
 		weasisSearchCriteria.getArchive().add("idDbA");
 
 		// Call service
-		this.connectorQueryService.buildFromPatientIds(new Manifest(), Set.of("uid"), weasisSearchCriteria);
+		this.connectorQueryService.buildFromPatientIds(new Manifest(), Set.of("uid"), weasisSearchCriteria, null);
 
 		// Test results
 		Mockito.verify(this.dbConnectorQueryServiceMock, Mockito.times(1))
 			.buildFromPatientIdsDbConnector(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
 		Mockito.verify(this.dicomConnectorQueryServiceMock, Mockito.never())
-			.buildFromPatientIdsDicomConnector(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+			.buildFromPatientIdsDicomConnector(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(),
+					Mockito.any());
 	}
 
 	@Test
@@ -173,13 +225,31 @@ class ConnectorQueryServiceImplTest {
 		weasisSearchCriteria.getArchive().add("idDicomA");
 
 		// Call service
-		this.connectorQueryService.buildFromPatientIds(new Manifest(), Set.of("uid"), weasisSearchCriteria);
+		this.connectorQueryService.buildFromPatientIds(new Manifest(), Set.of("uid"), weasisSearchCriteria, null);
 
 		// Test results
 		Mockito.verify(this.dbConnectorQueryServiceMock, Mockito.never())
 			.buildFromPatientIdsDbConnector(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
 		Mockito.verify(this.dicomConnectorQueryServiceMock, Mockito.times(1))
-			.buildFromPatientIdsDicomConnector(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+			.buildFromPatientIdsDicomConnector(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(),
+					Mockito.any());
+	}
+
+	@Test
+	void when_fillingManifestFromPatientIds_with_dicomWebArchive_should_callCorrectConnectorService() {
+		// Init data
+		WeasisSearchCriteria weasisSearchCriteria = new WeasisSearchCriteria();
+		weasisSearchCriteria.getArchive().add("idDicomWebA");
+
+		// Call service
+		this.connectorQueryService.buildFromPatientIds(new Manifest(), Set.of("uid"), weasisSearchCriteria, null);
+
+		// Test results
+		Mockito.verify(this.dbConnectorQueryServiceMock, Mockito.never())
+			.buildFromPatientIdsDbConnector(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+		Mockito.verify(this.dicomConnectorQueryServiceMock, Mockito.times(1))
+			.buildFromPatientIdsDicomConnector(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(),
+					Mockito.any());
 	}
 
 	@Test
@@ -190,23 +260,26 @@ class ConnectorQueryServiceImplTest {
 
 		// Mock behaviour
 		LinkedHashMap<String, ConnectorProperty> config = new LinkedHashMap<>();
-		WadoConnectorProperty wadoConnectorProperty = new WadoConnectorProperty(
-				new AuthenticationProperty(false, new OAuth2AuthenticationProperty("url"),
-						new BasicAuthenticationProperty("url", "login", "password")),
-				"transferSyntaxUid", 0, true, "additionnalParameters", null, null);
-		ConnectorProperty connectorPropertyDicomA = new ConnectorProperty("idDicomA", ConnectorType.DICOM,
-				new SearchCriteriaProperty(Set.of(QueryLevelType.PATIENT_ID)), wadoConnectorProperty, null, null);
+
+		ConnectorProperty connectorPropertyDicomA = ConnectorProperty.builder()
+			.id("idDicomA")
+			.type(ConnectorType.DICOM)
+			.searchCriteria(new SearchCriteriaProperty(Set.of(QueryLevelType.PATIENT_ID)))
+			.weasis(WeasisConnectorProperty.builder().build())
+			.build();
 		config.put("idDicomA", connectorPropertyDicomA);
+
 		Mockito.when(this.connectorConfigurationPropertiesMock.getConnectors()).thenReturn(config);
 
 		// Call service
-		this.connectorQueryService.buildFromPatientIds(new Manifest(), Set.of("uid"), weasisSearchCriteria);
+		this.connectorQueryService.buildFromPatientIds(new Manifest(), Set.of("uid"), weasisSearchCriteria, null);
 
 		// Test results
 		Mockito.verify(this.dbConnectorQueryServiceMock, Mockito.never())
 			.buildFromPatientIdsDbConnector(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
 		Mockito.verify(this.dicomConnectorQueryServiceMock, Mockito.never())
-			.buildFromPatientIdsDicomConnector(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+			.buildFromPatientIdsDicomConnector(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(),
+					Mockito.any());
 	}
 
 	@Test
@@ -216,13 +289,13 @@ class ConnectorQueryServiceImplTest {
 		archives.add("idDbA");
 
 		// Call service
-		this.connectorQueryService.buildFromStudyInstanceUids(new Manifest(), Set.of("uid"), archives);
+		this.connectorQueryService.buildFromStudyInstanceUids(new Manifest(), Set.of("uid"), archives, null);
 
 		// Test results
 		Mockito.verify(this.dbConnectorQueryServiceMock, Mockito.times(1))
 			.buildFromStudyInstanceUidsDbConnector(Mockito.any(), Mockito.any(), Mockito.any());
 		Mockito.verify(this.dicomConnectorQueryServiceMock, Mockito.never())
-			.buildFromStudyInstanceUidsDicomConnector(Mockito.any(), Mockito.any(), Mockito.any());
+			.buildFromStudyInstanceUidsDicomConnector(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
 	}
 
 	@Test
@@ -232,13 +305,29 @@ class ConnectorQueryServiceImplTest {
 		archives.add("idDicomA");
 
 		// Call service
-		this.connectorQueryService.buildFromStudyInstanceUids(new Manifest(), Set.of("uid"), archives);
+		this.connectorQueryService.buildFromStudyInstanceUids(new Manifest(), Set.of("uid"), archives, null);
 
 		// Test results
 		Mockito.verify(this.dbConnectorQueryServiceMock, Mockito.never())
 			.buildFromStudyInstanceUidsDbConnector(Mockito.any(), Mockito.any(), Mockito.any());
 		Mockito.verify(this.dicomConnectorQueryServiceMock, Mockito.times(1))
-			.buildFromStudyInstanceUidsDicomConnector(Mockito.any(), Mockito.any(), Mockito.any());
+			.buildFromStudyInstanceUidsDicomConnector(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+	}
+
+	@Test
+	void when_fillingManifestFromStudyInstanceUids_with_dicomWebArchive_should_callCorrectConnectorService() {
+		// Init data
+		LinkedHashSet<String> archives = new LinkedHashSet<>();
+		archives.add("idDicomWebA");
+
+		// Call service
+		this.connectorQueryService.buildFromStudyInstanceUids(new Manifest(), Set.of("uid"), archives, null);
+
+		// Test results
+		Mockito.verify(this.dbConnectorQueryServiceMock, Mockito.never())
+			.buildFromStudyInstanceUidsDbConnector(Mockito.any(), Mockito.any(), Mockito.any());
+		Mockito.verify(this.dicomConnectorQueryServiceMock, Mockito.times(1))
+			.buildFromStudyInstanceUidsDicomConnector(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
 	}
 
 	@Test
@@ -249,24 +338,25 @@ class ConnectorQueryServiceImplTest {
 
 		// Mock behaviour
 		LinkedHashMap<String, ConnectorProperty> config = new LinkedHashMap<>();
-		WadoConnectorProperty wadoConnectorProperty = new WadoConnectorProperty(
-				new AuthenticationProperty(false, new OAuth2AuthenticationProperty("url"),
-						new BasicAuthenticationProperty("url", "login", "password")),
-				"transferSyntaxUid", 0, true, "additionnalParameters", null, null);
-		ConnectorProperty connectorPropertyDicomA = new ConnectorProperty("idDicomA", ConnectorType.DICOM,
-				new SearchCriteriaProperty(Set.of(QueryLevelType.STUDY_INSTANCE_UID)), wadoConnectorProperty, null,
-				null);
+
+		ConnectorProperty connectorPropertyDicomA = ConnectorProperty.builder()
+			.id("idDicomA")
+			.type(ConnectorType.DICOM)
+			.searchCriteria(new SearchCriteriaProperty(Set.of(QueryLevelType.STUDY_INSTANCE_UID)))
+			.weasis(WeasisConnectorProperty.builder().build())
+			.build();
+
 		config.put("idDicomA", connectorPropertyDicomA);
 		Mockito.when(this.connectorConfigurationPropertiesMock.getConnectors()).thenReturn(config);
 
 		// Call service
-		this.connectorQueryService.buildFromStudyInstanceUids(new Manifest(), Set.of("uid"), archives);
+		this.connectorQueryService.buildFromStudyInstanceUids(new Manifest(), Set.of("uid"), archives, null);
 
 		// Test results
 		Mockito.verify(this.dbConnectorQueryServiceMock, Mockito.never())
 			.buildFromStudyInstanceUidsDbConnector(Mockito.any(), Mockito.any(), Mockito.any());
 		Mockito.verify(this.dicomConnectorQueryServiceMock, Mockito.never())
-			.buildFromStudyInstanceUidsDicomConnector(Mockito.any(), Mockito.any(), Mockito.any());
+			.buildFromStudyInstanceUidsDicomConnector(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
 	}
 
 	@Test
@@ -276,13 +366,13 @@ class ConnectorQueryServiceImplTest {
 		archives.add("idDbA");
 
 		// Call service
-		this.connectorQueryService.buildFromStudyAccessionNumbers(new Manifest(), Set.of("uid"), archives);
+		this.connectorQueryService.buildFromStudyAccessionNumbers(new Manifest(), Set.of("uid"), archives, null);
 
 		// Test results
 		Mockito.verify(this.dbConnectorQueryServiceMock, Mockito.times(1))
 			.buildFromStudyAccessionNumbersDbConnector(Mockito.any(), Mockito.any(), Mockito.any());
 		Mockito.verify(this.dicomConnectorQueryServiceMock, Mockito.never())
-			.buildFromStudyAccessionNumbersDicomConnector(Mockito.any(), Mockito.any(), Mockito.any());
+			.buildFromStudyAccessionNumbersDicomConnector(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
 	}
 
 	@Test
@@ -292,13 +382,29 @@ class ConnectorQueryServiceImplTest {
 		archives.add("idDicomA");
 
 		// Call service
-		this.connectorQueryService.buildFromStudyAccessionNumbers(new Manifest(), Set.of("uid"), archives);
+		this.connectorQueryService.buildFromStudyAccessionNumbers(new Manifest(), Set.of("uid"), archives, null);
 
 		// Test results
 		Mockito.verify(this.dbConnectorQueryServiceMock, Mockito.never())
 			.buildFromStudyAccessionNumbersDbConnector(Mockito.any(), Mockito.any(), Mockito.any());
 		Mockito.verify(this.dicomConnectorQueryServiceMock, Mockito.times(1))
-			.buildFromStudyAccessionNumbersDicomConnector(Mockito.any(), Mockito.any(), Mockito.any());
+			.buildFromStudyAccessionNumbersDicomConnector(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+	}
+
+	@Test
+	void when_fillingManifestFromAccessionNumbers_with_dicomWebArchive_should_callCorrectConnectorService() {
+		// Init data
+		LinkedHashSet<String> archives = new LinkedHashSet<>();
+		archives.add("idDicomWebA");
+
+		// Call service
+		this.connectorQueryService.buildFromStudyAccessionNumbers(new Manifest(), Set.of("uid"), archives, null);
+
+		// Test results
+		Mockito.verify(this.dbConnectorQueryServiceMock, Mockito.never())
+			.buildFromStudyAccessionNumbersDbConnector(Mockito.any(), Mockito.any(), Mockito.any());
+		Mockito.verify(this.dicomConnectorQueryServiceMock, Mockito.times(1))
+			.buildFromStudyAccessionNumbersDicomConnector(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
 	}
 
 	@Test
@@ -309,24 +415,24 @@ class ConnectorQueryServiceImplTest {
 
 		// Mock behaviour
 		LinkedHashMap<String, ConnectorProperty> config = new LinkedHashMap<>();
-		WadoConnectorProperty wadoConnectorProperty = new WadoConnectorProperty(
-				new AuthenticationProperty(false, new OAuth2AuthenticationProperty("url"),
-						new BasicAuthenticationProperty("url", "login", "password")),
-				"transferSyntaxUid", 0, true, "additionnalParameters", null, null);
-		ConnectorProperty connectorPropertyDicomA = new ConnectorProperty("idDicomA", ConnectorType.DICOM,
-				new SearchCriteriaProperty(Set.of(QueryLevelType.STUDY_ACCESSION_NUMBER)), wadoConnectorProperty, null,
-				null);
+
+		ConnectorProperty connectorPropertyDicomA = ConnectorProperty.builder()
+			.id("idDicomA")
+			.type(ConnectorType.DICOM)
+			.searchCriteria(new SearchCriteriaProperty(Set.of(QueryLevelType.STUDY_ACCESSION_NUMBER)))
+			.weasis(WeasisConnectorProperty.builder().build())
+			.build();
 		config.put("idDicomA", connectorPropertyDicomA);
 		Mockito.when(this.connectorConfigurationPropertiesMock.getConnectors()).thenReturn(config);
 
 		// Call service
-		this.connectorQueryService.buildFromStudyAccessionNumbers(new Manifest(), Set.of("uid"), archives);
+		this.connectorQueryService.buildFromStudyAccessionNumbers(new Manifest(), Set.of("uid"), archives, null);
 
 		// Test results
 		Mockito.verify(this.dbConnectorQueryServiceMock, Mockito.never())
 			.buildFromStudyAccessionNumbersDbConnector(Mockito.any(), Mockito.any(), Mockito.any());
 		Mockito.verify(this.dicomConnectorQueryServiceMock, Mockito.never())
-			.buildFromStudyAccessionNumbersDicomConnector(Mockito.any(), Mockito.any(), Mockito.any());
+			.buildFromStudyAccessionNumbersDicomConnector(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
 	}
 
 	@Test
@@ -336,13 +442,13 @@ class ConnectorQueryServiceImplTest {
 		archives.add("idDbA");
 
 		// Call service
-		this.connectorQueryService.buildFromSeriesInstanceUids(new Manifest(), Set.of("uid"), archives);
+		this.connectorQueryService.buildFromSeriesInstanceUids(new Manifest(), Set.of("uid"), archives, null);
 
 		// Test results
 		Mockito.verify(this.dbConnectorQueryServiceMock, Mockito.times(1))
 			.buildFromSeriesInstanceUidsDbConnector(Mockito.any(), Mockito.any(), Mockito.any());
 		Mockito.verify(this.dicomConnectorQueryServiceMock, Mockito.never())
-			.buildFromSeriesInstanceUidsDicomConnector(Mockito.any(), Mockito.any(), Mockito.any());
+			.buildFromSeriesInstanceUidsDicomConnector(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
 	}
 
 	@Test
@@ -352,13 +458,29 @@ class ConnectorQueryServiceImplTest {
 		archives.add("idDicomA");
 
 		// Call service
-		this.connectorQueryService.buildFromSeriesInstanceUids(new Manifest(), Set.of("uid"), archives);
+		this.connectorQueryService.buildFromSeriesInstanceUids(new Manifest(), Set.of("uid"), archives, null);
 
 		// Test results
 		Mockito.verify(this.dbConnectorQueryServiceMock, Mockito.never())
 			.buildFromSeriesInstanceUidsDbConnector(Mockito.any(), Mockito.any(), Mockito.any());
 		Mockito.verify(this.dicomConnectorQueryServiceMock, Mockito.times(1))
-			.buildFromSeriesInstanceUidsDicomConnector(Mockito.any(), Mockito.any(), Mockito.any());
+			.buildFromSeriesInstanceUidsDicomConnector(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+	}
+
+	@Test
+	void when_fillingManifestFromSeriesInstanceUids_with_dicomWebArchive_should_callCorrectConnectorService() {
+		// Init data
+		LinkedHashSet<String> archives = new LinkedHashSet<>();
+		archives.add("idDicomWebA");
+
+		// Call service
+		this.connectorQueryService.buildFromSeriesInstanceUids(new Manifest(), Set.of("uid"), archives, null);
+
+		// Test results
+		Mockito.verify(this.dbConnectorQueryServiceMock, Mockito.never())
+			.buildFromSeriesInstanceUidsDbConnector(Mockito.any(), Mockito.any(), Mockito.any());
+		Mockito.verify(this.dicomConnectorQueryServiceMock, Mockito.times(1))
+			.buildFromSeriesInstanceUidsDicomConnector(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
 	}
 
 	@Test
@@ -369,24 +491,25 @@ class ConnectorQueryServiceImplTest {
 
 		// Mock behaviour
 		LinkedHashMap<String, ConnectorProperty> config = new LinkedHashMap<>();
-		WadoConnectorProperty wadoConnectorProperty = new WadoConnectorProperty(
-				new AuthenticationProperty(false, new OAuth2AuthenticationProperty("url"),
-						new BasicAuthenticationProperty("url", "login", "password")),
-				"transferSyntaxUid", 0, true, "additionnalParameters", null, null);
-		ConnectorProperty connectorPropertyDicomA = new ConnectorProperty("idDicomA", ConnectorType.DICOM,
-				new SearchCriteriaProperty(Set.of(QueryLevelType.SERIE_INSTANCE_UID)), wadoConnectorProperty, null,
-				null);
+
+		ConnectorProperty connectorPropertyDicomA = ConnectorProperty.builder()
+			.id("idDicomA")
+			.type(ConnectorType.DICOM)
+			.searchCriteria(new SearchCriteriaProperty(Set.of(QueryLevelType.SERIE_INSTANCE_UID)))
+			.weasis(WeasisConnectorProperty.builder().build())
+			.build();
+
 		config.put("idDicomA", connectorPropertyDicomA);
 		Mockito.when(this.connectorConfigurationPropertiesMock.getConnectors()).thenReturn(config);
 
 		// Call service
-		this.connectorQueryService.buildFromSeriesInstanceUids(new Manifest(), Set.of("uid"), archives);
+		this.connectorQueryService.buildFromSeriesInstanceUids(new Manifest(), Set.of("uid"), archives, null);
 
 		// Test results
 		Mockito.verify(this.dbConnectorQueryServiceMock, Mockito.never())
 			.buildFromSeriesInstanceUidsDbConnector(Mockito.any(), Mockito.any(), Mockito.any());
 		Mockito.verify(this.dicomConnectorQueryServiceMock, Mockito.never())
-			.buildFromSeriesInstanceUidsDicomConnector(Mockito.any(), Mockito.any(), Mockito.any());
+			.buildFromSeriesInstanceUidsDicomConnector(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
 	}
 
 	@Test
@@ -396,13 +519,13 @@ class ConnectorQueryServiceImplTest {
 		archives.add("idDbA");
 
 		// Call service
-		this.connectorQueryService.buildFromSopInstanceUids(new Manifest(), Set.of("uid"), archives);
+		this.connectorQueryService.buildFromSopInstanceUids(new Manifest(), Set.of("uid"), archives, null);
 
 		// Test results
 		Mockito.verify(this.dbConnectorQueryServiceMock, Mockito.times(1))
 			.buildFromSopInstanceUidsDbConnector(Mockito.any(), Mockito.any(), Mockito.any());
 		Mockito.verify(this.dicomConnectorQueryServiceMock, Mockito.never())
-			.buildFromSopInstanceUidsDicomConnector(Mockito.any(), Mockito.any(), Mockito.any());
+			.buildFromSopInstanceUidsDicomConnector(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
 	}
 
 	@Test
@@ -412,13 +535,29 @@ class ConnectorQueryServiceImplTest {
 		archives.add("idDicomA");
 
 		// Call service
-		this.connectorQueryService.buildFromSopInstanceUids(new Manifest(), Set.of("uid"), archives);
+		this.connectorQueryService.buildFromSopInstanceUids(new Manifest(), Set.of("uid"), archives, null);
 
 		// Test results
 		Mockito.verify(this.dbConnectorQueryServiceMock, Mockito.never())
 			.buildFromSopInstanceUidsDbConnector(Mockito.any(), Mockito.any(), Mockito.any());
 		Mockito.verify(this.dicomConnectorQueryServiceMock, Mockito.times(1))
-			.buildFromSopInstanceUidsDicomConnector(Mockito.any(), Mockito.any(), Mockito.any());
+			.buildFromSopInstanceUidsDicomConnector(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+	}
+
+	@Test
+	void when_fillingManifestFromSopInstanceUids_with_dicomWebArchive_should_callCorrectConnectorService() {
+		// Init data
+		LinkedHashSet<String> archives = new LinkedHashSet<>();
+		archives.add("idDicomWebA");
+
+		// Call service
+		this.connectorQueryService.buildFromSopInstanceUids(new Manifest(), Set.of("uid"), archives, null);
+
+		// Test results
+		Mockito.verify(this.dbConnectorQueryServiceMock, Mockito.never())
+			.buildFromSopInstanceUidsDbConnector(Mockito.any(), Mockito.any(), Mockito.any());
+		Mockito.verify(this.dicomConnectorQueryServiceMock, Mockito.times(1))
+			.buildFromSopInstanceUidsDicomConnector(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
 	}
 
 	@Test
@@ -429,23 +568,25 @@ class ConnectorQueryServiceImplTest {
 
 		// Mock behaviour
 		LinkedHashMap<String, ConnectorProperty> config = new LinkedHashMap<>();
-		WadoConnectorProperty wadoConnectorProperty = new WadoConnectorProperty(
-				new AuthenticationProperty(false, new OAuth2AuthenticationProperty("url"),
-						new BasicAuthenticationProperty("url", "login", "password")),
-				"transferSyntaxUid", 0, true, "additionnalParameters", null, null);
-		ConnectorProperty connectorPropertyDicomA = new ConnectorProperty("idDicomA", ConnectorType.DICOM,
-				new SearchCriteriaProperty(Set.of(QueryLevelType.SOP_INSTANCE_UID)), wadoConnectorProperty, null, null);
+
+		ConnectorProperty connectorPropertyDicomA = ConnectorProperty.builder()
+			.id("idDicomA")
+			.type(ConnectorType.DICOM)
+			.searchCriteria(new SearchCriteriaProperty(Set.of(QueryLevelType.SOP_INSTANCE_UID)))
+			.weasis(WeasisConnectorProperty.builder().build())
+			.build();
+
 		config.put("idDicomA", connectorPropertyDicomA);
 		Mockito.when(this.connectorConfigurationPropertiesMock.getConnectors()).thenReturn(config);
 
 		// Call service
-		this.connectorQueryService.buildFromSopInstanceUids(new Manifest(), Set.of("uid"), archives);
+		this.connectorQueryService.buildFromSopInstanceUids(new Manifest(), Set.of("uid"), archives, null);
 
 		// Test results
 		Mockito.verify(this.dbConnectorQueryServiceMock, Mockito.never())
 			.buildFromSopInstanceUidsDbConnector(Mockito.any(), Mockito.any(), Mockito.any());
 		Mockito.verify(this.dicomConnectorQueryServiceMock, Mockito.never())
-			.buildFromSopInstanceUidsDicomConnector(Mockito.any(), Mockito.any(), Mockito.any());
+			.buildFromSopInstanceUidsDicomConnector(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
 	}
 
 }

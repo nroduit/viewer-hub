@@ -31,6 +31,32 @@ public final class ParamName {
 
 	public static final String KEY = "key";
 
+	// Dicom-web
+	public static final String DICOM_WEB_SERIES_INSTANCE_UID = "SeriesInstanceUID";
+
+	public static final String DICOM_WEB_ACCESSION_NUMBER = "AccessionNumber";
+
+	public static final String DICOM_WEB_PATIENT_ID = "PatientID";
+
+	public static final String DICOM_WEB_ISSUER_OF_PATIENT_ID = "IssuerOfPatientID";
+
+	public static final String DICOM_WEB_SOP_INSTANCE_UID = "SOPInstanceUID";
+
+	public static final String DICOM_WEB_STUDY_INSTANCE_UID = "StudyInstanceUID";
+
+	public static final String INCLUDE_FIELD = "includefield";
+
+	public static final String INCLUDE_FIELD_INSTANCE_ATTRIBUTES = "StudyInstanceUID,SeriesInstanceUID,SOPInstanceUID,InstanceNumber";
+
+	public static final String INCLUDE_FIELD_SERIE_ATTRIBUTES = "StudyInstanceUID,SeriesInstanceUID,SeriesDescription,SeriesNumber,Modality";
+
+	public static final String INCLUDE_FIELD_STUDY_ATTRIBUTES = "StudyInstanceUID,StudyDescription,StudyDate,StudyTime,AccessionNumber,StudyID,ReferringPhysicianName,PatientID,PatientName,IssuerOfPatientID,PatientBirthDate,PatientBirthTime,PatientSex";
+
+	// Dicom-web Pagination
+	public static final String LIMIT = "limit";
+
+	public static final String OFFSET = "offset";
+
 	private ParamName() {
 		// Private constructor to hide implicit one
 	}

@@ -12,20 +12,20 @@
 
 package org.viewer.hub.front.help;
 
-import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.Uses;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import org.viewer.hub.front.layouts.MainLayout;
+import org.vaadin.lineawesome.LineAwesomeIconUrl;
 
-@Route(value = HelpView.ROUTE, layout = MainLayout.class)
-@PageTitle("Viewer Hub - Help")
-@Tag("help-view")
+@PageTitle(HelpView.VIEW_NAME)
+@Route(HelpView.ROUTE)
+@Menu(order = 4, icon = LineAwesomeIconUrl.INFO_SOLID)
 @Uses(Icon.class)
 public class HelpView extends VerticalLayout {
 

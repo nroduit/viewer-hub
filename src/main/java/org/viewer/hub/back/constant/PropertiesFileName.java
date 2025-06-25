@@ -31,8 +31,6 @@ public class PropertiesFileName {
 
 	public static final String ZIP_EXTENSION = ".zip";
 
-	public static final String PACKAGE_PATTERN_NAME = "weasis-native";
-
 	public static final String RESOURCES_FOLDER_NAME = "resources";
 
 	public static final String CONF_FOLDER_NAME = "conf";
@@ -50,5 +48,8 @@ public class PropertiesFileName {
 
 	public static final String BIN_DIST_WEASIS_CONF_BASE_JSON_FILE_PATH = "%s%s/%s".formatted(BIN_DIST_WEASIS_PATH,
 			CONF_FOLDER_NAME, BASE_JSON_FILENAME);
+
+	public static final String VERSION_COMPATIBILITY_PATH = "%sconf/%s".formatted(BIN_DIST_WEASIS_PATH,
+			VERSION_COMPATIBILITY_FILE_NAME);
 
 }

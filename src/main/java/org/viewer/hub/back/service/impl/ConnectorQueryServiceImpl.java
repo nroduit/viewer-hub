@@ -15,6 +15,7 @@ import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.viewer.hub.back.config.properties.ConnectorConfigurationProperties;
 import org.viewer.hub.back.controller.exception.TechnicalException;
@@ -55,7 +56,8 @@ public class ConnectorQueryServiceImpl implements ConnectorQueryService {
 	}
 
 	@Override
-	public void buildFromPatientIds(Manifest manifest, Set<String> patientIds, @Valid SearchCriteria searchCriteria) {
+	public void buildFromPatientIds(Manifest manifest, Set<String> patientIds, @Valid SearchCriteria searchCriteria,
+			Authentication authentication) {
 		// Retrieve default or specific connectors
 		this.retrieveConnectors(searchCriteria.getArchive()).forEach(connector -> {
 			if (!connector.getSearchCriteria().getDeactivated().contains(QueryLevelType.PATIENT_ID)) {
@@ -63,9 +65,10 @@ public class ConnectorQueryServiceImpl implements ConnectorQueryService {
 					this.dbConnectorQueryService.buildFromPatientIdsDbConnector(manifest, patientIds, connector,
 							searchCriteria);
 				}
-				else if (Objects.equals(ConnectorType.DICOM, connector.getType())) {
+				else if (Objects.equals(ConnectorType.DICOM, connector.getType())
+						|| Objects.equals(ConnectorType.DICOM_WEB, connector.getType())) {
 					this.dicomConnectorQueryService.buildFromPatientIdsDicomConnector(manifest, patientIds, connector,
-							searchCriteria);
+							searchCriteria, authentication);
 				}
 			}
 		});
@@ -73,7 +76,7 @@ public class ConnectorQueryServiceImpl implements ConnectorQueryService {
 
 	@Override
 	public void buildFromStudyInstanceUids(Manifest manifest, Set<String> studyInstanceUids,
-			LinkedHashSet<String> archives) {
+			LinkedHashSet<String> archives, Authentication authentication) {
 		// Retrieve default or specific connectors
 		this.retrieveConnectors(archives).forEach(connector -> {
 			if (!connector.getSearchCriteria().getDeactivated().contains(QueryLevelType.STUDY_INSTANCE_UID)) {
@@ -81,9 +84,10 @@ public class ConnectorQueryServiceImpl implements ConnectorQueryService {
 					this.dbConnectorQueryService.buildFromStudyInstanceUidsDbConnector(manifest, studyInstanceUids,
 							connector);
 				}
-				else if (Objects.equals(ConnectorType.DICOM, connector.getType())) {
+				else if (Objects.equals(ConnectorType.DICOM, connector.getType())
+						|| Objects.equals(ConnectorType.DICOM_WEB, connector.getType())) {
 					this.dicomConnectorQueryService.buildFromStudyInstanceUidsDicomConnector(manifest,
-							studyInstanceUids, connector);
+							studyInstanceUids, connector, authentication);
 				}
 			}
 		});
@@ -91,7 +95,7 @@ public class ConnectorQueryServiceImpl implements ConnectorQueryService {
 
 	@Override
 	public void buildFromStudyAccessionNumbers(Manifest manifest, Set<String> studyAccessionNumbers,
-			LinkedHashSet<String> archives) {
+			LinkedHashSet<String> archives, Authentication authentication) {
 		// Retrieve default or specific connectors
 		this.retrieveConnectors(archives).forEach(connector -> {
 			if (!connector.getSearchCriteria().getDeactivated().contains(QueryLevelType.STUDY_ACCESSION_NUMBER)) {
@@ -99,9 +103,10 @@ public class ConnectorQueryServiceImpl implements ConnectorQueryService {
 					this.dbConnectorQueryService.buildFromStudyAccessionNumbersDbConnector(manifest,
 							studyAccessionNumbers, connector);
 				}
-				else if (Objects.equals(ConnectorType.DICOM, connector.getType())) {
+				else if (Objects.equals(ConnectorType.DICOM, connector.getType())
+						|| Objects.equals(ConnectorType.DICOM_WEB, connector.getType())) {
 					this.dicomConnectorQueryService.buildFromStudyAccessionNumbersDicomConnector(manifest,
-							studyAccessionNumbers, connector);
+							studyAccessionNumbers, connector, authentication);
 				}
 			}
 		});
@@ -109,7 +114,7 @@ public class ConnectorQueryServiceImpl implements ConnectorQueryService {
 
 	@Override
 	public void buildFromSeriesInstanceUids(Manifest manifest, Set<String> seriesInstanceUids,
-			LinkedHashSet<String> archives) {
+			LinkedHashSet<String> archives, Authentication authentication) {
 		// Retrieve default or specific connectors
 		this.retrieveConnectors(archives).forEach(connector -> {
 			if (!connector.getSearchCriteria().getDeactivated().contains(QueryLevelType.SERIE_INSTANCE_UID)) {
@@ -117,17 +122,18 @@ public class ConnectorQueryServiceImpl implements ConnectorQueryService {
 					this.dbConnectorQueryService.buildFromSeriesInstanceUidsDbConnector(manifest, seriesInstanceUids,
 							connector);
 				}
-				else if (Objects.equals(ConnectorType.DICOM, connector.getType())) {
+				else if (Objects.equals(ConnectorType.DICOM, connector.getType())
+						|| Objects.equals(ConnectorType.DICOM_WEB, connector.getType())) {
 					this.dicomConnectorQueryService.buildFromSeriesInstanceUidsDicomConnector(manifest,
-							seriesInstanceUids, connector);
+							seriesInstanceUids, connector, authentication);
 				}
 			}
 		});
 	}
 
 	@Override
-	public void buildFromSopInstanceUids(Manifest manifest, Set<String> sopInstanceUids,
-			LinkedHashSet<String> archives) {
+	public void buildFromSopInstanceUids(Manifest manifest, Set<String> sopInstanceUids, LinkedHashSet<String> archives,
+			Authentication authentication) {
 		// Retrieve default or specific connectors
 		this.retrieveConnectors(archives).forEach(connector -> {
 			if (!connector.getSearchCriteria().getDeactivated().contains(QueryLevelType.SOP_INSTANCE_UID)) {
@@ -135,12 +141,28 @@ public class ConnectorQueryServiceImpl implements ConnectorQueryService {
 					this.dbConnectorQueryService.buildFromSopInstanceUidsDbConnector(manifest, sopInstanceUids,
 							connector);
 				}
-				else if (Objects.equals(ConnectorType.DICOM, connector.getType())) {
+				else if (Objects.equals(ConnectorType.DICOM, connector.getType())
+						|| Objects.equals(ConnectorType.DICOM_WEB, connector.getType())) {
 					this.dicomConnectorQueryService.buildFromSopInstanceUidsDicomConnector(manifest, sopInstanceUids,
-							connector);
+							connector, authentication);
 				}
 			}
 		});
+	}
+
+	/**
+	 * Retrieve the connector from the connector id in parameter
+	 * @param connectorId Connector id
+	 * @return Connectors found
+	 */
+	@Override
+	public ConnectorProperty retrieveConnectorFromId(String connectorId) {
+		return this.connectorConfigurationProperties.getConnectors()
+			.values()
+			.stream()
+			.filter(c -> Objects.equals(c.getId(), connectorId))
+			.findFirst()
+			.orElseThrow(() -> new TechnicalException("Connector id not existing:" + connectorId));
 	}
 
 	/**
