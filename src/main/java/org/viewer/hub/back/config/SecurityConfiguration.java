@@ -11,6 +11,7 @@
 
 package org.viewer.hub.back.config;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.actuate.autoconfigure.security.servlet.EndpointRequest;
 import org.springframework.boot.actuate.context.ShutdownEndpoint;
@@ -33,13 +34,16 @@ import org.viewer.hub.back.constant.EndPoint;
 import org.viewer.hub.back.constant.Token;
 import org.viewer.hub.back.security.OpenIdConnectLogoutHandler;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 @Configuration
 @EnableWebSecurity
+@Slf4j
 public class SecurityConfiguration {
 
 	private static final String LOGIN_URL = "/login";
@@ -103,6 +107,11 @@ public class SecurityConfiguration {
 			// Retrieve roles from access token
 			Set<SimpleGrantedAuthority> grantedAuthoritiesFromAccessToken = this.retrieveRolesFromAccessToken(jwt);
 
+			// Log no roles found
+			if (grantedAuthoritiesFromAccessToken.isEmpty()) {
+				LOG.warn("No roles found from access token");
+			}
+
 			// Update the user with roles found
 			return new DefaultOidcUser(grantedAuthoritiesFromAccessToken, oidcUser.getIdToken(),
 					oidcUser.getUserInfo());
@@ -123,11 +132,15 @@ public class SecurityConfiguration {
 	 * @param jwt access token
 	 * @return Roles found
 	 */
-	private Set<SimpleGrantedAuthority> retrieveRolesFromAccessToken(Jwt jwt) {
+	Set<SimpleGrantedAuthority> retrieveRolesFromAccessToken(Jwt jwt) {
 		// Build roles
-		return ((List<String>) ((Map<String, Object>) ((Map<String, Object>) jwt.getClaims().get(Token.RESOURCE_ACCESS))
-			.get(Token.RESOURCE_NAME)).get(Token.ROLES)).stream()
-			.map(roleName -> Token.PREFIX_ROLE + roleName)
+		return Optional.ofNullable(jwt.getClaims())
+			.map(claims -> (Map<String, Object>) claims.get(Token.RESOURCE_ACCESS))
+			.map(resourceAccess -> (Map<String, Object>) resourceAccess.get(Token.RESOURCE_NAME))
+			.map(resourceNameMap -> (List<String>) resourceNameMap.get(Token.ROLES))
+			.orElse(Collections.emptyList())
+			.stream()
+			.map(roleName -> "%s%s".formatted(Token.PREFIX_ROLE, roleName))
 			.map(SimpleGrantedAuthority::new)
 			.collect(Collectors.toSet());
 	}

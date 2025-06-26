@@ -11,8 +11,10 @@
 
 package org.viewer.hub.back.service;
 
+import org.springframework.security.core.Authentication;
 import org.viewer.hub.back.model.SearchCriteria;
 import org.viewer.hub.back.model.manifest.Manifest;
+import org.viewer.hub.back.model.property.ConnectorProperty;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -27,40 +29,56 @@ public interface ConnectorQueryService {
 	 * @param manifest Manifest to fill
 	 * @param patientIds Patient ids to look for
 	 * @param searchCriteria Search criteria
+	 * @param authentication Authentication
 	 */
-	void buildFromPatientIds(Manifest manifest, Set<String> patientIds, SearchCriteria searchCriteria);
+	void buildFromPatientIds(Manifest manifest, Set<String> patientIds, SearchCriteria searchCriteria,
+			Authentication authentication);
 
 	/**
 	 * Fill manifest from study instance uids requests
 	 * @param manifest Manifest to fill
 	 * @param studyInstanceUids Study instance uids to look for
 	 * @param archives Archives
+	 * @param authentication Authentication
 	 */
-	void buildFromStudyInstanceUids(Manifest manifest, Set<String> studyInstanceUids, LinkedHashSet<String> archives);
+	void buildFromStudyInstanceUids(Manifest manifest, Set<String> studyInstanceUids, LinkedHashSet<String> archives,
+			Authentication authentication);
 
 	/**
 	 * Fill manifest from study accession numbers requests
 	 * @param manifest Manifest to fill
 	 * @param studyAccessionNumbers Study accession numbers to look for
 	 * @param archives Archives
+	 * @param authentication Authentication
 	 */
 	void buildFromStudyAccessionNumbers(Manifest manifest, Set<String> studyAccessionNumbers,
-			LinkedHashSet<String> archives);
+			LinkedHashSet<String> archives, Authentication authentication);
 
 	/**
 	 * Fill manifest from serie instance uids requests
 	 * @param manifest Manifest to fill
 	 * @param seriesInstanceUids Serie instance uids numbers to look for
 	 * @param archives Archives
+	 * @param authentication Authentication
 	 */
-	void buildFromSeriesInstanceUids(Manifest manifest, Set<String> seriesInstanceUids, LinkedHashSet<String> archives);
+	void buildFromSeriesInstanceUids(Manifest manifest, Set<String> seriesInstanceUids, LinkedHashSet<String> archives,
+			Authentication authentication);
 
 	/**
 	 * Fill manifest from sop instance uids requests
 	 * @param manifest Manifest to fill
 	 * @param sopInstanceUids Sop instance uids numbers to look for
 	 * @param archives Archives
+	 * @param authentication Authentication
 	 */
-	void buildFromSopInstanceUids(Manifest manifest, Set<String> sopInstanceUids, LinkedHashSet<String> archives);
+	void buildFromSopInstanceUids(Manifest manifest, Set<String> sopInstanceUids, LinkedHashSet<String> archives,
+			Authentication authentication);
+
+	/**
+	 * Retrieve the connector corresponding to connector id
+	 * @param connectorId Connector id to evaluate
+	 * @return ConnectorProperty found
+	 */
+	ConnectorProperty retrieveConnectorFromId(String connectorId);
 
 }

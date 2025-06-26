@@ -14,7 +14,9 @@ package org.viewer.hub.back.util;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.OffsetDateTime;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 
@@ -64,6 +66,24 @@ public class DateTimeUtil {
 	 */
 	public static long retrieveDurationFromDateTimeInMs(LocalDateTime localDateTime) {
 		return ChronoUnit.MILLIS.between(localDateTime, LocalDateTime.now());
+	}
+
+	/**
+	 * Parse Iso 8601 date String and format to the requested formatter
+	 * @param iso8601Date Date to format
+	 * @return
+	 */
+	public static String parseIso8601DateStringToReadableFormat(String iso8601Date, DateTimeFormatter outputFormatter) {
+		String toReturn = null;
+
+		if (iso8601Date != null && outputFormatter != null) {
+			// Parse the input date string to an OffsetDateTime object
+			OffsetDateTime dateTime = OffsetDateTime.parse(iso8601Date);
+			// Format the date to the new format
+			toReturn = dateTime.format(outputFormatter);
+		}
+
+		return toReturn;
 	}
 
 }

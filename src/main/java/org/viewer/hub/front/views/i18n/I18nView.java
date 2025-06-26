@@ -12,23 +12,26 @@
 package org.viewer.hub.front.views.i18n;
 
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.grid.contextmenu.GridContextMenu;
 import com.vaadin.flow.component.grid.contextmenu.GridMenuItem;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.dom.DomEventListener;
+import com.vaadin.flow.router.Menu;
+import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.annotation.Secured;
+import org.vaadin.lineawesome.LineAwesomeIconUrl;
 import org.viewer.hub.back.entity.I18nEntity;
 import org.viewer.hub.back.model.Message;
 import org.viewer.hub.back.model.MessageFormat;
 import org.viewer.hub.back.model.MessageLevel;
 import org.viewer.hub.back.model.MessageType;
-import org.viewer.hub.front.layouts.MainLayout;
 import org.viewer.hub.front.views.AbstractView;
 import org.viewer.hub.front.views.i18n.component.I18nFileUpload;
 import org.viewer.hub.front.views.i18n.component.I18nGrid;
@@ -42,7 +45,9 @@ import static org.viewer.hub.back.constant.PropertiesFileName.I18N_PATTERN_NAME;
 /**
  * View managing I18n versions
  */
-@Route(value = I18nView.ROUTE, layout = MainLayout.class)
+@PageTitle(I18nView.VIEW_NAME)
+@Route(I18nView.ROUTE)
+@Menu(order = 3, icon = LineAwesomeIconUrl.GLOBE_EUROPE_SOLID)
 @Secured({ "ROLE_admin" })
 @Getter
 public class I18nView extends AbstractView {
@@ -123,6 +128,7 @@ public class I18nView extends AbstractView {
 		this.refreshGridButton = new Button("Refresh", new Icon(VaadinIcon.REFRESH));
 		this.refreshGridButton.addClickListener(buttonClickEvent -> this.i18nDataProvider.refreshAll());
 		this.refreshGridButton.setMinWidth("50%");
+		this.refreshGridButton.addThemeVariants(ButtonVariant.MATERIAL_CONTAINED);
 	}
 
 	/**

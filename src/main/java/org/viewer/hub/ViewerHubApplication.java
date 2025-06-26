@@ -11,7 +11,6 @@
 
 package org.viewer.hub;
 
-import com.vaadin.flow.spring.annotation.EnableVaadin;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -23,7 +22,6 @@ import org.viewer.hub.back.config.properties.EnvironmentOverrideProperties;
 import org.viewer.hub.back.config.properties.WeasisPackageDefaultConfigurationProperties;
 
 @SpringBootApplication
-@EnableVaadin(value = "org.viewer.hub")
 @EnableAsync
 @EnableConfigurationProperties({ ConnectorConfigurationProperties.class,
 		WeasisPackageDefaultConfigurationProperties.class, EnvironmentOverrideProperties.class })
@@ -32,7 +30,6 @@ import org.viewer.hub.back.config.properties.WeasisPackageDefaultConfigurationPr
 public class ViewerHubApplication {
 
 	public static void main(String[] args) {
-
 		SpringApplication.run(ViewerHubApplication.class, args);
 	}
 

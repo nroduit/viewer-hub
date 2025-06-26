@@ -3,6 +3,9 @@ spring:
     oauth2:
       client:
         registration:
+          # ------------------
+          # --- Viewer-hub ---
+          # ------------------
           keycloak:
             client-id: viewer-hub
             client-secret: peLDyVHEpxTQ1A4GZZzQGK5xsPetlTrV
@@ -10,7 +13,25 @@ spring:
             redirect-uri: '${BACKEND_URI}/login/oauth2/code/{registrationId}'
             scope:
               - openid
+          # ------------------
+          # ---- Dcm4chee ----
+          # ------------------
+#          dcm4chee-dicomweb:
+#            provider: dcm4chee-dicomweb-provider
+#            client-id: xxx
+#            client-secret: '{cipher}'
+#            authorization-grant-type: client_credentials
+#            scope:
         provider:
+          # ------------------
+          # --- Viewer-hub ---
+          # ------------------
           keycloak:
             issuer-uri: http://localhost:8085/realms/viewer-hub
             jwk-set-uri: http://localhost:8085/realms/viewer-hub/protocol/openid-connect/certs
+          # ------------------
+          # ---- Dcm4chee ----
+          # ------------------
+#          dcm4chee-dicomweb-provider:
+#            authorization-uri:
+#            token-uri:

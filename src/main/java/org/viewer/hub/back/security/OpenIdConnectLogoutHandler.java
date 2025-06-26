@@ -49,7 +49,7 @@ public class OpenIdConnectLogoutHandler extends SecurityContextLogoutHandler {
 		RestTemplate restTemplate = new RestTemplate();
 
 		// Build logout URI
-		String endSessionEndpoint = user.getIssuer() + END_SESSION_ENDPOINT;
+		String endSessionEndpoint = "%s%s".formatted(user.getIssuer(), END_SESSION_ENDPOINT);
 		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(endSessionEndpoint)
 			.queryParam(ID_TOKEN_HINT, user.getIdToken().getTokenValue());
 

@@ -14,26 +14,27 @@ package org.viewer.hub.back.util;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import com.fasterxml.jackson.dataformat.javaprop.JavaPropsMapper;
 import com.fasterxml.jackson.dataformat.javaprop.JavaPropsSchema;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.viewer.hub.back.controller.exception.TechnicalException;
 import org.viewer.hub.back.entity.OverrideConfigEntity;
 import org.viewer.hub.back.entity.WeasisPropertyEntity;
+import org.viewer.hub.back.model.version.MinimalReleaseVersion;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Slf4j
+@NoArgsConstructor
 public class JacksonUtil {
-
-	private JacksonUtil() {
-		// Private constructor to hide implicit one
-	}
 
 	/**
 	 * Transform object in Json String
@@ -136,6 +137,33 @@ public class JacksonUtil {
 		}
 
 		return overrideConfigEntity;
+	}
+
+	/**
+	 * Read mapping minimal version from InputStream
+	 * @param inputStream InputStream
+	 * @return mapping minimal version from InputStream
+	 */
+	public static List<MinimalReleaseVersion> deserializeMinimalReleaseVersionsFromInputStream(
+			InputStream inputStream) {
+		try (inputStream) {
+			ObjectMapper objectMapper = new ObjectMapper()
+				.setPropertyNamingStrategy(PropertyNamingStrategies.KEBAB_CASE);
+
+			// Retrieve the minimal release versions
+			List<MinimalReleaseVersion> minimalReleaseVersions = objectMapper.readValue(inputStream,
+					new TypeReference<>() {
+					});
+
+			// Clean versions without qualifier for release and minimal versions
+			minimalReleaseVersions.forEach(MinimalReleaseVersion::cleaningQualifierForReleaseAndMinimalVersion);
+
+			return minimalReleaseVersions;
+		}
+		catch (IOException e) {
+			throw new TechnicalException(
+					"Issue when trying to retrieve minimal release versions: %s".formatted(e.getMessage()));
+		}
 	}
 
 }

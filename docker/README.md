@@ -75,6 +75,12 @@ Use the following credentials:
 - User: `admin`
 - Password: `changeit`
 
+## Nexus
+
+Nexus is used to store weasis bundles in order to import them in the viewer-hub server.
+
+Nexus console is accessible at this address: http://localhost:8086/
+
 ## Viewer Hub
 
 Viewer Hub is a web application that manages the resources required by the different versions of Weasis.

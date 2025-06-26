@@ -17,7 +17,7 @@ import org.viewer.hub.back.entity.LaunchConfigEntity;
 import org.viewer.hub.back.entity.OverrideConfigEntity;
 import org.viewer.hub.back.entity.PackageVersionEntity;
 import org.viewer.hub.back.entity.TargetEntity;
-import org.viewer.hub.front.views.override.component.OverrideConfigFilter;
+import org.viewer.hub.front.views.bundle.override.component.OverrideConfigFilter;
 
 import java.util.Set;
 
@@ -31,11 +31,12 @@ public interface OverrideConfigService {
 	OverrideConfigEntity create(OverrideConfigEntity overrideConfig);
 
 	/**
-	 * Update an OverrideConfigEntity
+	 * Create a new OverrideConfigEntity or update properties of an existing
+	 * OverrideConfigEntity
 	 * @param overrideConfig OverrideConfigEntity to update
 	 * @return OverrideConfigEntity updated
 	 */
-	OverrideConfigEntity update(OverrideConfigEntity overrideConfig);
+	OverrideConfigEntity createUpdate(OverrideConfigEntity overrideConfig);
 
 	/**
 	 * Retrieve the configuration properties
@@ -138,5 +139,12 @@ public interface OverrideConfigService {
 	 * @param overrideConfigEntity to delete
 	 */
 	void deleteOverrideConfigEntity(OverrideConfigEntity overrideConfigEntity);
+
+	/**
+	 * Modify the target of an overrideConfig
+	 * @param overrideConfigEntity OverrideConfig to modify
+	 * @param targetEntity Modified target
+	 */
+	OverrideConfigEntity modifyTarget(OverrideConfigEntity overrideConfigEntity, TargetEntity targetEntity);
 
 }

@@ -26,19 +26,16 @@ import org.viewer.hub.back.enums.ConnectorType;
 import org.viewer.hub.back.model.WeasisSearchCriteria;
 import org.viewer.hub.back.model.connector.DbConnectorResult;
 import org.viewer.hub.back.model.manifest.Manifest;
-import org.viewer.hub.back.model.property.AuthenticationProperty;
-import org.viewer.hub.back.model.property.BasicAuthenticationProperty;
 import org.viewer.hub.back.model.property.ConnectorProperty;
 import org.viewer.hub.back.model.property.DbConnectorProperty;
 import org.viewer.hub.back.model.property.DbConnectorQueryProperty;
-import org.viewer.hub.back.model.property.OAuth2AuthenticationProperty;
 import org.viewer.hub.back.model.property.SearchCriteriaProperty;
-import org.viewer.hub.back.model.property.WadoConnectorProperty;
+import org.viewer.hub.back.model.property.WeasisConnectorProperty;
+import org.viewer.hub.back.model.property.WeasisManifestConnectorProperty;
 import org.viewer.hub.back.service.DbConnectorQueryService;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -74,14 +71,23 @@ class DbConnectorQueryServiceImplTest {
 		DbConnectorQueryProperty dbConnectorQueryProperty = new DbConnectorQueryProperty("select",
 				"accessionNumberColumn", "patientIdColumn", "studyInstanceUidColumn", "serieInstanceUidColumn",
 				"sopInstanceUidColumn");
-		DbConnectorProperty dbConnectorProperty = new DbConnectorProperty("user", "password", "uri", "driver",
-				dbConnectorQueryProperty);
-		WadoConnectorProperty wadoConnectorProperty = new WadoConnectorProperty(
-				new AuthenticationProperty(false, new OAuth2AuthenticationProperty("url"),
-						new BasicAuthenticationProperty("url", "login", "password")),
-				"transferSyntaxUid", 0, true, "additionnalParameters", null, new HashMap<>());
-		this.connectorProperty = new ConnectorProperty("idDb", ConnectorType.DB,
-				new SearchCriteriaProperty(new HashSet<>()), wadoConnectorProperty, dbConnectorProperty, null);
+		DbConnectorProperty dbConnectorProperty = DbConnectorProperty.builder()
+			.user("user")
+			.password("password")
+			.uri("uri")
+			.driver("driver")
+			.query(dbConnectorQueryProperty)
+			.build();
+
+		this.connectorProperty = ConnectorProperty.builder()
+			.id("idDb")
+			.type(ConnectorType.DB)
+			.searchCriteria(new SearchCriteriaProperty(new HashSet<>()))
+			.weasis(WeasisConnectorProperty.builder()
+				.manifest(WeasisManifestConnectorProperty.builder().build())
+				.build())
+			.dbConnector(dbConnectorProperty)
+			.build();
 
 		// Create mocked service
 		this.dbConnectorQueryService = new DbConnectorQueryServiceImpl(this.currentTenantMock,

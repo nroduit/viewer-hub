@@ -14,6 +14,8 @@ package org.viewer.hub.back.repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.viewer.hub.back.entity.PackageVersionEntity;
 
+import java.util.List;
+
 /**
  * Repository for the entity PackageVersion.
  */
@@ -26,5 +28,12 @@ public interface PackageVersionRepository extends JpaRepository<PackageVersionEn
 	 * @return packageVersionEntity found
 	 */
 	PackageVersionEntity findByVersionNumberAndQualifier(String version, String qualifier);
+
+	/**
+	 * Retrieve the list of package version by version number
+	 * @param versionNumber Version number to retrieve
+	 * @return list of package version by version number found
+	 */
+	List<PackageVersionEntity> findByVersionNumber(String versionNumber);
 
 }

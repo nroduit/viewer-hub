@@ -12,3 +12,23 @@ weasis:
       default:
         number: 3.8.2
         qualifier: # example: -MGR
+
+  # - Repository (nexus) where are automatically built the zip package versions of Weasis
+  repository:
+    # Name of the repository
+    name: toChange
+    # Path to access the different versions in the repository
+    group: toChange
+    # Url used by the endpoints to call the repository
+    url: http://localhost:8086
+    # Authentication
+    authentication:
+      type: basic  # none, basic
+      # Basic
+      basic:
+        login:
+        password: '{cipher}'
+    # Api to retrieve the different Weasis artifacts
+    search-assets-api: /service/rest/v1/search/assets
+    # Api to download the different Weasis artifacts
+    download-assets-api: /service/rest/v1/search/assets/download

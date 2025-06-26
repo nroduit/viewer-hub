@@ -19,17 +19,20 @@ import com.vaadin.flow.component.combobox.ComboBox.ItemFilter;
 import com.vaadin.flow.component.combobox.MultiSelectComboBox;
 import com.vaadin.flow.component.details.DetailsVariant;
 import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.html.NativeLabel;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.data.binder.BinderValidationStatus;
 import com.vaadin.flow.function.ValueProvider;
+import com.vaadin.flow.router.Menu;
+import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.annotation.Secured;
+import org.vaadin.lineawesome.LineAwesomeIconUrl;
 import org.viewer.hub.back.entity.LaunchEntity;
 import org.viewer.hub.back.entity.TargetEntity;
 import org.viewer.hub.back.enums.TargetType;
@@ -38,7 +41,6 @@ import org.viewer.hub.back.model.Message;
 import org.viewer.hub.back.model.MessageFormat;
 import org.viewer.hub.back.model.MessageLevel;
 import org.viewer.hub.back.model.MessageType;
-import org.viewer.hub.front.layouts.MainLayout;
 import org.viewer.hub.front.views.AbstractView;
 import org.viewer.hub.front.views.association.component.AssociationAddUserDialog;
 import org.viewer.hub.front.views.association.component.AssociationGrid;
@@ -53,7 +55,9 @@ import java.util.Set;
 /**
  * View managing associations
  */
-@Route(value = AssociationView.ROUTE, layout = MainLayout.class)
+@PageTitle(AssociationView.VIEW_NAME)
+@Route(AssociationView.ROUTE)
+@Menu(order = 1, icon = LineAwesomeIconUrl.LINK_SOLID)
 @Secured({ "ROLE_admin" })
 public class AssociationView extends AbstractView {
 
@@ -134,7 +138,7 @@ public class AssociationView extends AbstractView {
 		this.launchLayout.setSplitterPosition(50);
 
 		// Selected target preferences
-		this.launchLayout.addToPrimary(new Label("Select row to see preferences..."));
+		this.launchLayout.addToPrimary(new NativeLabel("Select row to see preferences..."));
 		// Inherited preferences
 		this.launchLayout.addToSecondary(this.belongToMemberOfAccordion);
 		this.launchLayout.setPrimaryStyle("min-width", "50%");
@@ -264,7 +268,7 @@ public class AssociationView extends AbstractView {
 			this.selectedLaunchGrid.setItems(launchesSelected);
 		}
 		else {
-			this.launchLayout.addToPrimary(new Label("Select row to see preferences..."));
+			this.launchLayout.addToPrimary(new NativeLabel("Select row to see preferences..."));
 			this.launchLayout.setPrimaryStyle("min-width", "50%");
 		}
 
@@ -312,7 +316,7 @@ public class AssociationView extends AbstractView {
 					// Apply duplicate row style
 					launchGrid.applyDuplicateRowStyle(launchesDuplicates);
 					// Build label of the accordion panel
-					Label label = new Label(String.format("%s [%d]", belongToMemberOfTarget.getName(),
+					NativeLabel label = new NativeLabel(String.format("%s [%d]", belongToMemberOfTarget.getName(),
 							launchesBelongToMemberOf.size()));
 					// Set color to red in the accordion panel if contains a duplicate
 					if (!launchesDuplicates.isEmpty()) {
@@ -324,7 +328,8 @@ public class AssociationView extends AbstractView {
 				}
 				else {
 					this.belongToMemberOfAccordion
-						.add(String.format("%s [%d]", belongToMemberOfTarget.getName(), 0), new Label("No preferences"))
+						.add(String.format("%s [%d]", belongToMemberOfTarget.getName(), 0),
+								new NativeLabel("No preferences"))
 						.addThemeVariants(DetailsVariant.FILLED);
 				}
 			}

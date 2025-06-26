@@ -12,10 +12,22 @@
 package org.viewer.hub.back.model.manifest;
 
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+
 import java.io.Serial;
 import java.io.Serializable;
-import java.util.Objects;
 
+@Setter
+@Getter
+@Builder
+@AllArgsConstructor
+@EqualsAndHashCode
+@ToString
 public class Instance implements Serializable {
 
 	@Serial
@@ -34,55 +46,6 @@ public class Instance implements Serializable {
 	public Instance(String sopInstanceUID, Integer instanceNumber) {
 		this.sopInstanceUID = sopInstanceUID;
 		this.instanceNumber = instanceNumber;
-	}
-
-	public String getSopInstanceUID() {
-		return this.sopInstanceUID;
-	}
-
-	public void setSopInstanceUID(String sopInstanceUID) {
-		this.sopInstanceUID = sopInstanceUID;
-	}
-
-	public Integer getInstanceNumber() {
-		return this.instanceNumber;
-	}
-
-	public void setInstanceNumber(Integer instanceNumber) {
-		this.instanceNumber = instanceNumber;
-	}
-
-	public String getDirectDownloadFile() {
-		return this.directDownloadFile;
-	}
-
-	public void setDirectDownloadFile(String directDownloadFile) {
-		this.directDownloadFile = directDownloadFile;
-	}
-
-	@Override
-	public boolean equals(Object o) {
-		if (this == o) {
-			return true;
-		}
-		if (o == null || this.getClass() != o.getClass()) {
-			return false;
-		}
-		Instance instance = (Instance) o;
-		return this.instanceNumber == instance.instanceNumber
-				&& Objects.equals(this.sopInstanceUID, instance.sopInstanceUID)
-				&& Objects.equals(this.directDownloadFile, instance.directDownloadFile);
-	}
-
-	@Override
-	public int hashCode() {
-		return Objects.hash(this.sopInstanceUID, this.instanceNumber, this.directDownloadFile);
-	}
-
-	@Override
-	public String toString() {
-		return "Instance{" + "sopInstanceUID='" + this.sopInstanceUID + '\'' + ", instanceNumber=" + this.instanceNumber
-				+ ", directDownloadFile='" + this.directDownloadFile + '\'' + '}';
 	}
 
 }

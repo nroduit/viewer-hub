@@ -53,7 +53,7 @@ public class I18nGrid extends Grid<I18nEntity> {
 
 		// Set size for the grid
 		this.setWidthFull();
-		this.setHeight(86, Unit.PERCENTAGE);
+		this.setHeight(91, Unit.PERCENTAGE);
 
 		// Themes of the grid
 		this.addThemeVariants(GridVariant.LUMO_NO_BORDER, GridVariant.LUMO_ROW_STRIPES);

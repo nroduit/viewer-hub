@@ -11,6 +11,7 @@
 
 package org.viewer.hub.back.util;
 
+import java.text.DecimalFormat;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -66,6 +67,32 @@ public class StringUtil {
 	 */
 	public static String pathWithS3Separator(String path) {
 		return path != null ? path.replace("\\", "/") : null;
+	}
+
+	/**
+	 * Convert size in a readable format
+	 * @param size Size to convert
+	 * @return Readable format
+	 */
+	public static String convertSizeToReadableFormat(Long size) {
+		long ONE_KB = 1024;
+		long ONE_MB = ONE_KB * 1024;
+		long ONE_GB = ONE_MB * 1024;
+
+		DecimalFormat df = new DecimalFormat("#.##");
+		if (size >= ONE_GB) {
+			return "%s Go".formatted(df.format((double) size / ONE_GB));
+		}
+		else if (size >= ONE_MB) {
+			return "%s Mo".formatted(df.format((double) size / ONE_MB));
+		}
+		else if (size >= ONE_KB) {
+			return "%s Ko".formatted(df.format((double) size / ONE_KB));
+		}
+		else {
+			return size + " octets";
+		}
+
 	}
 
 }

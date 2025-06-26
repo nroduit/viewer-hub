@@ -16,7 +16,15 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 import org.springframework.validation.annotation.Validated;
+import org.viewer.hub.back.enums.ConnectorType;
 import org.viewer.hub.back.util.StringUtil;
 
 import java.io.Serial;
@@ -27,6 +35,12 @@ import java.util.Set;
 
 @Validated
 @JsonPropertyOrder({ "httpTags", "patients" })
+@Getter
+@Setter
+@EqualsAndHashCode
+@ToString
+@Builder
+@AllArgsConstructor
 public class ArcQuery implements Serializable {
 
 	@Serial
@@ -59,10 +73,14 @@ public class ArcQuery implements Serializable {
 	private String additionnalParameters;
 
 	@JacksonXmlProperty(isAttribute = true, localName = "overrideDicomTagsList")
+	@Getter(AccessLevel.NONE)
 	private String overrideDicomTagsList;
 
 	@JsonIgnore
 	private Set<String> overrideDicomTags;
+
+	@JacksonXmlProperty(isAttribute = true, localName = "queryMode")
+	private ConnectorType queryMode;
 
 	public ArcQuery() {
 		this.patients = new HashSet<>();
@@ -70,108 +88,9 @@ public class ArcQuery implements Serializable {
 		this.messages = new HashSet<>();
 	}
 
-	public String getArcId() {
-		return this.arcId;
-	}
-
-	public void setArcId(String arcId) {
-		this.arcId = arcId;
-	}
-
-	public String getBaseUrl() {
-		return this.baseUrl;
-	}
-
-	public void setBaseUrl(String baseUrl) {
-		this.baseUrl = baseUrl;
-	}
-
-	public String getWebLogin() {
-		return this.webLogin;
-	}
-
-	public void setWebLogin(String webLogin) {
-		this.webLogin = webLogin;
-	}
-
-	public boolean isRequireOnlySOPInstanceUID() {
-		return this.requireOnlySOPInstanceUID;
-	}
-
-	public void setRequireOnlySOPInstanceUID(boolean requireOnlySOPInstanceUID) {
-		this.requireOnlySOPInstanceUID = requireOnlySOPInstanceUID;
-	}
-
-	public String getAdditionnalParameters() {
-		return this.additionnalParameters;
-	}
-
-	public void setAdditionnalParameters(String additionnalParameters) {
-		this.additionnalParameters = additionnalParameters;
-	}
-
-	public Set<Patient> getPatients() {
-		return this.patients;
-	}
-
-	public void setPatients(Set<Patient> patients) {
-		this.patients = patients;
-	}
-
-	public Set<HttpTag> getHttpTags() {
-		return this.httpTags;
-	}
-
-	public void setHttpTags(Set<HttpTag> httpTags) {
-		this.httpTags = httpTags;
-	}
-
-	public Set<Message> getMessages() {
-		return this.messages;
-	}
-
-	public void setMessages(Set<Message> messages) {
-		this.messages = messages;
-	}
-
 	public String getOverrideDicomTagsList() {
 		return this.overrideDicomTags != null && !this.overrideDicomTags.isEmpty()
 				? String.join(StringUtil.COMMA, this.overrideDicomTags) : null;
-	}
-
-	public void setOverrideDicomTagsList(String overrideDicomTagsList) {
-		this.overrideDicomTagsList = overrideDicomTagsList;
-	}
-
-	public Set<String> getOverrideDicomTags() {
-		return this.overrideDicomTags;
-	}
-
-	public void setOverrideDicomTags(Set<String> overrideDicomTags) {
-		this.overrideDicomTags = overrideDicomTags;
-	}
-
-	@Override
-	public boolean equals(Object o) {
-		if (this == o) {
-			return true;
-		}
-		if (o == null || this.getClass() != o.getClass()) {
-			return false;
-		}
-		ArcQuery arcQuery = (ArcQuery) o;
-		return this.requireOnlySOPInstanceUID == arcQuery.requireOnlySOPInstanceUID
-				&& Objects.equals(this.patients, arcQuery.patients) && Objects.equals(this.httpTags, arcQuery.httpTags)
-				&& Objects.equals(this.messages, arcQuery.messages) && Objects.equals(this.arcId, arcQuery.arcId)
-				&& Objects.equals(this.baseUrl, arcQuery.baseUrl) && Objects.equals(this.webLogin, arcQuery.webLogin)
-				&& Objects.equals(this.additionnalParameters, arcQuery.additionnalParameters)
-				&& Objects.equals(this.overrideDicomTagsList, arcQuery.overrideDicomTagsList);
-	}
-
-	@Override
-	public int hashCode() {
-		return Objects.hash(this.patients, this.httpTags, this.messages, this.arcId, this.baseUrl, this.webLogin,
-				this.requireOnlySOPInstanceUID, this.additionnalParameters, this.overrideDicomTagsList);
 	}
 
 	/**
@@ -194,15 +113,6 @@ public class ArcQuery implements Serializable {
 			.filter(patient -> patient != null && Objects.equals(patient.getPatientID(), patientId))
 			.findFirst()
 			.orElse(null);
-	}
-
-	@Override
-	public String toString() {
-		return "ArcQuery{" + "patients=" + this.patients + ", httpTags=" + this.httpTags + ", messages=" + this.messages
-				+ ", arcId='" + this.arcId + '\'' + ", baseUrl='" + this.baseUrl + '\'' + ", webLogin='" + this.webLogin
-				+ '\'' + ", requireOnlySOPInstanceUID=" + this.requireOnlySOPInstanceUID + ", additionnalParameters='"
-				+ this.additionnalParameters + '\'' + ", overrideDicomTagsList='" + this.overrideDicomTagsList + '\''
-				+ ", overrideDicomTags=" + this.overrideDicomTags + '}';
 	}
 
 }

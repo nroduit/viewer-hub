@@ -31,29 +31,40 @@ connector:
   default: test
   config:
     test:
-      type: DICOM
+      type: DICOM # DB,DICOM,DICOM_WEB
+      # ------- Search Criteria ----
       search-criteria:
-        deactivated:
-      # ----------   Wado -------------
-      # Used to retrieve images from manifest
-      wado:
-        authentication:
-          # Used to force usage of basic authentication parameters to retrieve images (even if request is authenticated)
-          force-basic: false
-          # If request is authenticated: retrieve the token from the authenticated request and inject it in the manifest for Weasis to get the images
-          oauth2:
-            # Url used to retrieve images by adding authenticated request token in manifest
-            url: test
-          # Retrieve the images by using this basic authentication parameters
-          basic:
-            # Url used to retrieve images by using basic authentication
-            url: test
-            # Basic credentials
-            login: test
-            password: test
+        deactivated: # SOP_INSTANCE_UID, SERIE_INSTANCE_UID, STUDY_INSTANCE_UID, STUDY_ACCESSION_NUMBER, PATIENT_ID
+      # ----------  Weasis - Manifest -------
+      weasis:
+        manifest:
+          transfer-syntax-uid: '*'
       # --------   For dicom ----------
       dicom-connector:
-        calling-aet: test
-        aet: test
-        host: test
-        port: 00001
+        dimse:
+          calling-aet: test
+          aet: test
+          host: test
+          port: 00001
+        wado:
+          authentication:
+            # Used to force usage of basic authentication parameters to retrieve images (even if request is authenticated)
+            type: BASIC
+            # If request is authenticated: retrieve the token from the authenticated request and inject it in the manifest for Weasis to get the images
+            oauth2:
+              oidc-id: test
+              # Url used to retrieve images by adding authenticated request token in manifest
+              server:
+                url: test
+                port:
+                context:
+            # Retrieve the images by using this basic authentication parameters
+            basic:
+              # Basic credentials
+              login: test
+              password: test
+              # Url used to retrieve images by using basic authentication
+              server:
+                url: test
+                port:
+                context:

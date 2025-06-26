@@ -17,10 +17,11 @@ https://weasis.org/en/viewer-hub/index.html
 - Creation of versions of Weasis launched only for certain groups
 - Live changed of Weasis properties 
 - Versions management of i18n translations used by Weasis
-- Compatibility management between versions of Weasis installed on clients and versions of resources uploaded in ViewerHub (storage on Minio S3 + cache)
+- Compatibility management between versions of Weasis installed on clients and versions of resources uploaded in Viewer-Hub (storage on Minio S3 + cache)
 - Pacs connectors management
 - Retrieve OAuth2 tokens on IDP to enable Weasis to authenticate on dcm4chee pacs
 - Cryptography of launch urls
+- Retrieve in Nexus the stored package versions of Weasis
 
 ## Launch the different containers in local
 
@@ -86,6 +87,10 @@ http://localhost:8080/dcm4chee-arc/ui2/en/study/study
 
 As an example, you can import the file "dicom-example" located in the folders "docker -> dcm4chee" by using the dcm4chee interface.
 ("More functions" -> "Upload DICOM Object" -> "Select the STOW-RS server": "DCM4CHEE")
+
+## Nexus
+
+- Nexus console accessible at this address: http://localhost:8086/
 
 ## Run configuration
 
