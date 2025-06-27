@@ -144,6 +144,15 @@
             <version>${springboot.version}</version>
         </dependency>
 
+        <!-- ============== -->
+        <!-- Spring WebFlux -->
+        <!-- ============== -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-webflux</artifactId>
+            <version>${springboot.version}</version>
+        </dependency>
+
         <!-- ============ -->
         <!-- Spring Cloud -->
         <!-- ============ -->
