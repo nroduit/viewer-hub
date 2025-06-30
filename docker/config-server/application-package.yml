@@ -26,8 +26,8 @@ weasis:
       type: basic  # none, basic
       # Basic
       basic:
-        login:
-        password: '{cipher}'
+        login: toChange
+        password: toChange
     # Api to retrieve the different Weasis artifacts
     search-assets-api: /service/rest/v1/search/assets
     # Api to download the different Weasis artifacts
