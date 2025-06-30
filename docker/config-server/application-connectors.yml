@@ -46,8 +46,8 @@ connector:
             # Retrieve the images by using this basic authentication parameters
             basic:
               # Basic credentials
-              login:
-              password: '{cipher}'
+              login: toChange
+              password: toChange
               # Url used to retrieve images by using basic authentication
               server:
                 url: http://localhost
@@ -67,7 +67,7 @@ connector:
 #                context: /dcm4chee-arc/aets/DCM4CHEE/rs
 #            basic:
 #              login:
-#              password: '{cipher}'
+#              password:
 #              server:
 #                url: http://localhost
 #                port: 8080

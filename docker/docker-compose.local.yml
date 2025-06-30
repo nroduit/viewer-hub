@@ -24,6 +24,11 @@ services:
     volumes:
       - minio_storage:/resources
 
+  # Nexus to store Weasis bundles (weasis-native.zip)
+  nexus:
+    volumes:
+      - nexus-data:/sonatype-work
+
   create-bucket:
     image: minio/mc:RELEASE.2024-11-05T11-29-45Z
     container_name: create-s3-bucket
@@ -45,3 +50,5 @@ services:
 volumes:
   minio_storage:
     name: local_viewer_hub_minio
+  nexus-data:
+    name: local_viewer_hub_nexus
