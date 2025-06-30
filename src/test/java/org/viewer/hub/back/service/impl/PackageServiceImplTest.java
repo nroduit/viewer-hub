@@ -11,6 +11,8 @@
 
 package org.viewer.hub.back.service.impl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import jakarta.validation.constraints.NotNull;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,7 +24,10 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.util.ResourceUtils;
 import org.viewer.hub.back.config.properties.EnvironmentOverrideProperties;
+import org.viewer.hub.back.constant.PropertiesFileName;
+import org.viewer.hub.back.entity.OverrideConfigEntity;
 import org.viewer.hub.back.entity.PackageVersionEntity;
+import org.viewer.hub.back.entity.WeasisPropertyEntity;
 import org.viewer.hub.back.model.version.MinimalReleaseVersion;
 import org.viewer.hub.back.repository.LaunchConfigRepository;
 import org.viewer.hub.back.repository.PackageVersionRepository;
@@ -32,17 +37,23 @@ import org.viewer.hub.back.service.S3Service;
 import org.viewer.hub.back.service.TargetService;
 import org.viewer.hub.back.util.PackageUtil;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -268,6 +279,208 @@ class PackageServiceImplTest {
 
 		toTest = this.packageService.retrieveAvailablePackageVersionToUse(null, "-MGR");
 		assertThat(toTest.getVersionNumber() + toTest.getQualifier()).isEqualTo("4.0.2-MGR");
+	}
+
+	@Test
+	void when_versionAlreadyInstalledOnServer_shouldReturnFalse() throws IOException {
+		// OverrideConfigEntity
+		OverrideConfigEntity overrideConfigEntity = new OverrideConfigEntity();
+		WeasisPropertyEntity weasisPropertyEntity = new WeasisPropertyEntity();
+		weasisPropertyEntity.setCode("weasis.version");
+		weasisPropertyEntity.setValue("4.5.2-MGR");
+		overrideConfigEntity.setWeasisPropertyEntities(List.of(weasisPropertyEntity));
+
+		// MinimalReleaseVersions
+		MinimalReleaseVersion minimalReleaseVersionBase = new MinimalReleaseVersion();
+		MinimalReleaseVersion minimalReleaseVersion4Digits = new MinimalReleaseVersion();
+		minimalReleaseVersionBase.setReleaseVersion("4.5.2");
+		minimalReleaseVersionBase.setMinimalVersion("4.5.0");
+		minimalReleaseVersion4Digits.setReleaseVersion("4.5.2.4");
+		minimalReleaseVersion4Digits.setMinimalVersion("4.5.0");
+		List<MinimalReleaseVersion> minimalReleaseVersions = List.of(minimalReleaseVersionBase,
+				minimalReleaseVersion4Digits);
+
+		// Built inputStream
+		try (InputStream fileData = buildFileData(overrideConfigEntity, minimalReleaseVersions)) {
+
+			// Mock: version already installed on server
+			Mockito.when(this.packageVersionRepository.findByVersionNumberAndQualifier(Mockito.any(), Mockito.any()))
+				.thenReturn(new PackageVersionEntity());
+
+			// Test service
+			assertThat(this.packageService.isImportCoherent(fileData)).isFalse();
+		}
+	}
+
+	@Test
+	void when_baseVersionIsNotPresent_shouldReturnFalse() throws IOException {
+		// OverrideConfigEntity
+		OverrideConfigEntity overrideConfigEntity = new OverrideConfigEntity();
+		WeasisPropertyEntity weasisPropertyEntity = new WeasisPropertyEntity();
+		weasisPropertyEntity.setCode("weasis.version");
+		weasisPropertyEntity.setValue("4.5.2-MGR");
+		overrideConfigEntity.setWeasisPropertyEntities(List.of(weasisPropertyEntity));
+
+		// MinimalReleaseVersions
+		MinimalReleaseVersion minimalReleaseVersion4Digits = new MinimalReleaseVersion();
+		minimalReleaseVersion4Digits.setReleaseVersion("4.5.2.4");
+		minimalReleaseVersion4Digits.setMinimalVersion("4.5.0");
+		List<MinimalReleaseVersion> minimalReleaseVersions = List.of(minimalReleaseVersion4Digits);
+
+		// Built inputStream
+		try (InputStream fileData = buildFileData(overrideConfigEntity, minimalReleaseVersions)) {
+
+			// Mock: version already installed on server
+			Mockito.when(this.packageVersionRepository.findByVersionNumberAndQualifier(Mockito.any(), Mockito.any()))
+				.thenReturn(null);
+
+			// Test service
+			assertThat(this.packageService.isImportCoherent(fileData)).isFalse();
+		}
+	}
+
+	@Test
+	void when_versionPreviousVersionsMissing_shouldReturnFalse() throws IOException {
+		ReflectionTestUtils.setField(this.packageService, "viewerHubResourcesPackagesWeasisMappingMinimalVersionPath",
+				"test");
+
+		// OverrideConfigEntity
+		OverrideConfigEntity overrideConfigEntity = new OverrideConfigEntity();
+		WeasisPropertyEntity weasisPropertyEntity = new WeasisPropertyEntity();
+		weasisPropertyEntity.setCode("weasis.version");
+		weasisPropertyEntity.setValue("4.5.2-MGR");
+		overrideConfigEntity.setWeasisPropertyEntities(List.of(weasisPropertyEntity));
+
+		// MinimalReleaseVersions
+		MinimalReleaseVersion minimalReleaseVersionBase = new MinimalReleaseVersion();
+		MinimalReleaseVersion minimalReleaseVersion4Digits = new MinimalReleaseVersion();
+		minimalReleaseVersionBase.setReleaseVersion("4.5.2");
+		minimalReleaseVersionBase.setMinimalVersion("4.5.0");
+		minimalReleaseVersion4Digits.setReleaseVersion("4.5.2.4");
+		minimalReleaseVersion4Digits.setMinimalVersion("4.5.0");
+		List<MinimalReleaseVersion> minimalReleaseVersions = List.of(minimalReleaseVersionBase,
+				minimalReleaseVersion4Digits);
+
+		// Built inputStream
+		try (InputStream fileData = buildFileData(overrideConfigEntity, minimalReleaseVersions)) {
+
+			// Mock: version not already installed on server
+			Mockito.when(this.packageVersionRepository.findByVersionNumberAndQualifier(Mockito.any(), Mockito.any()))
+				.thenReturn(null);
+			// Mock: retrieve previous versions
+			List<MinimalReleaseVersion> list = new ArrayList<>();
+			MinimalReleaseVersion minimalReleaseVersion362 = new MinimalReleaseVersion();
+			minimalReleaseVersion362.setReleaseVersion("3.6.2");
+			minimalReleaseVersion362.setMinimalVersion("3.6.0");
+			minimalReleaseVersion362.setI18nVersion("4.0.0-SNAPSHOT");
+			list.add(minimalReleaseVersion362);
+			InputStream inputStream = buildInputStreamPreviousVersionsCompatibility(list);
+			InputStream inputStream2 = buildInputStreamPreviousVersionsCompatibility(list);
+			Mockito.when(this.s3Service.retrieveS3Object(Mockito.anyString())).thenReturn(inputStream, inputStream2);
+			// Mock: S3 key exists
+			Mockito.when(this.s3Service.doesS3KeyExists(Mockito.eq("test"))).thenReturn(true);
+
+			// Test service
+			assertThat(this.packageService.isImportCoherent(fileData)).isFalse();
+		}
+	}
+
+	@Test
+	void when_inputValid_shouldReturnTrue() throws IOException {
+		ReflectionTestUtils.setField(this.packageService, "viewerHubResourcesPackagesWeasisMappingMinimalVersionPath",
+				"test");
+
+		// OverrideConfigEntity
+		OverrideConfigEntity overrideConfigEntity = new OverrideConfigEntity();
+		WeasisPropertyEntity weasisPropertyEntity = new WeasisPropertyEntity();
+		weasisPropertyEntity.setCode("weasis.version");
+		weasisPropertyEntity.setValue("4.5.2-MGR");
+		overrideConfigEntity.setWeasisPropertyEntities(List.of(weasisPropertyEntity));
+
+		// MinimalReleaseVersions
+		MinimalReleaseVersion minimalReleaseVersion362 = new MinimalReleaseVersion();
+		minimalReleaseVersion362.setReleaseVersion("3.6.2");
+		minimalReleaseVersion362.setMinimalVersion("3.6.0");
+		minimalReleaseVersion362.setI18nVersion("4.0.0-SNAPSHOT");
+		MinimalReleaseVersion minimalReleaseVersionBase = new MinimalReleaseVersion();
+		MinimalReleaseVersion minimalReleaseVersion4Digits = new MinimalReleaseVersion();
+		minimalReleaseVersionBase.setReleaseVersion("4.5.2");
+		minimalReleaseVersionBase.setMinimalVersion("4.5.0");
+		minimalReleaseVersion4Digits.setReleaseVersion("4.5.2.4");
+		minimalReleaseVersion4Digits.setMinimalVersion("4.5.0");
+		List<MinimalReleaseVersion> minimalReleaseVersions = List.of(minimalReleaseVersion362,
+				minimalReleaseVersionBase, minimalReleaseVersion4Digits);
+
+		// Built inputStream
+		try (InputStream fileData = buildFileData(overrideConfigEntity, minimalReleaseVersions)) {
+
+			// Mock: version not already installed on server
+			Mockito.when(this.packageVersionRepository.findByVersionNumberAndQualifier(Mockito.any(), Mockito.any()))
+				.thenReturn(null);
+			// Mock: retrieve previous versions
+			List<MinimalReleaseVersion> list = new ArrayList<>();
+			list.add(minimalReleaseVersion362);
+			InputStream inputStream = buildInputStreamPreviousVersionsCompatibility(list);
+			InputStream inputStream2 = buildInputStreamPreviousVersionsCompatibility(list);
+			Mockito.when(this.s3Service.retrieveS3Object(Mockito.anyString())).thenReturn(inputStream, inputStream2);
+			// Mock: S3 key exists
+			Mockito.when(this.s3Service.doesS3KeyExists(Mockito.eq("test"))).thenReturn(true);
+
+			// Test service
+			assertThat(this.packageService.isImportCoherent(fileData)).isTrue();
+		}
+	}
+
+	private InputStream buildFileData(OverrideConfigEntity overrideConfigEntity,
+			List<MinimalReleaseVersion> minimalReleaseVersions) throws IOException {
+		// Create a ByteArrayOutputStream to hold zip content
+		try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
+				ZipOutputStream zos = new ZipOutputStream(baos)) {
+
+			ObjectMapper objectMapper = new ObjectMapper();
+
+			// === Base json ===
+
+			// Serialize the object into JSON string
+			String jsonContentOverrideConfigEntity = objectMapper.writeValueAsString(overrideConfigEntity);
+
+			// Create a zip entry for the JSON file
+			ZipEntry zipEntryBaseJsonFile = new ZipEntry(PropertiesFileName.BIN_DIST_WEASIS_CONF_BASE_JSON_FILE_PATH);
+			zos.putNextEntry(zipEntryBaseJsonFile);
+			// Write the serialized JSON content to the zip file
+			byte[] bytesOverrideConfigEntity = jsonContentOverrideConfigEntity.getBytes();
+			zos.write(bytesOverrideConfigEntity, 0, bytesOverrideConfigEntity.length);
+
+			// === Version Compatibility ===
+
+			// Serialize the object into JSON string
+			String jsonContentMinimalReleaseVersions = objectMapper
+				.setPropertyNamingStrategy(PropertyNamingStrategies.KEBAB_CASE)
+				.writeValueAsString(minimalReleaseVersions);
+
+			// Create a zip entry for the JSON file
+			ZipEntry zipEntryVersionCompatibilityFile = new ZipEntry(PropertiesFileName.VERSION_COMPATIBILITY_PATH);
+			zos.putNextEntry(zipEntryVersionCompatibilityFile);
+			// Write the serialized JSON content to the zip file
+			byte[] bytesMinimalReleaseVersions = jsonContentMinimalReleaseVersions.getBytes();
+			zos.write(bytesMinimalReleaseVersions, 0, bytesMinimalReleaseVersions.length);
+
+			// Close the zip entry
+			zos.closeEntry();
+
+			// Provide an InputStream from the ByteArrayOutputStream
+			return new ByteArrayInputStream(baos.toByteArray());
+		}
+	}
+
+	private InputStream buildInputStreamPreviousVersionsCompatibility(
+			List<MinimalReleaseVersion> minimalReleaseVersions) throws IOException {
+		ObjectMapper objectMapper = new ObjectMapper();
+		String jsonString = objectMapper.setPropertyNamingStrategy(PropertyNamingStrategies.KEBAB_CASE)
+			.writeValueAsString(minimalReleaseVersions);
+
+		// Create an InputStream from the JSON string
+		return new ByteArrayInputStream(jsonString.getBytes());
 	}
 
 }

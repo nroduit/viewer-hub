@@ -11,8 +11,9 @@
 
 package org.viewer.hub.back.model.property;
 
-import jakarta.validation.constraints.NotNull;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Pattern;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -28,32 +29,35 @@ import java.util.Set;
 @Getter
 @Setter
 @NoArgsConstructor
+@Builder
 @Validated
-public class WadoConnectorProperty {
+public class WeasisManifestConnectorProperty {
 
-	@NotNull
-	private AuthenticationProperty authentication;
-
+	@Schema(description = "Transfer syntax uid")
 	private String transferSyntaxUid;
 
+	@Schema(description = "Compression rate")
 	private Integer compressionRate;
 
+	@Schema(description = "Require only SOPInstanceUID")
 	private Boolean requireOnlySOPInstanceUID;
 
+	@Schema(description = "Additional parameters")
 	private String additionnalParameters;
 
 	// example: 0x11112222
+	@Schema(description = "Override dicom tags")
 	private Set<@Pattern(
 			regexp = "0x[0-9A-F][0-9A-F][0-9A-F][0-9A-F][0-9A-F][0-9A-F][0-9A-F][0-9A-F]") String> overrideDicomTags;
 
+	@Schema(description = "Http tags")
 	private Map<String, String> httpTags = new HashMap<>();
 
-	public WadoConnectorProperty(AuthenticationProperty authentication, String transferSyntaxUid,
-			Integer compressionRate, Boolean requireOnlySOPInstanceUID, String additionnalParameters,
+	public WeasisManifestConnectorProperty(String transferSyntaxUid, Integer compressionRate,
+			Boolean requireOnlySOPInstanceUID, String additionnalParameters,
 			Set<@Pattern(
 					regexp = "0x[0-9A-F][0-9A-F][0-9A-F][0-9A-F][0-9A-F][0-9A-F][0-9A-F][0-9A-F]") String> overrideDicomTags,
 			Map<String, String> httpTags) {
-		this.authentication = authentication;
 		this.transferSyntaxUid = transferSyntaxUid;
 		this.compressionRate = compressionRate;
 		this.requireOnlySOPInstanceUID = requireOnlySOPInstanceUID;

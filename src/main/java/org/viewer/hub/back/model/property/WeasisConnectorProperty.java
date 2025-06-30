@@ -11,36 +11,27 @@
 
 package org.viewer.hub.back.model.property;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.validation.annotation.Validated;
 
-/**
- * Manage the wado authentication in order to retrieve images from manifest in Weasis
- */
-@Validated
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
-public class AuthenticationProperty {
+@AllArgsConstructor
+@Builder
+@Validated
+public class WeasisConnectorProperty {
 
-	// Used to force usage of basic authentication parameters to retrieve images (even if
-	// request is authenticated)
+	@Valid
 	@NotNull
-	private Boolean forceBasic;
-
-	// If request is authenticated: retrieve the token from the authenticated request and
-	// inject it in the manifest for Weasis to get the images
-	@NotNull
-	private OAuth2AuthenticationProperty oauth2;
-
-	// If request is not authenticated use basic authentication to retrieve images with
-	// credentials from this property
-	@NotNull
-	private BasicAuthenticationProperty basic;
+	@Schema(description = "Weasis manifest properties")
+	private WeasisManifestConnectorProperty manifest;
 
 }

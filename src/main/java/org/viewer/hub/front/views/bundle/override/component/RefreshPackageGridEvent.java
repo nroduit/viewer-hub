@@ -8,7 +8,7 @@
  *  SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
  *
  */
-package org.viewer.hub.front.views.override.component;
+package org.viewer.hub.front.views.bundle.override.component;
 
 import org.springframework.context.ApplicationEvent;
 

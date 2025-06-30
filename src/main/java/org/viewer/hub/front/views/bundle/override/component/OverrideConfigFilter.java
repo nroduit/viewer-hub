@@ -8,7 +8,7 @@
  *  SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
  *
  */
-package org.viewer.hub.front.views.override.component;
+package org.viewer.hub.front.views.bundle.override.component;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -25,17 +25,20 @@ public class OverrideConfigFilter {
 
 	private String launchConfig;
 
+	private String weasisProfile;
+
 	private String group;
 
 	public OverrideConfigFilter() {
 		this.packageVersion = "";
 		this.launchConfig = "";
+		this.weasisProfile = "";
 		this.group = "";
 	}
 
 	public boolean hasFilter() {
 		return StringUtils.isNotBlank(this.packageVersion) || StringUtils.isNotBlank(this.launchConfig)
-				|| StringUtils.isNotBlank(this.group);
+				|| StringUtils.isNotBlank(this.weasisProfile) || StringUtils.isNotBlank(this.group);
 	}
 
 }

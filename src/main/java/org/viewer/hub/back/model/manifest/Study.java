@@ -16,6 +16,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import org.viewer.hub.back.util.DateTimeUtil;
 
 import java.io.Serial;
@@ -29,6 +31,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@Builder
+@AllArgsConstructor
 public class Study implements Serializable {
 
 	@Serial

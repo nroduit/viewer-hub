@@ -17,6 +17,7 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotNull;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.artifact.versioning.ComparableVersion;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -47,7 +48,8 @@ import org.viewer.hub.back.service.TargetService;
 import org.viewer.hub.back.util.JacksonUtil;
 import org.viewer.hub.back.util.PackageUtil;
 import org.viewer.hub.back.util.StringUtil;
-import org.viewer.hub.front.views.override.component.RefreshPackageGridEvent;
+import org.viewer.hub.back.util.VersionUtil;
+import org.viewer.hub.front.views.bundle.override.component.RefreshPackageGridEvent;
 import software.amazon.awssdk.services.s3.model.DeleteObjectsResponse;
 import software.amazon.awssdk.services.s3.model.PutObjectResponse;
 import software.amazon.awssdk.transfer.s3.model.CompletedCopy;
@@ -237,6 +239,214 @@ public class PackageServiceImpl implements PackageService {
 		return toReturn;
 	}
 
+	@Override
+	public PackageVersionEntity retrieveAvailablePackageVersionToUse(String weasisVersionRequested, String qualifier) {
+		PackageVersionEntity availablePackageVersionToUse;
+		// Retrieve default qualifier (handle no qualifier case)
+		String defaultQualifierToUse = this.defaultPackageVersionQualifier == null
+				|| this.defaultPackageVersionQualifier.isBlank() ? PackageUtil.NO_QUALIFIER
+						: this.defaultPackageVersionQualifier;
+
+		if (qualifier == null && weasisVersionRequested == null) {
+			availablePackageVersionToUse = this.cacheService
+				.getPackageVersion("%s%s".formatted(this.defaultPackageVersionNumber, defaultQualifierToUse));
+		}
+		else if (qualifier == null && weasisVersionRequested != null) {
+			availablePackageVersionToUse = this.cacheService
+				.getPackageVersion("%s%s".formatted(weasisVersionRequested, defaultQualifierToUse));
+		}
+		else if (qualifier != null && weasisVersionRequested == null) {
+			availablePackageVersionToUse = this.cacheService
+				.getPackageVersion("%s%s".formatted(this.defaultPackageVersionNumber, qualifier));
+		}
+		else {
+			availablePackageVersionToUse = this.cacheService
+				.getPackageVersion("%s%s".formatted(weasisVersionRequested, qualifier));
+		}
+		return availablePackageVersionToUse;
+	}
+
+	@Override
+	public void deleteResourcePackageVersion(OverrideConfigEntity overrideConfigEntity) {
+		if (overrideConfigEntity != null && overrideConfigEntity.getPackageVersion() != null
+				&& overrideConfigEntity.getLaunchConfig() != null && overrideConfigEntity.getTarget() != null) {
+			// Update OverrideConfig table
+			this.deleteResourceInDbOverrideConfig(overrideConfigEntity);
+
+			// Update PackageVersion table
+			this.deleteResourceInDbPackageVersion(overrideConfigEntity);
+
+			// S3
+			this.deleteResourcePackageVersionInS3(overrideConfigEntity).whenComplete((result, throwable) -> {
+				if (throwable == null) {
+					// Refresh available package versions
+					this.refreshAvailablePackageVersion();
+				}
+				else {
+					throw new TechnicalException(
+							"Issue when deleting resources files in S3:%s".formatted(throwable.getMessage()));
+				}
+			});
+
+		}
+	}
+
+	@Override
+	public boolean doesVersionNumberAlreadyExists(String version) {
+		return version != null && !this.packageVersionRepository
+			.findByVersionNumber(version.contains(StringUtil.HYPHEN) ? version.split(StringUtil.HYPHEN)[0] : version)
+			.isEmpty();
+	}
+
+	@Override
+	public List<PackageVersionEntity> retrievePackageVersionByVersionNumber(String version) {
+		List<PackageVersionEntity> packageVersionEntities = new ArrayList<>();
+		if (version != null) {
+			packageVersionEntities = this.packageVersionRepository.findByVersionNumber(
+					version.contains(StringUtil.HYPHEN) ? version.split(StringUtil.HYPHEN)[0] : version);
+		}
+		return packageVersionEntities;
+	}
+
+	@Override
+	public boolean isImportCoherent(InputStream fileData) {
+		boolean isImportCoherent;
+
+		// Retrieve the version to import
+		String versionToImport = checkWeasisNativeVersionToUpload(fileData);
+
+		// Case version is already installed on the server
+		isImportCoherent = isImportCoherentVersionNotAlreadyInstalledOnServer(versionToImport);
+
+		// Incoherent version compatibility file
+		isImportCoherent = isImportCoherent && isImportCoherentVersionCompatibilityFileCoherent(fileData);
+
+		return isImportCoherent;
+	}
+
+	/**
+	 * If the compatibility file has to be imported, check if the version compatibility is
+	 * coherent
+	 * @param fileData File to check
+	 * @return true if the version compatibility is coherent
+	 */
+	private boolean isImportCoherentVersionCompatibilityFileCoherent(InputStream fileData) {
+		boolean isImportCoherentVersionCompatibilityFileCoherent;
+
+		// Retrieve the version compatibility file in the zip import
+		List<MinimalReleaseVersion> minimalReleaseVersionsFromImport = retrieveMinimalVersionsFromImport(fileData);
+
+		// if (shouldReplaceMappingMinimalVersion(mappingMinimalVersionFilePath)){
+		if (shouldReplaceMappingMinimalVersion(null, minimalReleaseVersionsFromImport)) {
+
+			// Check that if there is a version with 4 digits, the base version with 3
+			// digits is declared
+			assert minimalReleaseVersionsFromImport != null;
+			isImportCoherentVersionCompatibilityFileCoherent = isImportCoherentVersionCompatibilityBaseVersion(
+					minimalReleaseVersionsFromImport);
+
+			// Case it is a replacement of the file
+			if (this.doesMappingMinimalVersionFileExists()) {
+				// Check that all the previous versions declared are presents in the new
+				// compatibility file
+				isImportCoherentVersionCompatibilityFileCoherent = isImportCoherentVersionCompatibilityFileCoherent
+						&& isImportCoherentVersionCompatibilityPreviousVersionsExist(minimalReleaseVersionsFromImport);
+			}
+		}
+		else {
+			isImportCoherentVersionCompatibilityFileCoherent = true;
+		}
+
+		return isImportCoherentVersionCompatibilityFileCoherent;
+	}
+
+	/**
+	 * Check that all the previous versions declared are presents in the new compatibility
+	 * file
+	 * @param minimalReleaseVersionsFromImport MinimalReleaseVersions from import
+	 * @return true if all the previous versions declared are presents in the new
+	 * compatibility file
+	 */
+	private boolean isImportCoherentVersionCompatibilityPreviousVersionsExist(
+			List<MinimalReleaseVersion> minimalReleaseVersionsFromImport) {
+		// Existing version compatibility file from S3
+		List<MinimalReleaseVersion> existingMinimalReleaseVersions = this
+			.retrieveS3MinimalReleaseVersions(this.viewerHubResourcesPackagesWeasisMappingMinimalVersionPath);
+
+		// Check that all the previous versions declared are presents in the new
+		// compatibility file
+		return new HashSet<>(minimalReleaseVersionsFromImport).containsAll(existingMinimalReleaseVersions);
+	}
+
+	/**
+	 * Retrieve the version compatibility file from the file to import
+	 * @param fileData File to import
+	 * @return List<MinimalReleaseVersion> found
+	 */
+	private List<MinimalReleaseVersion> retrieveMinimalVersionsFromImport(InputStream fileData) {
+
+		// Reset the input stream in order to start again the browsing of the zip file
+		// to import
+		resetInputStream(fileData);
+
+		try (ZipInputStream zis = new ZipInputStream(fileData)) {
+			ZipEntry ze;
+			while ((ze = zis.getNextEntry()) != null) {
+				if (!ze.isDirectory() && Objects.equals(ze.getName(), PropertiesFileName.VERSION_COMPATIBILITY_PATH)) {
+					// Retrieve the file version compatibility file in the zip
+					return JacksonUtil.deserializeMinimalReleaseVersionsFromInputStream(zis);
+				}
+			}
+		}
+		catch (IOException e) {
+			throw new TechnicalException("Issue when checking version of the zip file to import (using json file):%s"
+				.formatted(e.getMessage()));
+		}
+		finally {
+			// Reset the input stream in order to start again the browsing of the zip file
+			// to import
+			resetInputStream(fileData);
+		}
+		return null;
+	}
+
+	/**
+	 * Check that if there is a release version with 4 digits, the base version with 3
+	 * digits is declared
+	 * @param minimalReleaseVersionsFromImport List<MinimalReleaseVersion> to evaluate
+	 * @return true if the check is coherent
+	 */
+	private boolean isImportCoherentVersionCompatibilityBaseVersion(
+			List<MinimalReleaseVersion> minimalReleaseVersionsFromImport) {
+		return minimalReleaseVersionsFromImport.stream()
+			.filter(Objects::nonNull)
+			.map(MinimalReleaseVersion::getReleaseVersion)
+			.filter(version -> VersionUtil.countDigitsGroups(version) == 4)
+			.allMatch(version4GroupsDigits -> minimalReleaseVersionsFromImport.stream()
+				.anyMatch(mr -> Objects.equals(mr.getReleaseVersion(),
+						VersionUtil.extract3GroupsDigitsOf4GroupsDigitsVersion(version4GroupsDigits))));
+	}
+
+	/**
+	 * Check if the version is not already installed on the server
+	 * @param versionToImport Version to import
+	 * @return true if the version is not already installed on the server
+	 */
+	private boolean isImportCoherentVersionNotAlreadyInstalledOnServer(String versionToImport) {
+		boolean isImportCoherentVersionNotAlreadyInstalledOnServer = false;
+
+		// Check if a packageVersionEntity is already present in the database
+		if (StringUtils.isNotBlank(versionToImport)) {
+			isImportCoherentVersionNotAlreadyInstalledOnServer = versionToImport.contains(StringUtil.HYPHEN)
+					? packageVersionRepository.findByVersionNumberAndQualifier(
+							versionToImport.split(StringUtil.HYPHEN)[0],
+							"%s%s".formatted(StringUtil.HYPHEN, versionToImport.split(StringUtil.HYPHEN)[1])) == null
+					: packageVersionRepository.findByVersionNumber(versionToImport) == null;
+		}
+
+		return isImportCoherentVersionNotAlreadyInstalledOnServer;
+	}
+
 	/**
 	 * When all uploads have been done: - Handle replacement of file
 	 * mapping-minimal-version.json - Refresh cache and db
@@ -325,41 +535,76 @@ public class PackageServiceImpl implements PackageService {
 		// File to import
 		String toImportFilePath = outDir.resolve(CONF_FOLDER_NAME).resolve(VERSION_COMPATIBILITY_FILE_NAME).toString();
 
+		if (shouldReplaceMappingMinimalVersion(toImportFilePath, null)) {
+			// Replace file
+			return this.s3Service.copyS3ObjectFromTo(toImportFilePath,
+					this.viewerHubResourcesPackagesWeasisMappingMinimalVersionPath);
+		}
+
+		return CompletableFuture.completedFuture(null);
+	}
+
+	/**
+	 * Check if the mapping minimal version should be replaced
+	 * @param toImportFilePath mapping minimal version to import
+	 * @return true if the mapping minimal version file should be replaced
+	 */
+	private boolean shouldReplaceMappingMinimalVersion(String toImportFilePath,
+			List<MinimalReleaseVersion> minimalReleaseVersionsToImport) {
+		boolean shouldReplaceMappingMinimalVersion = false;
+
+		// Common method to not duplicate code
+		// It is either the import path or List<MinimalReleaseVersion> but not both
+		if (toImportFilePath != null && minimalReleaseVersionsToImport != null) {
+			throw new TechnicalException(
+					"shouldReplaceMappingMinimalVersion should be used either with the import path or List<MinimalReleaseVersion> but not both");
+		}
+
 		// Check if file mapping-minimal-version.json already exists
 		if (this.doesMappingMinimalVersionFileExists()) {
 			// If yes compare the existing file with the file to import
 			// Read mapping minimal version from file to import and get max release
 			// version
-			ComparableVersion maxVersionToImport = this.retrieveMaxReleaseVersion(toImportFilePath);
+			ComparableVersion maxVersionToImport = toImportFilePath != null
+					? this.retrieveMaxReleaseVersionFromS3(toImportFilePath)
+					: this.retrieveMaxReleaseVersion(minimalReleaseVersionsToImport);
+
 			// Read mapping minimal version from existing file and get max release version
 			ComparableVersion maxVersionExisting = this
-				.retrieveMaxReleaseVersion(this.viewerHubResourcesPackagesWeasisMappingMinimalVersionPath);
+				.retrieveMaxReleaseVersionFromS3(this.viewerHubResourcesPackagesWeasisMappingMinimalVersionPath);
 
 			// If max release version is the file to import: replace the previous file
 			if (maxVersionToImport != null && maxVersionExisting != null
 					&& maxVersionToImport.compareTo(maxVersionExisting) > 0) {
-				// Replace file
-				return this.s3Service.copyS3ObjectFromTo(toImportFilePath,
-						this.viewerHubResourcesPackagesWeasisMappingMinimalVersionPath);
+				shouldReplaceMappingMinimalVersion = true;
 			}
 		}
 		else {
 			// Copy directly the file in the resources package folder
-			return this.s3Service.copyS3ObjectFromTo(toImportFilePath,
-					this.viewerHubResourcesPackagesWeasisMappingMinimalVersionPath);
+			shouldReplaceMappingMinimalVersion = true;
 		}
-		return CompletableFuture.completedFuture(null);
+
+		return shouldReplaceMappingMinimalVersion;
 	}
 
 	/**
-	 * Retrieve max release version from file path in parameter
+	 * Retrieve max release version from file path in parameter in S3
 	 * @param mappingMinimalVersionFilePath Path of the file mapping minimal version
 	 * @return Comparable version
 	 */
 	@Nullable
-	private ComparableVersion retrieveMaxReleaseVersion(String mappingMinimalVersionFilePath) {
-		return this.retrieveS3MinimalReleaseVersions(mappingMinimalVersionFilePath)
-			.stream()
+	private ComparableVersion retrieveMaxReleaseVersionFromS3(String mappingMinimalVersionFilePath) {
+		return retrieveMaxReleaseVersion(this.retrieveS3MinimalReleaseVersions(mappingMinimalVersionFilePath));
+	}
+
+	/**
+	 * Retrieve max release version from List<MinimalReleaseVersion> in parameter
+	 * @param minimalReleaseVersions minimalReleaseVersions to evaluate
+	 * @return Comparable version
+	 */
+	@Nullable
+	private ComparableVersion retrieveMaxReleaseVersion(List<MinimalReleaseVersion> minimalReleaseVersions) {
+		return minimalReleaseVersions.stream()
 			.map(MinimalReleaseVersion::getReleaseVersion)
 			.map(ComparableVersion::new)
 			.max(Comparator.naturalOrder())
@@ -463,9 +708,8 @@ public class PackageServiceImpl implements PackageService {
 			}
 		}
 		catch (IOException e) {
-			throw new TechnicalException(
-					"Issue when checking version of the weasis-native zip file to import (using json file):%s"
-						.formatted(e.getMessage()));
+			throw new TechnicalException("Issue when checking version of the zip file to import (using json file):%s"
+				.formatted(e.getMessage()));
 		}
 		return null;
 	}
@@ -489,7 +733,7 @@ public class PackageServiceImpl implements PackageService {
 		}
 		catch (IOException e) {
 			throw new TechnicalException(
-					"Issue when checking version of the weasis-native zip file to import (using properties file):%s"
+					"Issue when checking version of the zip file to import (using properties file):%s"
 						.formatted(e.getMessage()));
 		}
 		return null;
@@ -623,58 +867,6 @@ public class PackageServiceImpl implements PackageService {
 		return this.s3Service.doesS3KeyExists(this.viewerHubResourcesPackagesWeasisMappingMinimalVersionPath);
 	}
 
-	@Override
-	public PackageVersionEntity retrieveAvailablePackageVersionToUse(String weasisVersionRequested, String qualifier) {
-		PackageVersionEntity availablePackageVersionToUse;
-		// Retrieve default qualifier (handle no qualifier case)
-		String defaultQualifierToUse = this.defaultPackageVersionQualifier == null
-				|| this.defaultPackageVersionQualifier.isBlank() ? PackageUtil.NO_QUALIFIER
-						: this.defaultPackageVersionQualifier;
-
-		if (qualifier == null && weasisVersionRequested == null) {
-			availablePackageVersionToUse = this.cacheService
-				.getPackageVersion("%s%s".formatted(this.defaultPackageVersionNumber, defaultQualifierToUse));
-		}
-		else if (qualifier == null && weasisVersionRequested != null) {
-			availablePackageVersionToUse = this.cacheService
-				.getPackageVersion("%s%s".formatted(weasisVersionRequested, defaultQualifierToUse));
-		}
-		else if (qualifier != null && weasisVersionRequested == null) {
-			availablePackageVersionToUse = this.cacheService
-				.getPackageVersion("%s%s".formatted(this.defaultPackageVersionNumber, qualifier));
-		}
-		else {
-			availablePackageVersionToUse = this.cacheService
-				.getPackageVersion("%s%s".formatted(weasisVersionRequested, qualifier));
-		}
-		return availablePackageVersionToUse;
-	}
-
-	@Override
-	public void deleteResourcePackageVersion(OverrideConfigEntity overrideConfigEntity) {
-		if (overrideConfigEntity != null && overrideConfigEntity.getPackageVersion() != null
-				&& overrideConfigEntity.getLaunchConfig() != null && overrideConfigEntity.getTarget() != null) {
-			// Update OverrideConfig table
-			this.deleteResourceInDbOverrideConfig(overrideConfigEntity);
-
-			// Update PackageVersion table
-			this.deleteResourceInDbPackageVersion(overrideConfigEntity);
-
-			// S3
-			this.deleteResourcePackageVersionInS3(overrideConfigEntity).whenComplete((result, throwable) -> {
-				if (throwable == null) {
-					// Refresh available package versions
-					this.refreshAvailablePackageVersion();
-				}
-				else {
-					throw new TechnicalException(
-							"Issue when deleting resources files in S3:%s".formatted(throwable.getMessage()));
-				}
-			});
-
-		}
-	}
-
 	/**
 	 * Delete package version in db only if launch config default and target default
 	 * @param overrideConfigEntity OverrideConfig to evaluate
@@ -734,13 +926,16 @@ public class PackageServiceImpl implements PackageService {
 		// Case delete only the config version selected (properties file) only if the
 		// group is default
 		else if (Objects.equals(overrideConfigEntity.getTarget().getType(), TargetType.DEFAULT)) {
+			boolean shouldUseJsonParsing = this.shouldUseJsonParsing(overrideConfigEntity.getPackageVersion());
 			return this.s3Service.deleteS3Objects("%s/%s%s%s/%s%s%s".formatted(
 					this.viewerHubResourcesPackagesWeasisPackagePath,
 					overrideConfigEntity.getPackageVersion().getVersionNumber(),
 					overrideConfigEntity.getPackageVersion().getQualifier() == null ? StringUtil.EMPTY_STRING
 							: overrideConfigEntity.getPackageVersion().getQualifier(),
-					PropertiesFileName.PATH_CONF_FOLDER, PropertiesFileName.EXT_PATTERN_NAME,
-					overrideConfigEntity.getLaunchConfig().getName(), PropertiesFileName.EXTENSION_PROPERTIES_FILE));
+					PropertiesFileName.PATH_CONF_FOLDER,
+					shouldUseJsonParsing ? StringUtil.EMPTY_STRING : PropertiesFileName.EXT_PATTERN_NAME,
+					overrideConfigEntity.getLaunchConfig().getName(), shouldUseJsonParsing
+							? PropertiesFileName.EXTENSION_JSON_FILE : PropertiesFileName.EXTENSION_PROPERTIES_FILE));
 		}
 		return CompletableFuture.completedFuture(null);
 	}

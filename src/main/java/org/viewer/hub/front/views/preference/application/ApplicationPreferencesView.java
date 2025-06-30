@@ -24,22 +24,24 @@ import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.provider.SortDirection;
 import com.vaadin.flow.router.AfterNavigationEvent;
 import com.vaadin.flow.router.AfterNavigationObserver;
+import com.vaadin.flow.router.Menu;
+import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.router.RouteAlias;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.annotation.Secured;
+import org.vaadin.lineawesome.LineAwesomeIconUrl;
 import org.viewer.hub.back.entity.TargetEntity;
 import org.viewer.hub.back.model.WeasisModule;
 import org.viewer.hub.back.model.WeasisProfile;
-import org.viewer.hub.front.layouts.MainLayout;
 import org.viewer.hub.front.views.AbstractView;
 
 import java.io.Serial;
 import java.util.ArrayList;
 import java.util.List;
 
-@Route(value = ApplicationPreferencesView.ROUTE, layout = MainLayout.class)
-@RouteAlias(value = "", layout = MainLayout.class)
+@PageTitle(ApplicationPreferencesView.VIEW_NAME)
+@Route("")
+@Menu(order = 0, icon = LineAwesomeIconUrl.CHART_BAR_SOLID)
 @Secured({ "ROLE_admin" })
 public class ApplicationPreferencesView extends AbstractView implements AfterNavigationObserver {
 

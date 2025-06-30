@@ -16,7 +16,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.viewer.hub.back.entity.LaunchConfigEntity;
 import org.viewer.hub.back.entity.LaunchEntity;
 import org.viewer.hub.back.entity.LaunchEntityPK;
@@ -51,6 +53,9 @@ class LaunchByTargetConfigPreferredSpecificationTest {
 
 	@Autowired
 	private TargetRepository targetRepository;
+
+	@MockBean
+	ClientRegistrationRepository clientRegistrationRepository;
 
 	@BeforeEach
 	public void init() {

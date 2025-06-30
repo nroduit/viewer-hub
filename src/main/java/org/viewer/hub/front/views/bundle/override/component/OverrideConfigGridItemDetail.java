@@ -8,7 +8,7 @@
  *  SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
  *
  */
-package org.viewer.hub.front.views.override.component;
+package org.viewer.hub.front.views.bundle.override.component;
 
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.tabs.TabSheet;
@@ -20,7 +20,7 @@ import org.viewer.hub.back.entity.OverrideConfigEntity;
 import org.viewer.hub.back.entity.WeasisPropertyEntity;
 import org.viewer.hub.back.enums.WeasisPropertyCategory;
 import org.viewer.hub.front.components.UIUtil;
-import org.viewer.hub.front.views.override.OverrideView;
+import org.viewer.hub.front.views.bundle.override.OverrideView;
 
 import java.io.Serial;
 import java.util.ArrayList;

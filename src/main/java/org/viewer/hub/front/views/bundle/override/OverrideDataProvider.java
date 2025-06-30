@@ -8,7 +8,7 @@
  *  SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
  *
  */
-package org.viewer.hub.front.views.override;
+package org.viewer.hub.front.views.bundle.override;
 
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.data.provider.QuerySortOrder;
@@ -18,7 +18,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import org.vaadin.artur.spring.dataprovider.FilterablePageableDataProvider;
-import org.viewer.hub.front.views.override.component.OverrideConfigFilter;
+import org.viewer.hub.front.views.bundle.override.component.OverrideConfigFilter;
 
 import java.io.Serial;
 import java.util.List;

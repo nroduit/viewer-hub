@@ -26,7 +26,7 @@ import org.viewer.hub.back.enums.TargetType;
 import org.viewer.hub.back.repository.OverrideConfigRepository;
 import org.viewer.hub.back.repository.TargetRepository;
 import org.viewer.hub.back.service.OverrideConfigService;
-import org.viewer.hub.front.views.override.component.OverrideConfigFilter;
+import org.viewer.hub.front.views.bundle.override.component.OverrideConfigFilter;
 
 import java.util.HashSet;
 import java.util.List;
@@ -243,6 +243,18 @@ class OverrideConfigServiceImplTest {
 	}
 
 	@Test
+	void when_retrieveOverrideConfigsPageable_with_filterWeasisProfile_should_callCorrectRepositoryMethod() {
+		OverrideConfigFilter overrideConfigFilter = new OverrideConfigFilter();
+		overrideConfigFilter.setWeasisProfile("weasisProfile");
+
+		// Call service
+		this.overrideConfigService.retrieveOverrideConfigsPageable(overrideConfigFilter, mock(Pageable.class));
+
+		// Tests results
+		Mockito.verify(this.overrideConfigRepositoryMock, times(1)).findAll(any(Specification.class));
+	}
+
+	@Test
 	void when_countingOverrideConfigs_without_filter_should_callCorrectRepositoryMethod() {
 		OverrideConfigFilter overrideConfigFilter = new OverrideConfigFilter();
 
@@ -263,6 +275,18 @@ class OverrideConfigServiceImplTest {
 
 		// Tests results
 		Mockito.verify(this.overrideConfigRepositoryMock, times(1)).count(any(Specification.class));
+	}
+
+	@Test
+	void when_countingOverrideConfigs_with_filterWeasisProfile_should_callCorrectRepositoryMethod() {
+		OverrideConfigFilter overrideConfigFilter = new OverrideConfigFilter();
+		overrideConfigFilter.setWeasisProfile("weasisProfile");
+
+		// Call service
+		this.overrideConfigService.countOverrideConfigs(overrideConfigFilter);
+
+		// Tests results
+		Mockito.verify(this.overrideConfigRepositoryMock, times(1)).findAll(any(Specification.class));
 	}
 
 	@Test

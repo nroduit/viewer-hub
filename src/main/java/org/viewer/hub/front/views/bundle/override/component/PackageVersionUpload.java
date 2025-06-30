@@ -9,7 +9,7 @@
  *
  */
 
-package org.viewer.hub.front.views.override.component;
+package org.viewer.hub.front.views.bundle.override.component;
 
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;

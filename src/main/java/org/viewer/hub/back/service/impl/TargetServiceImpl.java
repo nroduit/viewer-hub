@@ -51,35 +51,30 @@ public class TargetServiceImpl implements TargetService {
 
 	@Override
 	public List<TargetEntity> retrieveTargetsByType(TargetType targetType) {
-		LOG.debug("retrieveTargetsByType");
 		// Retrieve the different targets from DB
 		return this.targetRepository.findByType(targetType);
 	}
 
 	@Override
 	public TargetEntity retrieveTargetByNameAndType(String targetName, TargetType targetType) {
-		LOG.debug("retrieveTargetByNameAndType");
 		// Retrieve the DB
 		return this.targetRepository.findByNameIgnoreCaseAndType(targetName, targetType);
 	}
 
 	@Override
 	public TargetEntity retrieveTargetByName(String targetName) {
-		LOG.debug("retrieveTargetByName");
 		// Retrieve the target
 		return this.targetRepository.findByNameIgnoreCase(targetName);
 	}
 
 	@Override
 	public List<TargetEntity> retrieveTargetsByIds(List<Long> targetIds) {
-		LOG.debug("retrieveTargetsByIds");
 		// Retrieve the target
 		return this.targetRepository.findAllById(targetIds);
 	}
 
 	@Override
 	public List<TargetEntity> createTargets(@Valid List<TargetEntity> targets) {
-		LOG.debug("createTargets");
 		// Save the targets provided
 		return this.targetRepository.saveAll(targets);
 	}

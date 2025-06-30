@@ -16,6 +16,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDate;
@@ -26,6 +33,12 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@Setter
+@Getter
+@Builder
+@AllArgsConstructor
+@EqualsAndHashCode
+@ToString
 @JsonPropertyOrder({ "patientID", "issuerOfPatientID", "patientName", "patientBirthDate", "patientBirthTime",
 		"patientSex", "studies" })
 public class Patient implements Serializable {
@@ -77,85 +90,6 @@ public class Patient implements Serializable {
 		this.patientSex = patientSex;
 	}
 
-	public Set<Study> getStudies() {
-		return this.studies;
-	}
-
-	public void setStudies(Set<Study> studies) {
-		this.studies = studies;
-	}
-
-	public String getPatientID() {
-		return this.patientID;
-	}
-
-	public void setPatientID(String patientID) {
-		this.patientID = patientID;
-	}
-
-	public String getPatientName() {
-		return this.patientName;
-	}
-
-	public void setPatientName(String patientName) {
-		this.patientName = patientName;
-	}
-
-	public String getIssuerOfPatientID() {
-		return this.issuerOfPatientID;
-	}
-
-	public void setIssuerOfPatientID(String issuerOfPatientID) {
-		this.issuerOfPatientID = issuerOfPatientID;
-	}
-
-	public LocalDate getPatientBirthDate() {
-		return this.patientBirthDate;
-	}
-
-	public void setPatientBirthDate(LocalDate patientBirthDate) {
-		this.patientBirthDate = patientBirthDate;
-	}
-
-	public LocalTime getPatientBirthTime() {
-		return this.patientBirthTime;
-	}
-
-	public void setPatientBirthTime(LocalTime patientBirthTime) {
-		this.patientBirthTime = patientBirthTime;
-	}
-
-	public DicomPatientSex getPatientSex() {
-		return this.patientSex;
-	}
-
-	public void setPatientSex(DicomPatientSex patientSex) {
-		this.patientSex = patientSex;
-	}
-
-	@Override
-	public boolean equals(Object o) {
-		if (this == o) {
-			return true;
-		}
-		if (o == null || this.getClass() != o.getClass()) {
-			return false;
-		}
-		Patient patient = (Patient) o;
-		return Objects.equals(this.studies, patient.studies) && Objects.equals(this.patientID, patient.patientID)
-				&& Objects.equals(this.patientName, patient.patientName)
-				&& Objects.equals(this.issuerOfPatientID, patient.issuerOfPatientID)
-				&& Objects.equals(this.patientBirthDate, patient.patientBirthDate)
-				&& Objects.equals(this.patientBirthTime, patient.patientBirthTime)
-				&& this.patientSex == patient.patientSex;
-	}
-
-	@Override
-	public int hashCode() {
-		return Objects.hash(this.studies, this.patientID, this.patientName, this.issuerOfPatientID,
-				this.patientBirthDate, this.patientBirthTime, this.patientSex);
-	}
-
 	/**
 	 * Merge the current patient studies with the studies of the patient in parameter
 	 * @param patientToMerge Patient to merge
@@ -188,14 +122,6 @@ public class Patient implements Serializable {
 				study.merge(studyAlreadyInPatient);
 			}
 		});
-	}
-
-	@Override
-	public String toString() {
-		return "Patient{" + "studies=" + this.studies + ", patientID='" + this.patientID + '\'' + ", patientName='"
-				+ this.patientName + '\'' + ", issuerOfPatientID='" + this.issuerOfPatientID + '\''
-				+ ", patientBirthDate=" + this.patientBirthDate + ", patientBirthTime=" + this.patientBirthTime
-				+ ", patientSex=" + this.patientSex + '}';
 	}
 
 }

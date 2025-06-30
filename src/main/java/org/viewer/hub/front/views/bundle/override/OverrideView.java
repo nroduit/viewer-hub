@@ -9,10 +9,11 @@
  *
  */
 
-package org.viewer.hub.front.views.override;
+package org.viewer.hub.front.views.bundle.override;
 
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.grid.contextmenu.GridContextMenu;
 import com.vaadin.flow.component.grid.contextmenu.GridMenuItem;
 import com.vaadin.flow.component.icon.Icon;
@@ -21,38 +22,43 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.BinderValidationStatus;
 import com.vaadin.flow.dom.DomEventListener;
+import com.vaadin.flow.function.ValueProvider;
+import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.spring.annotation.UIScope;
 import jakarta.validation.constraints.NotNull;
-import com.vaadin.flow.server.VaadinSession;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.annotation.Secured;
+import org.springframework.stereotype.Component;
 import org.viewer.hub.back.entity.OverrideConfigEntity;
+import org.viewer.hub.back.entity.TargetEntity;
+import org.viewer.hub.back.enums.TargetType;
 import org.viewer.hub.back.enums.WeasisPropertyCategory;
 import org.viewer.hub.back.model.Message;
 import org.viewer.hub.back.model.MessageFormat;
 import org.viewer.hub.back.model.MessageLevel;
 import org.viewer.hub.back.model.MessageType;
-import org.viewer.hub.front.layouts.MainLayout;
 import org.viewer.hub.front.views.AbstractView;
-import org.viewer.hub.front.views.override.component.AddGroupConfigDialog;
-import org.viewer.hub.front.views.override.component.OverrideConfigGridItemDetail;
-import org.viewer.hub.front.views.override.component.PackageOverrideGrid;
-import org.viewer.hub.front.views.override.component.PackageVersionFileUpload;
-import org.viewer.hub.front.views.override.component.PackageVersionUpload;
+import org.viewer.hub.front.views.bundle.override.component.AddGroupConfigDialog;
+import org.viewer.hub.front.views.bundle.override.component.GroupComboBox;
+import org.viewer.hub.front.views.bundle.override.component.OverrideConfigGridItemDetail;
+import org.viewer.hub.front.views.bundle.override.component.PackageOverrideGrid;
+import org.viewer.hub.front.views.bundle.override.component.PackageVersionFileUpload;
+import org.viewer.hub.front.views.bundle.override.component.PackageVersionUpload;
 
 import java.io.Serial;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
-
-import static org.viewer.hub.back.constant.PropertiesFileName.PACKAGE_PATTERN_NAME;
 
 /**
  * View managing override of package configuration
  */
-@Route(value = OverrideView.ROUTE, layout = MainLayout.class)
-@Secured({ "ROLE_admin" })
+@PageTitle(OverrideView.VIEW_NAME)
+@Route(OverrideView.ROUTE)
+@Component
+@UIScope
 public class OverrideView extends AbstractView {
 
 	@Serial
@@ -60,7 +66,7 @@ public class OverrideView extends AbstractView {
 
 	public static final String ROUTE = "override";
 
-	public static final String VIEW_NAME = "Package";
+	public static final String VIEW_NAME = "Override";
 
 	// Logic
 	private final transient OverrideLogic overrideLogic;
@@ -109,7 +115,7 @@ public class OverrideView extends AbstractView {
 	}
 
 	/**
-	 * Handle upload of weasis-native package version
+	 * Handle upload of package version
 	 */
 	private void uploadPackageVersionListener() {
 		PackageVersionFileUpload packageVersionFileUpload = this.packageVersionUpload.getPackageVersionFileUpload();
@@ -117,20 +123,11 @@ public class OverrideView extends AbstractView {
 		// it reloads the view
 		UI.getCurrent()
 			.getPage()
-			.executeJs("window.addEventListener('visibilitychange', function() { location.reload(); });");
-
-		// Add Start listener
-		packageVersionFileUpload.addStartedListener(event ->
-		// Used to force refresh of the vaadin session before the beginning of the
-		// upload: otherwise with several different tabs on browser, the server
-		// responds with a 502 bad gateway and restart...
-		// VaadinSession.getCurrent().getSession().invalidate(); => not working with
-		// security config
-		VaadinSession.getCurrent().close());
+			.executeJs("window.addEventListener('visibilitychange', function() {location.reload(); });");
 
 		// Manage the upload of the package version to add
 		packageVersionFileUpload.addSucceededListener(event -> {
-			if (event.getFileName() != null && event.getFileName().contains(PACKAGE_PATTERN_NAME)) {
+			if (event.getFileName() != null) {
 				this.overrideLogic.handleUploadWeasisNative(packageVersionFileUpload);
 			}
 		});
@@ -164,7 +161,7 @@ public class OverrideView extends AbstractView {
 				if (overrideConfigGridItemDetail != null && overrideConfigGridItemDetail.getBinder() != null
 						&& overrideConfigGridItemDetail.getBinder().getBean() != null) {
 					// Update in DB the override config
-					this.overrideLogic.updateOverrideConfig(overrideConfigGridItemDetail.getBinder().getBean());
+					this.overrideLogic.createUpdate(overrideConfigGridItemDetail.getBinder().getBean());
 				}
 
 				// Set back the textfield in read only
@@ -180,7 +177,8 @@ public class OverrideView extends AbstractView {
 		this.packageVersionUpload = new PackageVersionUpload();
 
 		// Grid + data provider + right click context menu
-		this.packageOverrideGrid = new PackageOverrideGrid(this.overrideDataProvider);
+		this.packageOverrideGrid = new PackageOverrideGrid(this.overrideDataProvider,
+				this.createComboBoxGroupValueProvider());
 		this.overrideDataProvider.setFilter(this.packageOverrideGrid.getOverrideConfigFilter());
 		this.packageOverrideGrid.setDataProvider(this.overrideDataProvider);
 		this.createPackageOverrideGridContextMenu();
@@ -188,12 +186,67 @@ public class OverrideView extends AbstractView {
 		// Refresh button
 		this.refreshGridButton = new Button("Refresh", new Icon(VaadinIcon.REFRESH));
 		this.refreshGridButton.addClickListener(buttonClickEvent -> this.overrideDataProvider.refreshAll());
-		this.refreshGridButton.setMinWidth("47%");
+		this.refreshGridButton.setMinWidth("50%");
+		this.refreshGridButton.addThemeVariants(ButtonVariant.MATERIAL_CONTAINED);
 
 		// Create new group config
 		this.createNewGroupConfigButton = new Button("Create new group config", new Icon(VaadinIcon.PLUS));
 		this.createNewGroupConfigButton.addClickListener(buttonClickEvent -> this.addNewGroupConfigListener());
-		this.createNewGroupConfigButton.setMinWidth("47%");
+		this.createNewGroupConfigButton.setMinWidth("50%");
+		this.createNewGroupConfigButton.addThemeVariants(ButtonVariant.MATERIAL_CONTAINED);
+	}
+
+	private ValueProvider<OverrideConfigEntity, GroupComboBox> createComboBoxGroupValueProvider() {
+		// Retrieve all groups
+		Set<TargetEntity> groups = this.overrideLogic.retrieveGroups();
+
+		// Listener
+		return overrideConfigEntity -> {
+			GroupComboBox groupComboBox = new GroupComboBox(groups, overrideConfigEntity.getTarget());
+
+			// Disable base configuration of each launch config of the bundle
+			if (Objects.equals(overrideConfigEntity.getTarget().getType(), TargetType.DEFAULT)) {
+				groupComboBox.setEnabled(false);
+			}
+
+			// Change listener => refresh model + update in backend
+			groupComboBox.getComboBox().addValueChangeListener(event -> {
+				// Modify target
+				OverrideConfigEntity overrideConfigModified = new OverrideConfigEntity();
+				overrideConfigModified.setTarget(event.getValue());
+				overrideConfigModified.setLaunchConfig(overrideConfigEntity.getLaunchConfig());
+				overrideConfigModified.setPackageVersion(overrideConfigEntity.getPackageVersion());
+
+				if (!this.overrideLogic.doesOverrideConfigAlreadyExists(overrideConfigModified)) {
+					// Modify OverrideConfig
+					OverrideConfigEntity overrideConfigUpdated = this.overrideLogic.modifyTarget(overrideConfigEntity,
+							event.getValue());
+					if (overrideConfigUpdated != null) {
+						// OverrideConfig has been updated
+						this.displayMessage(
+								new Message(MessageLevel.INFO, MessageFormat.TEXT,
+										String.format("Override config %s has been updated", overrideConfigUpdated)),
+								MessageType.NOTIFICATION_MESSAGE);
+					}
+					else {
+						// OverrideConfig has not been updated
+						this.displayMessage(
+								new Message(MessageLevel.WARN, MessageFormat.TEXT, String
+									.format("Override config %s has not been updated", overrideConfigModified)),
+								MessageType.NOTIFICATION_MESSAGE);
+					}
+					this.packageOverrideGrid.getOverrideDataProvider().refreshAll();
+				}
+				else {
+					// Override config has not been updated because already existing
+					this.displayMessage(
+							new Message(MessageLevel.WARN, MessageFormat.TEXT,
+									String.format("Override config %s already existing!", overrideConfigModified)),
+							MessageType.NOTIFICATION_MESSAGE);
+				}
+			});
+			return groupComboBox;
+		};
 	}
 
 	/**
@@ -291,10 +344,9 @@ public class OverrideView extends AbstractView {
 				// copy them in the entity to create
 				this.overrideLogic.copyAllValuesFromDefaultGroupExceptId(overrideConfigToCreate);
 
-				// Create target
-				OverrideConfigEntity overrideConfigCreated = this.overrideLogic
-					.doesOverrideConfigAlreadyExists(overrideConfigToCreate) ? null
-							: this.overrideLogic.updateOverrideConfig(overrideConfigToCreate);
+				// Create OverrideConfig
+				OverrideConfigEntity overrideConfigCreated = this.overrideLogic.doesOverrideConfigAlreadyExists(
+						overrideConfigToCreate) ? null : this.overrideLogic.createUpdate(overrideConfigToCreate);
 
 				if (overrideConfigCreated != null) {
 					// OverrideConfig has been created
@@ -320,17 +372,19 @@ public class OverrideView extends AbstractView {
 	 * Add components in the view
 	 */
 	private void addComponentsView() {
+
 		// Upload
 		this.add(this.packageVersionUpload);
 		// Grid
 		this.add(this.packageOverrideGrid);
+
+		this.setSizeFull();
+		this.setWidthFull();
+
 		// Buttons
 		HorizontalLayout buttonLayout = new HorizontalLayout(this.refreshGridButton, this.createNewGroupConfigButton);
 		buttonLayout.setWidthFull();
-
 		this.add(buttonLayout);
-		this.setSizeFull();
-		this.setWidthFull();
 	}
 
 	// @Override

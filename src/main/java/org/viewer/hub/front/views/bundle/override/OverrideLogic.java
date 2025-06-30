@@ -9,9 +9,10 @@
  *
  */
 
-package org.viewer.hub.front.views.override;
+package org.viewer.hub.front.views.bundle.override;
 
 import lombok.Getter;
+import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.data.domain.Page;
@@ -29,9 +30,9 @@ import org.viewer.hub.back.model.MessageLevel;
 import org.viewer.hub.back.model.MessageType;
 import org.viewer.hub.back.service.OverrideConfigService;
 import org.viewer.hub.back.service.PackageService;
-import org.viewer.hub.front.views.override.component.OverrideConfigFilter;
-import org.viewer.hub.front.views.override.component.PackageVersionFileUpload;
-import org.viewer.hub.front.views.override.component.RefreshPackageGridEvent;
+import org.viewer.hub.front.views.bundle.override.component.OverrideConfigFilter;
+import org.viewer.hub.front.views.bundle.override.component.PackageVersionFileUpload;
+import org.viewer.hub.front.views.bundle.override.component.RefreshPackageGridEvent;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -45,6 +46,7 @@ import java.util.Set;
 public class OverrideLogic {
 
 	// View
+	@Setter
 	private OverrideView overrideView;
 
 	// Service
@@ -63,10 +65,6 @@ public class OverrideLogic {
 	@EventListener
 	public void onRefreshPackageGridEvent(RefreshPackageGridEvent refreshPackageGridEvent) {
 		this.overrideView.clearUploadedFileAndRefresh();
-	}
-
-	public void setOverrideView(OverrideView overrideView) {
-		this.overrideView = overrideView;
 	}
 
 	public Set<PackageVersionEntity> retrievePackageVersions() {
@@ -101,12 +99,13 @@ public class OverrideLogic {
 	}
 
 	/**
-	 * Update an OverrideConfigEntity in DB
+	 * Create a new OverrideConfigEntity or update properties of an existing
+	 * OverrideConfigEntity in DB
 	 * @param overrideConfigEntity OverrideConfigEntity
 	 * @return updated OverrideConfigEntity
 	 */
-	public OverrideConfigEntity updateOverrideConfig(OverrideConfigEntity overrideConfigEntity) {
-		return this.overrideConfigService.update(overrideConfigEntity);
+	public OverrideConfigEntity createUpdate(OverrideConfigEntity overrideConfigEntity) {
+		return this.overrideConfigService.createUpdate(overrideConfigEntity);
 	}
 
 	/**
@@ -152,21 +151,29 @@ public class OverrideLogic {
 	}
 
 	/**
-	 * Handle upload of weasis-native package version
+	 * Handle upload of package version
 	 */
 	public void handleUploadWeasisNative(PackageVersionFileUpload packageVersionFileUpload) {
 		try (InputStream fileDataInputStream = packageVersionFileUpload.getMemoryBuffer().getInputStream()) {
+			if (this.packageService.isImportCoherent(fileDataInputStream)) {
 
-			// Determine the version to upload, if incorrect format return null
-			String versionToUpload = this.checkVersionToUpload(fileDataInputStream);
+				// Determine the version to upload, if incorrect format return null
+				String versionToUpload = this.checkVersionToUpload(fileDataInputStream);
 
-			if (versionToUpload != null) {
-				this.handlePackageVersionToUpload(fileDataInputStream, versionToUpload);
+				if (versionToUpload != null) {
+					this.handlePackageVersionToUpload(fileDataInputStream, versionToUpload);
+				}
+				else {
+					this.overrideView.getPackageVersionUpload().getPackageVersionFileUpload().clearFileList();
+					this.overrideView.displayMessage(new Message(MessageLevel.ERROR, MessageFormat.TEXT,
+							"Issue when importing: rebuild before importing your zip file with appropriate version in the property weasis.version of the file config.properties or base.json"),
+							MessageType.NOTIFICATION_MESSAGE);
+				}
 			}
 			else {
 				this.overrideView.getPackageVersionUpload().getPackageVersionFileUpload().clearFileList();
 				this.overrideView.displayMessage(new Message(MessageLevel.ERROR, MessageFormat.TEXT,
-						"Issue when importing: rebuild before importing your weasis-native zip file with appropriate version in the property weasis.version of the file config.properties "),
+						"Issue when importing: incoherent import (version already present or compatibility version file not coherent)"),
 						MessageType.NOTIFICATION_MESSAGE);
 			}
 		}
@@ -184,6 +191,15 @@ public class OverrideLogic {
 	 */
 	public String checkVersionToUpload(InputStream fileData) {
 		return this.packageService.checkWeasisNativeVersionToUpload(fileData);
+	}
+
+	/**
+	 * Modify the target of an overrideConfig
+	 * @param overrideConfigEntity OverrideConfig to modify
+	 * @param targetEntity Modified target
+	 */
+	public OverrideConfigEntity modifyTarget(OverrideConfigEntity overrideConfigEntity, TargetEntity targetEntity) {
+		return this.overrideConfigService.modifyTarget(overrideConfigEntity, targetEntity);
 	}
 
 }

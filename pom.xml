@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~  Copyright (c) 2022-2024 Weasis Team and other contributors.
+  ~  Copyright (c) 2022-2025 Weasis Team and other contributors.
   ~
   ~  This program and the accompanying materials are made available under the terms of the Eclipse
   ~  Public License 2.0 which is available at https://www.eclipse.org/legal/epl-2.0, or the Apache
@@ -24,7 +24,7 @@
 
     <!-- Properties -->
     <properties>
-        <revision>0.9.2</revision>
+        <revision>0.10.0</revision>
         <java-version>21</java-version>
         <jdk-version>21</jdk-version>
         <enforcer.jdk-version>[${jdk-version},)</enforcer.jdk-version>
@@ -41,17 +41,19 @@
         <ojdbc.version>23.3.0.23.09</ojdbc.version>
         <jackson.version>2.15.3</jackson.version>
         <h2.version>2.2.224</h2.version>
-        <vaadin.version>24.6.1</vaadin.version>
-        <weasis-dicom-tools.version>5.29.0.2</weasis-dicom-tools.version>
+        <vaadin.version>24.6.5</vaadin.version>
+        <weasis-dicom-tools.version>5.32.0</weasis-dicom-tools.version>
         <maven.artifact.version>3.8.6</maven.artifact.version>
         <node.version>v23.6.0</node.version>
         <awssdk.version>2.21.29</awssdk.version>
-        <springdoc-openapi-ui.version>1.7.0</springdoc-openapi-ui.version>
+<!--        <springdoc-openapi-ui.version>1.7.0</springdoc-openapi-ui.version>-->
         <io.awspring.cloud.version>3.2.1</io.awspring.cloud.version>
         <lombok.version>1.18.30</lombok.version>
         <maven-compiler-plugin.version>3.12.1</maven-compiler-plugin.version>
         <spring-boot-maven-plugin.version>3.2.3</spring-boot-maven-plugin.version>
         <jacoco-maven-plugin.version>0.8.11</jacoco-maven-plugin.version>
+        <jakarta-json.version>2.0.1</jakarta-json.version>
+        <springdoc-openapi-starter-webmvc-ui.version>2.6.0</springdoc-openapi-starter-webmvc-ui.version>
     </properties>
 
     <repositories>
@@ -139,6 +141,15 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-configuration-processor</artifactId>
             <optional>true</optional>
+            <version>${springboot.version}</version>
+        </dependency>
+
+        <!-- ============== -->
+        <!-- Spring WebFlux -->
+        <!-- ============== -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-webflux</artifactId>
             <version>${springboot.version}</version>
         </dependency>
 
@@ -236,6 +247,15 @@
             <groupId>com.fasterxml.jackson.dataformat</groupId>
             <artifactId>jackson-dataformat-properties</artifactId>
             <version>${jackson.version}</version>
+        </dependency>
+
+        <!-- ==== -->
+        <!-- Json -->
+        <!-- ==== -->
+        <dependency>
+            <groupId>org.glassfish</groupId>
+            <artifactId>jakarta.json</artifactId>
+            <version>${jakarta-json.version}</version>
         </dependency>
 
         <!-- ==================================-->
@@ -348,6 +368,13 @@
             <version>3.0.0</version>
         </dependency>
 
+        <!-- Vaadin - Icons Line Awesome -->
+        <dependency>
+            <groupId>org.parttio</groupId>
+            <artifactId>line-awesome</artifactId>
+            <version>2.1.0</version>
+        </dependency>
+
         <!-- ===================== -->
         <!-- Freemarker SpringBoot -->
         <!-- ===================== -->
@@ -433,8 +460,8 @@
         <!-- ================== -->
         <dependency>
             <groupId>org.springdoc</groupId>
-            <artifactId>springdoc-openapi-ui</artifactId>
-            <version>${springdoc-openapi-ui.version}</version>
+            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+            <version>${springdoc-openapi-starter-webmvc-ui.version}</version>
         </dependency>
 
         <!-- ==== -->

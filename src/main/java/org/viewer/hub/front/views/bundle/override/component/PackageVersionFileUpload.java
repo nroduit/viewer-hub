@@ -9,7 +9,7 @@
  *
  */
 
-package org.viewer.hub.front.views.override.component;
+package org.viewer.hub.front.views.bundle.override.component;
 
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.upload.Upload;
@@ -32,7 +32,7 @@ public class PackageVersionFileUpload extends Upload {
 		super();
 		this.memoryBuffer = new MemoryBuffer();
 		this.setReceiver(this.memoryBuffer);
-		this.setDropLabel(new Span("Drag and drop your package version here (format weasis-native.zip)"));
+		this.setDropLabel(new Span("Drag and drop your package version here..."));
 	}
 
 }

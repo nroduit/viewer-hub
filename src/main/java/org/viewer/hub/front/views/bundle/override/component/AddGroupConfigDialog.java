@@ -9,7 +9,7 @@
  *
  */
 
-package org.viewer.hub.front.views.override.component;
+package org.viewer.hub.front.views.bundle.override.component;
 
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.Shortcuts;
@@ -24,7 +24,6 @@ import lombok.Setter;
 import org.viewer.hub.back.entity.LaunchConfigEntity;
 import org.viewer.hub.back.entity.OverrideConfigEntity;
 import org.viewer.hub.back.entity.PackageVersionEntity;
-import org.viewer.hub.back.entity.TargetEntity;
 
 import java.io.Serial;
 import java.util.Objects;
@@ -50,7 +49,7 @@ public class AddGroupConfigDialog extends Dialog {
 
 	private ComboBox<LaunchConfigEntity> launchConfigComboBox;
 
-	private ComboBox<TargetEntity> groupComboBox;
+	private GroupComboBox groupComboBox;
 
 	/**
 	 * Constructor
@@ -89,11 +88,10 @@ public class AddGroupConfigDialog extends Dialog {
 			.bind(OverrideConfigEntity::getLaunchConfig, OverrideConfigEntity::setLaunchConfig);
 
 		// Group
-		this.groupComboBox = new ComboBox<>();
+		this.groupComboBox = new GroupComboBox();
 		this.groupComboBox.setLabel("Group");
-		this.groupComboBox.setItemLabelGenerator(TargetEntity::getName);
-		this.groupComboBox.setPlaceholder("Select group");
-		this.binder.forField(this.groupComboBox)
+		this.groupComboBox.setPlaceHolder("Select group");
+		this.binder.forField(this.groupComboBox.getComboBox())
 			.withValidator(Objects::nonNull, "Group is mandatory")
 			.bind(OverrideConfigEntity::getTarget, OverrideConfigEntity::setTarget);
 

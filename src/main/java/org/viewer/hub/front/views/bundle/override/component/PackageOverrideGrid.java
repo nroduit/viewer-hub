@@ -8,22 +8,24 @@
  *  SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
  *
  */
-package org.viewer.hub.front.views.override.component;
+package org.viewer.hub.front.views.bundle.override.component;
 
-import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.grid.HeaderRow;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.value.ValueChangeMode;
+import com.vaadin.flow.function.ValueProvider;
 import lombok.Getter;
 import lombok.Setter;
 import org.viewer.hub.back.entity.OverrideConfigEntity;
+import org.viewer.hub.back.entity.WeasisPropertyEntity;
 import org.viewer.hub.front.components.UIUtil;
-import org.viewer.hub.front.views.override.OverrideDataProvider;
+import org.viewer.hub.front.views.bundle.override.OverrideDataProvider;
 
 import java.io.Serial;
+import java.util.Objects;
 
 /**
  * Grid for the package override view
@@ -40,6 +42,8 @@ public class PackageOverrideGrid extends Grid<OverrideConfigEntity> {
 
 	public static final String TOOLTIP_FILTER_BY_LAUNCH_CONFIG = "Filter by launch config";
 
+	public static final String TOOLTIP_FILTER_BY_WEASIS_PROFILE = "Filter by Weasis profile";
+
 	public static final String TOOLTIP_FILTER_BY_GROUP = "Filter by group";
 
 	// Filter grid rows
@@ -50,17 +54,22 @@ public class PackageOverrideGrid extends Grid<OverrideConfigEntity> {
 
 	private OverrideConfigGridItemDetail overrideConfigGridItemDetail;
 
+	// Value provider for column BelongToMemberOf
+	private final ValueProvider<OverrideConfigEntity, GroupComboBox> comboBoxGroupValueProvider;
+
 	/**
 	 * Constructor
 	 * @param overrideDataProvider Data provider for override configs
 	 */
-	public PackageOverrideGrid(OverrideDataProvider<OverrideConfigEntity> overrideDataProvider) {
+	public PackageOverrideGrid(OverrideDataProvider<OverrideConfigEntity> overrideDataProvider,
+			ValueProvider<OverrideConfigEntity, GroupComboBox> comboBoxGroupValueProvider) {
 		super();
 		this.overrideDataProvider = overrideDataProvider;
+		this.comboBoxGroupValueProvider = comboBoxGroupValueProvider;
 
 		// Set size for the grid
 		this.setWidthFull();
-		this.setHeight(86, Unit.PERCENTAGE);
+		this.setHeightFull();
 
 		// Themes of the grid
 		this.addThemeVariants(GridVariant.LUMO_NO_BORDER, GridVariant.LUMO_ROW_STRIPES);
@@ -70,6 +79,8 @@ public class PackageOverrideGrid extends Grid<OverrideConfigEntity> {
 		Column<OverrideConfigEntity> packageVersionColumn = this.addColumnPackageVersion();
 		// Launch Config
 		Column<OverrideConfigEntity> launchConfigColumn = this.addColumnLaunchConfig();
+		// Property weasis.profile
+		Column<OverrideConfigEntity> weasisProfileColumn = this.addColumnWeasisProfile();
 		// Group
 		Column<OverrideConfigEntity> groupColumn = this.addColumnGroup();
 
@@ -77,7 +88,7 @@ public class PackageOverrideGrid extends Grid<OverrideConfigEntity> {
 		this.setItemDetailsRenderer(this.createOverrideConfigDetails());
 
 		// Create filters on rows
-		this.createFiltersOnRows(packageVersionColumn, launchConfigColumn, groupColumn);
+		this.createFiltersOnRows(packageVersionColumn, launchConfigColumn, weasisProfileColumn, groupColumn);
 	}
 
 	/**
@@ -93,12 +104,14 @@ public class PackageOverrideGrid extends Grid<OverrideConfigEntity> {
 
 	/**
 	 * Create filters
-	 * @param packageVersionColumn Package Version Column
-	 * @param launchConfigColumn launch config Column
-	 * @param groupColumn group Column
+	 * @param packageVersionColumn Package Version column
+	 * @param launchConfigColumn launch config column
+	 * @param weasisProfileColumn Weasis profile column
+	 * @param groupColumn group column
 	 */
 	private void createFiltersOnRows(Column<OverrideConfigEntity> packageVersionColumn,
-			Column<OverrideConfigEntity> launchConfigColumn, Column<OverrideConfigEntity> groupColumn) {
+			Column<OverrideConfigEntity> launchConfigColumn, Column<OverrideConfigEntity> weasisProfileColumn,
+			Column<OverrideConfigEntity> groupColumn) {
 		// Filters
 		HeaderRow filterRow = this.appendHeaderRow();
 		this.overrideConfigFilter = new OverrideConfigFilter();
@@ -107,6 +120,8 @@ public class PackageOverrideGrid extends Grid<OverrideConfigEntity> {
 		this.createPackageVersionFilter(packageVersionColumn, filterRow);
 		// Launch config filter
 		this.createLaunchConfigFilter(launchConfigColumn, filterRow);
+		// Weasis profile filter
+		this.createWeasisProfileFilter(weasisProfileColumn, filterRow);
 		// Group filter
 		this.createGroupFilter(groupColumn, filterRow);
 	}
@@ -145,6 +160,24 @@ public class PackageOverrideGrid extends Grid<OverrideConfigEntity> {
 		launchConfigField.setSizeFull();
 		launchConfigField.setPlaceholder("Filter launch config");
 		UIUtil.setTooltip(launchConfigField, TOOLTIP_FILTER_BY_LAUNCH_CONFIG);
+	}
+
+	/**
+	 * Creation of the filter for Weasis profile
+	 * @param weasisProfileColumn Column
+	 * @param filterRow Row filter
+	 */
+	private void createWeasisProfileFilter(Column<OverrideConfigEntity> weasisProfileColumn, HeaderRow filterRow) {
+		TextField weasisProfileField = new TextField();
+		weasisProfileField.addValueChangeListener(event -> {
+			this.overrideConfigFilter.setWeasisProfile(event.getValue());
+			this.overrideDataProvider.refreshAll();
+		});
+		weasisProfileField.setValueChangeMode(ValueChangeMode.EAGER);
+		filterRow.getCell(weasisProfileColumn).setComponent(weasisProfileField);
+		weasisProfileField.setSizeFull();
+		weasisProfileField.setPlaceholder("Filter Weasis profile");
+		UIUtil.setTooltip(weasisProfileField, TOOLTIP_FILTER_BY_WEASIS_PROFILE);
 	}
 
 	/**
@@ -194,11 +227,29 @@ public class PackageOverrideGrid extends Grid<OverrideConfigEntity> {
 	}
 
 	/**
+	 * Add column weasis profile
+	 * @return column built
+	 */
+	private Column<OverrideConfigEntity> addColumnWeasisProfile() {
+		return this
+			.addColumn(overrideConfigEntity -> overrideConfigEntity.getWeasisPropertyEntities()
+				.stream()
+				.filter(p -> Objects.equals(p.getCode(), "weasis.profile"))
+				.findFirst()
+				.orElse(WeasisPropertyEntity.builder().value("").build())
+				.getValue())
+			.setHeader("Weasis profile")
+			.setWidth("20%")
+			.setSortable(false)
+			.setKey("weasisProfileColumn");
+	}
+
+	/**
 	 * Add column group
 	 * @return column built
 	 */
 	private Column<OverrideConfigEntity> addColumnGroup() {
-		return this.addColumn(overrideConfigEntity -> overrideConfigEntity.getTarget().getName())
+		return this.addComponentColumn(this.comboBoxGroupValueProvider)
 			.setHeader("Group")
 			.setWidth("20%")
 			.setSortable(false)

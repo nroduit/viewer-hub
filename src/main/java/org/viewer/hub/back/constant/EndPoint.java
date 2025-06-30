@@ -59,4 +59,15 @@ public class EndPoint {
 
 	public static final String ALL_REMAINING_PATH = "/**";
 
+	// Dicom-web
+	public static final String STUDIES_PATH = "/studies";
+
+	public static final String SERIES_PATH = "/series";
+
+	public static final String INSTANCES_PATH = "/instances";
+
+	public static final String STUDIES_SERIES_PATH = "/studies/{studyUID}/series";
+
+	public static final String STUDIES_SERIES_INSTANCES_PATH = "/studies/{studyUID}/series/{serieUID}/instances";
+
 }

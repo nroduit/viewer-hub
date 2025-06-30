@@ -11,11 +11,14 @@
 
 package org.viewer.hub.back.model.property;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.viewer.hub.back.enums.ConnectorType;
 import org.viewer.hub.back.model.validator.ValidConnectorProperty;
@@ -26,29 +29,39 @@ import org.viewer.hub.back.model.validator.ValidConnectorProperty;
 @Setter
 @EqualsAndHashCode
 @AllArgsConstructor
+@NoArgsConstructor
+@Builder
 public class ConnectorProperty {
 
+	@Schema(description = "Id of the connector")
 	private String id;
 
 	@NotNull
+	@Schema(description = "Type of connector: DB, dicom, dicom-web")
 	private ConnectorType type;
 
-	// -------- Wado --------
+	// -------- Search criteria --------
 	@Valid
 	@NotNull
+	@Schema(description = "Search criteria")
 	private SearchCriteriaProperty searchCriteria;
 
-	// -------- Wado --------
+	// -------- Weasis --------
 	@Valid
 	@NotNull
-	private WadoConnectorProperty wado;
+	@Schema(description = "Properties specific to Weasis")
+	private WeasisConnectorProperty weasis;
 
 	// -------- For database --------
-
+	@Schema(description = "Db connector properties")
 	private DbConnectorProperty dbConnector;
 
 	// -------- For dicom ----------
-
+	@Schema(description = "Dicom connector properties")
 	private DicomConnectorProperty dicomConnector;
+
+	// -------- For dicom-web ----------
+	@Schema(description = "Dicom-web connector properties")
+	private DicomWebConnectorProperty dicomWebConnector;
 
 }

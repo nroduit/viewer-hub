@@ -18,7 +18,7 @@ import jakarta.persistence.criteria.Root;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.jpa.domain.Specification;
 import org.viewer.hub.back.entity.OverrideConfigEntity;
-import org.viewer.hub.front.views.override.component.OverrideConfigFilter;
+import org.viewer.hub.front.views.bundle.override.component.OverrideConfigFilter;
 
 import java.util.ArrayList;
 import java.util.List;
