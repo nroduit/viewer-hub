@@ -18,9 +18,9 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.viewer.hub.back.enums.IHERequestType;
+import org.viewer.hub.back.model.ArchiveSearchCriteria;
+import org.viewer.hub.back.model.IHESearchCriteria;
 import org.viewer.hub.back.model.SearchCriteria;
-import org.viewer.hub.back.model.WeasisIHESearchCriteria;
-import org.viewer.hub.back.model.WeasisSearchCriteria;
 import org.viewer.hub.back.model.manifest.Manifest;
 import org.viewer.hub.back.service.CacheService;
 import org.viewer.hub.back.service.ConnectorQueryService;
@@ -66,9 +66,9 @@ public class ManifestServiceImpl implements ManifestService {
 	// When working should use SecurityContextHolder.getContext().getAuthentication()
 	public void buildManifest(String key, @Valid SearchCriteria searchCriteria, Authentication authentication) {
 		// Build the manifest depending on the configured connectors
-		Manifest manifest = searchCriteria instanceof WeasisIHESearchCriteria
-				? this.buildManifestWithIHESearchCriteria((WeasisIHESearchCriteria) searchCriteria, authentication, key)
-				: this.buildManifestWithoutIHESearchCriteria((WeasisSearchCriteria) searchCriteria, authentication,
+		Manifest manifest = searchCriteria instanceof IHESearchCriteria
+				? this.buildManifestWithIHESearchCriteria((IHESearchCriteria) searchCriteria, authentication, key)
+				: this.buildManifestWithoutIHESearchCriteria((ArchiveSearchCriteria) searchCriteria, authentication,
 						key);
 
 		// Update the build duration
@@ -92,8 +92,8 @@ public class ManifestServiceImpl implements ManifestService {
 	 * basic or oAuth2 wado parameters should be used
 	 * @return Manifest built
 	 */
-	private Manifest buildManifestWithoutIHESearchCriteria(WeasisSearchCriteria searchCriteria,
-			Authentication authentication, String key) {
+	private Manifest buildManifestWithoutIHESearchCriteria(ArchiveSearchCriteria searchCriteria,
+														   Authentication authentication, String key) {
 		LOG.debug("Building manifest without IHE search criteria");
 		Manifest manifest = new Manifest(authentication != null, searchCriteria);
 
@@ -145,8 +145,8 @@ public class ManifestServiceImpl implements ManifestService {
 	 * basic or oAuth2 wado parameters should be used
 	 * @return Manifest built
 	 */
-	private Manifest buildManifestWithIHESearchCriteria(WeasisIHESearchCriteria searchCriteria,
-			Authentication authentication, String key) {
+	private Manifest buildManifestWithIHESearchCriteria(IHESearchCriteria searchCriteria,
+                                                        Authentication authentication, String key) {
 		LOG.debug("Building manifest with IHE search criteria");
 
 		// TODO: addGeneralViewerMessage...

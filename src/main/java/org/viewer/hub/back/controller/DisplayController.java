@@ -32,10 +32,11 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.view.RedirectView;
 import org.viewer.hub.back.constant.EndPoint;
 import org.viewer.hub.back.constant.ParamName;
+import org.viewer.hub.back.model.ArchiveSearchCriteria;
+import org.viewer.hub.back.model.IHESearchCriteria;
 import org.viewer.hub.back.model.SearchCriteria;
-import org.viewer.hub.back.model.WeasisIHESearchCriteria;
-import org.viewer.hub.back.model.WeasisSearchCriteria;
 import org.viewer.hub.back.service.CryptographyService;
+import org.viewer.hub.back.service.DisplaySelectViewerRuleService;
 import org.viewer.hub.back.service.DisplayService;
 import org.viewer.hub.back.util.InetUtil;
 
@@ -52,6 +53,9 @@ public class DisplayController {
 	// Services
 	private final DisplayService displayService;
 
+	// TODO
+	private final DisplaySelectViewerRuleService displaySelectViewerRuleService;
+
 	private final CryptographyService cryptographyService;
 
 	/**
@@ -60,10 +64,26 @@ public class DisplayController {
 	 * @param cryptographyService cryptography service
 	 */
 	@Autowired
-	public DisplayController(final DisplayService displayService, final CryptographyService cryptographyService) {
+	public DisplayController(final DisplayService displayService, final CryptographyService cryptographyService,
+							 final DisplaySelectViewerRuleService displaySelectViewerRuleService) {
 		this.displayService = displayService;
 		this.cryptographyService = cryptographyService;
+		this.displaySelectViewerRuleService = displaySelectViewerRuleService;
 	}
+
+	// TODO
+	/**
+	 * Display a viewer depending on SearchCriteria and rules to select the viewer to display
+	 */
+	@Operation(summary = "Display a viewer depending on search criteria and rule to select the viewer to launch",
+			description = "Display a viewer depending on SearchCriteria and rules to select the viewer to launch")
+	@GetMapping(EndPoint.VIEWER)
+	public RedirectView launchViewerWithoutIHEParameters(HttpServletRequest request, Authentication authentication,
+													  @Valid ArchiveSearchCriteria archiveSearchCriteria) {
+		// TODO
+		return new RedirectView(this.displaySelectViewerRuleService.displayViewer(authentication, archiveSearchCriteria));
+	}
+
 
 	/**
 	 * Launch Weasis depending on IHE search criteria: not authenticated version
@@ -77,7 +97,7 @@ public class DisplayController {
 			description = "Launch Weasis depending on IHE search criteria: not authenticated version")
 	@GetMapping(EndPoint.IHE_INVOKE_IMAGE_DISPLAY_PATH)
 	public RedirectView launchWeasisWithIHEParameters(HttpServletRequest request, Authentication authentication,
-			@Valid WeasisIHESearchCriteria weasisIHESearchCriteria,
+			@Valid IHESearchCriteria weasisIHESearchCriteria,
 			@RequestParam(value = ParamName.EXT_CFG, required = false) String extCfg) {
 		// TODO: workaround=> currently not working with different name => conflict ?
 		// to do JacksonConfig
@@ -104,7 +124,7 @@ public class DisplayController {
 	@GetMapping(EndPoint.AUTH_IHE_INVOKE_IMAGE_DISPLAY_PATH)
 	public RedirectView launchAuthWeasisWithIHEParameters(HttpServletRequest request,
 			@Parameter(hidden = true, required = true) @NotNull Authentication authentication,
-			@Valid WeasisIHESearchCriteria weasisIHESearchCriteria,
+			@Valid IHESearchCriteria weasisIHESearchCriteria,
 			@RequestParam(value = ParamName.EXT_CFG, required = false) String extCfg) {
 		try {
 			return this.launchWeasisWithIHEParameters(request, authentication, weasisIHESearchCriteria, extCfg);
@@ -129,7 +149,7 @@ public class DisplayController {
 			description = "Launch Weasis depending on search criteria: not authenticated version")
 	@GetMapping(EndPoint.WEASIS_PATH)
 	public RedirectView launchWeasisWithoutIHEParameters(HttpServletRequest request, Authentication authentication,
-			@Valid WeasisSearchCriteria weasisSearchCriteria,
+			@Valid ArchiveSearchCriteria weasisSearchCriteria,
 			@RequestParam(value = ParamName.EXT_CFG, required = false) String extCfg) {
 		// TODO: workaround=> currently not working with different name => conflict ?
 		// to do JacksonConfig
@@ -156,7 +176,7 @@ public class DisplayController {
 	@GetMapping(EndPoint.AUTH_WEASIS_PATH)
 	public RedirectView launchAuthWeasisWithoutIHEParameters(HttpServletRequest request,
 			@Parameter(hidden = true, required = true) @NotNull Authentication authentication,
-			@Valid WeasisSearchCriteria weasisSearchCriteria,
+			@Valid ArchiveSearchCriteria weasisSearchCriteria,
 			@RequestParam(value = ParamName.EXT_CFG, required = false) String extCfg) {
 		try {
 			return this.launchWeasisWithoutIHEParameters(request, authentication, weasisSearchCriteria, extCfg);
@@ -173,7 +193,7 @@ public class DisplayController {
 			description = "Launch Weasis depending on IHE search criteria: not authenticated version => search criteria in body")
 	@PostMapping(EndPoint.IHE_INVOKE_IMAGE_DISPLAY_PATH)
 	public RedirectView launchWeasisWithIHEParameters(HttpServletRequest request,
-			@RequestBody @Valid WeasisIHESearchCriteria weasisIHESearchCriteria) {
+			@RequestBody @Valid IHESearchCriteria weasisIHESearchCriteria) {
 		return this.launchWeasisWithIHEParameters(request, null, weasisIHESearchCriteria,
 				weasisIHESearchCriteria.getExtCfg());
 	}
@@ -182,7 +202,7 @@ public class DisplayController {
 			description = "Launch Weasis depending on search criteria: not authenticated version => search criteria in body")
 	@PostMapping(EndPoint.WEASIS_PATH)
 	public RedirectView launchWeasisWithoutIHEParameters(HttpServletRequest request,
-			@RequestBody @Valid WeasisSearchCriteria weasisSearchCriteria) {
+			@RequestBody @Valid ArchiveSearchCriteria weasisSearchCriteria) {
 		return this.launchWeasisWithoutIHEParameters(request, null, weasisSearchCriteria,
 				weasisSearchCriteria.getExtCfg());
 	}

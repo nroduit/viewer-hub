@@ -31,7 +31,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import org.viewer.hub.back.config.properties.ConnectorConfigurationProperties;
 import org.viewer.hub.back.enums.ConnectorAuthType;
 import org.viewer.hub.back.enums.ConnectorType;
-import org.viewer.hub.back.model.WeasisSearchCriteria;
+import org.viewer.hub.back.model.ArchiveSearchCriteria;
 import org.viewer.hub.back.model.manifest.DicomPatientSex;
 import org.viewer.hub.back.model.manifest.Manifest;
 import org.viewer.hub.back.model.property.ConnectorAuthenticationProperty;
@@ -246,7 +246,7 @@ class DicomConnectorQueryServiceImplTest {
 		Manifest manifest = new Manifest();
 		Set<String> patientIds = new HashSet<>();
 		patientIds.add("patientId");
-		WeasisSearchCriteria weasisSearchCriteria = new WeasisSearchCriteria();
+		ArchiveSearchCriteria weasisSearchCriteria = new ArchiveSearchCriteria();
 
 		// Call service
 		this.dicomConnectorQueryService.buildFromPatientIdsDicomConnector(manifest, patientIds,
@@ -266,7 +266,7 @@ class DicomConnectorQueryServiceImplTest {
 		Manifest manifest = new Manifest();
 		Set<String> patientIds = new HashSet<>();
 		patientIds.add("patientId");
-		WeasisSearchCriteria weasisSearchCriteria = new WeasisSearchCriteria();
+		ArchiveSearchCriteria weasisSearchCriteria = new ArchiveSearchCriteria();
 
 		// Mock behaviour
 		Mockito.when(responseSpec.bodyToMono(String.class))

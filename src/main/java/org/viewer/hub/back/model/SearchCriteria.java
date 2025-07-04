@@ -38,6 +38,14 @@ import static org.weasis.core.util.StringUtil.deAccent;
 @EqualsAndHashCode
 public abstract class SearchCriteria implements Serializable {
 
+	// TODO
+//	=> SearchCriteria
+//    => ArchiveSearchCriteria/IHESearchCriteria
+//      => WeasisArchiveSearchCriteria/WeasisIHESearchCriteria et OHIFArchiveSearchCriteria/OHIFIHESearchCriteria
+
+
+
+
 	@Serial
 	private static final long serialVersionUID = 3062479886665643364L;
 

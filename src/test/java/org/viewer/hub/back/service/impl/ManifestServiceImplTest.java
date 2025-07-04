@@ -18,8 +18,8 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.viewer.hub.back.enums.IHERequestType;
-import org.viewer.hub.back.model.WeasisIHESearchCriteria;
-import org.viewer.hub.back.model.WeasisSearchCriteria;
+import org.viewer.hub.back.model.ArchiveSearchCriteria;
+import org.viewer.hub.back.model.IHESearchCriteria;
 import org.viewer.hub.back.service.CacheService;
 import org.viewer.hub.back.service.ConnectorQueryService;
 import org.viewer.hub.back.service.SecurityService;
@@ -59,7 +59,7 @@ class ManifestServiceImplTest {
 	void when_buildingManifestWithoutIHE_with_weasisSearchCriteria_should_putManifestInCache() {
 
 		// Init data
-		WeasisSearchCriteria weasisSearchCriteria = new WeasisSearchCriteria();
+		ArchiveSearchCriteria weasisSearchCriteria = new ArchiveSearchCriteria();
 
 		// Call service
 		this.manifestService.buildManifest("testWithoutIHE", weasisSearchCriteria, null);
@@ -73,7 +73,7 @@ class ManifestServiceImplTest {
 	void when_buildingManifestWithoutIHE_with_sopInstanceUids_should_callCorrespondingMethod() {
 
 		// Init data
-		WeasisSearchCriteria weasisSearchCriteria = new WeasisSearchCriteria();
+		ArchiveSearchCriteria weasisSearchCriteria = new ArchiveSearchCriteria();
 		weasisSearchCriteria.setObjectUID(new LinkedHashSet<>(List.of("objectUid")));
 
 		// Call service
@@ -88,7 +88,7 @@ class ManifestServiceImplTest {
 	void when_buildingManifestWithoutIHE_with_serieInstanceUids_should_callCorrespondingMethod() {
 
 		// Init data
-		WeasisSearchCriteria weasisSearchCriteria = new WeasisSearchCriteria();
+		ArchiveSearchCriteria weasisSearchCriteria = new ArchiveSearchCriteria();
 		weasisSearchCriteria.setSeriesUID(new LinkedHashSet<>(List.of("uid")));
 
 		// Call service
@@ -103,7 +103,7 @@ class ManifestServiceImplTest {
 	void when_buildingManifestWithoutIHE_with_studyAccessionsNumber_should_callCorrespondingMethod() {
 
 		// Init data
-		WeasisSearchCriteria weasisSearchCriteria = new WeasisSearchCriteria();
+		ArchiveSearchCriteria weasisSearchCriteria = new ArchiveSearchCriteria();
 		weasisSearchCriteria.setAccessionNumber(new LinkedHashSet<>(List.of("uid")));
 
 		// Call service
@@ -118,7 +118,7 @@ class ManifestServiceImplTest {
 	void when_buildingManifestWithoutIHE_with_studyUids_should_callCorrespondingMethod() {
 
 		// Init data
-		WeasisSearchCriteria weasisSearchCriteria = new WeasisSearchCriteria();
+		ArchiveSearchCriteria weasisSearchCriteria = new ArchiveSearchCriteria();
 		weasisSearchCriteria.setStudyUID(new LinkedHashSet<>(List.of("uid")));
 
 		// Call service
@@ -133,7 +133,7 @@ class ManifestServiceImplTest {
 	void when_buildingManifestWithoutIHE_with_patientIds_should_callCorrespondingMethod() {
 
 		// Init data
-		WeasisSearchCriteria weasisSearchCriteria = new WeasisSearchCriteria();
+		ArchiveSearchCriteria weasisSearchCriteria = new ArchiveSearchCriteria();
 		weasisSearchCriteria.setPatientID(new LinkedHashSet<>(List.of("uid")));
 
 		// Call service
@@ -148,7 +148,7 @@ class ManifestServiceImplTest {
 	void when_buildingManifestWithIHE_with_weasisIHESearchCriteria_should_putManifestInCache() {
 
 		// Init data
-		WeasisIHESearchCriteria weasisIHESearchCriteria = new WeasisIHESearchCriteria();
+		IHESearchCriteria weasisIHESearchCriteria = new IHESearchCriteria();
 
 		// Call service
 		this.manifestService.buildManifest("testWithIHE", weasisIHESearchCriteria, null);
@@ -162,7 +162,7 @@ class ManifestServiceImplTest {
 	void when_buildingManifestWithIHE_with_iheRequestTypeStudyAndAccessionNumber_should_callCorrespondingMethod() {
 
 		// Init data
-		WeasisIHESearchCriteria weasisIHESearchCriteria = new WeasisIHESearchCriteria();
+		IHESearchCriteria weasisIHESearchCriteria = new IHESearchCriteria();
 		weasisIHESearchCriteria.setAccessionNumber(new LinkedHashSet<>(List.of("uid")));
 		weasisIHESearchCriteria.setRequestType(IHERequestType.STUDY);
 
@@ -178,7 +178,7 @@ class ManifestServiceImplTest {
 	void when_buildingManifestWithIHE_with_iheRequestTypeStudyAndStudyInstanceUids_should_callCorrespondingMethod() {
 
 		// Init data
-		WeasisIHESearchCriteria weasisIHESearchCriteria = new WeasisIHESearchCriteria();
+		IHESearchCriteria weasisIHESearchCriteria = new IHESearchCriteria();
 		weasisIHESearchCriteria.setStudyUID(new LinkedHashSet<>(List.of("uid")));
 		weasisIHESearchCriteria.setRequestType(IHERequestType.STUDY);
 
@@ -194,7 +194,7 @@ class ManifestServiceImplTest {
 	void when_buildingManifestWithIHE_with_iheRequestTypeStudyAndStudyInstanceUidsDeactivated_should_callCorrespondingMethod() {
 
 		// Init data
-		WeasisIHESearchCriteria weasisIHESearchCriteria = new WeasisIHESearchCriteria();
+		IHESearchCriteria weasisIHESearchCriteria = new IHESearchCriteria();
 		weasisIHESearchCriteria.setAccessionNumber(new LinkedHashSet<>(List.of("uid")));
 		weasisIHESearchCriteria.setRequestType(IHERequestType.STUDY);
 
@@ -210,7 +210,7 @@ class ManifestServiceImplTest {
 	void when_buildingManifestWithIHE_with_iheRequestTypePatientAndPatientIds_should_callCorrespondingMethod() {
 
 		// Init data
-		WeasisIHESearchCriteria weasisIHESearchCriteria = new WeasisIHESearchCriteria();
+		IHESearchCriteria weasisIHESearchCriteria = new IHESearchCriteria();
 		weasisIHESearchCriteria.setPatientID("uid");
 		weasisIHESearchCriteria.setRequestType(IHERequestType.PATIENT);
 

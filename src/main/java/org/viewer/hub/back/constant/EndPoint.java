@@ -54,6 +54,8 @@ public class EndPoint {
 
 	public static final String AUTH_IHE_INVOKE_IMAGE_DISPLAY_PATH = "/auth/IHEInvokeImageDisplay";
 
+	public static final String VIEWER = "/viewer";
+
 	// Override package configuration
 	public static final String OVERRIDE_CONFIG_PATH = "/overrideConfig";
 

@@ -29,7 +29,7 @@ import java.util.Set;
 @NotNull
 @ToString
 @EqualsAndHashCode(callSuper = true)
-public class WeasisSearchCriteria extends SearchCriteria {
+public class ArchiveSearchCriteria extends SearchCriteria {
 
 	@Schema(description = "Patient Ids to look for", name = "patientID", type = "Set<String>", example = "123,456,789")
 	private Set<String> patientID;
@@ -53,7 +53,7 @@ public class WeasisSearchCriteria extends SearchCriteria {
 	/**
 	 * Constructor
 	 */
-	public WeasisSearchCriteria() {
+	public ArchiveSearchCriteria() {
 		this.patientID = new HashSet<>();
 		this.studyUID = new HashSet<>();
 		this.accessionNumber = new HashSet<>();

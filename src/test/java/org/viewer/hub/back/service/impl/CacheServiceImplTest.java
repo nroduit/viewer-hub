@@ -24,7 +24,7 @@ import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.viewer.hub.back.constant.CacheName;
 import org.viewer.hub.back.entity.PackageVersionEntity;
-import org.viewer.hub.back.model.WeasisSearchCriteria;
+import org.viewer.hub.back.model.ArchiveSearchCriteria;
 import org.viewer.hub.back.model.manifest.Manifest;
 import org.viewer.hub.back.service.CacheService;
 
@@ -100,7 +100,7 @@ class CacheServiceImplTest {
 	@Test
 	void when_searchParametersChange_then_keyBuiltShouldBeDifferent() {
 		// Build keys
-		WeasisSearchCriteria weasisSearchCriteria = new WeasisSearchCriteria();
+		ArchiveSearchCriteria weasisSearchCriteria = new ArchiveSearchCriteria();
 		weasisSearchCriteria.setArchive(new LinkedHashSet<>(List.of("A", "B")));
 		String key = this.cacheService.constructManifestKeyDependingOnSearchParameters(weasisSearchCriteria);
 		weasisSearchCriteria.getArchive().add("C");

@@ -18,7 +18,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
-import org.viewer.hub.back.model.WeasisSearchCriteria;
+import org.viewer.hub.back.model.ArchiveSearchCriteria;
 import org.viewer.hub.back.service.CacheService;
 import org.viewer.hub.back.service.DisplayService;
 import org.viewer.hub.back.service.ManifestService;
@@ -46,7 +46,7 @@ class DisplayServiceImplTest {
 	@Test
 	void when_retrievingWeasisLaunchUrl_should_callMethodToBuildKey() {
 		// Init data
-		WeasisSearchCriteria weasisSearchCriteria = new WeasisSearchCriteria();
+		ArchiveSearchCriteria weasisSearchCriteria = new ArchiveSearchCriteria();
 
 		// Call service
 		this.displayService.retrieveWeasisLaunchUrl(weasisSearchCriteria, null);
@@ -59,7 +59,7 @@ class DisplayServiceImplTest {
 	@Test
 	void when_retrievingWeasisLaunchUrl_withKeyAlreadyExistingInCache_should_notCallServiceToBuildManifest() {
 		// Init data
-		WeasisSearchCriteria weasisSearchCriteria = new WeasisSearchCriteria();
+		ArchiveSearchCriteria weasisSearchCriteria = new ArchiveSearchCriteria();
 
 		// Mock
 		Mockito.when(this.cacheServiceMock.constructManifestKeyDependingOnSearchParameters(weasisSearchCriteria))
@@ -76,7 +76,7 @@ class DisplayServiceImplTest {
 	@Test
 	void when_retrievingWeasisLaunchUrl_withKeyNotExistingInCache_should_callServiceToBuildManifest() {
 		// Init data
-		WeasisSearchCriteria weasisSearchCriteria = new WeasisSearchCriteria();
+		ArchiveSearchCriteria weasisSearchCriteria = new ArchiveSearchCriteria();
 
 		// Mock
 		Mockito.when(this.cacheServiceMock.constructManifestKeyDependingOnSearchParameters(weasisSearchCriteria))
@@ -93,7 +93,7 @@ class DisplayServiceImplTest {
 	@Test
 	void when_retrievingWeasisLaunchUrl_with_noArgumentCommand_should_buildValidLaunchUrl() {
 		// Init data
-		WeasisSearchCriteria weasisSearchCriteria = new WeasisSearchCriteria();
+		ArchiveSearchCriteria weasisSearchCriteria = new ArchiveSearchCriteria();
 		weasisSearchCriteria.setPro(List.of("pro"));
 		weasisSearchCriteria.setUser("user");
 		weasisSearchCriteria.setHost("host");
@@ -115,7 +115,7 @@ class DisplayServiceImplTest {
 	@Test
 	void when_retrievingWeasisLaunchUrl_with_argumentCommand_should_buildValidLaunchUrl() {
 		// Init data
-		WeasisSearchCriteria weasisSearchCriteria = new WeasisSearchCriteria();
+		ArchiveSearchCriteria weasisSearchCriteria = new ArchiveSearchCriteria();
 		weasisSearchCriteria.setPro(List.of("pro"));
 		weasisSearchCriteria.setUser("user");
 		weasisSearchCriteria.setHost("host");

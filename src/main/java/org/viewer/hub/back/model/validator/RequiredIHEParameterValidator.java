@@ -14,7 +14,7 @@ package org.viewer.hub.back.model.validator;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import org.viewer.hub.back.enums.IHERequestType;
-import org.viewer.hub.back.model.WeasisIHESearchCriteria;
+import org.viewer.hub.back.model.IHESearchCriteria;
 
 import java.util.Objects;
 
@@ -23,11 +23,11 @@ import java.util.Objects;
  * the requestType provided
  */
 public class RequiredIHEParameterValidator
-		implements ConstraintValidator<RequiredIHEParameter, WeasisIHESearchCriteria> {
+		implements ConstraintValidator<RequiredIHEParameter, IHESearchCriteria> {
 
 	@Override
-	public boolean isValid(WeasisIHESearchCriteria weasisIHESearchCriteria,
-			ConstraintValidatorContext constraintValidatorContext) {
+	public boolean isValid(IHESearchCriteria weasisIHESearchCriteria,
+						   ConstraintValidatorContext constraintValidatorContext) {
 		// case request Patient
 		if (Objects.equals(IHERequestType.PATIENT, weasisIHESearchCriteria.getRequestType())
 				&& weasisIHESearchCriteria.getPatientID() != null

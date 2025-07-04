@@ -23,7 +23,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.viewer.hub.back.config.tenant.TenantIdentifierResolver;
 import org.viewer.hub.back.enums.ConnectorType;
-import org.viewer.hub.back.model.WeasisSearchCriteria;
+import org.viewer.hub.back.model.ArchiveSearchCriteria;
 import org.viewer.hub.back.model.connector.DbConnectorResult;
 import org.viewer.hub.back.model.manifest.Manifest;
 import org.viewer.hub.back.model.property.ConnectorProperty;
@@ -119,7 +119,7 @@ class DbConnectorQueryServiceImplTest {
 		Manifest manifest = new Manifest();
 		Set<String> patientIds = new HashSet<>();
 		patientIds.add("patientIds");
-		WeasisSearchCriteria weasisSearchCriteria = new WeasisSearchCriteria();
+		ArchiveSearchCriteria weasisSearchCriteria = new ArchiveSearchCriteria();
 
 		// Call service
 		this.dbConnectorQueryService.buildFromPatientIdsDbConnector(manifest, patientIds, this.connectorProperty,

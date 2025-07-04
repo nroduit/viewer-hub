@@ -11,5 +11,5 @@
 
 package org.viewer.hub.back.model;
 
-public class WeasisIHESearchCriteria extends IHESearchCriteria {
+public class WeasisArchiveSearchCriteria extends ArchiveSearchCriteria {
 }

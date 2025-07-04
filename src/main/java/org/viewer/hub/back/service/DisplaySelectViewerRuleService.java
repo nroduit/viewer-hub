@@ -9,7 +9,12 @@
  *
  */
 
-package org.viewer.hub.back.model;
+package org.viewer.hub.back.service;
 
-public class WeasisIHESearchCriteria extends IHESearchCriteria {
+import jakarta.validation.Valid;
+import org.springframework.security.core.Authentication;
+import org.viewer.hub.back.model.ArchiveSearchCriteria;
+
+public interface DisplaySelectViewerRuleService {
+    String displayViewer(Authentication authentication, @Valid ArchiveSearchCriteria archiveSearchCriteria);
 }

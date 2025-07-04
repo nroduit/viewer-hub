@@ -12,8 +12,8 @@
 package org.viewer.hub.back.service;
 
 import jakarta.validation.Valid;
-import org.viewer.hub.back.model.WeasisIHESearchCriteria;
-import org.viewer.hub.back.model.WeasisSearchCriteria;
+import org.viewer.hub.back.model.ArchiveSearchCriteria;
+import org.viewer.hub.back.model.IHESearchCriteria;
 
 /**
  * Service dealing with cryptography
@@ -38,24 +38,24 @@ public interface CryptographyService {
 	 * Encode WeasisSearchCriteria values
 	 * @param weasisSearchCriteria values to encode
 	 */
-	void encode(@Valid WeasisSearchCriteria weasisSearchCriteria);
+	void encode(@Valid ArchiveSearchCriteria weasisSearchCriteria);
 
 	/**
 	 * Decode WeasisSearchCriteria values
 	 * @param weasisSearchCriteria values to decode
 	 */
-	void decode(WeasisSearchCriteria weasisSearchCriteria);
+	void decode(ArchiveSearchCriteria weasisSearchCriteria);
 
 	/**
 	 * Encode WeasisIHESearchCriteria values
 	 * @param weasisIHESearchCriteria values to encode
 	 */
-	void encode(@Valid WeasisIHESearchCriteria weasisIHESearchCriteria);
+	void encode(@Valid IHESearchCriteria weasisIHESearchCriteria);
 
 	/**
 	 * Decode WeasisIHESearchCriteria values
 	 * @param weasisIHESearchCriteria values to decode
 	 */
-	void decode(WeasisIHESearchCriteria weasisIHESearchCriteria);
+	void decode(IHESearchCriteria weasisIHESearchCriteria);
 
 }

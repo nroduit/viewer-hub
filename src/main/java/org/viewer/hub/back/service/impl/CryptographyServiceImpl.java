@@ -18,8 +18,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.encrypt.Encryptors;
 import org.springframework.security.crypto.encrypt.TextEncryptor;
 import org.springframework.stereotype.Service;
-import org.viewer.hub.back.model.WeasisIHESearchCriteria;
-import org.viewer.hub.back.model.WeasisSearchCriteria;
+import org.viewer.hub.back.model.ArchiveSearchCriteria;
+import org.viewer.hub.back.model.IHESearchCriteria;
 import org.viewer.hub.back.service.CryptographyService;
 
 import java.util.stream.Collectors;
@@ -75,7 +75,7 @@ public class CryptographyServiceImpl implements CryptographyService {
 	}
 
 	@Override
-	public void encode(@Valid WeasisSearchCriteria weasisSearchCriteria) {
+	public void encode(@Valid ArchiveSearchCriteria weasisSearchCriteria) {
 		if (this.enabled) {
 			// Patient Ids
 			weasisSearchCriteria.setPatientID(weasisSearchCriteria.getPatientID()
@@ -111,7 +111,7 @@ public class CryptographyServiceImpl implements CryptographyService {
 	}
 
 	@Override
-	public void decode(@Valid WeasisSearchCriteria weasisSearchCriteria) {
+	public void decode(@Valid ArchiveSearchCriteria weasisSearchCriteria) {
 		if (this.enabled) {
 			// Patient Ids
 			weasisSearchCriteria.setPatientID(weasisSearchCriteria.getPatientID()
@@ -147,7 +147,7 @@ public class CryptographyServiceImpl implements CryptographyService {
 	}
 
 	@Override
-	public void encode(@Valid WeasisIHESearchCriteria weasisIHESearchCriteria) {
+	public void encode(@Valid IHESearchCriteria weasisIHESearchCriteria) {
 		if (this.enabled) {
 			// Patient Id
 			if (StringUtils.isNotBlank(weasisIHESearchCriteria.getPatientID())) {
@@ -169,7 +169,7 @@ public class CryptographyServiceImpl implements CryptographyService {
 	}
 
 	@Override
-	public void decode(@Valid WeasisIHESearchCriteria weasisIHESearchCriteria) {
+	public void decode(@Valid IHESearchCriteria weasisIHESearchCriteria) {
 		if (this.enabled) {
 			// Patient Id
 			if (StringUtils.isNotBlank(weasisIHESearchCriteria.getPatientID())) {

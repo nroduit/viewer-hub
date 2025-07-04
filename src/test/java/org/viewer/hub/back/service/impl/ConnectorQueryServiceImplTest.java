@@ -21,7 +21,7 @@ import org.viewer.hub.back.config.properties.ConnectorConfigurationProperties;
 import org.viewer.hub.back.controller.exception.TechnicalException;
 import org.viewer.hub.back.enums.ConnectorType;
 import org.viewer.hub.back.enums.QueryLevelType;
-import org.viewer.hub.back.model.WeasisSearchCriteria;
+import org.viewer.hub.back.model.ArchiveSearchCriteria;
 import org.viewer.hub.back.model.manifest.Manifest;
 import org.viewer.hub.back.model.property.ConnectorDicomWebProperty;
 import org.viewer.hub.back.model.property.ConnectorProperty;
@@ -204,7 +204,7 @@ class ConnectorQueryServiceImplTest {
 	@Test
 	void when_fillingManifestFromPatientIds_with_dbArchive_should_callCorrectConnectorService() {
 		// Init data
-		WeasisSearchCriteria weasisSearchCriteria = new WeasisSearchCriteria();
+		ArchiveSearchCriteria weasisSearchCriteria = new ArchiveSearchCriteria();
 		weasisSearchCriteria.getArchive().add("idDbA");
 
 		// Call service
@@ -221,7 +221,7 @@ class ConnectorQueryServiceImplTest {
 	@Test
 	void when_fillingManifestFromPatientIds_with_dicomArchive_should_callCorrectConnectorService() {
 		// Init data
-		WeasisSearchCriteria weasisSearchCriteria = new WeasisSearchCriteria();
+		ArchiveSearchCriteria weasisSearchCriteria = new ArchiveSearchCriteria();
 		weasisSearchCriteria.getArchive().add("idDicomA");
 
 		// Call service
@@ -238,7 +238,7 @@ class ConnectorQueryServiceImplTest {
 	@Test
 	void when_fillingManifestFromPatientIds_with_dicomWebArchive_should_callCorrectConnectorService() {
 		// Init data
-		WeasisSearchCriteria weasisSearchCriteria = new WeasisSearchCriteria();
+		ArchiveSearchCriteria weasisSearchCriteria = new ArchiveSearchCriteria();
 		weasisSearchCriteria.getArchive().add("idDicomWebA");
 
 		// Call service
@@ -255,7 +255,7 @@ class ConnectorQueryServiceImplTest {
 	@Test
 	void when_fillingManifestFromPatientIds_with_deactivatedPatientIdSearchCriteria_should_notCallConnectorService() {
 		// Init data
-		WeasisSearchCriteria weasisSearchCriteria = new WeasisSearchCriteria();
+		ArchiveSearchCriteria weasisSearchCriteria = new ArchiveSearchCriteria();
 		weasisSearchCriteria.getArchive().add("idDicomA");
 
 		// Mock behaviour

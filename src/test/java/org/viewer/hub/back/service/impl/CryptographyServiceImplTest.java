@@ -14,8 +14,8 @@ package org.viewer.hub.back.service.impl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.viewer.hub.back.model.WeasisIHESearchCriteria;
-import org.viewer.hub.back.model.WeasisSearchCriteria;
+import org.viewer.hub.back.model.ArchiveSearchCriteria;
+import org.viewer.hub.back.model.IHESearchCriteria;
 
 import java.util.Set;
 
@@ -47,7 +47,7 @@ class CryptographyServiceImplTest {
 	@DisplayName("WeasisSearchCriteria: When encoding/decoding should retrieve original values")
 	void given_weasisSearchCriteria_when_encodingDecoding_shouldRetrieveOriginalValues() {
 		// Given
-		WeasisSearchCriteria weasisSearchCriteria = new WeasisSearchCriteria();
+		ArchiveSearchCriteria weasisSearchCriteria = new ArchiveSearchCriteria();
 		weasisSearchCriteria.setPatientID(Set.of("patientID"));
 		weasisSearchCriteria.setAccessionNumber(Set.of("accessionNumber"));
 		weasisSearchCriteria.setStudyUID(Set.of("studyUID"));
@@ -94,7 +94,7 @@ class CryptographyServiceImplTest {
 	@DisplayName("WeasisIHESearchCriteria: When encoding/decoding should retrieve original values")
 	void given_weasisIHESearchCriteria_when_encodingDecoding_shouldRetrieveOriginalValues() {
 		// Given
-		WeasisIHESearchCriteria weasisIHESearchCriteria = new WeasisIHESearchCriteria();
+		IHESearchCriteria weasisIHESearchCriteria = new IHESearchCriteria();
 		weasisIHESearchCriteria.setPatientID("patientID");
 		weasisIHESearchCriteria.setAccessionNumber(Set.of("accessionNumber"));
 		weasisIHESearchCriteria.setStudyUID(Set.of("studyUID"));
