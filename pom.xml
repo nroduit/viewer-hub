@@ -46,7 +46,6 @@
         <maven.artifact.version>3.8.6</maven.artifact.version>
         <node.version>v23.6.0</node.version>
         <awssdk.version>2.21.29</awssdk.version>
-<!--        <springdoc-openapi-ui.version>1.7.0</springdoc-openapi-ui.version>-->
         <io.awspring.cloud.version>3.2.1</io.awspring.cloud.version>
         <lombok.version>1.18.30</lombok.version>
         <maven-compiler-plugin.version>3.12.1</maven-compiler-plugin.version>

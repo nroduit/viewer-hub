@@ -12,8 +12,8 @@
 package org.viewer.hub.back.service;
 
 import org.viewer.hub.back.entity.PackageVersionEntity;
-import org.viewer.hub.back.model.SearchCriteria;
 import org.viewer.hub.back.model.manifest.Manifest;
+import org.viewer.hub.back.model.searchcriteria.SearchCriteria;
 
 import java.util.Collection;
 

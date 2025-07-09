@@ -29,7 +29,7 @@ import org.viewer.hub.back.model.manifest.ArcQuery;
 import org.viewer.hub.back.model.manifest.HttpTag;
 import org.viewer.hub.back.model.manifest.Manifest;
 import org.viewer.hub.back.model.property.ConnectorProperty;
-import org.viewer.hub.back.service.ConnectorQueryService;
+import org.viewer.hub.back.service.ConnectorService;
 import org.viewer.hub.back.service.SecurityService;
 
 import java.util.Base64;
@@ -39,7 +39,7 @@ import java.util.Objects;
 public class SecurityServiceImpl implements SecurityService {
 
 	// Services
-	private final ConnectorQueryService connectorQueryService;
+	private final ConnectorService connectorQueryService;
 
 	private final OAuth2AuthorizedClientService oAuth2AuthorizedClientService;
 
@@ -48,7 +48,7 @@ public class SecurityServiceImpl implements SecurityService {
 	private final ClientRegistrationRepository clientRegistrationRepository;
 
 	@Autowired
-	public SecurityServiceImpl(ConnectorQueryService connectorQueryService,
+	public SecurityServiceImpl(ConnectorService connectorQueryService,
 			OAuth2AuthorizedClientService oAuth2AuthorizedClientService,
 			final OAuth2AuthorizedClientManager clientCredentialsAuthorizedClientManager,
 			final ClientRegistrationRepository clientRegistrationRepository) {

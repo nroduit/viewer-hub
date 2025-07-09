@@ -9,7 +9,7 @@
  *
  */
 
-package org.viewer.hub.back.model.manifest;
+package org.viewer.hub.back.model.patient;
 
 public enum DicomPatientSex {
 

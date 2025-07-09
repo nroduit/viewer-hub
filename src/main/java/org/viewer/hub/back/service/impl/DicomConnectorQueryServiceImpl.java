@@ -36,18 +36,17 @@ import org.viewer.hub.back.constant.ParamName;
 import org.viewer.hub.back.controller.exception.TechnicalException;
 import org.viewer.hub.back.enums.ConnectorAuthType;
 import org.viewer.hub.back.enums.ConnectorType;
+import org.viewer.hub.back.enums.DicomWebLevelLimitType;
 import org.viewer.hub.back.enums.HeaderType;
 import org.viewer.hub.back.enums.SearchCriteriaType;
-import org.viewer.hub.back.enums.WeasisManifestDicomWebLevelLimitType;
-import org.viewer.hub.back.model.SearchCriteria;
-import org.viewer.hub.back.model.manifest.DicomPatientSex;
-import org.viewer.hub.back.model.manifest.Instance;
-import org.viewer.hub.back.model.manifest.Manifest;
-import org.viewer.hub.back.model.manifest.Patient;
-import org.viewer.hub.back.model.manifest.Serie;
-import org.viewer.hub.back.model.manifest.Study;
+import org.viewer.hub.back.model.patient.DicomPatientSex;
+import org.viewer.hub.back.model.patient.Instance;
+import org.viewer.hub.back.model.patient.Patient;
+import org.viewer.hub.back.model.patient.Serie;
+import org.viewer.hub.back.model.patient.Study;
 import org.viewer.hub.back.model.property.ConnectorAuthenticationProperty;
 import org.viewer.hub.back.model.property.ConnectorProperty;
+import org.viewer.hub.back.model.searchcriteria.SearchCriteria;
 import org.viewer.hub.back.service.DicomConnectorQueryService;
 import org.viewer.hub.back.service.DicomWebClientService;
 import org.viewer.hub.back.util.ConnectorUtil;
@@ -90,8 +89,8 @@ public class DicomConnectorQueryServiceImpl implements DicomConnectorQueryServic
 	@Value("${timeout.dicom-web}")
 	private String dicomWebTimeoutDuration;
 
-	@Value("${connector.weasis-manifest-dicom-web-level-limit}")
-	private WeasisManifestDicomWebLevelLimitType weasisManifestDicomWebLevelLimitType;
+	@Value("${connector.dicom-web-level-limit}")
+	private DicomWebLevelLimitType dicomWebLevelLimitType;
 
 	/**
 	 * Autowired constructor.
@@ -109,56 +108,41 @@ public class DicomConnectorQueryServiceImpl implements DicomConnectorQueryServic
 	}
 
 	@Override
-	public void buildFromStudyAccessionNumbersDicomConnector(Manifest manifest, Set<String> studyAccessionNumbers,
+	public Set<Patient> retrievePatientsFromStudyAccessionNumbersDicomConnector(Set<String> studyAccessionNumbers,
 			@Valid ConnectorProperty connector, Authentication authentication) {
-		Set<Patient> patientsFound = this.retrieveDicomConnectorResults(connector, studyAccessionNumbers,
-				SearchCriteriaType.ACCESSION_NUMBER, authentication);
-
-		// Update manifest with patients found
-		manifest.update(patientsFound, connector);
+		return this.retrieveDicomConnectorResults(connector, studyAccessionNumbers, SearchCriteriaType.ACCESSION_NUMBER,
+				authentication);
 	}
 
 	@Override
-	public void buildFromPatientIdsDicomConnector(Manifest manifest, Set<String> patientIds,
+	public Set<Patient> retrievePatientsFromPatientIdsDicomConnector(Set<String> patientIds,
 			@Valid ConnectorProperty connector, @Valid SearchCriteria searchCriteria, Authentication authentication) {
 		Set<Patient> patientsFound = this.retrieveDicomConnectorResults(connector, patientIds,
 				SearchCriteriaType.PATIENT_ID, authentication);
 
 		// Apply patient request filters
-		patientsFound = searchCriteria.applyPatientRequestSearchCriteriaFilters(patientsFound);
-
-		// Update manifest with patients found
-		manifest.update(patientsFound, connector);
+		return searchCriteria.applyPatientRequestSearchCriteriaFilters(patientsFound);
 	}
 
 	@Override
-	public void buildFromStudyInstanceUidsDicomConnector(Manifest manifest, Set<String> studyInstanceUids,
+	public Set<Patient> retrievePatientsFromStudyInstanceUidsDicomConnector(Set<String> studyInstanceUids,
 			@Valid ConnectorProperty connector, Authentication authentication) {
-		Set<Patient> patientsFound = this.retrieveDicomConnectorResults(connector, studyInstanceUids,
-				SearchCriteriaType.STUDY_INSTANCE_UID, authentication);
-
-		// Update manifest with patients found
-		manifest.update(patientsFound, connector);
+		return this.retrieveDicomConnectorResults(connector, studyInstanceUids, SearchCriteriaType.STUDY_INSTANCE_UID,
+				authentication);
 	}
 
 	@Override
-	public void buildFromSeriesInstanceUidsDicomConnector(Manifest manifest, Set<String> seriesInstanceUids,
+	public Set<Patient> retrievePatientsFromSeriesInstanceUidsDicomConnector(Set<String> seriesInstanceUids,
 			@Valid ConnectorProperty connector, Authentication authentication) {
-		Set<Patient> patientsFound = this.retrieveDicomConnectorResults(connector, seriesInstanceUids,
-				SearchCriteriaType.SERIE_INSTANCE_UID, authentication);
-
-		// Update manifest with patients found
-		manifest.update(patientsFound, connector);
+		return this.retrieveDicomConnectorResults(connector, seriesInstanceUids, SearchCriteriaType.SERIE_INSTANCE_UID,
+				authentication);
 	}
 
 	@Override
-	public void buildFromSopInstanceUidsDicomConnector(Manifest manifest, Set<String> sopInstanceUids,
+	public Set<Patient> retrievePatientsFromSopInstanceUidsDicomConnector(Set<String> sopInstanceUids,
 			@Valid ConnectorProperty connector, Authentication authentication) {
-		Set<Patient> patientsFound = this.retrieveDicomConnectorResults(connector, sopInstanceUids,
-				SearchCriteriaType.SOP_INSTANCE_UID, authentication);
-
-		// Update manifest with patients found
-		manifest.update(patientsFound, connector);
+		return this.retrieveDicomConnectorResults(connector, sopInstanceUids, SearchCriteriaType.SOP_INSTANCE_UID,
+				authentication);
 	}
 
 	@PostConstruct
@@ -318,9 +302,9 @@ public class DicomConnectorQueryServiceImpl implements DicomConnectorQueryServic
 	 */
 	private void retrieveDicomSopInstancesAndUpdatePatients(ConnectorProperty connector, Set<Patient> patients,
 			Patient patient, Authentication authentication) {
-		if (!(Objects.equals(connector.getType(), ConnectorType.DICOM_WEB) && (Objects
-			.equals(weasisManifestDicomWebLevelLimitType, WeasisManifestDicomWebLevelLimitType.SERIE)
-				|| Objects.equals(weasisManifestDicomWebLevelLimitType, WeasisManifestDicomWebLevelLimitType.STUDY)))) {
+		if (!(Objects.equals(connector.getType(), ConnectorType.DICOM_WEB)
+				&& (Objects.equals(dicomWebLevelLimitType, DicomWebLevelLimitType.SERIE)
+						|| Objects.equals(dicomWebLevelLimitType, DicomWebLevelLimitType.STUDY)))) {
 			// Retrieve sop instances
 			this.retrieveDicomSopInstancesFromStudySerieInstanceUids(patient, connector, authentication);
 		}
@@ -339,12 +323,12 @@ public class DicomConnectorQueryServiceImpl implements DicomConnectorQueryServic
 	private void retrieveDicomSeriesSopInstancesAndUpdatePatients(ConnectorProperty connector, Set<Patient> patients,
 			Patient patient, Authentication authentication) {
 		if (!(Objects.equals(connector.getType(), ConnectorType.DICOM_WEB)
-				&& Objects.equals(weasisManifestDicomWebLevelLimitType, WeasisManifestDicomWebLevelLimitType.STUDY))) {
+				&& Objects.equals(dicomWebLevelLimitType, DicomWebLevelLimitType.STUDY))) {
 			// Retrieve series
 			this.retrieveDicomSeriesFromStudyInstanceUid(patient, connector, authentication);
 
-			if (!(Objects.equals(connector.getType(), ConnectorType.DICOM_WEB) && Objects
-				.equals(weasisManifestDicomWebLevelLimitType, WeasisManifestDicomWebLevelLimitType.SERIE))) {
+			if (!(Objects.equals(connector.getType(), ConnectorType.DICOM_WEB)
+					&& Objects.equals(dicomWebLevelLimitType, DicomWebLevelLimitType.SERIE))) {
 				// Retrieve sop instances
 				this.retrieveDicomSopInstancesFromStudySerieInstanceUids(patient, connector, authentication);
 			}

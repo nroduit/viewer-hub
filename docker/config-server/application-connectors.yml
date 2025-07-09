@@ -4,8 +4,8 @@ connector:
   # defined in the config
   default: dcm4chee-local # connectorId1, connectorId2
 
-  # Limit the Weasis manifest for dicom-web connector
-  weasis-manifest-dicom-web-level-limit: # STUDY, SERIE
+  # Limit the dicom-web connector when retrieving metadata
+  dicom-web-level-limit: # STUDY, SERIE
 
   # Connectors configuration
   config:

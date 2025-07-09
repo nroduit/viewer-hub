@@ -18,10 +18,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
-import org.viewer.hub.back.model.WeasisSearchCriteria;
+import org.viewer.hub.back.model.searchcriteria.WeasisArchiveSearchCriteria;
 import org.viewer.hub.back.service.CacheService;
-import org.viewer.hub.back.service.DisplayService;
-import org.viewer.hub.back.service.ManifestService;
+import org.viewer.hub.back.service.WeasisDisplayService;
+import org.viewer.hub.back.service.WeasisService;
 
 import java.util.List;
 
@@ -33,20 +33,20 @@ class DisplayServiceImplTest {
 
 	private final CacheService cacheServiceMock = Mockito.mock(CacheService.class);
 
-	private final ManifestService manifestServiceMock = Mockito.mock(ManifestService.class);
+	private final WeasisService manifestServiceMock = Mockito.mock(WeasisService.class);
 
-	private DisplayService displayService;
+	private WeasisDisplayService displayService;
 
 	@BeforeEach
 	public void setUp() {
-		this.displayService = new DisplayServiceImpl(this.cacheServiceMock, this.manifestServiceMock);
+		this.displayService = new WeasisDisplayServiceImpl(this.cacheServiceMock, this.manifestServiceMock);
 		ReflectionTestUtils.setField(this.displayService, "viewerHubServerUrl", "http://test.com");
 	}
 
 	@Test
 	void when_retrievingWeasisLaunchUrl_should_callMethodToBuildKey() {
 		// Init data
-		WeasisSearchCriteria weasisSearchCriteria = new WeasisSearchCriteria();
+		WeasisArchiveSearchCriteria weasisSearchCriteria = new WeasisArchiveSearchCriteria();
 
 		// Call service
 		this.displayService.retrieveWeasisLaunchUrl(weasisSearchCriteria, null);
@@ -59,7 +59,7 @@ class DisplayServiceImplTest {
 	@Test
 	void when_retrievingWeasisLaunchUrl_withKeyAlreadyExistingInCache_should_notCallServiceToBuildManifest() {
 		// Init data
-		WeasisSearchCriteria weasisSearchCriteria = new WeasisSearchCriteria();
+		WeasisArchiveSearchCriteria weasisSearchCriteria = new WeasisArchiveSearchCriteria();
 
 		// Mock
 		Mockito.when(this.cacheServiceMock.constructManifestKeyDependingOnSearchParameters(weasisSearchCriteria))
@@ -76,7 +76,7 @@ class DisplayServiceImplTest {
 	@Test
 	void when_retrievingWeasisLaunchUrl_withKeyNotExistingInCache_should_callServiceToBuildManifest() {
 		// Init data
-		WeasisSearchCriteria weasisSearchCriteria = new WeasisSearchCriteria();
+		WeasisArchiveSearchCriteria weasisSearchCriteria = new WeasisArchiveSearchCriteria();
 
 		// Mock
 		Mockito.when(this.cacheServiceMock.constructManifestKeyDependingOnSearchParameters(weasisSearchCriteria))
@@ -93,7 +93,7 @@ class DisplayServiceImplTest {
 	@Test
 	void when_retrievingWeasisLaunchUrl_with_noArgumentCommand_should_buildValidLaunchUrl() {
 		// Init data
-		WeasisSearchCriteria weasisSearchCriteria = new WeasisSearchCriteria();
+		WeasisArchiveSearchCriteria weasisSearchCriteria = new WeasisArchiveSearchCriteria();
 		weasisSearchCriteria.setPro(List.of("pro"));
 		weasisSearchCriteria.setUser("user");
 		weasisSearchCriteria.setHost("host");
@@ -115,7 +115,7 @@ class DisplayServiceImplTest {
 	@Test
 	void when_retrievingWeasisLaunchUrl_with_argumentCommand_should_buildValidLaunchUrl() {
 		// Init data
-		WeasisSearchCriteria weasisSearchCriteria = new WeasisSearchCriteria();
+		WeasisArchiveSearchCriteria weasisSearchCriteria = new WeasisArchiveSearchCriteria();
 		weasisSearchCriteria.setPro(List.of("pro"));
 		weasisSearchCriteria.setUser("user");
 		weasisSearchCriteria.setHost("host");

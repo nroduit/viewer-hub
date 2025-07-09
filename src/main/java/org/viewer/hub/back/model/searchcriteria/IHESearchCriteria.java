@@ -9,11 +9,12 @@
  *
  */
 
-package org.viewer.hub.back.model;
+package org.viewer.hub.back.model.searchcriteria;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.ToString;
 import org.viewer.hub.back.enums.IHERequestType;
 import org.viewer.hub.back.model.validator.RequiredIHEParameter;
@@ -30,12 +31,14 @@ import java.util.Set;
 @RequiredIHEParameter
 @ToString
 @EqualsAndHashCode(callSuper = true)
-public class WeasisIHESearchCriteria extends SearchCriteria {
+public class IHESearchCriteria extends SearchCriteria {
 
+	@Setter
 	@Schema(description = "IHE request type. Value can only be STUDY or PATIENT", name = "requestType",
 			type = "IHERequestType", example = "STUDY")
 	private IHERequestType requestType;
 
+	@Setter
 	@Schema(description = "Patient Id to look for", name = "patientID", type = "String", example = "123")
 	private String patientID;
 
@@ -48,60 +51,37 @@ public class WeasisIHESearchCriteria extends SearchCriteria {
 	private Set<String> accessionNumber;
 
 	// Not handle yet
+	@Setter
 	@Schema(description = "Not handle yet", name = "patientName", type = "String", example = "Not handle yet")
 	private String patientName;
 
 	// Not handle yet
+	@Setter
 	@Schema(description = "Not handle yet", name = "patientBirthDate", type = "LocalDateTime",
 			example = "Not handle yet")
 	private LocalDateTime patientBirthDate;
 
 	// Not handle yet
+	@Setter
 	@Schema(description = "Not handle yet", name = "viewerType", type = "String", example = "Not handle yet")
 	private String viewerType;
 
 	// Not handle yet
+	@Setter
 	@Schema(description = "Not handle yet", name = "diagnosticQuality", type = "Boolean", example = "Not handle yet")
 	private Boolean diagnosticQuality;
 
 	// Not handle yet
+	@Setter
 	@Schema(description = "Not handle yet", name = "keyImagesOnly", type = "Boolean", example = "Not handle yet")
 	private Boolean keyImagesOnly;
 
 	/**
 	 * Constructor
 	 */
-	public WeasisIHESearchCriteria() {
+	public IHESearchCriteria() {
 		this.studyUID = new HashSet<>();
 		this.accessionNumber = new HashSet<>();
-	}
-
-	public void setRequestType(IHERequestType requestType) {
-		this.requestType = requestType;
-	}
-
-	public void setPatientID(String patientID) {
-		this.patientID = patientID;
-	}
-
-	public void setPatientName(String patientName) {
-		this.patientName = patientName;
-	}
-
-	public void setPatientBirthDate(LocalDateTime patientBirthDate) {
-		this.patientBirthDate = patientBirthDate;
-	}
-
-	public void setViewerType(String viewerType) {
-		this.viewerType = viewerType;
-	}
-
-	public void setDiagnosticQuality(Boolean diagnosticQuality) {
-		this.diagnosticQuality = diagnosticQuality;
-	}
-
-	public void setKeyImagesOnly(Boolean keyImagesOnly) {
-		this.keyImagesOnly = keyImagesOnly;
 	}
 
 	public void setStudyUID(Set<String> studyUID) {

@@ -18,26 +18,27 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.viewer.hub.back.enums.IHERequestType;
-import org.viewer.hub.back.model.WeasisIHESearchCriteria;
-import org.viewer.hub.back.model.WeasisSearchCriteria;
+import org.viewer.hub.back.model.searchcriteria.WeasisArchiveSearchCriteria;
+import org.viewer.hub.back.model.searchcriteria.WeasisIHESearchCriteria;
 import org.viewer.hub.back.service.CacheService;
-import org.viewer.hub.back.service.ConnectorQueryService;
 import org.viewer.hub.back.service.SecurityService;
+import org.viewer.hub.back.service.WeasisConnectorQueryService;
 
 import java.util.LinkedHashSet;
 import java.util.List;
 
-class ManifestServiceImplTest {
+class WeasisServiceImplTest {
 
 	private final CacheService cacheServiceMock = Mockito.mock(CacheService.class);
 
-	private final ConnectorQueryService connectorQueryServiceMock = Mockito.mock(ConnectorQueryService.class);
+	private final WeasisConnectorQueryService connectorQueryServiceMock = Mockito
+		.mock(WeasisConnectorQueryService.class);
 
 	@Mock
 
 	private SecurityService securityServiceMock;
 
-	private ManifestServiceImpl manifestService;
+	private WeasisServiceImpl weasisService;
 
 	AutoCloseable openMocks;
 
@@ -46,7 +47,7 @@ class ManifestServiceImplTest {
 
 		openMocks = MockitoAnnotations.openMocks(this);
 
-		this.manifestService = new ManifestServiceImpl(this.cacheServiceMock, this.connectorQueryServiceMock,
+		this.weasisService = new WeasisServiceImpl(this.cacheServiceMock, this.connectorQueryServiceMock,
 				this.securityServiceMock);
 	}
 
@@ -59,10 +60,10 @@ class ManifestServiceImplTest {
 	void when_buildingManifestWithoutIHE_with_weasisSearchCriteria_should_putManifestInCache() {
 
 		// Init data
-		WeasisSearchCriteria weasisSearchCriteria = new WeasisSearchCriteria();
+		WeasisArchiveSearchCriteria weasisSearchCriteria = new WeasisArchiveSearchCriteria();
 
 		// Call service
-		this.manifestService.buildManifest("testWithoutIHE", weasisSearchCriteria, null);
+		this.weasisService.buildManifest("testWithoutIHE", weasisSearchCriteria, null);
 
 		// Test results
 		Mockito.verify(this.cacheServiceMock, Mockito.atLeastOnce())
@@ -73,11 +74,11 @@ class ManifestServiceImplTest {
 	void when_buildingManifestWithoutIHE_with_sopInstanceUids_should_callCorrespondingMethod() {
 
 		// Init data
-		WeasisSearchCriteria weasisSearchCriteria = new WeasisSearchCriteria();
+		WeasisArchiveSearchCriteria weasisSearchCriteria = new WeasisArchiveSearchCriteria();
 		weasisSearchCriteria.setObjectUID(new LinkedHashSet<>(List.of("objectUid")));
 
 		// Call service
-		this.manifestService.buildManifest("testWithoutIHE", weasisSearchCriteria, null);
+		this.weasisService.buildManifest("testWithoutIHE", weasisSearchCriteria, null);
 
 		// Test results
 		Mockito.verify(this.connectorQueryServiceMock, Mockito.atLeastOnce())
@@ -88,11 +89,11 @@ class ManifestServiceImplTest {
 	void when_buildingManifestWithoutIHE_with_serieInstanceUids_should_callCorrespondingMethod() {
 
 		// Init data
-		WeasisSearchCriteria weasisSearchCriteria = new WeasisSearchCriteria();
+		WeasisArchiveSearchCriteria weasisSearchCriteria = new WeasisArchiveSearchCriteria();
 		weasisSearchCriteria.setSeriesUID(new LinkedHashSet<>(List.of("uid")));
 
 		// Call service
-		this.manifestService.buildManifest("testWithoutIHE", weasisSearchCriteria, null);
+		this.weasisService.buildManifest("testWithoutIHE", weasisSearchCriteria, null);
 
 		// Test results
 		Mockito.verify(this.connectorQueryServiceMock, Mockito.atLeastOnce())
@@ -103,11 +104,11 @@ class ManifestServiceImplTest {
 	void when_buildingManifestWithoutIHE_with_studyAccessionsNumber_should_callCorrespondingMethod() {
 
 		// Init data
-		WeasisSearchCriteria weasisSearchCriteria = new WeasisSearchCriteria();
+		WeasisArchiveSearchCriteria weasisSearchCriteria = new WeasisArchiveSearchCriteria();
 		weasisSearchCriteria.setAccessionNumber(new LinkedHashSet<>(List.of("uid")));
 
 		// Call service
-		this.manifestService.buildManifest("testWithoutIHE", weasisSearchCriteria, null);
+		this.weasisService.buildManifest("testWithoutIHE", weasisSearchCriteria, null);
 
 		// Test results
 		Mockito.verify(this.connectorQueryServiceMock, Mockito.atLeastOnce())
@@ -118,11 +119,11 @@ class ManifestServiceImplTest {
 	void when_buildingManifestWithoutIHE_with_studyUids_should_callCorrespondingMethod() {
 
 		// Init data
-		WeasisSearchCriteria weasisSearchCriteria = new WeasisSearchCriteria();
+		WeasisArchiveSearchCriteria weasisSearchCriteria = new WeasisArchiveSearchCriteria();
 		weasisSearchCriteria.setStudyUID(new LinkedHashSet<>(List.of("uid")));
 
 		// Call service
-		this.manifestService.buildManifest("testWithoutIHE", weasisSearchCriteria, null);
+		this.weasisService.buildManifest("testWithoutIHE", weasisSearchCriteria, null);
 
 		// Test results
 		Mockito.verify(this.connectorQueryServiceMock, Mockito.atLeastOnce())
@@ -133,11 +134,11 @@ class ManifestServiceImplTest {
 	void when_buildingManifestWithoutIHE_with_patientIds_should_callCorrespondingMethod() {
 
 		// Init data
-		WeasisSearchCriteria weasisSearchCriteria = new WeasisSearchCriteria();
+		WeasisArchiveSearchCriteria weasisSearchCriteria = new WeasisArchiveSearchCriteria();
 		weasisSearchCriteria.setPatientID(new LinkedHashSet<>(List.of("uid")));
 
 		// Call service
-		this.manifestService.buildManifest("testWithoutIHE", weasisSearchCriteria, null);
+		this.weasisService.buildManifest("testWithoutIHE", weasisSearchCriteria, null);
 
 		// Test results
 		Mockito.verify(this.connectorQueryServiceMock, Mockito.atLeastOnce())
@@ -151,7 +152,7 @@ class ManifestServiceImplTest {
 		WeasisIHESearchCriteria weasisIHESearchCriteria = new WeasisIHESearchCriteria();
 
 		// Call service
-		this.manifestService.buildManifest("testWithIHE", weasisIHESearchCriteria, null);
+		this.weasisService.buildManifest("testWithIHE", weasisIHESearchCriteria, null);
 
 		// Test results
 		Mockito.verify(this.cacheServiceMock, Mockito.atLeastOnce())
@@ -167,7 +168,7 @@ class ManifestServiceImplTest {
 		weasisIHESearchCriteria.setRequestType(IHERequestType.STUDY);
 
 		// Call service
-		this.manifestService.buildManifest("testWithIHE", weasisIHESearchCriteria, null);
+		this.weasisService.buildManifest("testWithIHE", weasisIHESearchCriteria, null);
 
 		// Test results
 		Mockito.verify(this.connectorQueryServiceMock, Mockito.atLeastOnce())
@@ -183,7 +184,7 @@ class ManifestServiceImplTest {
 		weasisIHESearchCriteria.setRequestType(IHERequestType.STUDY);
 
 		// Call service
-		this.manifestService.buildManifest("testWithIHE", weasisIHESearchCriteria, null);
+		this.weasisService.buildManifest("testWithIHE", weasisIHESearchCriteria, null);
 
 		// Test results
 		Mockito.verify(this.connectorQueryServiceMock, Mockito.atLeastOnce())
@@ -199,7 +200,7 @@ class ManifestServiceImplTest {
 		weasisIHESearchCriteria.setRequestType(IHERequestType.STUDY);
 
 		// Call service
-		this.manifestService.buildManifest("testWithIHE", weasisIHESearchCriteria, null);
+		this.weasisService.buildManifest("testWithIHE", weasisIHESearchCriteria, null);
 
 		// Test results
 		Mockito.verify(this.connectorQueryServiceMock, Mockito.never())
@@ -215,7 +216,7 @@ class ManifestServiceImplTest {
 		weasisIHESearchCriteria.setRequestType(IHERequestType.PATIENT);
 
 		// Call service
-		this.manifestService.buildManifest("testWithIHE", weasisIHESearchCriteria, null);
+		this.weasisService.buildManifest("testWithIHE", weasisIHESearchCriteria, null);
 
 		// Test results
 		Mockito.verify(this.connectorQueryServiceMock, Mockito.atLeastOnce())
@@ -226,7 +227,7 @@ class ManifestServiceImplTest {
 	void when_retrievingManifest_should_putGetManifestFromCache() {
 
 		// Call service
-		this.manifestService.retrieveManifest("testWithoutIHE");
+		this.weasisService.retrieveManifest("testWithoutIHE");
 
 		// Test results
 		Mockito.verify(this.cacheServiceMock, Mockito.atLeastOnce()).getManifest(Mockito.anyString());

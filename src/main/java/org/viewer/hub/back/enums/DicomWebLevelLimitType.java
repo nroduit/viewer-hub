@@ -12,10 +12,9 @@
 package org.viewer.hub.back.enums;
 
 /**
- * Define the max level of information that the Weasis manifest should have to retrieve
- * the images in dicom-web: filter the manifest built to this level.
+ * Define the max level of information that the dicom-web connector should to retrieve.
  */
-public enum WeasisManifestDicomWebLevelLimitType {
+public enum DicomWebLevelLimitType {
 
 	STUDY, SERIE;
 

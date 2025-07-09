@@ -25,6 +25,7 @@ import lombok.Setter;
 import lombok.ToString;
 import org.springframework.validation.annotation.Validated;
 import org.viewer.hub.back.enums.ConnectorType;
+import org.viewer.hub.back.model.patient.Patient;
 import org.viewer.hub.back.util.StringUtil;
 
 import java.io.Serial;

@@ -12,19 +12,26 @@
 package org.viewer.hub.back.service;
 
 import org.springframework.security.core.Authentication;
-import org.viewer.hub.back.model.SearchCriteria;
+import org.viewer.hub.back.model.manifest.Manifest;
+import org.viewer.hub.back.model.searchcriteria.SearchCriteria;
 
 /**
- * Service used to launch the application Weasis
+ * Service managing Weasis manifest
  */
-public interface DisplayService {
+public interface WeasisService {
 
 	/**
-	 * Retrieve url which will launch Weasis with the key of the manifest in the cache
-	 * @param searchCriteria search criteria
+	 * Build manifest and set it in the cache
+	 * @param key Cache key
+	 * @param searchCriteria Criteria to build the manifest
 	 * @param authentication Authentication
-	 * @return url which will launch Weasis
 	 */
-	String retrieveWeasisLaunchUrl(SearchCriteria searchCriteria, Authentication authentication);
+	void buildManifest(String key, SearchCriteria searchCriteria, Authentication authentication);
+
+	/**
+	 * Retrieve manifest from the cache
+	 * @param key Cache key
+	 */
+	Manifest retrieveManifest(String key);
 
 }

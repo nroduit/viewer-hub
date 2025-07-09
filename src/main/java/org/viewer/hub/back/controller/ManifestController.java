@@ -26,7 +26,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.viewer.hub.back.constant.EndPoint;
 import org.viewer.hub.back.model.manifest.Manifest;
-import org.viewer.hub.back.service.ManifestService;
+import org.viewer.hub.back.model.searchcriteria.IHESearchCriteria;
+import org.viewer.hub.back.model.searchcriteria.WeasisArchiveSearchCriteria;
+import org.viewer.hub.back.model.searchcriteria.WeasisIHESearchCriteria;
+import org.viewer.hub.back.service.WeasisService;
 import org.viewer.hub.back.util.DateTimeUtil;
 import org.viewer.hub.back.util.JacksonUtil;
 import org.viewer.hub.back.util.Retryable;
@@ -46,15 +49,15 @@ import static net.logstash.logback.argument.StructuredArguments.kv;
 public class ManifestController {
 
 	// Services
-	private final ManifestService manifestService;
+	private final WeasisService weasisService;
 
 	/**
 	 * Autowired constructor
-	 * @param manifestService manifest service
+	 * @param weasisService manifest service
 	 */
 	@Autowired
-	public ManifestController(final ManifestService manifestService) {
-		this.manifestService = manifestService;
+	public ManifestController(final WeasisService weasisService) {
+		this.weasisService = weasisService;
 	}
 
 	/**
@@ -70,7 +73,7 @@ public class ManifestController {
 
 		// currently quick and dirty: TODO: with spring-retry on condition instead of
 		// exception if possible ?
-		Manifest manifest = Retryable.of(() -> this.manifestService.retrieveManifest(key))
+		Manifest manifest = Retryable.of(() -> this.weasisService.retrieveManifest(key))
 			// => Retry occurs when build of manifest is currently in progress
 			// => Retry should not be launch when the manifest has been evicted from cache
 			// after ttl (= manifest is null)
@@ -97,6 +100,15 @@ public class ManifestController {
 	private static void logManifestRetrieval(HttpServletRequest request, Manifest manifest, String key,
 			LocalDateTime startRetrieveManifest) {
 		if (manifest != null && manifest.getStartManifestRequest() != null) {
+			// Ext-cfg
+			String extCfg = manifest.getSearchCriteria() instanceof IHESearchCriteria
+					? ((WeasisIHESearchCriteria) manifest.getSearchCriteria()).getExtCfg()
+					: ((WeasisArchiveSearchCriteria) manifest.getSearchCriteria()).getExtCfg();
+			// Config
+			String config = manifest.getSearchCriteria() instanceof IHESearchCriteria
+					? ((WeasisIHESearchCriteria) manifest.getSearchCriteria()).getConfig()
+					: ((WeasisArchiveSearchCriteria) manifest.getSearchCriteria()).getConfig();
+
 			LOG.info("Manifest with key %s has been retrieved".formatted(key),
 					kv("weasis.manifest.launch.time",
 							DateTimeUtil.retrieveDurationFromDateTimeInMs(manifest.getStartManifestRequest())),
@@ -108,8 +120,7 @@ public class ManifestController {
 									? manifest.getSearchCriteria().getUser().toUpperCase() : null),
 					kv("request.client", manifest.getSearchCriteria().getClient()),
 					kv("request.component", request.getHeader("User-Agent")),
-					kv("request.config", StringUtils.isNotBlank(manifest.getSearchCriteria().getConfig())
-							? manifest.getSearchCriteria().getConfig() : manifest.getSearchCriteria().getExtCfg()),
+					kv("request.config", StringUtils.isNotBlank(config) ? config : extCfg),
 					kv("request.parameters", JacksonUtil.serializeIntoJson(manifest.getSearchCriteria())),
 					kv("manifest.size", manifest.toString().length()));
 		}

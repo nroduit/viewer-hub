@@ -21,33 +21,37 @@ import org.springframework.web.util.UriComponentsBuilder;
 import org.viewer.hub.back.constant.CommandName;
 import org.viewer.hub.back.constant.EndPoint;
 import org.viewer.hub.back.constant.ParamName;
-import org.viewer.hub.back.model.SearchCriteria;
 import org.viewer.hub.back.model.manifest.Manifest;
+import org.viewer.hub.back.model.searchcriteria.IHESearchCriteria;
+import org.viewer.hub.back.model.searchcriteria.SearchCriteria;
+import org.viewer.hub.back.model.searchcriteria.WeasisArchiveSearchCriteria;
+import org.viewer.hub.back.model.searchcriteria.WeasisIHESearchCriteria;
 import org.viewer.hub.back.service.CacheService;
-import org.viewer.hub.back.service.DisplayService;
-import org.viewer.hub.back.service.ManifestService;
+import org.viewer.hub.back.service.WeasisDisplayService;
+import org.viewer.hub.back.service.WeasisService;
 import org.viewer.hub.back.util.StringUtil;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @Slf4j
-public class DisplayServiceImpl implements DisplayService {
+public class WeasisDisplayServiceImpl implements WeasisDisplayService {
 
 	// Services
 	private final CacheService cacheService;
 
-	private final ManifestService manifestService;
+	private final WeasisService weasisService;
 
 	@Value("${viewer-hub.server.url}")
 	private String viewerHubServerUrl;
 
 	@Autowired
-	public DisplayServiceImpl(final CacheService cacheService, final ManifestService manifestService) {
+	public WeasisDisplayServiceImpl(final CacheService cacheService, final WeasisService weasisService) {
 		this.cacheService = cacheService;
-		this.manifestService = manifestService;
+		this.weasisService = weasisService;
 	}
 
 	@Override
@@ -64,7 +68,7 @@ public class DisplayServiceImpl implements DisplayService {
 		if (!isBuildInProgress) {
 			// Case no manifest built yet: build the manifest asynchronously
 			if (manifest == null) {
-				this.manifestService.buildManifest(key, searchCriteria, authentication);
+				this.weasisService.buildManifest(key, searchCriteria, authentication);
 			}
 			// Case manifest already built and in the cache: reset structured arguments
 			// for monitoring
@@ -126,8 +130,10 @@ public class DisplayServiceImpl implements DisplayService {
 	 * @return weasis argument commands
 	 */
 	private String retrieveArgumentCommands(SearchCriteria searchCriteria) {
-		return searchCriteria.getArg() != null && !searchCriteria.getArg().isEmpty()
-				? String.join(StringUtil.SPACE, searchCriteria.getArg()) : null;
+		List<String> args = searchCriteria instanceof IHESearchCriteria
+				? ((WeasisIHESearchCriteria) searchCriteria).getArg()
+				: ((WeasisArchiveSearchCriteria) searchCriteria).getArg();
+		return args != null && !args.isEmpty() ? String.join(StringUtil.SPACE, args) : null;
 	}
 
 	/**
@@ -159,10 +165,25 @@ public class DisplayServiceImpl implements DisplayService {
 		// .queryParam("pro", "weasis.pref.url+" + viewerHubServerUrl +
 		// EndPoint.PREFERENCES_PATH);
 
+		// Pro
+		List<String> props = searchCriteria instanceof IHESearchCriteria
+				? ((WeasisIHESearchCriteria) searchCriteria).getPro()
+				: ((WeasisArchiveSearchCriteria) searchCriteria).getPro();
+
+		// Ext-cfg
+		String extCfg = searchCriteria instanceof IHESearchCriteria
+				? ((WeasisIHESearchCriteria) searchCriteria).getExtCfg()
+				: ((WeasisArchiveSearchCriteria) searchCriteria).getExtCfg();
+
+		// Config
+		String config = searchCriteria instanceof IHESearchCriteria
+				? ((WeasisIHESearchCriteria) searchCriteria).getConfig()
+				: ((WeasisArchiveSearchCriteria) searchCriteria).getConfig();
+
 		// Add additional params if existing in initial request
 		// Properties
-		if (!searchCriteria.getPro().isEmpty()) {
-			uriBuilderLaunchConfig.queryParam(ParamName.PRO, searchCriteria.getPro());
+		if (!props.isEmpty()) {
+			uriBuilderLaunchConfig.queryParam(ParamName.PRO, props);
 		}
 		// User
 		if (searchCriteria.getUser() != null && !searchCriteria.getUser().isBlank()) {
@@ -173,12 +194,12 @@ public class DisplayServiceImpl implements DisplayService {
 			uriBuilderLaunchConfig.queryParam(ParamName.HOST, searchCriteria.getHost());
 		}
 		// Ext-cfg
-		if (searchCriteria.getExtCfg() != null && !searchCriteria.getExtCfg().isBlank()) {
-			uriBuilderLaunchConfig.queryParam(ParamName.EXT_CFG, searchCriteria.getExtCfg());
+		if (extCfg != null && !extCfg.isBlank()) {
+			uriBuilderLaunchConfig.queryParam(ParamName.EXT_CFG, extCfg);
 		}
 		// Config
-		if (searchCriteria.getConfig() != null && !searchCriteria.getConfig().isBlank()) {
-			uriBuilderLaunchConfig.queryParam(ParamName.CONFIG, searchCriteria.getConfig());
+		if (config != null && !config.isBlank()) {
+			uriBuilderLaunchConfig.queryParam(ParamName.CONFIG, config);
 		}
 
 		// Weasis config command
