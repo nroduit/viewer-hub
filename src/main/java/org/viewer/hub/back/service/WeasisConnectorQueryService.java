@@ -12,9 +12,8 @@
 package org.viewer.hub.back.service;
 
 import org.springframework.security.core.Authentication;
-import org.viewer.hub.back.model.SearchCriteria;
 import org.viewer.hub.back.model.manifest.Manifest;
-import org.viewer.hub.back.model.property.ConnectorProperty;
+import org.viewer.hub.back.model.searchcriteria.SearchCriteria;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -22,7 +21,7 @@ import java.util.Set;
 /**
  * Used to make requests to the different configured connectors
  */
-public interface ConnectorQueryService {
+public interface WeasisConnectorQueryService {
 
 	/**
 	 * Fill manifest from patients ids requests
@@ -73,12 +72,5 @@ public interface ConnectorQueryService {
 	 */
 	void buildFromSopInstanceUids(Manifest manifest, Set<String> sopInstanceUids, LinkedHashSet<String> archives,
 			Authentication authentication);
-
-	/**
-	 * Retrieve the connector corresponding to connector id
-	 * @param connectorId Connector id to evaluate
-	 * @return ConnectorProperty found
-	 */
-	ConnectorProperty retrieveConnectorFromId(String connectorId);
 
 }

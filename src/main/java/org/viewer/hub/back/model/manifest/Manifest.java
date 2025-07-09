@@ -26,9 +26,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import org.viewer.hub.back.model.SearchCriteria;
+import org.viewer.hub.back.model.patient.Patient;
 import org.viewer.hub.back.model.presentation.Presentation;
 import org.viewer.hub.back.model.property.ConnectorProperty;
+import org.viewer.hub.back.model.searchcriteria.SearchCriteria;
 import org.viewer.hub.back.model.selection.Selections;
 
 import java.io.Serial;

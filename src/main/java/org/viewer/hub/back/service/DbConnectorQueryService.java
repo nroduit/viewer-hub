@@ -11,9 +11,10 @@
 
 package org.viewer.hub.back.service;
 
-import org.viewer.hub.back.model.SearchCriteria;
-import org.viewer.hub.back.model.manifest.Manifest;
+import jakarta.validation.Valid;
+import org.viewer.hub.back.model.patient.Patient;
 import org.viewer.hub.back.model.property.ConnectorProperty;
+import org.viewer.hub.back.model.searchcriteria.SearchCriteria;
 
 import java.util.Set;
 
@@ -23,49 +24,45 @@ import java.util.Set;
 public interface DbConnectorQueryService {
 
 	/**
-	 * Fill manifest from patients ids requests with DB connector
-	 * @param manifest Manifest to fill
+	 * Retrieve patients from patients ids requests with DB connector
 	 * @param patientIds Patient ids to look for
 	 * @param connector Connector properties
 	 * @param searchCriteria Search criteria
 	 */
-	void buildFromPatientIdsDbConnector(Manifest manifest, Set<String> patientIds, ConnectorProperty connector,
-			SearchCriteria searchCriteria);
+	Set<Patient> retrievePatientsFromPatientIdsDbConnector(Set<String> patientIds, @Valid ConnectorProperty connector,
+			@Valid SearchCriteria searchCriteria);
 
 	/**
-	 * Fill manifest from study instance uids requests with DB connector
-	 * @param manifest Manifest to fill
-	 * @param studyInstanceUids Study instance uids to look for
-	 * @param connector Connector properties
-	 */
-	void buildFromStudyInstanceUidsDbConnector(Manifest manifest, Set<String> studyInstanceUids,
-			ConnectorProperty connector);
-
-	/**
-	 * Fill manifest from study accession numbers requests with DB connector
-	 * @param manifest Manifest to fill
+	 * Retrieve patients from study accession numbers requests with DB connector
 	 * @param studyAccessionNumbers Study accession numbers to look for
 	 * @param connector Connector properties
 	 */
-	void buildFromStudyAccessionNumbersDbConnector(Manifest manifest, Set<String> studyAccessionNumbers,
-			ConnectorProperty connector);
+	Set<Patient> retrievePatientsFromStudyAccessionNumbersDbConnector(Set<String> studyAccessionNumbers,
+
+			@Valid ConnectorProperty connector);
 
 	/**
-	 * Fill manifest from serie instance uids requests with DB connector
-	 * @param manifest Manifest to fill
+	 * Retrieve patients from study instance uids requests with DB connector
+	 * @param studyInstanceUids Study instance uids to look for
+	 * @param connector Connector properties
+	 */
+	Set<Patient> retrievePatientsFromStudyInstanceUidsDbConnector(Set<String> studyInstanceUids,
+			@Valid ConnectorProperty connector);
+
+	/**
+	 * Retrieve patients from serie instance uids requests with DB connector
 	 * @param seriesInstanceUids Serie instance uids numbers to look for
 	 * @param connector Connector properties
 	 */
-	void buildFromSeriesInstanceUidsDbConnector(Manifest manifest, Set<String> seriesInstanceUids,
-			ConnectorProperty connector);
+	Set<Patient> retrievePatientsFromSeriesInstanceUidsDbConnector(Set<String> seriesInstanceUids,
+			@Valid ConnectorProperty connector);
 
 	/**
-	 * Fill manifest from sop instance uids requests with DB connector
-	 * @param manifest Manifest to fill
+	 * Retrieve patients from sop instance uids requests with DB connector
 	 * @param sopInstanceUids Sop instance uids numbers to look for
 	 * @param connector Connector properties
 	 */
-	void buildFromSopInstanceUidsDbConnector(Manifest manifest, Set<String> sopInstanceUids,
-			ConnectorProperty connector);
+	Set<Patient> retrievePatientsFromSopInstanceUidsDbConnector(Set<String> sopInstanceUids,
+			@Valid ConnectorProperty connector);
 
 }

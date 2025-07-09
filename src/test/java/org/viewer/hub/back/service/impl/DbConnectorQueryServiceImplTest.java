@@ -23,7 +23,6 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.viewer.hub.back.config.tenant.TenantIdentifierResolver;
 import org.viewer.hub.back.enums.ConnectorType;
-import org.viewer.hub.back.model.WeasisSearchCriteria;
 import org.viewer.hub.back.model.connector.DbConnectorResult;
 import org.viewer.hub.back.model.manifest.Manifest;
 import org.viewer.hub.back.model.property.ConnectorProperty;
@@ -32,6 +31,7 @@ import org.viewer.hub.back.model.property.DbConnectorQueryProperty;
 import org.viewer.hub.back.model.property.SearchCriteriaProperty;
 import org.viewer.hub.back.model.property.WeasisConnectorProperty;
 import org.viewer.hub.back.model.property.WeasisManifestConnectorProperty;
+import org.viewer.hub.back.model.searchcriteria.ArchiveSearchCriteria;
 import org.viewer.hub.back.service.DbConnectorQueryService;
 
 import java.time.LocalDate;
@@ -102,7 +102,7 @@ class DbConnectorQueryServiceImplTest {
 		studyAccessionNumbers.add("studyAccessionNumber");
 
 		// Call service
-		this.dbConnectorQueryService.buildFromStudyAccessionNumbersDbConnector(manifest, studyAccessionNumbers,
+		this.dbConnectorQueryService.retrievePatientsFromStudyAccessionNumbersDbConnector(studyAccessionNumbers,
 				this.connectorProperty);
 
 		// Test results
@@ -119,10 +119,10 @@ class DbConnectorQueryServiceImplTest {
 		Manifest manifest = new Manifest();
 		Set<String> patientIds = new HashSet<>();
 		patientIds.add("patientIds");
-		WeasisSearchCriteria weasisSearchCriteria = new WeasisSearchCriteria();
+		ArchiveSearchCriteria weasisSearchCriteria = new ArchiveSearchCriteria();
 
 		// Call service
-		this.dbConnectorQueryService.buildFromPatientIdsDbConnector(manifest, patientIds, this.connectorProperty,
+		this.dbConnectorQueryService.retrievePatientsFromPatientIdsDbConnector(patientIds, this.connectorProperty,
 				weasisSearchCriteria);
 
 		// Test results
@@ -141,7 +141,7 @@ class DbConnectorQueryServiceImplTest {
 		studyInstanceUids.add("studyInstanceUids");
 
 		// Call service
-		this.dbConnectorQueryService.buildFromStudyInstanceUidsDbConnector(manifest, studyInstanceUids,
+		this.dbConnectorQueryService.retrievePatientsFromStudyInstanceUidsDbConnector(studyInstanceUids,
 				this.connectorProperty);
 
 		// Test results
@@ -160,7 +160,7 @@ class DbConnectorQueryServiceImplTest {
 		seriesInstanceUids.add("seriesInstanceUids");
 
 		// Call service
-		this.dbConnectorQueryService.buildFromSeriesInstanceUidsDbConnector(manifest, seriesInstanceUids,
+		this.dbConnectorQueryService.retrievePatientsFromSeriesInstanceUidsDbConnector(seriesInstanceUids,
 				this.connectorProperty);
 
 		// Test results
@@ -179,7 +179,7 @@ class DbConnectorQueryServiceImplTest {
 		sopInstanceUids.add("sopInstanceUids");
 
 		// Call service
-		this.dbConnectorQueryService.buildFromSopInstanceUidsDbConnector(manifest, sopInstanceUids,
+		this.dbConnectorQueryService.retrievePatientsFromSopInstanceUidsDbConnector(sopInstanceUids,
 				this.connectorProperty);
 
 		// Test results

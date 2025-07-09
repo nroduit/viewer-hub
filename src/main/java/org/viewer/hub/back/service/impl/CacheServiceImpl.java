@@ -20,8 +20,8 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.viewer.hub.back.constant.CacheName;
 import org.viewer.hub.back.entity.PackageVersionEntity;
-import org.viewer.hub.back.model.SearchCriteria;
 import org.viewer.hub.back.model.manifest.Manifest;
+import org.viewer.hub.back.model.searchcriteria.SearchCriteria;
 import org.viewer.hub.back.service.CacheService;
 
 import java.util.Collection;

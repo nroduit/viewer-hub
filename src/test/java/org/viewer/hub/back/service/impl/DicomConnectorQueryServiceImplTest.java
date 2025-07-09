@@ -31,9 +31,8 @@ import org.springframework.web.reactive.function.client.WebClient;
 import org.viewer.hub.back.config.properties.ConnectorConfigurationProperties;
 import org.viewer.hub.back.enums.ConnectorAuthType;
 import org.viewer.hub.back.enums.ConnectorType;
-import org.viewer.hub.back.model.WeasisSearchCriteria;
-import org.viewer.hub.back.model.manifest.DicomPatientSex;
-import org.viewer.hub.back.model.manifest.Manifest;
+import org.viewer.hub.back.model.patient.DicomPatientSex;
+import org.viewer.hub.back.model.patient.Patient;
 import org.viewer.hub.back.model.property.ConnectorAuthenticationProperty;
 import org.viewer.hub.back.model.property.ConnectorDicomWebProperty;
 import org.viewer.hub.back.model.property.ConnectorProperty;
@@ -46,6 +45,7 @@ import org.viewer.hub.back.model.property.DicomWebConnectorProperty;
 import org.viewer.hub.back.model.property.SearchCriteriaProperty;
 import org.viewer.hub.back.model.property.WeasisConnectorProperty;
 import org.viewer.hub.back.model.property.WeasisManifestConnectorProperty;
+import org.viewer.hub.back.model.searchcriteria.ArchiveSearchCriteria;
 import org.viewer.hub.back.service.DicomConnectorQueryService;
 import org.viewer.hub.back.service.DicomWebClientService;
 import org.weasis.dicom.op.CFind;
@@ -53,7 +53,6 @@ import org.weasis.dicom.param.DicomParam;
 import org.weasis.dicom.param.DicomState;
 import reactor.core.publisher.Mono;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Function;
@@ -197,29 +196,24 @@ class DicomConnectorQueryServiceImplTest {
 	}
 
 	@Test
-	void when_buildingFromStudyAccessionNumber_withDicomConnector_with_validData_should_addCorrectValuesInManifest() {
+	void when_retrievePatientsFromStudyAccessionNumber_withDicomConnector_with_validData_should_addCorrectValuesInManifest() {
 		// Init data
-		Manifest manifest = new Manifest();
 		Set<String> studyAccessionNumbers = new HashSet<>();
 		studyAccessionNumbers.add("studyAccessionNumber");
 
 		// Call service
-		this.dicomConnectorQueryService.buildFromStudyAccessionNumbersDicomConnector(manifest, studyAccessionNumbers,
-				this.dicomConnectorProperty, null);
+		Set<Patient> patients = this.dicomConnectorQueryService.retrievePatientsFromStudyAccessionNumbersDicomConnector(
+				studyAccessionNumbers, this.dicomConnectorProperty, null);
 
 		// Test results
-		assertEquals("patientId", new ArrayList<>(manifest.getArcQueries().get(0).getPatients()).get(0).getPatientID());
-		assertEquals("idDicom", manifest.getArcQueries().get(0).getArcId());
-		assertEquals(ConnectorType.DICOM, manifest.getArcQueries().get(0).getQueryMode());
-		assertEquals(DicomPatientSex.O,
-				new ArrayList<>(manifest.getArcQueries().get(0).getPatients()).get(0).getPatientSex());
+		assertEquals("patientId", patients.stream().findFirst().get().getPatientID());
+		assertEquals(DicomPatientSex.O, patients.stream().findFirst().get().getPatientSex());
 	}
 
 	@Test
 	void when_buildingFromStudyAccessionNumber_withDicomWebConnector_with_validData_should_addCorrectValuesInManifest()
 			throws JsonProcessingException {
 		// Init data
-		Manifest manifest = new Manifest();
 		Set<String> studyAccessionNumbers = new HashSet<>();
 		studyAccessionNumbers.add("studyAccessionNumber");
 
@@ -229,44 +223,36 @@ class DicomConnectorQueryServiceImplTest {
 					"[{\"00100020\":{\"vr\":\"LO\",\"Value\":[\"patientId\"]},\"00100040\":{\"vr\":\"CS\",\"Value\":[\"O\"]}}]"));
 
 		// Call service
-		this.dicomConnectorQueryService.buildFromStudyAccessionNumbersDicomConnector(manifest, studyAccessionNumbers,
-				this.dicomWebConnectorProperty, null);
+		Set<Patient> patients = this.dicomConnectorQueryService.retrievePatientsFromStudyAccessionNumbersDicomConnector(
+				studyAccessionNumbers, this.dicomWebConnectorProperty, null);
 
 		// Test results
-		assertEquals("patientId", new ArrayList<>(manifest.getArcQueries().get(0).getPatients()).get(0).getPatientID());
-		assertEquals("idDicomWeb", manifest.getArcQueries().get(0).getArcId());
-		assertEquals(ConnectorType.DICOM_WEB, manifest.getArcQueries().get(0).getQueryMode());
-		assertEquals(DicomPatientSex.O,
-				new ArrayList<>(manifest.getArcQueries().get(0).getPatients()).get(0).getPatientSex());
+		assertEquals("patientId", patients.stream().findFirst().get().getPatientID());
+		assertEquals(DicomPatientSex.O, patients.stream().findFirst().get().getPatientSex());
 	}
 
 	@Test
 	void when_buildingFromPatientIds_withDicomConnector_with_validData_should_addCorrectValuesInManifest() {
 		// Init data
-		Manifest manifest = new Manifest();
 		Set<String> patientIds = new HashSet<>();
 		patientIds.add("patientId");
-		WeasisSearchCriteria weasisSearchCriteria = new WeasisSearchCriteria();
+		ArchiveSearchCriteria archiveSearchCriteria = new ArchiveSearchCriteria();
 
 		// Call service
-		this.dicomConnectorQueryService.buildFromPatientIdsDicomConnector(manifest, patientIds,
-				this.dicomConnectorProperty, weasisSearchCriteria, null);
+		Set<Patient> patients = this.dicomConnectorQueryService.retrievePatientsFromPatientIdsDicomConnector(patientIds,
+				this.dicomConnectorProperty, archiveSearchCriteria, null);
 
 		// Test results
-		assertEquals("patientId", new ArrayList<>(manifest.getArcQueries().get(0).getPatients()).get(0).getPatientID());
-		assertEquals(ConnectorType.DICOM, manifest.getArcQueries().get(0).getQueryMode());
-		assertEquals("idDicom", manifest.getArcQueries().get(0).getArcId());
-		assertEquals(DicomPatientSex.O,
-				new ArrayList<>(manifest.getArcQueries().get(0).getPatients()).get(0).getPatientSex());
+		assertEquals("patientId", patients.stream().findFirst().get().getPatientID());
+		assertEquals(DicomPatientSex.O, patients.stream().findFirst().get().getPatientSex());
 	}
 
 	@Test
 	void when_buildingFromPatientIds_withDicomWebConnector_with_validData_should_addCorrectValuesInManifest() {
 		// Init data
-		Manifest manifest = new Manifest();
 		Set<String> patientIds = new HashSet<>();
 		patientIds.add("patientId");
-		WeasisSearchCriteria weasisSearchCriteria = new WeasisSearchCriteria();
+		ArchiveSearchCriteria weasisSearchCriteria = new ArchiveSearchCriteria();
 
 		// Mock behaviour
 		Mockito.when(responseSpec.bodyToMono(String.class))
@@ -274,40 +260,32 @@ class DicomConnectorQueryServiceImplTest {
 					"[{\"00100020\":{\"vr\":\"LO\",\"Value\":[\"patientId\"]},\"00100040\":{\"vr\":\"CS\",\"Value\":[\"O\"]}}]"));
 
 		// Call service
-		this.dicomConnectorQueryService.buildFromPatientIdsDicomConnector(manifest, patientIds,
+		Set<Patient> patients = this.dicomConnectorQueryService.retrievePatientsFromPatientIdsDicomConnector(patientIds,
 				this.dicomWebConnectorProperty, weasisSearchCriteria, null);
 
 		// Test results
-		assertEquals("patientId", new ArrayList<>(manifest.getArcQueries().get(0).getPatients()).get(0).getPatientID());
-		assertEquals("idDicomWeb", manifest.getArcQueries().get(0).getArcId());
-		assertEquals(ConnectorType.DICOM_WEB, manifest.getArcQueries().get(0).getQueryMode());
-		assertEquals(DicomPatientSex.O,
-				new ArrayList<>(manifest.getArcQueries().get(0).getPatients()).get(0).getPatientSex());
+		assertEquals("patientId", patients.stream().findFirst().get().getPatientID());
+		assertEquals(DicomPatientSex.O, patients.stream().findFirst().get().getPatientSex());
 	}
 
 	@Test
 	void when_buildingFromStudyInstanceUids_withDicomConnector_with_validData_should_addCorrectValuesInManifest() {
 		// Init data
-		Manifest manifest = new Manifest();
 		Set<String> studyInstanceUids = new HashSet<>();
 		studyInstanceUids.add("studyInstanceUid");
 
 		// Call service
-		this.dicomConnectorQueryService.buildFromStudyInstanceUidsDicomConnector(manifest, studyInstanceUids,
-				this.dicomConnectorProperty, null);
+		Set<Patient> patients = this.dicomConnectorQueryService
+			.retrievePatientsFromStudyInstanceUidsDicomConnector(studyInstanceUids, this.dicomConnectorProperty, null);
 
 		// Test results
-		assertEquals("patientId", new ArrayList<>(manifest.getArcQueries().get(0).getPatients()).get(0).getPatientID());
-		assertEquals("idDicom", manifest.getArcQueries().get(0).getArcId());
-		assertEquals(ConnectorType.DICOM, manifest.getArcQueries().get(0).getQueryMode());
-		assertEquals(DicomPatientSex.O,
-				new ArrayList<>(manifest.getArcQueries().get(0).getPatients()).get(0).getPatientSex());
+		assertEquals("patientId", patients.stream().findFirst().get().getPatientID());
+		assertEquals(DicomPatientSex.O, patients.stream().findFirst().get().getPatientSex());
 	}
 
 	@Test
 	void when_buildingFromStudyInstanceUids_withDicomWebConnector_with_validData_should_addCorrectValuesInManifest() {
 		// Init data
-		Manifest manifest = new Manifest();
 		Set<String> studyInstanceUids = new HashSet<>();
 		studyInstanceUids.add("studyInstanceUid");
 
@@ -317,40 +295,32 @@ class DicomConnectorQueryServiceImplTest {
 					"[{\"00100020\":{\"vr\":\"LO\",\"Value\":[\"patientId\"]},\"00100040\":{\"vr\":\"CS\",\"Value\":[\"O\"]}}]"));
 
 		// Call service
-		this.dicomConnectorQueryService.buildFromStudyInstanceUidsDicomConnector(manifest, studyInstanceUids,
-				this.dicomWebConnectorProperty, null);
+		Set<Patient> patients = this.dicomConnectorQueryService.retrievePatientsFromStudyInstanceUidsDicomConnector(
+				studyInstanceUids, this.dicomWebConnectorProperty, null);
 
 		// Test results
-		assertEquals("patientId", new ArrayList<>(manifest.getArcQueries().get(0).getPatients()).get(0).getPatientID());
-		assertEquals("idDicomWeb", manifest.getArcQueries().get(0).getArcId());
-		assertEquals(ConnectorType.DICOM_WEB, manifest.getArcQueries().get(0).getQueryMode());
-		assertEquals(DicomPatientSex.O,
-				new ArrayList<>(manifest.getArcQueries().get(0).getPatients()).get(0).getPatientSex());
+		assertEquals("patientId", patients.stream().findFirst().get().getPatientID());
+		assertEquals(DicomPatientSex.O, patients.stream().findFirst().get().getPatientSex());
 	}
 
 	@Test
 	void when_buildingFromSeriesInstanceUids_withDicomConnector_with_validData_should_addCorrectValuesInManifest() {
 		// Init data
-		Manifest manifest = new Manifest();
 		Set<String> seriesInstanceUids = new HashSet<>();
 		seriesInstanceUids.add("seriesInstanceUid");
 
 		// Call service
-		this.dicomConnectorQueryService.buildFromSeriesInstanceUidsDicomConnector(manifest, seriesInstanceUids,
-				this.dicomConnectorProperty, null);
+		Set<Patient> patients = this.dicomConnectorQueryService.retrievePatientsFromSeriesInstanceUidsDicomConnector(
+				seriesInstanceUids, this.dicomConnectorProperty, null);
 
 		// Test results
-		assertEquals("patientId", new ArrayList<>(manifest.getArcQueries().get(0).getPatients()).get(0).getPatientID());
-		assertEquals("idDicom", manifest.getArcQueries().get(0).getArcId());
-		assertEquals(ConnectorType.DICOM, manifest.getArcQueries().get(0).getQueryMode());
-		assertEquals(DicomPatientSex.O,
-				new ArrayList<>(manifest.getArcQueries().get(0).getPatients()).get(0).getPatientSex());
+		assertEquals("patientId", patients.stream().findFirst().get().getPatientID());
+		assertEquals(DicomPatientSex.O, patients.stream().findFirst().get().getPatientSex());
 	}
 
 	@Test
 	void when_buildingFromSeriesInstanceUids_withDicomWebConnector_with_validData_should_addCorrectValuesInManifest() {
 		// Init data
-		Manifest manifest = new Manifest();
 		Set<String> seriesInstanceUids = new HashSet<>();
 		seriesInstanceUids.add("seriesInstanceUid");
 
@@ -360,40 +330,32 @@ class DicomConnectorQueryServiceImplTest {
 					"[{\"00100020\":{\"vr\":\"LO\",\"Value\":[\"patientId\"]},\"0020000D\":{\"vr\":\"UI\",\"Value\":[\"studyInstanceUID\"]},\"00100040\":{\"vr\":\"CS\",\"Value\":[\"O\"]}}]"));
 
 		// Call service
-		this.dicomConnectorQueryService.buildFromSeriesInstanceUidsDicomConnector(manifest, seriesInstanceUids,
-				this.dicomWebConnectorProperty, null);
+		Set<Patient> patients = this.dicomConnectorQueryService.retrievePatientsFromSeriesInstanceUidsDicomConnector(
+				seriesInstanceUids, this.dicomWebConnectorProperty, null);
 
 		// Test results
-		assertEquals("patientId", new ArrayList<>(manifest.getArcQueries().get(0).getPatients()).get(0).getPatientID());
-		assertEquals("idDicomWeb", manifest.getArcQueries().get(0).getArcId());
-		assertEquals(ConnectorType.DICOM_WEB, manifest.getArcQueries().get(0).getQueryMode());
-		assertEquals(DicomPatientSex.O,
-				new ArrayList<>(manifest.getArcQueries().get(0).getPatients()).get(0).getPatientSex());
+		assertEquals("patientId", patients.stream().findFirst().get().getPatientID());
+		assertEquals(DicomPatientSex.O, patients.stream().findFirst().get().getPatientSex());
 	}
 
 	@Test
 	void when_buildingFromSopInstanceUids_withDicomConnector_with_validData_should_addCorrectValuesInManifest() {
 		// Init data
-		Manifest manifest = new Manifest();
 		Set<String> sopInstanceUids = new HashSet<>();
 		sopInstanceUids.add("sopInstanceUid");
 
 		// Call service
-		this.dicomConnectorQueryService.buildFromSopInstanceUidsDicomConnector(manifest, sopInstanceUids,
-				this.dicomConnectorProperty, null);
+		Set<Patient> patients = this.dicomConnectorQueryService
+			.retrievePatientsFromSopInstanceUidsDicomConnector(sopInstanceUids, this.dicomConnectorProperty, null);
 
 		// Test results
-		assertEquals("patientId", new ArrayList<>(manifest.getArcQueries().get(0).getPatients()).get(0).getPatientID());
-		assertEquals("idDicom", manifest.getArcQueries().get(0).getArcId());
-		assertEquals(ConnectorType.DICOM, manifest.getArcQueries().get(0).getQueryMode());
-		assertEquals(DicomPatientSex.O,
-				new ArrayList<>(manifest.getArcQueries().get(0).getPatients()).get(0).getPatientSex());
+		assertEquals("patientId", patients.stream().findFirst().get().getPatientID());
+		assertEquals(DicomPatientSex.O, patients.stream().findFirst().get().getPatientSex());
 	}
 
 	@Test
 	void when_buildingFromSopInstanceUids_withDicomWebConnector_with_validData_should_addCorrectValuesInManifest() {
 		// Init data
-		Manifest manifest = new Manifest();
 		Set<String> sopInstanceUids = new HashSet<>();
 		sopInstanceUids.add("sopInstanceUid");
 
@@ -403,15 +365,12 @@ class DicomConnectorQueryServiceImplTest {
 					"[{\"00100020\":{\"vr\":\"LO\",\"Value\":[\"patientId\"]},\"0020000D\":{\"vr\":\"UI\",\"Value\":[\"studyInstanceUID\"]},\"0020000E\":{\"vr\":\"UI\",\"Value\":[\"serieInstanceUID\"]},\"00100040\":{\"vr\":\"CS\",\"Value\":[\"O\"]}}]"));
 
 		// Call service
-		this.dicomConnectorQueryService.buildFromSopInstanceUidsDicomConnector(manifest, sopInstanceUids,
-				this.dicomWebConnectorProperty, null);
+		Set<Patient> patients = this.dicomConnectorQueryService
+			.retrievePatientsFromSopInstanceUidsDicomConnector(sopInstanceUids, this.dicomWebConnectorProperty, null);
 
 		// Test results
-		assertEquals("patientId", new ArrayList<>(manifest.getArcQueries().get(0).getPatients()).get(0).getPatientID());
-		assertEquals("idDicomWeb", manifest.getArcQueries().get(0).getArcId());
-		assertEquals(ConnectorType.DICOM_WEB, manifest.getArcQueries().get(0).getQueryMode());
-		assertEquals(DicomPatientSex.O,
-				new ArrayList<>(manifest.getArcQueries().get(0).getPatients()).get(0).getPatientSex());
+		assertEquals("patientId", patients.stream().findFirst().get().getPatientID());
+		assertEquals(DicomPatientSex.O, patients.stream().findFirst().get().getPatientSex());
 	}
 
 }

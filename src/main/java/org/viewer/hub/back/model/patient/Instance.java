@@ -9,7 +9,7 @@
  *
  */
 
-package org.viewer.hub.back.model.manifest;
+package org.viewer.hub.back.model.patient;
 
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import lombok.AllArgsConstructor;

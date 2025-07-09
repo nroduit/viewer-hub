@@ -31,10 +31,11 @@ import org.viewer.hub.back.config.s3.S3ClientConfigurationProperties;
 import org.viewer.hub.back.constant.EndPoint;
 import org.viewer.hub.back.constant.ParamName;
 import org.viewer.hub.back.enums.IHERequestType;
-import org.viewer.hub.back.model.WeasisIHESearchCriteria;
-import org.viewer.hub.back.model.WeasisSearchCriteria;
+import org.viewer.hub.back.model.searchcriteria.ArchiveSearchCriteria;
+import org.viewer.hub.back.model.searchcriteria.IHESearchCriteria;
+import org.viewer.hub.back.model.searchcriteria.WeasisArchiveSearchCriteria;
 import org.viewer.hub.back.service.CryptographyService;
-import org.viewer.hub.back.service.DisplayService;
+import org.viewer.hub.back.service.WeasisDisplayService;
 
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -47,7 +48,7 @@ class DisplayControllerIntegrationTests {
 	private MockMvc mockMvc;
 
 	@MockBean
-	private DisplayService displayService;
+	private WeasisDisplayService displayService;
 
 	@MockBean
 	private CryptographyService cryptographyService;
@@ -66,7 +67,7 @@ class DisplayControllerIntegrationTests {
 	@Test
 	void when_launchWeasisWithoutIHEParameters_with_validData_and_getRequest_should_beRedirection() throws Exception {
 		// Init data
-		WeasisSearchCriteria weasisSearchCriteria = new WeasisSearchCriteria();
+		ArchiveSearchCriteria weasisSearchCriteria = new ArchiveSearchCriteria();
 		weasisSearchCriteria.setUser("test");
 
 		// Mock service
@@ -79,7 +80,7 @@ class DisplayControllerIntegrationTests {
 	@Test
 	void when_launchWeasisWithIHEParameters_with_validData_and_getRequest_should_beRedirection() throws Exception {
 		// Init data
-		WeasisIHESearchCriteria weasisIHESearchCriteria = new WeasisIHESearchCriteria();
+		IHESearchCriteria weasisIHESearchCriteria = new IHESearchCriteria();
 		weasisIHESearchCriteria.setUser("test");
 		weasisIHESearchCriteria.setRequestType(IHERequestType.PATIENT);
 		weasisIHESearchCriteria.setPatientID("patientId");
@@ -94,7 +95,7 @@ class DisplayControllerIntegrationTests {
 	@Test
 	void when_launchWeasisWithoutIHEParameters_with_invalidData_and_getRequest_should_beBadRequest() throws Exception {
 		// Init data
-		WeasisSearchCriteria weasisSearchCriteria = new WeasisSearchCriteria();
+		ArchiveSearchCriteria weasisSearchCriteria = new ArchiveSearchCriteria();
 		weasisSearchCriteria.setUser("test");
 		weasisSearchCriteria.setArchive(new LinkedHashSet<>(List.of("archiveNotExisting")));
 
@@ -109,7 +110,7 @@ class DisplayControllerIntegrationTests {
 	@Test
 	void when_launchWeasisWithIHEParameters_with_invalidData_and_getRequest_should_beBadRequest() throws Exception {
 		// Init data
-		WeasisIHESearchCriteria weasisIHESearchCriteria = new WeasisIHESearchCriteria();
+		IHESearchCriteria weasisIHESearchCriteria = new IHESearchCriteria();
 		weasisIHESearchCriteria.setUser("test");
 		weasisIHESearchCriteria.setRequestType(IHERequestType.PATIENT);
 		weasisIHESearchCriteria.setPatientID(null);
@@ -125,7 +126,7 @@ class DisplayControllerIntegrationTests {
 	@Test
 	void when_launchWeasisWithoutIHEParameters_with_validData_and_postRequest_should_beRedirection() throws Exception {
 		// Init data
-		WeasisSearchCriteria weasisSearchCriteria = new WeasisSearchCriteria();
+		WeasisArchiveSearchCriteria weasisSearchCriteria = new WeasisArchiveSearchCriteria();
 		weasisSearchCriteria.setUser("test");
 		weasisSearchCriteria.setExtCfg("extCfg");
 
@@ -139,7 +140,7 @@ class DisplayControllerIntegrationTests {
 	@Test
 	void when_launchWeasisWithIHEParameters_with_validData_and_postRequest_should_beRedirection() throws Exception {
 		// Init data
-		WeasisIHESearchCriteria weasisIHESearchCriteria = new WeasisIHESearchCriteria();
+		IHESearchCriteria weasisIHESearchCriteria = new IHESearchCriteria();
 		weasisIHESearchCriteria.setUser("test");
 		weasisIHESearchCriteria.setRequestType(IHERequestType.PATIENT);
 		weasisIHESearchCriteria.setPatientID("patientId");
@@ -154,7 +155,7 @@ class DisplayControllerIntegrationTests {
 	@Test
 	void when_launchWeasisWithoutIHEParameters_with_invalidData_and_postRequest_should_beBadRequest() throws Exception {
 		// Init data
-		WeasisSearchCriteria weasisSearchCriteria = new WeasisSearchCriteria();
+		ArchiveSearchCriteria weasisSearchCriteria = new ArchiveSearchCriteria();
 		weasisSearchCriteria.setArchive(new LinkedHashSet<>(List.of("archiveNotExisting")));
 
 		// Mock service
@@ -168,7 +169,7 @@ class DisplayControllerIntegrationTests {
 	@Test
 	void when_launchWeasisWithIHEParameters_with_invalidData_and_postRequest_should_beBadRequest() throws Exception {
 		// Init data
-		WeasisIHESearchCriteria weasisIHESearchCriteria = new WeasisIHESearchCriteria();
+		IHESearchCriteria weasisIHESearchCriteria = new IHESearchCriteria();
 		weasisIHESearchCriteria.setUser("test");
 		weasisIHESearchCriteria.setRequestType(IHERequestType.PATIENT);
 		weasisIHESearchCriteria.setPatientID(null);
@@ -181,7 +182,7 @@ class DisplayControllerIntegrationTests {
 	}
 
 	private void launchWeasisWithoutIHEParametersPostRequestInvalidDataShouldBeBadRequest(
-			WeasisSearchCriteria weasisSearchCriteria) throws Exception {
+			ArchiveSearchCriteria weasisSearchCriteria) throws Exception {
 
 		// Data Input
 		String weasisSearchCriteriaString = null;
@@ -199,7 +200,7 @@ class DisplayControllerIntegrationTests {
 	}
 
 	private void launchWeasisWithIHEParametersPostRequestInvalidDataShouldBeBadRequest(
-			WeasisIHESearchCriteria weasisIHESearchCriteria) throws Exception {
+			IHESearchCriteria weasisIHESearchCriteria) throws Exception {
 
 		// Data Input
 		String weasisSearchCriteriaString = null;
@@ -217,7 +218,7 @@ class DisplayControllerIntegrationTests {
 	}
 
 	private void launchWeasisWithoutIHEParametersGetRequestInvalidDataShouldBeBadRequest(
-			WeasisSearchCriteria weasisSearchCriteria, String extCfg) throws Exception {
+			ArchiveSearchCriteria weasisSearchCriteria, String extCfg) throws Exception {
 		// Call controller and check status
 		this.mockMvc
 			.perform(MockMvcRequestBuilders.get(EndPoint.DISPLAY_PATH + EndPoint.WEASIS_PATH)
@@ -228,7 +229,7 @@ class DisplayControllerIntegrationTests {
 	}
 
 	private void launchWeasisWithIHEParametersGetRequestInvalidDataShouldBeBadRequest(
-			WeasisIHESearchCriteria weasisIHESearchCriteria, String extCfg) throws Exception {
+			IHESearchCriteria weasisIHESearchCriteria, String extCfg) throws Exception {
 		// Call controller and check status
 		this.mockMvc
 			.perform(MockMvcRequestBuilders.get(EndPoint.DISPLAY_PATH + EndPoint.IHE_INVOKE_IMAGE_DISPLAY_PATH)
@@ -240,7 +241,7 @@ class DisplayControllerIntegrationTests {
 	}
 
 	private void launchWeasisWithoutIHEParametersPostRequestShouldBeRedirection(
-			WeasisSearchCriteria weasisSearchCriteria) throws Exception {
+			ArchiveSearchCriteria weasisSearchCriteria) throws Exception {
 		// Data Input
 		ObjectMapper objectMapper = new ObjectMapper();
 		String weasisSearchCriteriaString = objectMapper.writeValueAsString(weasisSearchCriteria);
@@ -253,8 +254,8 @@ class DisplayControllerIntegrationTests {
 			.andExpect(MockMvcResultMatchers.status().is3xxRedirection());
 	}
 
-	private void launchWeasisWithIHEParametersPostRequestShouldBeRedirection(
-			WeasisIHESearchCriteria weasisIHESearchCriteria) throws Exception {
+	private void launchWeasisWithIHEParametersPostRequestShouldBeRedirection(IHESearchCriteria weasisIHESearchCriteria)
+			throws Exception {
 		// Data Input
 		ObjectMapper objectMapper = new ObjectMapper();
 		String weasisSearchCriteriaString = objectMapper.writeValueAsString(weasisIHESearchCriteria);
@@ -268,7 +269,7 @@ class DisplayControllerIntegrationTests {
 	}
 
 	private void launchWeasisWithoutIHEParametersGetRequestShouldBeRedirection(
-			WeasisSearchCriteria weasisSearchCriteria, String extCfg) throws Exception {
+			ArchiveSearchCriteria weasisSearchCriteria, String extCfg) throws Exception {
 		// Call controller and check status
 		this.mockMvc
 			.perform(MockMvcRequestBuilders.get(EndPoint.DISPLAY_PATH + EndPoint.WEASIS_PATH)
@@ -277,8 +278,8 @@ class DisplayControllerIntegrationTests {
 			.andExpect(MockMvcResultMatchers.status().is3xxRedirection());
 	}
 
-	private void launchWeasisWithIHEParametersGetRequestShouldBeRedirection(
-			WeasisIHESearchCriteria weasisIHESearchCriteria, String extCfg) throws Exception {
+	private void launchWeasisWithIHEParametersGetRequestShouldBeRedirection(IHESearchCriteria weasisIHESearchCriteria,
+			String extCfg) throws Exception {
 		// Call controller and check status
 		this.mockMvc
 			.perform(MockMvcRequestBuilders.get(EndPoint.DISPLAY_PATH + EndPoint.IHE_INVOKE_IMAGE_DISPLAY_PATH)
