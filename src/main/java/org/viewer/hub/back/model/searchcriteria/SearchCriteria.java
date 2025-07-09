@@ -9,30 +9,29 @@
  *
  */
 
-package org.viewer.hub.back.model;
+package org.viewer.hub.back.model.searchcriteria;
 
-import com.fasterxml.jackson.annotation.JsonGetter;
-import com.fasterxml.jackson.annotation.JsonSetter;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.ToString;
-import org.viewer.hub.back.model.manifest.Patient;
+import org.viewer.hub.back.model.patient.Patient;
 import org.viewer.hub.back.model.validator.ExistingConnector;
 import org.viewer.hub.back.util.StringUtil;
 
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.weasis.core.util.StringUtil.deAccent;
 
+@Getter
 @ExistingConnector
 @ToString
 @EqualsAndHashCode
@@ -41,46 +40,36 @@ public abstract class SearchCriteria implements Serializable {
 	@Serial
 	private static final long serialVersionUID = 3062479886665643364L;
 
-	@Schema(description = "Used to modify the properties of the launcher", name = "pro", type = "List<String>",
-			example = "weasis.export.dicom true")
-	private List<String> pro = new ArrayList<>();
-
+	@Setter
 	@Schema(description = "Provide user context for the request. Used to retrieve specific properties depending on user/user group",
 			name = "user", type = "String", example = "abcd")
 	private String user;
 
+	@Setter
 	@Schema(description = "Provide host context for the request. Used to retrieve specific properties depending on host/host group",
 			name = "host", type = "String", example = "pc-1234")
 	private String host;
 
+	@Setter
 	@Schema(description = "Define the client making the request", name = "client", type = "String", example = "compacs")
 	private String client;
-
-	@Schema(description = "[DEPRECATED][MARK_AS_REMOVAL] Define the context to use for the launcher. Will be replaced by 'config'",
-			name = "extCfg", type = "String", example = "dicomizer")
-	private String extCfg;
-
-	@Schema(description = "Define the context to use for the launcher.", name = "config", type = "String",
-			example = "dicomizer")
-	private String config;
-
-	@Schema(description = "Argument for the launcher", name = "arg", type = "List<String>",
-			example = "$dicom:close –all")
-	private List<String> arg = new ArrayList<>();
 
 	@Schema(description = "Request should be done by using these archives in parameter", name = "archive",
 			type = "LinkedHashSet<String>", example = "vnaDb, vnaDicom, pacsDcm4chee")
 	private LinkedHashSet<String> archive = new LinkedHashSet<>();
 
 	// Patient request filters
+	@Setter
 	@Schema(description = "Filter the results depending on StudyDateTime (min)", name = "lowerDateTime",
 			type = "LocalDateTime", example = "2024-07-19T10:15:30")
 	private LocalDateTime lowerDateTime;
 
+	@Setter
 	@Schema(description = "Filter the results depending on StudyDateTime (max)", name = "upperDateTime",
 			type = "LocalDateTime", example = "2024-07-19T10:15:30")
 	private LocalDateTime upperDateTime;
 
+	@Setter
 	@Schema(description = "Provide the most recent studies (compared by StudyDateTime) and limit the number of results by this parameter",
 			name = "mostRecentResults", type = "Integer", example = "5")
 	private Integer mostRecentResults;
@@ -93,40 +82,8 @@ public abstract class SearchCriteria implements Serializable {
 			name = "containsInDescription", type = "Set<String>", example = "abc, def")
 	private Set<String> containsInDescription = new HashSet<>();
 
-	public LocalDateTime getLowerDateTime() {
-		return this.lowerDateTime;
-	}
-
-	public void setLowerDateTime(LocalDateTime lowerDateTime) {
-		this.lowerDateTime = lowerDateTime;
-	}
-
-	public LocalDateTime getUpperDateTime() {
-		return this.upperDateTime;
-	}
-
-	public void setUpperDateTime(LocalDateTime upperDateTime) {
-		this.upperDateTime = upperDateTime;
-	}
-
-	public Integer getMostRecentResults() {
-		return this.mostRecentResults;
-	}
-
-	public void setMostRecentResults(Integer mostRecentResults) {
-		this.mostRecentResults = mostRecentResults;
-	}
-
-	public Set<String> getModalitiesInStudy() {
-		return this.modalitiesInStudy;
-	}
-
 	public void setModalitiesInStudy(Set<String> modalitiesInStudy) {
 		this.modalitiesInStudy = StringUtil.splitCommaSeparatedValuesToList(modalitiesInStudy);
-	}
-
-	public Set<String> getContainsInDescription() {
-		return this.containsInDescription;
 	}
 
 	public void setContainsInDescription(Set<String> containsInDescription) {
@@ -136,70 +93,8 @@ public abstract class SearchCriteria implements Serializable {
 			.collect(Collectors.toSet());
 	}
 
-	public LinkedHashSet<String> getArchive() {
-		return this.archive;
-	}
-
 	public void setArchive(LinkedHashSet<String> archive) {
 		this.archive = (LinkedHashSet<String>) StringUtil.splitCommaSeparatedValuesToList(archive);
-	}
-
-	public List<String> getArg() {
-		return this.arg;
-	}
-
-	public void setArg(List<String> arg) {
-		this.arg = arg;
-	}
-
-	@JsonGetter("ext-cfg")
-	public String getExtCfg() {
-		return this.extCfg;
-	}
-
-	@JsonSetter("ext-cfg")
-	public void setExtCfg(String extCfg) {
-		this.extCfg = extCfg;
-	}
-
-	public String getConfig() {
-		return this.config;
-	}
-
-	public void setConfig(String config) {
-		this.config = config;
-	}
-
-	public String getHost() {
-		return this.host;
-	}
-
-	public void setHost(String host) {
-		this.host = host;
-	}
-
-	public String getUser() {
-		return this.user;
-	}
-
-	public void setUser(String user) {
-		this.user = user;
-	}
-
-	public String getClient() {
-		return this.client;
-	}
-
-	public void setClient(String client) {
-		this.client = client;
-	}
-
-	public List<String> getPro() {
-		return this.pro;
-	}
-
-	public void setPro(List<String> pro) {
-		this.pro = pro;
 	}
 
 	public Set<Patient> applyPatientRequestSearchCriteriaFilters(Set<Patient> patientsToFilter) {

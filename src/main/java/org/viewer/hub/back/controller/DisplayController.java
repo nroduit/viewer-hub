@@ -32,11 +32,11 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.view.RedirectView;
 import org.viewer.hub.back.constant.EndPoint;
 import org.viewer.hub.back.constant.ParamName;
-import org.viewer.hub.back.model.SearchCriteria;
-import org.viewer.hub.back.model.WeasisIHESearchCriteria;
-import org.viewer.hub.back.model.WeasisSearchCriteria;
+import org.viewer.hub.back.model.searchcriteria.SearchCriteria;
+import org.viewer.hub.back.model.searchcriteria.WeasisArchiveSearchCriteria;
+import org.viewer.hub.back.model.searchcriteria.WeasisIHESearchCriteria;
 import org.viewer.hub.back.service.CryptographyService;
-import org.viewer.hub.back.service.DisplayService;
+import org.viewer.hub.back.service.WeasisDisplayService;
 import org.viewer.hub.back.util.InetUtil;
 
 /**
@@ -50,18 +50,19 @@ import org.viewer.hub.back.util.InetUtil;
 public class DisplayController {
 
 	// Services
-	private final DisplayService displayService;
+	private final WeasisDisplayService weasisDisplayService;
 
 	private final CryptographyService cryptographyService;
 
 	/**
 	 * Autowired constructor
-	 * @param displayService display service
+	 * @param weasisDisplayService display service
 	 * @param cryptographyService cryptography service
 	 */
 	@Autowired
-	public DisplayController(final DisplayService displayService, final CryptographyService cryptographyService) {
-		this.displayService = displayService;
+	public DisplayController(final WeasisDisplayService weasisDisplayService,
+			final CryptographyService cryptographyService) {
+		this.weasisDisplayService = weasisDisplayService;
 		this.cryptographyService = cryptographyService;
 	}
 
@@ -88,7 +89,8 @@ public class DisplayController {
 
 		// If encoding enabled decode values
 		this.cryptographyService.decode(weasisIHESearchCriteria);
-		return new RedirectView(this.displayService.retrieveWeasisLaunchUrl(weasisIHESearchCriteria, authentication));
+		return new RedirectView(
+				this.weasisDisplayService.retrieveWeasisLaunchUrl(weasisIHESearchCriteria, authentication));
 	}
 
 	/**
@@ -119,7 +121,7 @@ public class DisplayController {
 
 	/**
 	 * Launch Weasis depending on search criteria: unsecured version
-	 * @param weasisSearchCriteria weasis Search Criteria
+	 * @param weasisArchiveSearchCriteria weasis Search Criteria
 	 * @param extCfg ext config
 	 * @return launch weasis with the weasis command thanks to the weasis launch url.
 	 * Build also the manifest corresponding to the search criteria if not present in the
@@ -129,23 +131,24 @@ public class DisplayController {
 			description = "Launch Weasis depending on search criteria: not authenticated version")
 	@GetMapping(EndPoint.WEASIS_PATH)
 	public RedirectView launchWeasisWithoutIHEParameters(HttpServletRequest request, Authentication authentication,
-			@Valid WeasisSearchCriteria weasisSearchCriteria,
+			@Valid WeasisArchiveSearchCriteria weasisArchiveSearchCriteria,
 			@RequestParam(value = ParamName.EXT_CFG, required = false) String extCfg) {
 		// TODO: workaround=> currently not working with different name => conflict ?
 		// to do JacksonConfig
-		weasisSearchCriteria.setExtCfg(extCfg);
+		weasisArchiveSearchCriteria.setExtCfg(extCfg);
 
 		// Resolve the host of the request in case it is not defined
-		// resolveHostSearchCriteria(request, weasisSearchCriteria);
+		// resolveHostSearchCriteria(request, weasisArchiveSearchCriteria);
 
 		// If encoding enabled decode values
-		this.cryptographyService.decode(weasisSearchCriteria);
-		return new RedirectView(this.displayService.retrieveWeasisLaunchUrl(weasisSearchCriteria, authentication));
+		this.cryptographyService.decode(weasisArchiveSearchCriteria);
+		return new RedirectView(
+				this.weasisDisplayService.retrieveWeasisLaunchUrl(weasisArchiveSearchCriteria, authentication));
 	}
 
 	/**
 	 * Launch Weasis depending on search criteria: secured version
-	 * @param weasisSearchCriteria weasis Search Criteria
+	 * @param weasisArchiveSearchCriteria weasis Search Criteria
 	 * @param extCfg ext config
 	 * @return launch weasis with the weasis command thanks to the weasis launch url.
 	 * Build also the manifest corresponding to the search criteria if not present in the
@@ -156,10 +159,10 @@ public class DisplayController {
 	@GetMapping(EndPoint.AUTH_WEASIS_PATH)
 	public RedirectView launchAuthWeasisWithoutIHEParameters(HttpServletRequest request,
 			@Parameter(hidden = true, required = true) @NotNull Authentication authentication,
-			@Valid WeasisSearchCriteria weasisSearchCriteria,
+			@Valid WeasisArchiveSearchCriteria weasisArchiveSearchCriteria,
 			@RequestParam(value = ParamName.EXT_CFG, required = false) String extCfg) {
 		try {
-			return this.launchWeasisWithoutIHEParameters(request, authentication, weasisSearchCriteria, extCfg);
+			return this.launchWeasisWithoutIHEParameters(request, authentication, weasisArchiveSearchCriteria, extCfg);
 		}
 		finally {
 			// Reset the authentication in order to force OAuth2 to login
@@ -182,9 +185,9 @@ public class DisplayController {
 			description = "Launch Weasis depending on search criteria: not authenticated version => search criteria in body")
 	@PostMapping(EndPoint.WEASIS_PATH)
 	public RedirectView launchWeasisWithoutIHEParameters(HttpServletRequest request,
-			@RequestBody @Valid WeasisSearchCriteria weasisSearchCriteria) {
-		return this.launchWeasisWithoutIHEParameters(request, null, weasisSearchCriteria,
-				weasisSearchCriteria.getExtCfg());
+			@RequestBody @Valid WeasisArchiveSearchCriteria weasisArchiveSearchCriteria) {
+		return this.launchWeasisWithoutIHEParameters(request, null, weasisArchiveSearchCriteria,
+				weasisArchiveSearchCriteria.getExtCfg());
 	}
 
 	/**

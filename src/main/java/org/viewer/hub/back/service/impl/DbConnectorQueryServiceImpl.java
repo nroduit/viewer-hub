@@ -20,15 +20,14 @@ import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.stereotype.Service;
 import org.viewer.hub.back.config.tenant.TenantIdentifierResolver;
 import org.viewer.hub.back.constant.DbQueryConstant;
-import org.viewer.hub.back.model.SearchCriteria;
 import org.viewer.hub.back.model.connector.DbConnectorResult;
-import org.viewer.hub.back.model.manifest.DicomPatientSex;
-import org.viewer.hub.back.model.manifest.Instance;
-import org.viewer.hub.back.model.manifest.Manifest;
-import org.viewer.hub.back.model.manifest.Patient;
-import org.viewer.hub.back.model.manifest.Serie;
-import org.viewer.hub.back.model.manifest.Study;
+import org.viewer.hub.back.model.patient.DicomPatientSex;
+import org.viewer.hub.back.model.patient.Instance;
+import org.viewer.hub.back.model.patient.Patient;
+import org.viewer.hub.back.model.patient.Serie;
+import org.viewer.hub.back.model.patient.Study;
 import org.viewer.hub.back.model.property.ConnectorProperty;
+import org.viewer.hub.back.model.searchcriteria.SearchCriteria;
 import org.viewer.hub.back.service.DbConnectorQueryService;
 
 import java.util.HashSet;
@@ -52,62 +51,44 @@ public class DbConnectorQueryServiceImpl implements DbConnectorQueryService {
 	}
 
 	@Override
-	public void buildFromStudyAccessionNumbersDbConnector(Manifest manifest, Set<String> studyAccessionNumbers,
-			@Valid ConnectorProperty connector) {
-		Set<Patient> patientsFound = this.retrieveDbConnectorResults(connector, DbQueryConstant.PARAM_ACCESSION_NUMBERS,
-				studyAccessionNumbers, connector.getDbConnector().getQuery().getAccessionNumberColumn(),
-				DbQueryConstant.IN_ACCESSION_NUMBER);
-
-		// Update manifest with patients found
-		manifest.update(patientsFound, connector);
-	}
-
-	@Override
-	public void buildFromPatientIdsDbConnector(Manifest manifest, Set<String> patientIds,
+	public Set<Patient> retrievePatientsFromPatientIdsDbConnector(Set<String> patientIds,
 			@Valid ConnectorProperty connector, @Valid SearchCriteria searchCriteria) {
 		Set<Patient> patientsFound = this.retrieveDbConnectorResults(connector, DbQueryConstant.PARAM_PATIENT_IDS,
 				patientIds, connector.getDbConnector().getQuery().getPatientIdColumn(), DbQueryConstant.IN_PATIENT_ID);
 
 		// Apply patient request filters
-		patientsFound = searchCriteria.applyPatientRequestSearchCriteriaFilters(patientsFound);
-
-		// Update manifest with patients found
-		manifest.update(patientsFound, connector);
+		return searchCriteria.applyPatientRequestSearchCriteriaFilters(patientsFound);
 	}
 
 	@Override
-	public void buildFromStudyInstanceUidsDbConnector(Manifest manifest, Set<String> studyInstanceUids,
+	public Set<Patient> retrievePatientsFromStudyAccessionNumbersDbConnector(Set<String> studyAccessionNumbers,
 			@Valid ConnectorProperty connector) {
-		Set<Patient> patientsFound = this.retrieveDbConnectorResults(connector,
-				DbQueryConstant.PARAM_STUDY_INSTANCE_UIDS, studyInstanceUids,
+		return this.retrieveDbConnectorResults(connector, DbQueryConstant.PARAM_ACCESSION_NUMBERS,
+				studyAccessionNumbers, connector.getDbConnector().getQuery().getAccessionNumberColumn(),
+				DbQueryConstant.IN_ACCESSION_NUMBER);
+	}
+
+	@Override
+	public Set<Patient> retrievePatientsFromStudyInstanceUidsDbConnector(Set<String> studyInstanceUids,
+			@Valid ConnectorProperty connector) {
+		return this.retrieveDbConnectorResults(connector, DbQueryConstant.PARAM_STUDY_INSTANCE_UIDS, studyInstanceUids,
 				connector.getDbConnector().getQuery().getStudyInstanceUidColumn(),
 				DbQueryConstant.IN_STUDY_INSTANCE_UID);
-
-		// Update manifest with patients found
-		manifest.update(patientsFound, connector);
 	}
 
 	@Override
-	public void buildFromSeriesInstanceUidsDbConnector(Manifest manifest, Set<String> seriesInstanceUids,
+	public Set<Patient> retrievePatientsFromSeriesInstanceUidsDbConnector(Set<String> seriesInstanceUids,
 			@Valid ConnectorProperty connector) {
-		Set<Patient> patientsFound = this.retrieveDbConnectorResults(connector,
-				DbQueryConstant.PARAM_SERIE_INSTANCE_UIDS, seriesInstanceUids,
+		return this.retrieveDbConnectorResults(connector, DbQueryConstant.PARAM_SERIE_INSTANCE_UIDS, seriesInstanceUids,
 				connector.getDbConnector().getQuery().getSerieInstanceUidColumn(),
 				DbQueryConstant.IN_SERIE_INSTANCE_UID);
-
-		// Update manifest with patients found
-		manifest.update(patientsFound, connector);
 	}
 
 	@Override
-	public void buildFromSopInstanceUidsDbConnector(Manifest manifest, Set<String> sopInstanceUids,
+	public Set<Patient> retrievePatientsFromSopInstanceUidsDbConnector(Set<String> sopInstanceUids,
 			@Valid ConnectorProperty connector) {
-		Set<Patient> patientsFound = this.retrieveDbConnectorResults(connector, DbQueryConstant.PARAM_SOP_INSTANCE_UIDS,
-				sopInstanceUids, connector.getDbConnector().getQuery().getSopInstanceUidColumn(),
-				DbQueryConstant.IN_SOP_INSTANCE_UID);
-
-		// Update manifest with patients found
-		manifest.update(patientsFound, connector);
+		return this.retrieveDbConnectorResults(connector, DbQueryConstant.PARAM_SOP_INSTANCE_UIDS, sopInstanceUids,
+				connector.getDbConnector().getQuery().getSopInstanceUidColumn(), DbQueryConstant.IN_SOP_INSTANCE_UID);
 	}
 
 	/**

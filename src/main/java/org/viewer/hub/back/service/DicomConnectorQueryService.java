@@ -11,10 +11,11 @@
 
 package org.viewer.hub.back.service;
 
+import jakarta.validation.Valid;
 import org.springframework.security.core.Authentication;
-import org.viewer.hub.back.model.SearchCriteria;
-import org.viewer.hub.back.model.manifest.Manifest;
+import org.viewer.hub.back.model.patient.Patient;
 import org.viewer.hub.back.model.property.ConnectorProperty;
+import org.viewer.hub.back.model.searchcriteria.SearchCriteria;
 
 import java.util.Set;
 
@@ -24,54 +25,50 @@ import java.util.Set;
 public interface DicomConnectorQueryService {
 
 	/**
-	 * Fill manifest from patients ids requests with dicom/dicom-web connector
-	 * @param manifest Manifest to fill
+	 * Retrieve patients from patients ids requests with dicom/dicom-web connector
 	 * @param patientIds Patient ids to look for
 	 * @param connector Connector properties
 	 * @param searchCriteria Search criteria
 	 * @param authentication Authentication
 	 */
-	void buildFromPatientIdsDicomConnector(Manifest manifest, Set<String> patientIds, ConnectorProperty connector,
-			SearchCriteria searchCriteria, Authentication authentication);
+	Set<Patient> retrievePatientsFromPatientIdsDicomConnector(Set<String> patientIds,
+			@Valid ConnectorProperty connector, @Valid SearchCriteria searchCriteria, Authentication authentication);
 
 	/**
-	 * Fill manifest from study instance uids requests with dicom/dicom-web connector
-	 * @param manifest Manifest to fill
+	 * Retrieve patients from study instance uids requests with dicom/dicom-web connector
 	 * @param studyInstanceUids Study instance uids to look for
 	 * @param connector Connector properties
 	 * @param authentication Authentication
 	 */
-	void buildFromStudyInstanceUidsDicomConnector(Manifest manifest, Set<String> studyInstanceUids,
-			ConnectorProperty connector, Authentication authentication);
+	Set<Patient> retrievePatientsFromStudyInstanceUidsDicomConnector(Set<String> studyInstanceUids,
+			@Valid ConnectorProperty connector, Authentication authentication);
 
 	/**
-	 * Fill manifest from study accession numbers requests with dicom/dicom-web connector
-	 * @param manifest Manifest to fill
+	 * Retrieve patients from study accession numbers requests with dicom/dicom-web
+	 * connector
 	 * @param studyAccessionNumbers Study accession numbers to look for
 	 * @param connector Connector properties
 	 * @param authentication Authentication
 	 */
-	void buildFromStudyAccessionNumbersDicomConnector(Manifest manifest, Set<String> studyAccessionNumbers,
-			ConnectorProperty connector, Authentication authentication);
+	Set<Patient> retrievePatientsFromStudyAccessionNumbersDicomConnector(Set<String> studyAccessionNumbers,
+			@Valid ConnectorProperty connector, Authentication authentication);
 
 	/**
-	 * Fill manifest from serie instance uids requests with dicom/dicom-web connector
-	 * @param manifest Manifest to fill
+	 * Retrieve patients from serie instance uids requests with dicom/dicom-web connector
 	 * @param seriesInstanceUids Serie instance uids numbers to look for
 	 * @param connector Connector properties
 	 * @param authentication Authentication
 	 */
-	void buildFromSeriesInstanceUidsDicomConnector(Manifest manifest, Set<String> seriesInstanceUids,
-			ConnectorProperty connector, Authentication authentication);
+	Set<Patient> retrievePatientsFromSeriesInstanceUidsDicomConnector(Set<String> seriesInstanceUids,
+			@Valid ConnectorProperty connector, Authentication authentication);
 
 	/**
-	 * Fill manifest from sop instance uids requests with dicom/dicom-web connector
-	 * @param manifest Manifest to fill
+	 * Retrieve patients from sop instance uids requests with dicom/dicom-web connector
 	 * @param sopInstanceUids Sop instance uids numbers to look for
 	 * @param connector Connector properties
 	 * @param authentication Authentication
 	 */
-	void buildFromSopInstanceUidsDicomConnector(Manifest manifest, Set<String> sopInstanceUids,
-			ConnectorProperty connector, Authentication authentication);
+	Set<Patient> retrievePatientsFromSopInstanceUidsDicomConnector(Set<String> sopInstanceUids,
+			@Valid ConnectorProperty connector, Authentication authentication);
 
 }

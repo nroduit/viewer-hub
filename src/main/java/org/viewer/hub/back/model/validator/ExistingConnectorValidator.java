@@ -16,7 +16,7 @@ import jakarta.validation.ConstraintValidatorContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.viewer.hub.back.config.properties.ConnectorConfigurationProperties;
-import org.viewer.hub.back.model.SearchCriteria;
+import org.viewer.hub.back.model.searchcriteria.SearchCriteria;
 
 /**
  * ExistingConnectorValidator: used to check that archives correspond to existing

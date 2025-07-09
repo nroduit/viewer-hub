@@ -29,7 +29,7 @@ import org.viewer.hub.back.config.s3.S3ClientConfigurationProperties;
 import org.viewer.hub.back.constant.EndPoint;
 import org.viewer.hub.back.constant.ParamName;
 import org.viewer.hub.back.model.manifest.Manifest;
-import org.viewer.hub.back.service.ManifestService;
+import org.viewer.hub.back.service.WeasisService;
 
 @WithMockUser
 @ExtendWith(SpringExtension.class)
@@ -39,7 +39,7 @@ class ManifestControllerIntegrationTests {
 	private MockMvc mockMvc;
 
 	@MockBean
-	private ManifestService manifestService;
+	private WeasisService manifestService;
 
 	@MockBean
 	private S3ClientConfigurationProperties s3ClientConfigurationProperties;

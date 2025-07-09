@@ -18,10 +18,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.viewer.hub.back.config.properties.ConnectorConfigurationProperties;
-import org.viewer.hub.back.controller.exception.TechnicalException;
 import org.viewer.hub.back.enums.ConnectorType;
 import org.viewer.hub.back.enums.QueryLevelType;
-import org.viewer.hub.back.model.WeasisSearchCriteria;
 import org.viewer.hub.back.model.manifest.Manifest;
 import org.viewer.hub.back.model.property.ConnectorDicomWebProperty;
 import org.viewer.hub.back.model.property.ConnectorProperty;
@@ -33,21 +31,22 @@ import org.viewer.hub.back.model.property.DicomConnectorProperty;
 import org.viewer.hub.back.model.property.DicomWebConnectorProperty;
 import org.viewer.hub.back.model.property.SearchCriteriaProperty;
 import org.viewer.hub.back.model.property.WeasisConnectorProperty;
+import org.viewer.hub.back.model.searchcriteria.ArchiveSearchCriteria;
+import org.viewer.hub.back.service.ConnectorService;
 import org.viewer.hub.back.service.DbConnectorQueryService;
 import org.viewer.hub.back.service.DicomConnectorQueryService;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 
 @ExtendWith(MockitoExtension.class)
 @Slf4j
-class ConnectorQueryServiceImplTest {
+class WeasisConnectorQueryServiceImplTest {
 
 	private final ConnectorConfigurationProperties connectorConfigurationPropertiesMock = Mockito
 		.mock(ConnectorConfigurationProperties.class);
@@ -57,7 +56,19 @@ class ConnectorQueryServiceImplTest {
 	private final DicomConnectorQueryService dicomConnectorQueryServiceMock = Mockito
 		.mock(DicomConnectorQueryService.class);
 
-	private ConnectorQueryServiceImpl connectorQueryService;
+	private final ConnectorService connectorServiceMock = Mockito.mock(ConnectorService.class);
+
+	private WeasisConnectorQueryServiceImpl connectorQueryService;
+
+	private ConnectorProperty connectorPropertyDbA;
+
+	private ConnectorProperty connectorPropertyDbb;
+
+	private ConnectorProperty connectorPropertyDicomA;
+
+	private ConnectorProperty connectorPropertyDicomB;
+
+	private ConnectorProperty connectorPropertyDicomWebA;
 
 	@BeforeEach
 	public void setUp() {
@@ -93,7 +104,7 @@ class ConnectorQueryServiceImplTest {
 
 		SearchCriteriaProperty searchCriteria = new SearchCriteriaProperty(new HashSet<>());
 
-		ConnectorProperty connectorPropertyDbA = ConnectorProperty.builder()
+		connectorPropertyDbA = ConnectorProperty.builder()
 			.id("idDbA")
 			.type(ConnectorType.DB)
 			.searchCriteria(new SearchCriteriaProperty(new HashSet<>()))
@@ -103,7 +114,7 @@ class ConnectorQueryServiceImplTest {
 			.dicomWebConnector(dicomWebConnectorProperty)
 			.build();
 
-		ConnectorProperty connectorPropertyDbb = ConnectorProperty.builder()
+		connectorPropertyDbb = ConnectorProperty.builder()
 			.id("idDbB")
 			.type(ConnectorType.DB)
 			.searchCriteria(new SearchCriteriaProperty(new HashSet<>()))
@@ -113,7 +124,7 @@ class ConnectorQueryServiceImplTest {
 			.dicomWebConnector(dicomWebConnectorProperty)
 			.build();
 
-		ConnectorProperty connectorPropertyDicomA = ConnectorProperty.builder()
+		connectorPropertyDicomA = ConnectorProperty.builder()
 			.id("idDicomA")
 			.type(ConnectorType.DICOM)
 			.searchCriteria(new SearchCriteriaProperty(new HashSet<>()))
@@ -123,7 +134,7 @@ class ConnectorQueryServiceImplTest {
 			.dicomWebConnector(dicomWebConnectorProperty)
 			.build();
 
-		ConnectorProperty connectorPropertyDicomB = ConnectorProperty.builder()
+		connectorPropertyDicomB = ConnectorProperty.builder()
 			.id("idDicomB")
 			.type(ConnectorType.DICOM)
 			.searchCriteria(new SearchCriteriaProperty(new HashSet<>()))
@@ -133,7 +144,7 @@ class ConnectorQueryServiceImplTest {
 			.dicomWebConnector(dicomWebConnectorProperty)
 			.build();
 
-		ConnectorProperty connectorPropertyDicomWebA = ConnectorProperty.builder()
+		connectorPropertyDicomWebA = ConnectorProperty.builder()
 			.id("idDicomWebA")
 			.type(ConnectorType.DICOM_WEB)
 			.searchCriteria(new SearchCriteriaProperty(new HashSet<>()))
@@ -152,110 +163,68 @@ class ConnectorQueryServiceImplTest {
 		Mockito.when(this.connectorConfigurationPropertiesMock.getConnectors()).thenReturn(config);
 
 		// Create mocked service
-		this.connectorQueryService = new ConnectorQueryServiceImpl(this.connectorConfigurationPropertiesMock,
-				this.dbConnectorQueryServiceMock, this.dicomConnectorQueryServiceMock);
-	}
-
-	@Test
-	void when_retrievingConnectors_with_emptyArchivesRequested_should_returnDefaultOrderedConnectorsConfig() {
-
-		// Init data
-		LinkedHashSet<String> archives = new LinkedHashSet<>();
-
-		// Call service
-		LinkedHashSet<ConnectorProperty> connectorProperties = this.connectorQueryService.retrieveConnectors(archives);
-
-		// Test results
-		ArrayList<ConnectorProperty> connectorPropertiesList = new ArrayList<>(connectorProperties);
-		assertEquals("idDbA", connectorPropertiesList.get(0).getId());
-		assertEquals("idDbB", connectorPropertiesList.get(1).getId());
-		assertEquals("idDicomA", connectorPropertiesList.get(2).getId());
-		assertEquals("idDicomB", connectorPropertiesList.get(3).getId());
-	}
-
-	@Test
-	void when_retrievingConnectors_with_existingArchives_should_returnRequestedConnectors() {
-		// Init data
-		LinkedHashSet<String> archives = new LinkedHashSet<>();
-		archives.add("idDbB");
-		archives.add("idDbA");
-		archives.add("idDicomB");
-
-		// Call service
-		LinkedHashSet<ConnectorProperty> connectorProperties = this.connectorQueryService.retrieveConnectors(archives);
-
-		// Test results
-		ArrayList<ConnectorProperty> connectorPropertiesList = new ArrayList<>(connectorProperties);
-		assertEquals("idDbB", connectorPropertiesList.get(0).getId());
-		assertEquals("idDbA", connectorPropertiesList.get(1).getId());
-		assertEquals("idDicomB", connectorPropertiesList.get(2).getId());
-	}
-
-	@Test
-	void when_retrievingConnectors_with_notExistingArchives_should_throwTechnicalException() {
-		// Init data
-		LinkedHashSet<String> archives = new LinkedHashSet<>();
-		archives.add("notExisting");
-
-		// Call service and test result
-		assertThrows(TechnicalException.class, () -> this.connectorQueryService.retrieveConnectors(archives));
+		this.connectorQueryService = new WeasisConnectorQueryServiceImpl(this.dbConnectorQueryServiceMock,
+				this.dicomConnectorQueryServiceMock, this.connectorServiceMock);
 	}
 
 	@Test
 	void when_fillingManifestFromPatientIds_with_dbArchive_should_callCorrectConnectorService() {
 		// Init data
-		WeasisSearchCriteria weasisSearchCriteria = new WeasisSearchCriteria();
+		ArchiveSearchCriteria weasisSearchCriteria = new ArchiveSearchCriteria();
 		weasisSearchCriteria.getArchive().add("idDbA");
+		Mockito.when(this.connectorServiceMock.retrieveConnectors(any()))
+			.thenReturn(new LinkedHashSet<>(List.of(connectorPropertyDbA)));
 
 		// Call service
 		this.connectorQueryService.buildFromPatientIds(new Manifest(), Set.of("uid"), weasisSearchCriteria, null);
 
 		// Test results
 		Mockito.verify(this.dbConnectorQueryServiceMock, Mockito.times(1))
-			.buildFromPatientIdsDbConnector(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+			.retrievePatientsFromPatientIdsDbConnector(any(), any(), any());
 		Mockito.verify(this.dicomConnectorQueryServiceMock, Mockito.never())
-			.buildFromPatientIdsDicomConnector(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(),
-					Mockito.any());
+			.retrievePatientsFromPatientIdsDicomConnector(any(), any(), any(), any());
 	}
 
 	@Test
 	void when_fillingManifestFromPatientIds_with_dicomArchive_should_callCorrectConnectorService() {
 		// Init data
-		WeasisSearchCriteria weasisSearchCriteria = new WeasisSearchCriteria();
+		ArchiveSearchCriteria weasisSearchCriteria = new ArchiveSearchCriteria();
 		weasisSearchCriteria.getArchive().add("idDicomA");
+		Mockito.when(this.connectorServiceMock.retrieveConnectors(any()))
+			.thenReturn(new LinkedHashSet<>(List.of(connectorPropertyDicomA)));
 
 		// Call service
 		this.connectorQueryService.buildFromPatientIds(new Manifest(), Set.of("uid"), weasisSearchCriteria, null);
 
 		// Test results
 		Mockito.verify(this.dbConnectorQueryServiceMock, Mockito.never())
-			.buildFromPatientIdsDbConnector(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+			.retrievePatientsFromPatientIdsDbConnector(any(), any(), any());
 		Mockito.verify(this.dicomConnectorQueryServiceMock, Mockito.times(1))
-			.buildFromPatientIdsDicomConnector(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(),
-					Mockito.any());
+			.retrievePatientsFromPatientIdsDicomConnector(any(), any(), any(), any());
 	}
 
 	@Test
 	void when_fillingManifestFromPatientIds_with_dicomWebArchive_should_callCorrectConnectorService() {
 		// Init data
-		WeasisSearchCriteria weasisSearchCriteria = new WeasisSearchCriteria();
+		ArchiveSearchCriteria weasisSearchCriteria = new ArchiveSearchCriteria();
 		weasisSearchCriteria.getArchive().add("idDicomWebA");
+		Mockito.when(this.connectorServiceMock.retrieveConnectors(any()))
+			.thenReturn(new LinkedHashSet<>(List.of(connectorPropertyDicomWebA)));
 
 		// Call service
 		this.connectorQueryService.buildFromPatientIds(new Manifest(), Set.of("uid"), weasisSearchCriteria, null);
 
 		// Test results
 		Mockito.verify(this.dbConnectorQueryServiceMock, Mockito.never())
-			.buildFromPatientIdsDbConnector(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+			.retrievePatientsFromPatientIdsDbConnector(any(), any(), any());
 		Mockito.verify(this.dicomConnectorQueryServiceMock, Mockito.times(1))
-			.buildFromPatientIdsDicomConnector(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(),
-					Mockito.any());
+			.retrievePatientsFromPatientIdsDicomConnector(any(), any(), any(), any());
 	}
 
 	@Test
 	void when_fillingManifestFromPatientIds_with_deactivatedPatientIdSearchCriteria_should_notCallConnectorService() {
 		// Init data
-		WeasisSearchCriteria weasisSearchCriteria = new WeasisSearchCriteria();
+		ArchiveSearchCriteria weasisSearchCriteria = new ArchiveSearchCriteria();
 		weasisSearchCriteria.getArchive().add("idDicomA");
 
 		// Mock behaviour
@@ -270,16 +239,17 @@ class ConnectorQueryServiceImplTest {
 		config.put("idDicomA", connectorPropertyDicomA);
 
 		Mockito.when(this.connectorConfigurationPropertiesMock.getConnectors()).thenReturn(config);
+		Mockito.when(this.connectorServiceMock.retrieveConnectors(any()))
+			.thenReturn(new LinkedHashSet<>(List.of(connectorPropertyDicomA)));
 
 		// Call service
 		this.connectorQueryService.buildFromPatientIds(new Manifest(), Set.of("uid"), weasisSearchCriteria, null);
 
 		// Test results
 		Mockito.verify(this.dbConnectorQueryServiceMock, Mockito.never())
-			.buildFromPatientIdsDbConnector(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+			.retrievePatientsFromPatientIdsDbConnector(any(), any(), any());
 		Mockito.verify(this.dicomConnectorQueryServiceMock, Mockito.never())
-			.buildFromPatientIdsDicomConnector(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(),
-					Mockito.any());
+			.retrievePatientsFromPatientIdsDicomConnector(any(), any(), any(), any());
 	}
 
 	@Test
@@ -287,15 +257,17 @@ class ConnectorQueryServiceImplTest {
 		// Init data
 		LinkedHashSet<String> archives = new LinkedHashSet<>();
 		archives.add("idDbA");
+		Mockito.when(this.connectorServiceMock.retrieveConnectors(any()))
+			.thenReturn(new LinkedHashSet<>(List.of(connectorPropertyDbA)));
 
 		// Call service
 		this.connectorQueryService.buildFromStudyInstanceUids(new Manifest(), Set.of("uid"), archives, null);
 
 		// Test results
 		Mockito.verify(this.dbConnectorQueryServiceMock, Mockito.times(1))
-			.buildFromStudyInstanceUidsDbConnector(Mockito.any(), Mockito.any(), Mockito.any());
+			.retrievePatientsFromStudyInstanceUidsDbConnector(any(), any());
 		Mockito.verify(this.dicomConnectorQueryServiceMock, Mockito.never())
-			.buildFromStudyInstanceUidsDicomConnector(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+			.retrievePatientsFromStudyInstanceUidsDicomConnector(any(), any(), any());
 	}
 
 	@Test
@@ -303,15 +275,17 @@ class ConnectorQueryServiceImplTest {
 		// Init data
 		LinkedHashSet<String> archives = new LinkedHashSet<>();
 		archives.add("idDicomA");
+		Mockito.when(this.connectorServiceMock.retrieveConnectors(any()))
+			.thenReturn(new LinkedHashSet<>(List.of(connectorPropertyDicomA)));
 
 		// Call service
 		this.connectorQueryService.buildFromStudyInstanceUids(new Manifest(), Set.of("uid"), archives, null);
 
 		// Test results
 		Mockito.verify(this.dbConnectorQueryServiceMock, Mockito.never())
-			.buildFromStudyInstanceUidsDbConnector(Mockito.any(), Mockito.any(), Mockito.any());
+			.retrievePatientsFromStudyInstanceUidsDbConnector(any(), any());
 		Mockito.verify(this.dicomConnectorQueryServiceMock, Mockito.times(1))
-			.buildFromStudyInstanceUidsDicomConnector(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+			.retrievePatientsFromStudyInstanceUidsDicomConnector(any(), any(), any());
 	}
 
 	@Test
@@ -319,15 +293,17 @@ class ConnectorQueryServiceImplTest {
 		// Init data
 		LinkedHashSet<String> archives = new LinkedHashSet<>();
 		archives.add("idDicomWebA");
+		Mockito.when(this.connectorServiceMock.retrieveConnectors(any()))
+			.thenReturn(new LinkedHashSet<>(List.of(connectorPropertyDicomWebA)));
 
 		// Call service
 		this.connectorQueryService.buildFromStudyInstanceUids(new Manifest(), Set.of("uid"), archives, null);
 
 		// Test results
 		Mockito.verify(this.dbConnectorQueryServiceMock, Mockito.never())
-			.buildFromStudyInstanceUidsDbConnector(Mockito.any(), Mockito.any(), Mockito.any());
+			.retrievePatientsFromStudyInstanceUidsDbConnector(any(), any());
 		Mockito.verify(this.dicomConnectorQueryServiceMock, Mockito.times(1))
-			.buildFromStudyInstanceUidsDicomConnector(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+			.retrievePatientsFromStudyInstanceUidsDicomConnector(any(), any(), any());
 	}
 
 	@Test
@@ -348,15 +324,17 @@ class ConnectorQueryServiceImplTest {
 
 		config.put("idDicomA", connectorPropertyDicomA);
 		Mockito.when(this.connectorConfigurationPropertiesMock.getConnectors()).thenReturn(config);
+		Mockito.when(this.connectorServiceMock.retrieveConnectors(any()))
+			.thenReturn(new LinkedHashSet<>(List.of(connectorPropertyDicomA)));
 
 		// Call service
 		this.connectorQueryService.buildFromStudyInstanceUids(new Manifest(), Set.of("uid"), archives, null);
 
 		// Test results
 		Mockito.verify(this.dbConnectorQueryServiceMock, Mockito.never())
-			.buildFromStudyInstanceUidsDbConnector(Mockito.any(), Mockito.any(), Mockito.any());
+			.retrievePatientsFromStudyInstanceUidsDbConnector(any(), any());
 		Mockito.verify(this.dicomConnectorQueryServiceMock, Mockito.never())
-			.buildFromStudyInstanceUidsDicomConnector(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+			.retrievePatientsFromStudyInstanceUidsDicomConnector(any(), any(), any());
 	}
 
 	@Test
@@ -364,15 +342,17 @@ class ConnectorQueryServiceImplTest {
 		// Init data
 		LinkedHashSet<String> archives = new LinkedHashSet<>();
 		archives.add("idDbA");
+		Mockito.when(this.connectorServiceMock.retrieveConnectors(any()))
+			.thenReturn(new LinkedHashSet<>(List.of(connectorPropertyDbA)));
 
 		// Call service
 		this.connectorQueryService.buildFromStudyAccessionNumbers(new Manifest(), Set.of("uid"), archives, null);
 
 		// Test results
 		Mockito.verify(this.dbConnectorQueryServiceMock, Mockito.times(1))
-			.buildFromStudyAccessionNumbersDbConnector(Mockito.any(), Mockito.any(), Mockito.any());
+			.retrievePatientsFromStudyAccessionNumbersDbConnector(any(), any());
 		Mockito.verify(this.dicomConnectorQueryServiceMock, Mockito.never())
-			.buildFromStudyAccessionNumbersDicomConnector(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+			.retrievePatientsFromStudyAccessionNumbersDicomConnector(any(), any(), any());
 	}
 
 	@Test
@@ -380,15 +360,17 @@ class ConnectorQueryServiceImplTest {
 		// Init data
 		LinkedHashSet<String> archives = new LinkedHashSet<>();
 		archives.add("idDicomA");
+		Mockito.when(this.connectorServiceMock.retrieveConnectors(any()))
+			.thenReturn(new LinkedHashSet<>(List.of(connectorPropertyDicomA)));
 
 		// Call service
 		this.connectorQueryService.buildFromStudyAccessionNumbers(new Manifest(), Set.of("uid"), archives, null);
 
 		// Test results
 		Mockito.verify(this.dbConnectorQueryServiceMock, Mockito.never())
-			.buildFromStudyAccessionNumbersDbConnector(Mockito.any(), Mockito.any(), Mockito.any());
+			.retrievePatientsFromStudyAccessionNumbersDbConnector(any(), any());
 		Mockito.verify(this.dicomConnectorQueryServiceMock, Mockito.times(1))
-			.buildFromStudyAccessionNumbersDicomConnector(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+			.retrievePatientsFromStudyAccessionNumbersDicomConnector(any(), any(), any());
 	}
 
 	@Test
@@ -396,15 +378,17 @@ class ConnectorQueryServiceImplTest {
 		// Init data
 		LinkedHashSet<String> archives = new LinkedHashSet<>();
 		archives.add("idDicomWebA");
+		Mockito.when(this.connectorServiceMock.retrieveConnectors(any()))
+			.thenReturn(new LinkedHashSet<>(List.of(connectorPropertyDicomWebA)));
 
 		// Call service
 		this.connectorQueryService.buildFromStudyAccessionNumbers(new Manifest(), Set.of("uid"), archives, null);
 
 		// Test results
 		Mockito.verify(this.dbConnectorQueryServiceMock, Mockito.never())
-			.buildFromStudyAccessionNumbersDbConnector(Mockito.any(), Mockito.any(), Mockito.any());
+			.retrievePatientsFromStudyAccessionNumbersDbConnector(any(), any());
 		Mockito.verify(this.dicomConnectorQueryServiceMock, Mockito.times(1))
-			.buildFromStudyAccessionNumbersDicomConnector(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+			.retrievePatientsFromStudyAccessionNumbersDicomConnector(any(), any(), any());
 	}
 
 	@Test
@@ -424,15 +408,17 @@ class ConnectorQueryServiceImplTest {
 			.build();
 		config.put("idDicomA", connectorPropertyDicomA);
 		Mockito.when(this.connectorConfigurationPropertiesMock.getConnectors()).thenReturn(config);
+		Mockito.when(this.connectorServiceMock.retrieveConnectors(any()))
+			.thenReturn(new LinkedHashSet<>(List.of(connectorPropertyDicomA)));
 
 		// Call service
 		this.connectorQueryService.buildFromStudyAccessionNumbers(new Manifest(), Set.of("uid"), archives, null);
 
 		// Test results
 		Mockito.verify(this.dbConnectorQueryServiceMock, Mockito.never())
-			.buildFromStudyAccessionNumbersDbConnector(Mockito.any(), Mockito.any(), Mockito.any());
+			.retrievePatientsFromStudyAccessionNumbersDbConnector(any(), any());
 		Mockito.verify(this.dicomConnectorQueryServiceMock, Mockito.never())
-			.buildFromStudyAccessionNumbersDicomConnector(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+			.retrievePatientsFromStudyAccessionNumbersDicomConnector(any(), any(), any());
 	}
 
 	@Test
@@ -440,15 +426,17 @@ class ConnectorQueryServiceImplTest {
 		// Init data
 		LinkedHashSet<String> archives = new LinkedHashSet<>();
 		archives.add("idDbA");
+		Mockito.when(this.connectorServiceMock.retrieveConnectors(any()))
+			.thenReturn(new LinkedHashSet<>(List.of(connectorPropertyDbA)));
 
 		// Call service
 		this.connectorQueryService.buildFromSeriesInstanceUids(new Manifest(), Set.of("uid"), archives, null);
 
 		// Test results
 		Mockito.verify(this.dbConnectorQueryServiceMock, Mockito.times(1))
-			.buildFromSeriesInstanceUidsDbConnector(Mockito.any(), Mockito.any(), Mockito.any());
+			.retrievePatientsFromSeriesInstanceUidsDbConnector(any(), any());
 		Mockito.verify(this.dicomConnectorQueryServiceMock, Mockito.never())
-			.buildFromSeriesInstanceUidsDicomConnector(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+			.retrievePatientsFromSeriesInstanceUidsDicomConnector(any(), any(), any());
 	}
 
 	@Test
@@ -456,15 +444,17 @@ class ConnectorQueryServiceImplTest {
 		// Init data
 		LinkedHashSet<String> archives = new LinkedHashSet<>();
 		archives.add("idDicomA");
+		Mockito.when(this.connectorServiceMock.retrieveConnectors(any()))
+			.thenReturn(new LinkedHashSet<>(List.of(connectorPropertyDicomA)));
 
 		// Call service
 		this.connectorQueryService.buildFromSeriesInstanceUids(new Manifest(), Set.of("uid"), archives, null);
 
 		// Test results
 		Mockito.verify(this.dbConnectorQueryServiceMock, Mockito.never())
-			.buildFromSeriesInstanceUidsDbConnector(Mockito.any(), Mockito.any(), Mockito.any());
+			.retrievePatientsFromSeriesInstanceUidsDbConnector(any(), any());
 		Mockito.verify(this.dicomConnectorQueryServiceMock, Mockito.times(1))
-			.buildFromSeriesInstanceUidsDicomConnector(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+			.retrievePatientsFromSeriesInstanceUidsDicomConnector(any(), any(), any());
 	}
 
 	@Test
@@ -472,15 +462,17 @@ class ConnectorQueryServiceImplTest {
 		// Init data
 		LinkedHashSet<String> archives = new LinkedHashSet<>();
 		archives.add("idDicomWebA");
+		Mockito.when(this.connectorServiceMock.retrieveConnectors(any()))
+			.thenReturn(new LinkedHashSet<>(List.of(connectorPropertyDicomWebA)));
 
 		// Call service
 		this.connectorQueryService.buildFromSeriesInstanceUids(new Manifest(), Set.of("uid"), archives, null);
 
 		// Test results
 		Mockito.verify(this.dbConnectorQueryServiceMock, Mockito.never())
-			.buildFromSeriesInstanceUidsDbConnector(Mockito.any(), Mockito.any(), Mockito.any());
+			.retrievePatientsFromSeriesInstanceUidsDbConnector(any(), any());
 		Mockito.verify(this.dicomConnectorQueryServiceMock, Mockito.times(1))
-			.buildFromSeriesInstanceUidsDicomConnector(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+			.retrievePatientsFromSeriesInstanceUidsDicomConnector(any(), any(), any());
 	}
 
 	@Test
@@ -501,15 +493,17 @@ class ConnectorQueryServiceImplTest {
 
 		config.put("idDicomA", connectorPropertyDicomA);
 		Mockito.when(this.connectorConfigurationPropertiesMock.getConnectors()).thenReturn(config);
+		Mockito.when(this.connectorServiceMock.retrieveConnectors(any()))
+			.thenReturn(new LinkedHashSet<>(List.of(connectorPropertyDicomA)));
 
 		// Call service
 		this.connectorQueryService.buildFromSeriesInstanceUids(new Manifest(), Set.of("uid"), archives, null);
 
 		// Test results
 		Mockito.verify(this.dbConnectorQueryServiceMock, Mockito.never())
-			.buildFromSeriesInstanceUidsDbConnector(Mockito.any(), Mockito.any(), Mockito.any());
+			.retrievePatientsFromSeriesInstanceUidsDbConnector(any(), any());
 		Mockito.verify(this.dicomConnectorQueryServiceMock, Mockito.never())
-			.buildFromSeriesInstanceUidsDicomConnector(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+			.retrievePatientsFromSeriesInstanceUidsDicomConnector(any(), any(), any());
 	}
 
 	@Test
@@ -517,15 +511,17 @@ class ConnectorQueryServiceImplTest {
 		// Init data
 		LinkedHashSet<String> archives = new LinkedHashSet<>();
 		archives.add("idDbA");
+		Mockito.when(this.connectorServiceMock.retrieveConnectors(any()))
+			.thenReturn(new LinkedHashSet<>(List.of(connectorPropertyDbA)));
 
 		// Call service
 		this.connectorQueryService.buildFromSopInstanceUids(new Manifest(), Set.of("uid"), archives, null);
 
 		// Test results
 		Mockito.verify(this.dbConnectorQueryServiceMock, Mockito.times(1))
-			.buildFromSopInstanceUidsDbConnector(Mockito.any(), Mockito.any(), Mockito.any());
+			.retrievePatientsFromSopInstanceUidsDbConnector(any(), any());
 		Mockito.verify(this.dicomConnectorQueryServiceMock, Mockito.never())
-			.buildFromSopInstanceUidsDicomConnector(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+			.retrievePatientsFromSopInstanceUidsDicomConnector(any(), any(), any());
 	}
 
 	@Test
@@ -533,15 +529,17 @@ class ConnectorQueryServiceImplTest {
 		// Init data
 		LinkedHashSet<String> archives = new LinkedHashSet<>();
 		archives.add("idDicomA");
+		Mockito.when(this.connectorServiceMock.retrieveConnectors(any()))
+			.thenReturn(new LinkedHashSet<>(List.of(connectorPropertyDicomA)));
 
 		// Call service
 		this.connectorQueryService.buildFromSopInstanceUids(new Manifest(), Set.of("uid"), archives, null);
 
 		// Test results
 		Mockito.verify(this.dbConnectorQueryServiceMock, Mockito.never())
-			.buildFromSopInstanceUidsDbConnector(Mockito.any(), Mockito.any(), Mockito.any());
+			.retrievePatientsFromSopInstanceUidsDbConnector(any(), any());
 		Mockito.verify(this.dicomConnectorQueryServiceMock, Mockito.times(1))
-			.buildFromSopInstanceUidsDicomConnector(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+			.retrievePatientsFromSopInstanceUidsDicomConnector(any(), any(), any());
 	}
 
 	@Test
@@ -549,15 +547,17 @@ class ConnectorQueryServiceImplTest {
 		// Init data
 		LinkedHashSet<String> archives = new LinkedHashSet<>();
 		archives.add("idDicomWebA");
+		Mockito.when(this.connectorServiceMock.retrieveConnectors(any()))
+			.thenReturn(new LinkedHashSet<>(List.of(connectorPropertyDicomWebA)));
 
 		// Call service
 		this.connectorQueryService.buildFromSopInstanceUids(new Manifest(), Set.of("uid"), archives, null);
 
 		// Test results
 		Mockito.verify(this.dbConnectorQueryServiceMock, Mockito.never())
-			.buildFromSopInstanceUidsDbConnector(Mockito.any(), Mockito.any(), Mockito.any());
+			.retrievePatientsFromSopInstanceUidsDbConnector(any(), any());
 		Mockito.verify(this.dicomConnectorQueryServiceMock, Mockito.times(1))
-			.buildFromSopInstanceUidsDicomConnector(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+			.retrievePatientsFromSopInstanceUidsDicomConnector(any(), any(), any());
 	}
 
 	@Test
@@ -575,18 +575,19 @@ class ConnectorQueryServiceImplTest {
 			.searchCriteria(new SearchCriteriaProperty(Set.of(QueryLevelType.SOP_INSTANCE_UID)))
 			.weasis(WeasisConnectorProperty.builder().build())
 			.build();
-
 		config.put("idDicomA", connectorPropertyDicomA);
 		Mockito.when(this.connectorConfigurationPropertiesMock.getConnectors()).thenReturn(config);
+		Mockito.when(this.connectorServiceMock.retrieveConnectors(any()))
+			.thenReturn(new LinkedHashSet<>(List.of(connectorPropertyDicomA)));
 
 		// Call service
 		this.connectorQueryService.buildFromSopInstanceUids(new Manifest(), Set.of("uid"), archives, null);
 
 		// Test results
 		Mockito.verify(this.dbConnectorQueryServiceMock, Mockito.never())
-			.buildFromSopInstanceUidsDbConnector(Mockito.any(), Mockito.any(), Mockito.any());
+			.retrievePatientsFromSopInstanceUidsDbConnector(any(), any());
 		Mockito.verify(this.dicomConnectorQueryServiceMock, Mockito.never())
-			.buildFromSopInstanceUidsDicomConnector(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+			.retrievePatientsFromSopInstanceUidsDicomConnector(any(), any(), any());
 	}
 
 }
