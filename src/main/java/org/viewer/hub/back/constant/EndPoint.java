@@ -46,13 +46,18 @@ public class EndPoint {
 	// Display
 	public static final String DISPLAY_PATH = "/display";
 
+	// Dicom Web
+	public static final String DICOMWEB_PATH = "/dicomweb";
+
+	// Weasis commands
 	public static final String WEASIS_PATH = "/weasis";
 
-	public static final String AUTH_WEASIS_PATH = "/auth/weasis";
+	public static final String AUTH_PATH = "/auth";
+
+	public static final String METADATA_PATH = "/metadata";
+	public static final String FRAMES_PATH = "/frames";
 
 	public static final String IHE_INVOKE_IMAGE_DISPLAY_PATH = "/IHEInvokeImageDisplay";
-
-	public static final String AUTH_IHE_INVOKE_IMAGE_DISPLAY_PATH = "/auth/IHEInvokeImageDisplay";
 
 	// Override package configuration
 	public static final String OVERRIDE_CONFIG_PATH = "/overrideConfig";
@@ -61,13 +66,7 @@ public class EndPoint {
 
 	// Dicom-web
 	public static final String STUDIES_PATH = "/studies";
-
 	public static final String SERIES_PATH = "/series";
-
 	public static final String INSTANCES_PATH = "/instances";
-
-	public static final String STUDIES_SERIES_PATH = "/studies/{studyUID}/series";
-
-	public static final String STUDIES_SERIES_INSTANCES_PATH = "/studies/{studyUID}/series/{serieUID}/instances";
 
 }

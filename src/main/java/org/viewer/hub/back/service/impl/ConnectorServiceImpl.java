@@ -11,6 +11,7 @@
 
 package org.viewer.hub.back.service.impl;
 
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,10 +19,10 @@ import org.springframework.stereotype.Service;
 import org.viewer.hub.back.config.properties.ConnectorConfigurationProperties;
 import org.viewer.hub.back.controller.exception.TechnicalException;
 import org.viewer.hub.back.model.property.ConnectorProperty;
+import org.viewer.hub.back.model.searchcriteria.SearchCriteria;
 import org.viewer.hub.back.service.ConnectorService;
 
-import java.util.LinkedHashSet;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -36,6 +37,21 @@ public class ConnectorServiceImpl implements ConnectorService {
 	@Autowired
 	public ConnectorServiceImpl(final ConnectorConfigurationProperties connectorConfigurationProperties) {
 		this.connectorConfigurationProperties = connectorConfigurationProperties;
+	}
+
+	@Override
+	public ConnectorProperty retrieveConnectorFromId(@Valid SearchCriteria searchCriteria) {
+		return retrieveConnectorFromId(searchCriteria.getArchive());
+	}
+
+	@Override
+	public ConnectorProperty retrieveConnectorFromId(LinkedHashSet<String> archive) {
+		// Retrieve default or specific connectors
+		LinkedHashSet<ConnectorProperty> connectors = this.retrieveConnectors(archive);
+		if (connectors.isEmpty()) {
+			return null;
+		}
+		return connectors.getFirst();
 	}
 
 	/**
@@ -54,7 +70,20 @@ public class ConnectorServiceImpl implements ConnectorService {
 	}
 
 	@Override
-	public LinkedHashSet<ConnectorProperty> retrieveConnectors(LinkedHashSet<String> archives) {
+	public String getArchiveName(@Valid SearchCriteria searchCriteria) {
+		// Retrieve default or specific connectors
+		for (ConnectorProperty connector : this.retrieveConnectors(searchCriteria.getArchive())) {
+			return connector.getName();
+		}
+		return null;
+	}
+
+	/**
+	 * Retrieve the connector properties from the list of archives id in parameter
+	 * @param archives Archive to evaluate
+	 * @return List of connector properties
+	 */
+	LinkedHashSet<ConnectorProperty> retrieveConnectors(LinkedHashSet<String> archives) {
 		// If archive list empty:
 		// - if no default (or invalid default connector defined) parse defined default
 		// ordered connectors config
@@ -88,12 +117,46 @@ public class ConnectorServiceImpl implements ConnectorService {
 	private LinkedHashSet<ConnectorProperty> retrieveConnectorsFromIds(LinkedHashSet<String> connectors) {
 		return connectors.stream()
 			.map(connector -> this.connectorConfigurationProperties.getConnectors()
-				.values()
-				.stream()
-				.filter(c -> Objects.equals(c.getId(), connector))
-				.findFirst()
-				.orElseThrow(() -> new TechnicalException("Connector id not existing:" + connector)))
+					.values()
+					.stream()
+					.filter(c -> Objects.equals(c.getId(), connector))
+					.findFirst()
+					.orElseThrow(() -> new TechnicalException("Connector id not existing:" + connector)))
 			.collect(Collectors.toCollection(LinkedHashSet::new));
+	}
+
+	@Override
+	public String getDicomRsUrl(@Valid SearchCriteria searchCriteria) {
+		// Retrieve default or specific connectors
+		for (ConnectorProperty connector : this.retrieveConnectors(searchCriteria.getArchive())) {
+			if (connector.getDicomWebConnector() != null) {
+				return connector.getDicomWebConnector().getQidoRs().getAuthentication().getBasic().getServer().getFullUrl();
+			}
+		}
+		return null;
+	}
+
+	@Override
+	public String[] getCredentials(@Valid SearchCriteria searchCriteria) {
+		// Retrieve default or specific connectors
+		for (ConnectorProperty connector : this.retrieveConnectors(searchCriteria.getArchive())) {
+			if (connector.getDicomWebConnector() != null) {
+				String[] credentials = new String[2];
+				credentials[0] = connector.getDicomWebConnector().getQidoRs().getAuthentication().getBasic().getLogin();
+				credentials[1] = connector.getDicomWebConnector().getQidoRs().getAuthentication().getBasic().getPassword();
+				return credentials;
+			}
+		}
+		return null;
+	}
+
+	@Override
+	public boolean canHandleRedirect(@Valid String archive) {
+		// Retrieve default or specific connectors
+		for (ConnectorProperty connector : this.retrieveConnectors(new LinkedHashSet<>(Collections.singletonList(archive)))) {
+			return connector.isHandleRedirect();
+		}
+		return false;
 	}
 
 }

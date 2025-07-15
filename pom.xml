@@ -42,6 +42,7 @@
         <jackson.version>2.15.3</jackson.version>
         <h2.version>2.2.224</h2.version>
         <vaadin.version>24.6.5</vaadin.version>
+        <dcm4che.version>5.33.1</dcm4che.version>
         <weasis-dicom-tools.version>5.32.0</weasis-dicom-tools.version>
         <maven.artifact.version>3.8.6</maven.artifact.version>
         <node.version>v23.6.0</node.version>
@@ -74,6 +75,14 @@
             </snapshots>
             <id>mvn-repo-master</id>
             <url>https://raw.github.com/nroduit/mvn-repo/master/</url>
+        </repository>
+        <repository>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+            <id>dcm4che</id>
+            <name>dcm4che Repository</name>
+            <url>https://maven.dcm4che.org/</url>
         </repository>
     </repositories>
 
@@ -432,6 +441,20 @@
                     <artifactId>opencv_java</artifactId>
                 </exclusion>
             </exclusions>
+        </dependency>
+
+        <!-- ================== -->
+        <!-- Dcm4che-->
+        <!-- ================== -->
+        <dependency>
+            <groupId>org.dcm4che</groupId>
+            <artifactId>dcm4che-imageio</artifactId>
+            <version>${dcm4che.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.dcm4che</groupId>
+            <artifactId>dcm4che-mime</artifactId>
+            <version>${dcm4che.version}</version>
         </dependency>
 
         <!-- ================== -->

@@ -2,7 +2,7 @@
 connector:
   # If value is present: use the connectors specified, if not present or wrong connector ids: use all the connectors
   # defined in the config
-  default: dcm4chee-local # connectorId1, connectorId2
+  default: dcm4chee-local, orthanc-local # connectorId1, connectorId2
 
   # Limit the dicom-web connector when retrieving metadata
   dicom-web-level-limit: # STUDY, SERIE
@@ -14,10 +14,11 @@ connector:
     # ---- DCM4CHEE PACS ----
     # -----------------------
     dcm4chee-local:
-      type: DICOM # DB,DICOM,DICOM_WEB
+      name: dcm4chee
       # ------- Search Criteria ----
       search-criteria:
         deactivated: # SOP_INSTANCE_UID, SERIE_INSTANCE_UID, STUDY_INSTANCE_UID, STUDY_ACCESSION_NUMBER, PATIENT_ID
+      handle-redirect: false
       # ----------  Weasis - Manifest -------
       weasis:
         manifest:
@@ -53,22 +54,102 @@ connector:
                 url: http://localhost
                 port: 8080
                 context: /dcm4chee-arc/aets/DCM4CHEE/wado
+      # --------   For dicom web ----------
+      dicom-web-connector:
+        # ----------   Qido -------------
+        # Used to retrieve images from criterias
+        qido-rs:
+          authentication:
+            # Type: BASIC, OAUTH2
+            type: OAUTH2
+            # Retrieve the token from oidc config (if authorization_code flow, request should be authenticated, otherwise use BASIC authentication) and inject it in the manifest for Weasis to get the images
+            oauth2:
+              oidc-id: keycloak
+              # Url used to retrieve images by adding token in manifest
+              server:
+                url: http://localhost
+                port: 8080
+                context: /dcm4chee-arc/aets/DCM4CHEE/rs
+            # Retrieve the images by using this basic authentication parameters
+            basic:
+              # Basic credentials
+              login: toChange
+              password: toChange
+              # Url used to retrieve images by using basic authentication
+              server:
+                url: http://localhost
+                port: 8080
+                context: /dcm4chee-arc/aets/DCM4CHEE/rs
 
-      # --------   For dicom-web ----------
-#      dicom-web-connector:
-#        qido-rs: # In order to retrieve the metadata
-#          authentication:
-#            type: OAUTH2
-#            oauth2:
-#              oidc-id: dcm4chee-dicomweb
-#              server:
-#                url: http://localhost
-#                port: 8080
-#                context: /dcm4chee-arc/aets/DCM4CHEE/rs
-#            basic:
-#              login:
-#              password:
-#              server:
-#                url: http://localhost
-#                port: 8080
-#                context: /dcm4chee-arc/aets/DCM4CHEE/rs
+
+    # -----------------------
+    # ---- ORTHANC PACS ----
+    # -----------------------
+    orthanc-local:
+      name: orthanc
+      # ------- Search Criteria ----
+      search-criteria:
+        deactivated: # SOP_INSTANCE_UID, SERIE_INSTANCE_UID, STUDY_INSTANCE_UID, STUDY_ACCESSION_NUMBER, PATIENT_ID
+      handle-redirect: false
+      # ----------  Weasis - Manifest -------
+      weasis:
+        manifest:
+          transfer-syntax-uid: '*'
+      # --------   For dicom ----------
+      dicom-connector:
+        dimse:
+          calling-aet: VIEWER-HUB
+          aet: ORTHANC
+          host: localhost
+          port: 4242
+        # ----------   Wado -------------
+        # Used to retrieve images from manifest
+        wado:
+          authentication:
+            # Type: BASIC, OAUTH2
+            type: OAUTH2
+            # Retrieve the token from oidc config (if authorization_code flow, request should be authenticated, otherwise use BASIC authentication) and inject it in the manifest for Weasis to get the images
+            oauth2:
+              oidc-id: keycloak
+              # Url used to retrieve images by adding token in manifest
+              server:
+                url: http://localhost
+                port: 8042
+                context: /wado
+            # Retrieve the images by using this basic authentication parameters
+            basic:
+              # Basic credentials
+              login: orthanc-user
+              password: password
+              # Url used to retrieve images by using basic authentication
+              server:
+                url: http://localhost
+                port: 8042
+                context: /wado
+      # --------   For dicom web ----------
+      dicom-web-connector:
+        # ----------   Qido -------------
+        # Used to retrieve images from criterias
+        qido-rs:
+          authentication:
+            # Type: BASIC, OAUTH2
+            type: OAUTH2
+            # Retrieve the token from oidc config (if authorization_code flow, request should be authenticated, otherwise use BASIC authentication) and inject it in the manifest for Weasis to get the images
+            oauth2:
+              oidc-id: keycloak
+              # Url used to retrieve images by adding token in manifest
+              server:
+                url: http://localhost
+                port: 8042
+                context: /dicomweb
+            # Retrieve the images by using this basic authentication parameters
+            basic:
+              # Basic credentials
+              login: orthanc-user
+              password: password
+              # Url used to retrieve images by using basic authentication
+              server:
+                url: http://localhost
+                port: 8042
+                context: /dicomweb
+

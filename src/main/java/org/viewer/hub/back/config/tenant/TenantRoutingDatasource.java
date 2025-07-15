@@ -18,7 +18,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.datasource.lookup.AbstractRoutingDataSource;
 import org.springframework.stereotype.Component;
 import org.viewer.hub.back.config.properties.ConnectorConfigurationProperties;
-import org.viewer.hub.back.enums.ConnectorType;
 import org.viewer.hub.back.model.property.ConnectorProperty;
 
 import javax.sql.DataSource;
@@ -96,8 +95,8 @@ public class TenantRoutingDatasource extends AbstractRoutingDataSource {
 		connectorConfigurationProperties.getConnectors()
 			.keySet()
 			.stream()
-			.filter(k -> Objects.nonNull(connectorConfigurationProperties.getConnectors().get(k)) && Objects
-				.equals(connectorConfigurationProperties.getConnectors().get(k).getType(), ConnectorType.DB))
+			.filter(k -> Objects.nonNull(connectorConfigurationProperties.getConnectors().get(k))
+					&& connectorConfigurationProperties.getConnectors().get(k).getDbConnector() != null)
 			.forEach(kdb -> {
 				ConnectorProperty connector = connectorConfigurationProperties.getConnectors().get(kdb);
 				targetDataSources.put(kdb,

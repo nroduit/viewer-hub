@@ -13,6 +13,8 @@ package org.viewer.hub.back.util;
 
 import org.viewer.hub.back.constant.SearchCriteriaConstant;
 
+import java.util.Base64;
+
 /**
  * Helper for connectors
  */
@@ -65,6 +67,11 @@ public class ConnectorUtil {
 						+ SearchCriteriaConstant.ENCRYPTED_CIRCUMFLEX.length());
 		}
 		return issuerPatientIdDependingHl7Syntax;
+	}
+
+	public static String toBase64(String[] credentials) {
+		return Base64.getEncoder()
+				.encodeToString("%s:%s".formatted(credentials[0], credentials[1]).getBytes());
 	}
 
 }

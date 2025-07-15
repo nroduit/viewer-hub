@@ -35,7 +35,6 @@ import org.viewer.hub.back.constant.Message;
 import org.viewer.hub.back.constant.ParamName;
 import org.viewer.hub.back.controller.exception.TechnicalException;
 import org.viewer.hub.back.enums.ConnectorAuthType;
-import org.viewer.hub.back.enums.ConnectorType;
 import org.viewer.hub.back.enums.DicomWebLevelLimitType;
 import org.viewer.hub.back.enums.HeaderType;
 import org.viewer.hub.back.enums.SearchCriteriaType;
@@ -149,7 +148,7 @@ public class DicomConnectorQueryServiceImpl implements DicomConnectorQueryServic
 	private void populateDicomWebWebClients() {
 		// Populate webClients for OAuth2 dicom-web connectors
 		this.connectorConfigurationProperties.getConnectors().forEach(((key, connectorProperty) -> {
-			if (Objects.equals(connectorProperty.getType(), ConnectorType.DICOM_WEB)) {
+			if (connectorProperty.getDicomWebConnector() != null) {
 				connectorProperty.getDicomWebConnector()
 					.setWebClientWadoRs(this.dicomWebClientService.buildWebClientWadoRs(connectorProperty));
 				connectorProperty.getDicomWebConnector()
@@ -302,7 +301,7 @@ public class DicomConnectorQueryServiceImpl implements DicomConnectorQueryServic
 	 */
 	private void retrieveDicomSopInstancesAndUpdatePatients(ConnectorProperty connector, Set<Patient> patients,
 			Patient patient, Authentication authentication) {
-		if (!(Objects.equals(connector.getType(), ConnectorType.DICOM_WEB)
+		if (!(connector.getDicomWebConnector() != null
 				&& (Objects.equals(dicomWebLevelLimitType, DicomWebLevelLimitType.SERIE)
 						|| Objects.equals(dicomWebLevelLimitType, DicomWebLevelLimitType.STUDY)))) {
 			// Retrieve sop instances
@@ -322,12 +321,12 @@ public class DicomConnectorQueryServiceImpl implements DicomConnectorQueryServic
 	 */
 	private void retrieveDicomSeriesSopInstancesAndUpdatePatients(ConnectorProperty connector, Set<Patient> patients,
 			Patient patient, Authentication authentication) {
-		if (!(Objects.equals(connector.getType(), ConnectorType.DICOM_WEB)
+		if (!(connector.getDicomWebConnector() != null
 				&& Objects.equals(dicomWebLevelLimitType, DicomWebLevelLimitType.STUDY))) {
 			// Retrieve series
 			this.retrieveDicomSeriesFromStudyInstanceUid(patient, connector, authentication);
 
-			if (!(Objects.equals(connector.getType(), ConnectorType.DICOM_WEB)
+			if (!(connector.getDicomWebConnector() != null
 					&& Objects.equals(dicomWebLevelLimitType, DicomWebLevelLimitType.SERIE))) {
 				// Retrieve sop instances
 				this.retrieveDicomSopInstancesFromStudySerieInstanceUids(patient, connector, authentication);
@@ -347,7 +346,7 @@ public class DicomConnectorQueryServiceImpl implements DicomConnectorQueryServic
 			ConnectorProperty connector, Authentication authentication) {
 		List<Attributes> patientStudySerieAttributes = new ArrayList<>();
 
-		if (Objects.equals(connector.getType(), ConnectorType.DICOM)) {
+		if (connector.getDicomConnector() != null) {
 			// Define query to retrieve patient,studies, serie from serie instance uid and
 			// process dicom query
 			patientStudySerieAttributes = this.retrieveDicomQueryResults(connector, QueryRetrieveLevel.SERIES,
@@ -403,7 +402,7 @@ public class DicomConnectorQueryServiceImpl implements DicomConnectorQueryServic
 			ConnectorProperty connector, Authentication authentication) {
 		// Define query to retrieve patient,studies from accession number and process
 		// dicom query
-		List<Attributes> patientStudiesAttributes = Objects.equals(connector.getType(), ConnectorType.DICOM) ?
+		List<Attributes> patientStudiesAttributes = connector.getDicomConnector() != null ?
 		// Define query to retrieve patient,studies from accession number and process
 		// dicom query
 				this.retrieveDicomQueryResults(connector, QueryRetrieveLevel.STUDY,
@@ -430,7 +429,7 @@ public class DicomConnectorQueryServiceImpl implements DicomConnectorQueryServic
 			Authentication authentication) {
 		List<Attributes> patientStudiesAttributes;
 		// Dicom request
-		if (Objects.equals(connector.getType(), ConnectorType.DICOM)) {
+		if (connector.getDicomConnector() != null) {
 			patientStudiesAttributes = this.retrieveDicomQueryResults(connector, QueryRetrieveLevel.STUDY,
 					this.definePatientStudiesDicomParamsFromPatientId(patientId), false);
 		}
@@ -466,7 +465,7 @@ public class DicomConnectorQueryServiceImpl implements DicomConnectorQueryServic
 	private Patient retrieveDicomPatientStudiesFromStudyInstanceUid(String studyInstanceUid,
 			ConnectorProperty connector, Authentication authentication) {
 
-		List<Attributes> patientStudiesAttributes = Objects.equals(connector.getType(), ConnectorType.DICOM) ?
+		List<Attributes> patientStudiesAttributes = connector.getDicomConnector() != null ?
 		// Define query to retrieve patient,studies from study instance uid and process
 		// dicom query
 				this.retrieveDicomQueryResults(connector, QueryRetrieveLevel.STUDY,
@@ -490,7 +489,7 @@ public class DicomConnectorQueryServiceImpl implements DicomConnectorQueryServic
 
 		// Define query to retrieve patient,studies, serie, instance from sop instance uid
 		// and process dicom query
-		if (Objects.equals(connector.getType(), ConnectorType.DICOM)) {
+		if (connector.getDicomConnector() != null) {
 			patientStudySerieSopInstanceAttributes = this.retrieveDicomQueryResults(connector, QueryRetrieveLevel.IMAGE,
 					this.definePatientStudySerieSopInstanceDicomParamsFromSopInstanceUid(sopInstanceUid), true);
 		}
@@ -556,7 +555,7 @@ public class DicomConnectorQueryServiceImpl implements DicomConnectorQueryServic
 			Authentication authentication, String serieUID, String studyUID) {
 		return this
 			.retrieveDicomWebQueryResults(connector.getDicomWebConnector().getWebClientQidoRs(),
-					uriBuilder -> uriBuilder.path(EndPoint.STUDIES_SERIES_PATH)
+					uriBuilder -> uriBuilder.path(EndPoint.STUDIES_PATH + "/{studyUID}" + EndPoint.SERIES_PATH)
 						.queryParam(ParamName.DICOM_WEB_SERIES_INSTANCE_UID, serieUID)
 						.queryParam(ParamName.INCLUDE_FIELD, ParamName.INCLUDE_FIELD_SERIE_ATTRIBUTES)
 						.build(studyUID),
@@ -854,14 +853,15 @@ public class DicomConnectorQueryServiceImpl implements DicomConnectorQueryServic
 			Authentication authentication) {
 		patient.getStudies().forEach(study -> {
 
-			List<Attributes> seriesAttributes = Objects.equals(connector.getType(), ConnectorType.DICOM) ?
+			List<Attributes> seriesAttributes = connector.getDicomConnector() != null ?
 			// Define and process dicom query to retrieve series from study instance uid
 					this.retrieveDicomQueryResults(connector, QueryRetrieveLevel.SERIES,
 							this.defineSeriesDicomParamsFromStudyInstanceUid(study.getStudyInstanceUID()), false)
 					:
 			// Dicom-web query
 					this.retrieveDicomWebQueryResults(connector.getDicomWebConnector().getWebClientQidoRs(),
-							uriBuilder -> uriBuilder.path(EndPoint.STUDIES_SERIES_PATH)
+							uriBuilder -> uriBuilder.path(EndPoint.STUDIES_PATH
+											+ "/{studyUID}" + EndPoint.SERIES_PATH)
 								.build(study.getStudyInstanceUID()),
 							connector.getDicomWebConnector().getQidoRs().getAuthentication(), authentication);
 
@@ -886,7 +886,7 @@ public class DicomConnectorQueryServiceImpl implements DicomConnectorQueryServic
 		patient.getStudies().forEach(study -> study.getSeries().forEach(serie -> {
 			// Define and process dicom query to retrieve sop instances from serie
 			// instance uid and study instance uid
-			List<Attributes> sopInstancesAttributes = Objects.equals(connector.getType(), ConnectorType.DICOM) ?
+			List<Attributes> sopInstancesAttributes = connector.getDicomConnector() != null ?
 			// Define and process dicom query to retrieve sop instances from serie
 			// instance uid and study instance uid
 					this.retrieveDicomQueryResults(connector, QueryRetrieveLevel.IMAGE,
@@ -896,7 +896,8 @@ public class DicomConnectorQueryServiceImpl implements DicomConnectorQueryServic
 					:
 			// Dicom-web query
 					this.retrieveDicomWebQueryResults(connector.getDicomWebConnector().getWebClientQidoRs(),
-							uriBuilder -> uriBuilder.path(EndPoint.STUDIES_SERIES_INSTANCES_PATH)
+							uriBuilder -> uriBuilder.path(EndPoint.STUDIES_PATH + "/{studyUID}"
+											+ EndPoint.SERIES_PATH + "/{serieUID}" + EndPoint.INSTANCES_PATH)
 								.build(study.getStudyInstanceUID(), serie.getSeriesInstanceUID()),
 							connector.getDicomWebConnector().getQidoRs().getAuthentication(), authentication);
 

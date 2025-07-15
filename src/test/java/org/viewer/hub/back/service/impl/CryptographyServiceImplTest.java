@@ -47,82 +47,82 @@ class CryptographyServiceImplTest {
 	@DisplayName("WeasisSearchCriteria: When encoding/decoding should retrieve original values")
 	void given_weasisSearchCriteria_when_encodingDecoding_shouldRetrieveOriginalValues() {
 		// Given
-		ArchiveSearchCriteria weasisSearchCriteria = new ArchiveSearchCriteria();
-		weasisSearchCriteria.setPatientID(Set.of("patientID"));
-		weasisSearchCriteria.setAccessionNumber(Set.of("accessionNumber"));
-		weasisSearchCriteria.setStudyUID(Set.of("studyUID"));
-		weasisSearchCriteria.setSeriesUID(Set.of("seriesUID"));
-		weasisSearchCriteria.setObjectUID(Set.of("objectUID"));
+		ArchiveSearchCriteria archiveSearchCriteria = new ArchiveSearchCriteria();
+		archiveSearchCriteria.setPatientID(Set.of("patientID"));
+		archiveSearchCriteria.setAccessionNumber(Set.of("accessionNumber"));
+		archiveSearchCriteria.setStudyUID(Set.of("studyUID"));
+		archiveSearchCriteria.setSeriesUID(Set.of("seriesUID"));
+		archiveSearchCriteria.setObjectUID(Set.of("objectUID"));
 
 		// When
-		this.cryptographyService.encode(weasisSearchCriteria);
+		this.cryptographyService.encode(archiveSearchCriteria);
 
 		// Then
-		assertThat(weasisSearchCriteria.getPatientID()).hasSize(1);
-		assertThat(weasisSearchCriteria.getPatientID().stream().findFirst().orElse("patientID"))
+		assertThat(archiveSearchCriteria.getPatientID()).hasSize(1);
+		assertThat(archiveSearchCriteria.getPatientID().stream().findFirst().orElse("patientID"))
 			.isNotEqualTo("patientID");
-		assertThat(weasisSearchCriteria.getAccessionNumber()).hasSize(1);
-		assertThat(weasisSearchCriteria.getAccessionNumber().stream().findFirst().orElse("accessionNumber"))
+		assertThat(archiveSearchCriteria.getAccessionNumber()).hasSize(1);
+		assertThat(archiveSearchCriteria.getAccessionNumber().stream().findFirst().orElse("accessionNumber"))
 			.isNotEqualTo("accessionNumber");
-		assertThat(weasisSearchCriteria.getStudyUID()).hasSize(1);
-		assertThat(weasisSearchCriteria.getStudyUID().stream().findFirst().orElse("studyUID")).isNotEqualTo("studyUID");
-		assertThat(weasisSearchCriteria.getSeriesUID()).hasSize(1);
-		assertThat(weasisSearchCriteria.getSeriesUID().stream().findFirst().orElse("seriesUID"))
+		assertThat(archiveSearchCriteria.getStudyUID()).hasSize(1);
+		assertThat(archiveSearchCriteria.getStudyUID().stream().findFirst().orElse("studyUID")).isNotEqualTo("studyUID");
+		assertThat(archiveSearchCriteria.getSeriesUID()).hasSize(1);
+		assertThat(archiveSearchCriteria.getSeriesUID().stream().findFirst().orElse("seriesUID"))
 			.isNotEqualTo("seriesUID");
-		assertThat(weasisSearchCriteria.getObjectUID()).hasSize(1);
-		assertThat(weasisSearchCriteria.getObjectUID().stream().findFirst().orElse("objectUID"))
+		assertThat(archiveSearchCriteria.getObjectUID()).hasSize(1);
+		assertThat(archiveSearchCriteria.getObjectUID().stream().findFirst().orElse("objectUID"))
 			.isNotEqualTo("objectUID");
 
 		// When
-		this.cryptographyService.decode(weasisSearchCriteria);
+		this.cryptographyService.decode(archiveSearchCriteria);
 
 		// Then
-		assertThat(weasisSearchCriteria.getPatientID()).hasSize(1);
-		assertThat(weasisSearchCriteria.getPatientID().stream().findFirst().orElse(null)).isEqualTo("patientID");
-		assertThat(weasisSearchCriteria.getAccessionNumber()).hasSize(1);
-		assertThat(weasisSearchCriteria.getAccessionNumber().stream().findFirst().orElse(null))
+		assertThat(archiveSearchCriteria.getPatientID()).hasSize(1);
+		assertThat(archiveSearchCriteria.getPatientID().stream().findFirst().orElse(null)).isEqualTo("patientID");
+		assertThat(archiveSearchCriteria.getAccessionNumber()).hasSize(1);
+		assertThat(archiveSearchCriteria.getAccessionNumber().stream().findFirst().orElse(null))
 			.isEqualTo("accessionNumber");
-		assertThat(weasisSearchCriteria.getStudyUID()).hasSize(1);
-		assertThat(weasisSearchCriteria.getStudyUID().stream().findFirst().orElse(null)).isEqualTo("studyUID");
-		assertThat(weasisSearchCriteria.getSeriesUID()).hasSize(1);
-		assertThat(weasisSearchCriteria.getSeriesUID().stream().findFirst().orElse(null)).isEqualTo("seriesUID");
-		assertThat(weasisSearchCriteria.getObjectUID()).hasSize(1);
-		assertThat(weasisSearchCriteria.getObjectUID().stream().findFirst().orElse(null)).isEqualTo("objectUID");
+		assertThat(archiveSearchCriteria.getStudyUID()).hasSize(1);
+		assertThat(archiveSearchCriteria.getStudyUID().stream().findFirst().orElse(null)).isEqualTo("studyUID");
+		assertThat(archiveSearchCriteria.getSeriesUID()).hasSize(1);
+		assertThat(archiveSearchCriteria.getSeriesUID().stream().findFirst().orElse(null)).isEqualTo("seriesUID");
+		assertThat(archiveSearchCriteria.getObjectUID()).hasSize(1);
+		assertThat(archiveSearchCriteria.getObjectUID().stream().findFirst().orElse(null)).isEqualTo("objectUID");
 	}
 
 	@Test
 	@DisplayName("WeasisIHESearchCriteria: When encoding/decoding should retrieve original values")
 	void given_weasisIHESearchCriteria_when_encodingDecoding_shouldRetrieveOriginalValues() {
 		// Given
-		IHESearchCriteria weasisIHESearchCriteria = new IHESearchCriteria();
-		weasisIHESearchCriteria.setPatientID("patientID");
-		weasisIHESearchCriteria.setAccessionNumber(Set.of("accessionNumber"));
-		weasisIHESearchCriteria.setStudyUID(Set.of("studyUID"));
+		IHESearchCriteria IHESearchCriteria = new IHESearchCriteria();
+		IHESearchCriteria.setPatientID("patientID");
+		IHESearchCriteria.setAccessionNumber(Set.of("accessionNumber"));
+		IHESearchCriteria.setStudyUID(Set.of("studyUID"));
 
 		// When
-		this.cryptographyService.encode(weasisIHESearchCriteria);
+		this.cryptographyService.encode(IHESearchCriteria);
 
 		// Then
-		assertThat(weasisIHESearchCriteria.getPatientID()).isNotBlank();
-		assertThat(weasisIHESearchCriteria.getPatientID()).isNotEqualTo("patientID");
-		assertThat(weasisIHESearchCriteria.getAccessionNumber()).hasSize(1);
-		assertThat(weasisIHESearchCriteria.getAccessionNumber().stream().findFirst().orElse("accessionNumber"))
+		assertThat(IHESearchCriteria.getPatientID()).isNotBlank();
+		assertThat(IHESearchCriteria.getPatientID()).isNotEqualTo("patientID");
+		assertThat(IHESearchCriteria.getAccessionNumber()).hasSize(1);
+		assertThat(IHESearchCriteria.getAccessionNumber().stream().findFirst().orElse("accessionNumber"))
 			.isNotEqualTo("accessionNumber");
-		assertThat(weasisIHESearchCriteria.getStudyUID()).hasSize(1);
-		assertThat(weasisIHESearchCriteria.getStudyUID().stream().findFirst().orElse("studyUID"))
+		assertThat(IHESearchCriteria.getStudyUID()).hasSize(1);
+		assertThat(IHESearchCriteria.getStudyUID().stream().findFirst().orElse("studyUID"))
 			.isNotEqualTo("studyUID");
 
 		// When
-		this.cryptographyService.decode(weasisIHESearchCriteria);
+		this.cryptographyService.decode(IHESearchCriteria);
 
 		// Then
-		assertThat(weasisIHESearchCriteria.getPatientID()).isNotBlank();
-		assertThat(weasisIHESearchCriteria.getPatientID()).isEqualTo("patientID");
-		assertThat(weasisIHESearchCriteria.getAccessionNumber()).hasSize(1);
-		assertThat(weasisIHESearchCriteria.getAccessionNumber().stream().findFirst().orElse(null))
+		assertThat(IHESearchCriteria.getPatientID()).isNotBlank();
+		assertThat(IHESearchCriteria.getPatientID()).isEqualTo("patientID");
+		assertThat(IHESearchCriteria.getAccessionNumber()).hasSize(1);
+		assertThat(IHESearchCriteria.getAccessionNumber().stream().findFirst().orElse(null))
 			.isEqualTo("accessionNumber");
-		assertThat(weasisIHESearchCriteria.getStudyUID()).hasSize(1);
-		assertThat(weasisIHESearchCriteria.getStudyUID().stream().findFirst().orElse(null)).isEqualTo("studyUID");
+		assertThat(IHESearchCriteria.getStudyUID()).hasSize(1);
+		assertThat(IHESearchCriteria.getStudyUID().stream().findFirst().orElse(null)).isEqualTo("studyUID");
 	}
 
 }

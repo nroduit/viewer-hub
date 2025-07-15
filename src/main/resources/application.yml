@@ -104,6 +104,9 @@ viewer-hub:
         path: '${viewer-hub.resources-packages.path}/weasis/i18n'
       mapping-minimal-version:
         path: '${viewer-hub.resources-packages.path}/weasis/mapping-minimal-version.json'
+  # TODO : ne pas utiliser
+  tmp:
+    storage: '/tmp/viewer-hub-storage'
 
 server:
 # Enable response compression: currently not working
@@ -120,3 +123,8 @@ weasis:
     filename:
       properties: config.properties
       json: base.json
+
+# - OHIF
+ohif:
+  server:
+    url: "http://localhost:3000"

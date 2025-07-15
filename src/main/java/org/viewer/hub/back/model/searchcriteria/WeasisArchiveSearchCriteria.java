@@ -46,4 +46,9 @@ public class WeasisArchiveSearchCriteria extends ArchiveSearchCriteria {
 			example = "$dicom:close –all")
 	private List<String> arg = new ArrayList<>();
 
+	public WeasisArchiveSearchCriteria(ArchiveSearchCriteria archiveSearchCriteria) {
+		super(archiveSearchCriteria.getPatientID(), archiveSearchCriteria.getStudyUID(),
+			archiveSearchCriteria.getAccessionNumber(), archiveSearchCriteria.getSeriesUID(),
+			archiveSearchCriteria.getObjectUID());
+	}
 }

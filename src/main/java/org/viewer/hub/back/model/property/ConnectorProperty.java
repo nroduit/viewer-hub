@@ -15,12 +15,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.viewer.hub.back.enums.ConnectorType;
 import org.viewer.hub.back.model.validator.ValidConnectorProperty;
 
 @NotNull
@@ -29,22 +26,39 @@ import org.viewer.hub.back.model.validator.ValidConnectorProperty;
 @Setter
 @EqualsAndHashCode
 @AllArgsConstructor
-@NoArgsConstructor
-@Builder
 public class ConnectorProperty {
 
 	@Schema(description = "Id of the connector")
 	private String id;
 
-	@NotNull
-	@Schema(description = "Type of connector: DB, dicom, dicom-web")
-	private ConnectorType type;
-
 	// -------- Search criteria --------
+	@NotNull
+	@Schema(description = "Name of connector")
+	private String name;
+
+	// -------- SearchCriteriaProperty --------
 	@Valid
 	@NotNull
 	@Schema(description = "Search criteria")
 	private SearchCriteriaProperty searchCriteria;
+
+	// -------- Handle redirects --------
+	@NotNull
+	private boolean handleRedirect;
+
+	// -------- For database --------
+	@Schema(description = "Db connector properties")
+	@Valid
+	private DbConnectorProperty dbConnector;
+
+	// -------- For dicom ----------
+	@Schema(description = "Dicom connector properties")
+	@Valid
+	private DicomConnectorProperty dicomConnector;
+
+	// -------- For dicom-web ----------
+	@Schema(description = "Dicom-web connector properties")
+	private DicomWebConnectorProperty dicomWebConnector;
 
 	// -------- Weasis --------
 	@Valid
@@ -52,16 +66,5 @@ public class ConnectorProperty {
 	@Schema(description = "Properties specific to Weasis")
 	private WeasisConnectorProperty weasis;
 
-	// -------- For database --------
-	@Schema(description = "Db connector properties")
-	private DbConnectorProperty dbConnector;
-
-	// -------- For dicom ----------
-	@Schema(description = "Dicom connector properties")
-	private DicomConnectorProperty dicomConnector;
-
-	// -------- For dicom-web ----------
-	@Schema(description = "Dicom-web connector properties")
-	private DicomWebConnectorProperty dicomWebConnector;
 
 }

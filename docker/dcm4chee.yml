@@ -14,9 +14,9 @@ services:
       - "389:389"
     environment:
       STORAGE_DIR: /storage/fs1
-      IID_STUDY_URL: ${IID_STUDY_URL}
-      IID_PATIENT_URL: ${IID_PATIENT_URL}
       IID_URL_TARGET: _self
+    env_file:
+      - ./dcm4chee/${TARGET_ENV}
     volumes:
       - /var/local/dcm4chee-arc/ldap:/var/lib/openldap/openldap-data
       - /var/local/dcm4chee-arc/slapd.d:/etc/openldap/slapd.d

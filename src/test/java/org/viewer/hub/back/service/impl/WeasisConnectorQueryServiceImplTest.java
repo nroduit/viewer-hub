@@ -170,13 +170,13 @@ class WeasisConnectorQueryServiceImplTest {
 	@Test
 	void when_fillingManifestFromPatientIds_with_dbArchive_should_callCorrectConnectorService() {
 		// Init data
-		ArchiveSearchCriteria weasisSearchCriteria = new ArchiveSearchCriteria();
-		weasisSearchCriteria.getArchive().add("idDbA");
+		ArchiveSearchCriteria archiveSearchCriteria = new ArchiveSearchCriteria();
+		archiveSearchCriteria.getArchive().add("idDbA");
 		Mockito.when(this.connectorServiceMock.retrieveConnectors(any()))
 			.thenReturn(new LinkedHashSet<>(List.of(connectorPropertyDbA)));
 
 		// Call service
-		this.connectorQueryService.buildFromPatientIds(new Manifest(), Set.of("uid"), weasisSearchCriteria, null);
+		this.connectorQueryService.buildFromPatientIds(new Manifest(), Set.of("uid"), archiveSearchCriteria, null);
 
 		// Test results
 		Mockito.verify(this.dbConnectorQueryServiceMock, Mockito.times(1))
@@ -188,13 +188,13 @@ class WeasisConnectorQueryServiceImplTest {
 	@Test
 	void when_fillingManifestFromPatientIds_with_dicomArchive_should_callCorrectConnectorService() {
 		// Init data
-		ArchiveSearchCriteria weasisSearchCriteria = new ArchiveSearchCriteria();
-		weasisSearchCriteria.getArchive().add("idDicomA");
+		ArchiveSearchCriteria archiveSearchCriteria = new ArchiveSearchCriteria();
+		archiveSearchCriteria.getArchive().add("idDicomA");
 		Mockito.when(this.connectorServiceMock.retrieveConnectors(any()))
 			.thenReturn(new LinkedHashSet<>(List.of(connectorPropertyDicomA)));
 
 		// Call service
-		this.connectorQueryService.buildFromPatientIds(new Manifest(), Set.of("uid"), weasisSearchCriteria, null);
+		this.connectorQueryService.buildFromPatientIds(new Manifest(), Set.of("uid"), archiveSearchCriteria, null);
 
 		// Test results
 		Mockito.verify(this.dbConnectorQueryServiceMock, Mockito.never())
@@ -206,13 +206,13 @@ class WeasisConnectorQueryServiceImplTest {
 	@Test
 	void when_fillingManifestFromPatientIds_with_dicomWebArchive_should_callCorrectConnectorService() {
 		// Init data
-		ArchiveSearchCriteria weasisSearchCriteria = new ArchiveSearchCriteria();
-		weasisSearchCriteria.getArchive().add("idDicomWebA");
+		ArchiveSearchCriteria archiveSearchCriteria = new ArchiveSearchCriteria();
+		archiveSearchCriteria.getArchive().add("idDicomWebA");
 		Mockito.when(this.connectorServiceMock.retrieveConnectors(any()))
 			.thenReturn(new LinkedHashSet<>(List.of(connectorPropertyDicomWebA)));
 
 		// Call service
-		this.connectorQueryService.buildFromPatientIds(new Manifest(), Set.of("uid"), weasisSearchCriteria, null);
+		this.connectorQueryService.buildFromPatientIds(new Manifest(), Set.of("uid"), archiveSearchCriteria, null);
 
 		// Test results
 		Mockito.verify(this.dbConnectorQueryServiceMock, Mockito.never())
@@ -224,8 +224,8 @@ class WeasisConnectorQueryServiceImplTest {
 	@Test
 	void when_fillingManifestFromPatientIds_with_deactivatedPatientIdSearchCriteria_should_notCallConnectorService() {
 		// Init data
-		ArchiveSearchCriteria weasisSearchCriteria = new ArchiveSearchCriteria();
-		weasisSearchCriteria.getArchive().add("idDicomA");
+		ArchiveSearchCriteria archiveSearchCriteria = new ArchiveSearchCriteria();
+		archiveSearchCriteria.getArchive().add("idDicomA");
 
 		// Mock behaviour
 		LinkedHashMap<String, ConnectorProperty> config = new LinkedHashMap<>();
@@ -243,7 +243,7 @@ class WeasisConnectorQueryServiceImplTest {
 			.thenReturn(new LinkedHashSet<>(List.of(connectorPropertyDicomA)));
 
 		// Call service
-		this.connectorQueryService.buildFromPatientIds(new Manifest(), Set.of("uid"), weasisSearchCriteria, null);
+		this.connectorQueryService.buildFromPatientIds(new Manifest(), Set.of("uid"), archiveSearchCriteria, null);
 
 		// Test results
 		Mockito.verify(this.dbConnectorQueryServiceMock, Mockito.never())

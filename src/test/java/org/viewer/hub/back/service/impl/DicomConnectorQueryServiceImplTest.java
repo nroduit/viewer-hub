@@ -252,7 +252,7 @@ class DicomConnectorQueryServiceImplTest {
 		// Init data
 		Set<String> patientIds = new HashSet<>();
 		patientIds.add("patientId");
-		ArchiveSearchCriteria weasisSearchCriteria = new ArchiveSearchCriteria();
+		ArchiveSearchCriteria archiveSearchCriteria = new ArchiveSearchCriteria();
 
 		// Mock behaviour
 		Mockito.when(responseSpec.bodyToMono(String.class))
@@ -261,7 +261,7 @@ class DicomConnectorQueryServiceImplTest {
 
 		// Call service
 		Set<Patient> patients = this.dicomConnectorQueryService.retrievePatientsFromPatientIdsDicomConnector(patientIds,
-				this.dicomWebConnectorProperty, weasisSearchCriteria, null);
+				this.dicomWebConnectorProperty, archiveSearchCriteria, null);
 
 		// Test results
 		assertEquals("patientId", patients.stream().findFirst().get().getPatientID());

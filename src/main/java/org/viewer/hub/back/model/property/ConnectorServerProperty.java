@@ -41,4 +41,8 @@ public class ConnectorServerProperty {
 	@Schema(description = "Context path of the api")
 	private String context;
 
+	public String getFullUrl() {
+		return url + ":" + port + context;
+	}
+
 }

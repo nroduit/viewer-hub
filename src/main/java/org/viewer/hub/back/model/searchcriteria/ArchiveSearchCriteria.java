@@ -13,6 +13,7 @@ package org.viewer.hub.back.model.searchcriteria;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
@@ -28,6 +29,7 @@ import java.util.Set;
 @Getter
 @NotNull
 @ToString
+@AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 public class ArchiveSearchCriteria extends SearchCriteria {
 

@@ -1,7 +1,3 @@
-version: '3.7'
-
-name: viewer-hub
-
 services:
 
   # Postgres SQL

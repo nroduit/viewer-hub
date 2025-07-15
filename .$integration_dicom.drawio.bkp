@@ -1,0 +1,33 @@
+<mxfile host="Electron" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/26.0.16 Chrome/132.0.6834.196 Electron/34.2.0 Safari/537.36" version="26.0.16">
+  <diagram name="Page-1" id="deSAqjhEXc5CT7bfWmWd">
+    <mxGraphModel dx="1050" dy="621" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="y8I--u5Gp5bFWQCBICnB-1" value="Viewer" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="840" y="120" width="160" height="520" as="geometry" />
+        </mxCell>
+        <mxCell id="y8I--u5Gp5bFWQCBICnB-2" value="Archive" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="120" width="160" height="520" as="geometry" />
+        </mxCell>
+        <mxCell id="y8I--u5Gp5bFWQCBICnB-4" value="viewer-hub" style="swimlane;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="360" y="120" width="320" height="520" as="geometry" />
+        </mxCell>
+        <mxCell id="y8I--u5Gp5bFWQCBICnB-6" value="DisplayContoller" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="y8I--u5Gp5bFWQCBICnB-4">
+          <mxGeometry x="90" y="40" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="y8I--u5Gp5bFWQCBICnB-5" value="" style="endArrow=classic;html=1;rounded=0;exitX=1.008;exitY=0.109;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" target="y8I--u5Gp5bFWQCBICnB-6">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="199.99999999999997" y="189.99999999999994" as="sourcePoint" />
+            <mxPoint x="398.72" y="193.32" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="y8I--u5Gp5bFWQCBICnB-7" value="ask to open a docim object" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];labelBorderColor=default;" vertex="1" connectable="0" parent="y8I--u5Gp5bFWQCBICnB-5">
+          <mxGeometry x="-0.2096" y="1" relative="1" as="geometry">
+            <mxPoint x="21" y="1" as="offset" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

@@ -11,7 +11,9 @@
 
 package org.viewer.hub.back.service;
 
+import jakarta.validation.Valid;
 import org.springframework.security.core.Authentication;
+import org.viewer.hub.back.model.searchcriteria.ArchiveSearchCriteria;
 import org.viewer.hub.back.model.searchcriteria.SearchCriteria;
 
 /**
@@ -25,6 +27,12 @@ public interface WeasisDisplayService {
 	 * @param authentication Authentication
 	 * @return url which will launch Weasis
 	 */
-	String retrieveWeasisLaunchUrl(SearchCriteria searchCriteria, Authentication authentication);
+	String retrieveWeasisManifestLaunchUrl(SearchCriteria searchCriteria, Authentication authentication);
 
+	/**
+	 * Retrieve url which will launch Weasis with the key of the manifest in the cache
+	 * @param searchCriteria search criteria
+	 * @return url which will launch Weasis
+	 */
+	String retrieveWeasisQidoLaunchUrl(@Valid ArchiveSearchCriteria searchCriteria);
 }

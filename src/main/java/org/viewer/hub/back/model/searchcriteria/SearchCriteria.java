@@ -31,45 +31,44 @@ import java.util.stream.Collectors;
 
 import static org.weasis.core.util.StringUtil.deAccent;
 
-@Getter
 @ExistingConnector
 @ToString
 @EqualsAndHashCode
+@Getter
+@Setter
 public abstract class SearchCriteria implements Serializable {
 
 	@Serial
 	private static final long serialVersionUID = 3062479886665643364L;
 
-	@Setter
 	@Schema(description = "Provide user context for the request. Used to retrieve specific properties depending on user/user group",
 			name = "user", type = "String", example = "abcd")
 	private String user;
 
-	@Setter
 	@Schema(description = "Provide host context for the request. Used to retrieve specific properties depending on host/host group",
 			name = "host", type = "String", example = "pc-1234")
 	private String host;
 
-	@Setter
 	@Schema(description = "Define the client making the request", name = "client", type = "String", example = "compacs")
 	private String client;
 
 	@Schema(description = "Request should be done by using these archives in parameter", name = "archive",
-			type = "LinkedHashSet<String>", example = "vnaDb, vnaDicom, pacsDcm4chee")
+			type = "LinkedHashSet<String>", example = "dcm4chee-local, orthanc-local")
 	private LinkedHashSet<String> archive = new LinkedHashSet<>();
 
+	@Schema(description = "Request should be done by using these viewers in parameter", name = "archive",
+			type = "LinkedHashSet<String>", example = "weasis, ohif")
+	private LinkedHashSet<String> viewer = new LinkedHashSet<>();
+
 	// Patient request filters
-	@Setter
 	@Schema(description = "Filter the results depending on StudyDateTime (min)", name = "lowerDateTime",
 			type = "LocalDateTime", example = "2024-07-19T10:15:30")
 	private LocalDateTime lowerDateTime;
 
-	@Setter
 	@Schema(description = "Filter the results depending on StudyDateTime (max)", name = "upperDateTime",
 			type = "LocalDateTime", example = "2024-07-19T10:15:30")
 	private LocalDateTime upperDateTime;
 
-	@Setter
 	@Schema(description = "Provide the most recent studies (compared by StudyDateTime) and limit the number of results by this parameter",
 			name = "mostRecentResults", type = "Integer", example = "5")
 	private Integer mostRecentResults;
@@ -122,11 +121,11 @@ public abstract class SearchCriteria implements Serializable {
 			patientsToFilter.stream()
 				.filter(patient -> patient.getStudies().size() > this.mostRecentResults)
 				.forEach(patient -> patient.setStudies(patient.getStudies()
-					.stream()
-					.filter(study -> study.getStudyDateTime() != null)
-					.sorted((s1, s2) -> s2.getStudyDateTime().compareTo(s1.getStudyDateTime()))
-					.limit(this.mostRecentResults)
-					.collect(Collectors.toSet())));
+						.stream()
+						.filter(study -> study.getStudyDateTime() != null)
+						.sorted((s1, s2) -> s2.getStudyDateTime().compareTo(s1.getStudyDateTime()))
+						.limit(this.mostRecentResults)
+						.collect(Collectors.toSet())));
 		}
 	}
 
@@ -156,7 +155,7 @@ public abstract class SearchCriteria implements Serializable {
 				.stream()
 				.filter(study -> Objects.nonNull(study.getStudyDescription()) && !study.getStudyDescription().isBlank())
 				.filter(study -> this.containsInDescription.stream()
-					.anyMatch(description -> deAccent(study.getStudyDescription()).toLowerCase().contains(description)))
+						.anyMatch(description -> deAccent(study.getStudyDescription()).toLowerCase().contains(description)))
 				.collect(Collectors.toSet())));
 		}
 	}
@@ -166,8 +165,8 @@ public abstract class SearchCriteria implements Serializable {
 			patientsToFilter.forEach(patient -> patient.setStudies(patient.getStudies()
 				.stream()
 				.filter(study -> study.getSeries()
-					.stream()
-					.anyMatch(serie -> this.modalitiesInStudy.contains(serie.getModality())))
+						.stream()
+						.anyMatch(serie -> this.modalitiesInStudy.contains(serie.getModality())))
 				.collect(Collectors.toSet())));
 		}
 	}

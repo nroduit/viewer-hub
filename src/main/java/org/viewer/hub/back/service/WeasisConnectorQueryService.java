@@ -61,7 +61,7 @@ public interface WeasisConnectorQueryService {
 	 * @param authentication Authentication
 	 */
 	void buildFromSeriesInstanceUids(Manifest manifest, Set<String> seriesInstanceUids, LinkedHashSet<String> archives,
-			Authentication authentication);
+			 Authentication authentication);
 
 	/**
 	 * Fill manifest from sop instance uids requests

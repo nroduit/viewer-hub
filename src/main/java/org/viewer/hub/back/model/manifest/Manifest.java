@@ -27,6 +27,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import org.viewer.hub.back.model.patient.Patient;
+import org.viewer.hub.back.enums.ConnectorType;
 import org.viewer.hub.back.model.presentation.Presentation;
 import org.viewer.hub.back.model.property.ConnectorProperty;
 import org.viewer.hub.back.model.searchcriteria.SearchCriteria;
@@ -191,7 +192,15 @@ public class Manifest implements Serializable {
 
 		// Set the query mode in order for Weasis to user the corresponding requests to
 		// retrieve the images
-		arcQuery.setQueryMode(connector.getType());
+		if (connector.getDbConnector() != null) {
+			arcQuery.setQueryMode(ConnectorType.DB);
+		}
+		else if (connector.getDicomConnector() != null) {
+			arcQuery.setQueryMode(ConnectorType.DICOM);
+		}
+		else if (connector.getDicomWebConnector() != null) {
+			arcQuery.setQueryMode(ConnectorType.DICOM_WEB);
+		}
 
 		this.getArcQueries().add(arcQuery);
 	}

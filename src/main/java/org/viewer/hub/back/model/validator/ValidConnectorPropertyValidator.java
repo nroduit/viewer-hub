@@ -19,7 +19,6 @@ import org.springframework.security.oauth2.client.registration.ClientRegistratio
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.stereotype.Component;
 import org.viewer.hub.back.enums.ConnectorAuthType;
-import org.viewer.hub.back.enums.ConnectorType;
 import org.viewer.hub.back.model.property.ConnectorAuthenticationProperty;
 import org.viewer.hub.back.model.property.ConnectorProperty;
 import org.viewer.hub.back.model.property.DbConnectorProperty;
@@ -43,24 +42,12 @@ public class ValidConnectorPropertyValidator implements ConstraintValidator<Vali
 
 	@Override
 	public boolean isValid(ConnectorProperty connector, ConstraintValidatorContext constraintValidatorContext) {
-		if (connector == null || connector.getType() == null) {
+		if (connector == null) {
 			return false;
 		}
-		// Case database configuration
-		else if (Objects.equals(connector.getType(), ConnectorType.DB)) {
-			return isDbConnectorValid(connector.getDbConnector());
-		}
-		// Case dicom web configuration
-		else if (Objects.equals(connector.getType(), ConnectorType.DICOM_WEB)) {
-			return isDicomWebConnectorValid(connector.getDicomWebConnector());
-		}
-		// Case dicom configuration
-		else if (Objects.equals(connector.getType(), ConnectorType.DICOM)) {
-			return isDicomConnectorValid(connector.getDicomConnector());
-		}
-		else {
-			return false;
-		}
+		return isDbConnectorValid(connector.getDbConnector())
+			|| isDicomWebConnectorValid(connector.getDicomWebConnector())
+			|| isDicomConnectorValid(connector.getDicomConnector());
 	}
 
 	/**

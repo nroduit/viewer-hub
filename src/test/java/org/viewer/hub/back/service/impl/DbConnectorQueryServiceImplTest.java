@@ -119,11 +119,12 @@ class DbConnectorQueryServiceImplTest {
 		Manifest manifest = new Manifest();
 		Set<String> patientIds = new HashSet<>();
 		patientIds.add("patientIds");
-		ArchiveSearchCriteria weasisSearchCriteria = new ArchiveSearchCriteria();
+
+		ArchiveSearchCriteria archiveSearchCriteria = new ArchiveSearchCriteria();
 
 		// Call service
 		this.dbConnectorQueryService.retrievePatientsFromPatientIdsDbConnector(patientIds, this.connectorProperty,
-				weasisSearchCriteria);
+				archiveSearchCriteria);
 
 		// Test results
 		Mockito.verify(this.currentTenantMock, Mockito.times(1)).setCurrentTenant(Mockito.anyString());

@@ -57,6 +57,11 @@ public class WebConfiguration implements WebMvcConfigurer {
 		this.resourceLoader = resourceLoader;
 	}
 
+	@Bean(name = "multipartResolver")
+	public DicomWebRequestResolver getDicomWebResolver() {
+		return new DicomWebRequestResolver();
+	}
+
 	@Override
 	public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
 		converters.add(this.mappingJackson2XmlHttpMessageConverter(new Jackson2ObjectMapperBuilder()));

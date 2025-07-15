@@ -11,7 +11,9 @@
 
 package org.viewer.hub.back.service;
 
+import jakarta.validation.Valid;
 import org.viewer.hub.back.model.property.ConnectorProperty;
+import org.viewer.hub.back.model.searchcriteria.SearchCriteria;
 
 import java.util.LinkedHashSet;
 
@@ -21,6 +23,18 @@ import java.util.LinkedHashSet;
 public interface ConnectorService {
 
 	/**
+	 * get connector
+	 * @param archive Archives to evaluate
+	 */
+	ConnectorProperty retrieveConnectorFromId(LinkedHashSet<String> archive);
+
+	/**
+	 * get connector
+	 * @param searchCriteria Search criteria
+	 */
+	ConnectorProperty retrieveConnectorFromId(@Valid SearchCriteria searchCriteria);
+
+	/**
 	 * Retrieve the connector corresponding to connector id
 	 * @param connectorId Connector id to evaluate
 	 * @return ConnectorProperty found
@@ -28,10 +42,27 @@ public interface ConnectorService {
 	ConnectorProperty retrieveConnectorFromId(String connectorId);
 
 	/**
-	 * Retrieve the connector properties from the list of archives id in parameter
-	 * @param archives Archive to evaluate
-	 * @return LinkedHashSet of connector properties
+	 * get name of connector
+	 * @param searchCriteria Search criteria
 	 */
-	LinkedHashSet<ConnectorProperty> retrieveConnectors(LinkedHashSet<String> archives);
+	String getArchiveName(@Valid SearchCriteria searchCriteria);
+
+	/**
+	 * get dicom-rs url of dicom web request
+	 * @param searchCriteria Search criteria
+	 */
+	String getDicomRsUrl(@Valid SearchCriteria searchCriteria);
+
+	/**
+	 * get credentials of dicom web request
+	 * @param searchCriteria Search criteria
+	 */
+	String[] getCredentials(@Valid SearchCriteria searchCriteria);
+
+	/**
+	 * get handleRedirect of dicom web request
+	 * @param archive archive
+	 */
+	boolean canHandleRedirect(@Valid String archive);
 
 }

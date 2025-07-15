@@ -100,11 +100,11 @@ class CacheServiceImplTest {
 	@Test
 	void when_searchParametersChange_then_keyBuiltShouldBeDifferent() {
 		// Build keys
-		ArchiveSearchCriteria weasisSearchCriteria = new ArchiveSearchCriteria();
-		weasisSearchCriteria.setArchive(new LinkedHashSet<>(List.of("A", "B")));
-		String key = this.cacheService.constructManifestKeyDependingOnSearchParameters(weasisSearchCriteria);
-		weasisSearchCriteria.getArchive().add("C");
-		String keyToCompare = this.cacheService.constructManifestKeyDependingOnSearchParameters(weasisSearchCriteria);
+		ArchiveSearchCriteria archiveSearchCriteria = new ArchiveSearchCriteria();
+		archiveSearchCriteria.setArchive(new LinkedHashSet<>(List.of("A", "B")));
+		String key = this.cacheService.constructManifestKeyDependingOnSearchParameters(archiveSearchCriteria);
+		archiveSearchCriteria.getArchive().add("C");
+		String keyToCompare = this.cacheService.constructManifestKeyDependingOnSearchParameters(archiveSearchCriteria);
 
 		// Test keys
 		assertNotEquals(key, keyToCompare);

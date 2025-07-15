@@ -20,6 +20,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.viewer.hub.back.model.searchcriteria.WeasisArchiveSearchCriteria;
 import org.viewer.hub.back.service.CacheService;
+import org.viewer.hub.back.service.ConnectorService;
 import org.viewer.hub.back.service.WeasisDisplayService;
 import org.viewer.hub.back.service.WeasisService;
 
@@ -35,11 +36,13 @@ class DisplayServiceImplTest {
 
 	private final WeasisService manifestServiceMock = Mockito.mock(WeasisService.class);
 
+	private final ConnectorService connectorServiceMock = Mockito.mock(ConnectorService.class);
+
 	private WeasisDisplayService displayService;
 
 	@BeforeEach
 	public void setUp() {
-		this.displayService = new WeasisDisplayServiceImpl(this.cacheServiceMock, this.manifestServiceMock);
+		this.displayService = new WeasisDisplayServiceImpl(this.cacheServiceMock, this.manifestServiceMock, this.connectorServiceMock);
 		ReflectionTestUtils.setField(this.displayService, "viewerHubServerUrl", "http://test.com");
 	}
 
@@ -49,7 +52,7 @@ class DisplayServiceImplTest {
 		WeasisArchiveSearchCriteria weasisSearchCriteria = new WeasisArchiveSearchCriteria();
 
 		// Call service
-		this.displayService.retrieveWeasisLaunchUrl(weasisSearchCriteria, null);
+		this.displayService.retrieveWeasisWadoLaunchUrl(weasisSearchCriteria, null);
 
 		// Test results
 		Mockito.verify(this.cacheServiceMock, Mockito.times(1))
@@ -66,7 +69,7 @@ class DisplayServiceImplTest {
 			.thenReturn(null);
 
 		// Call service
-		this.displayService.retrieveWeasisLaunchUrl(weasisSearchCriteria, null);
+		this.displayService.retrieveWeasisWadoLaunchUrl(weasisSearchCriteria, null);
 
 		// Test results
 		Mockito.verify(this.manifestServiceMock, Mockito.never())
@@ -83,7 +86,7 @@ class DisplayServiceImplTest {
 			.thenReturn("key");
 
 		// Call service
-		this.displayService.retrieveWeasisLaunchUrl(weasisSearchCriteria, null);
+		this.displayService.retrieveWeasisWadoLaunchUrl(weasisSearchCriteria, null);
 
 		// Test results
 		Mockito.verify(this.manifestServiceMock, Mockito.times(1))
@@ -104,7 +107,7 @@ class DisplayServiceImplTest {
 			.thenReturn("key");
 
 		// Call service
-		String launchUrl = this.displayService.retrieveWeasisLaunchUrl(weasisSearchCriteria, null);
+		String launchUrl = this.displayService.retrieveWeasisWadoLaunchUrl(weasisSearchCriteria, null);
 
 		// Test results
 		assertEquals(
@@ -127,7 +130,7 @@ class DisplayServiceImplTest {
 			.thenReturn("key");
 
 		// Call service
-		String launchUrl = this.displayService.retrieveWeasisLaunchUrl(weasisSearchCriteria, null);
+		String launchUrl = this.displayService.retrieveWeasisWadoLaunchUrl(weasisSearchCriteria, null);
 
 		// Test results
 		assertEquals(

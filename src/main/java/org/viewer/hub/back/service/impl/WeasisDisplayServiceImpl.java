@@ -18,22 +18,22 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.UriComponentsBuilder;
-import org.viewer.hub.back.constant.CommandName;
 import org.viewer.hub.back.constant.EndPoint;
 import org.viewer.hub.back.constant.ParamName;
+import org.viewer.hub.back.constant.WeasisCommandName;
 import org.viewer.hub.back.model.manifest.Manifest;
-import org.viewer.hub.back.model.searchcriteria.IHESearchCriteria;
-import org.viewer.hub.back.model.searchcriteria.SearchCriteria;
-import org.viewer.hub.back.model.searchcriteria.WeasisArchiveSearchCriteria;
-import org.viewer.hub.back.model.searchcriteria.WeasisIHESearchCriteria;
+import org.viewer.hub.back.model.searchcriteria.*;
 import org.viewer.hub.back.service.CacheService;
+import org.viewer.hub.back.service.ConnectorService;
 import org.viewer.hub.back.service.WeasisDisplayService;
 import org.viewer.hub.back.service.WeasisService;
+import org.viewer.hub.back.util.ConnectorUtil;
 import org.viewer.hub.back.util.StringUtil;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -45,17 +45,22 @@ public class WeasisDisplayServiceImpl implements WeasisDisplayService {
 
 	private final WeasisService weasisService;
 
+	private final ConnectorService connectorService;
+
 	@Value("${viewer-hub.server.url}")
 	private String viewerHubServerUrl;
 
 	@Autowired
-	public WeasisDisplayServiceImpl(final CacheService cacheService, final WeasisService weasisService) {
+	public WeasisDisplayServiceImpl(final CacheService cacheService,
+									final WeasisService weasisService,
+									final ConnectorService connectorService) {
 		this.cacheService = cacheService;
 		this.weasisService = weasisService;
+		this.connectorService = connectorService;
 	}
 
 	@Override
-	public String retrieveWeasisLaunchUrl(@Valid SearchCriteria searchCriteria, Authentication authentication) {
+	public String retrieveWeasisManifestLaunchUrl(@Valid SearchCriteria searchCriteria, Authentication authentication) {
 		// Hash parameters to build the key
 		String key = this.cacheService.constructManifestKeyDependingOnSearchParameters(searchCriteria);
 
@@ -80,7 +85,7 @@ public class WeasisDisplayServiceImpl implements WeasisDisplayService {
 		}
 
 		// Build the launch url
-		return this.buildWeasisLaunchUrl(key, searchCriteria);
+		return this.buildWeasisGetManifestUrl(key, searchCriteria);
 	}
 
 	/**
@@ -89,7 +94,7 @@ public class WeasisDisplayServiceImpl implements WeasisDisplayService {
 	 * @param searchCriteria Search criteria
 	 * @return launch url built
 	 */
-	private String buildWeasisLaunchUrl(String key, SearchCriteria searchCriteria) {
+	private String buildWeasisGetManifestUrl(String key, SearchCriteria searchCriteria) {
 		// TODO: set other parameters ?..cf pacs connector invokeWeasis
 
 		// Retrieve weasis dicom get command: $dicom:get
@@ -103,24 +108,25 @@ public class WeasisDisplayServiceImpl implements WeasisDisplayService {
 		String weasisConfigCommand = this.retrieveWeasisConfigCommand(searchCriteria);
 
 		// Build launch url which will depend on argument command existence
-		String launchUrl = argumentCommands == null
-				? buildWeasisProtocolCommand(dicomGetManifestCommand, weasisConfigCommand)
-				: buildWeasisProtocolCommand(argumentCommands, weasisConfigCommand);
+		String launchUrl = buildWeasisProtocolCommand(dicomGetManifestCommand, argumentCommands, weasisConfigCommand);
 
 		LOG.info("[LAUNCH URL]\n " + launchUrl + " \n[SEARCH CRITERIA] " + searchCriteria);
 		return launchUrl;
 	}
 
 	/**
-	 * Build encoded weasis protocol url with dicomGet or arguments command + weasisConfig
-	 * command
-	 * @param dicomGetOrArgumentCommand dicomGet or arguments command
-	 * @param weasisConfigCommand Weasis Config command
-	 * @return weasis protocol encoded url built
+	 * Retrieve weasis dicom get command: weasis://$dicom:get
+	 * @param key Key used to build weasis dicom get command
+	 * @return dicom get manifest command
 	 */
-	private static String buildWeasisProtocolCommand(String dicomGetOrArgumentCommand, String weasisConfigCommand) {
-		return CommandName.LAUNCH_URL_WEASIS_COMMANDS_CONFIG.formatted(URLEncoder
-			.encode("%s %s".formatted(dicomGetOrArgumentCommand, weasisConfigCommand), StandardCharsets.UTF_8));
+	private String retrieveDicomGetManifestCommand(String key) {
+		// Url to retrieve the manifest corresponding to the key
+		UriComponentsBuilder uriBuilderRetrieveManifest = UriComponentsBuilder
+				.fromHttpUrl("%s%s".formatted(this.viewerHubServerUrl, EndPoint.MANIFEST_PATH))
+				// Manifest key
+				.queryParam(ParamName.KEY, key);
+
+		return "%s \"%s\"".formatted(WeasisCommandName.WEASIS_DICOM_GET_MANIFEST_COMMAND, uriBuilderRetrieveManifest.toUriString());
 	}
 
 	/**
@@ -133,23 +139,84 @@ public class WeasisDisplayServiceImpl implements WeasisDisplayService {
 		List<String> args = searchCriteria instanceof IHESearchCriteria
 				? ((WeasisIHESearchCriteria) searchCriteria).getArg()
 				: ((WeasisArchiveSearchCriteria) searchCriteria).getArg();
-		return args != null && !args.isEmpty() ? String.join(StringUtil.SPACE, args) : null;
+		return args != null ? String.join(StringUtil.SPACE, args) : "";
 	}
 
 	/**
-	 * Retrieve weasis dicom get command: weasis://$dicom:get
-	 * @param key Key used to build weasis dicom get command
-	 * @return dicom get manifest command
+	 * Retrieve arguments commands if existing: {{arg}} {{arg}}... Used for example for
+	 * launching dicomizer: weasis://$acquire:patient + ext-cfg=dicomizer
+	 * @param searchCriteria Search criteria
+	 * @return weasis argument commands
 	 */
-	private String retrieveDicomGetManifestCommand(String key) {
-		// Url to retrieve the manifest corresponding to the key
-		UriComponentsBuilder uriBuilderRetrieveManifest = UriComponentsBuilder
-			.fromHttpUrl("%s%s".formatted(this.viewerHubServerUrl, EndPoint.MANIFEST_PATH))
-			// Manifest key
-			.queryParam(ParamName.KEY, key);
+	private String retrieveQidoArgumentCommands(SearchCriteria searchCriteria) {
+		String commonArguments = retrieveArgumentCommands(searchCriteria);
+		List<String> args = new ArrayList<>();
+		String dicomRsUrl = connectorService.getDicomRsUrl(searchCriteria);
+		if (dicomRsUrl != null) {
+			args.add("--url \"" + dicomRsUrl + "\"");
+		}
+		String[] credentials = connectorService.getCredentials(searchCriteria);
+		if (credentials != null) {
+			args.add("-H \"Authorization: Basic " + ConnectorUtil.toBase64(credentials) + "\"");
+		}
+		return commonArguments + " " + String.join(StringUtil.SPACE, args);
+	}
 
-		// Weasis dicom get command
-		return "%s \"%s\"".formatted(CommandName.WEASIS_DICOM_GET_COMMAND, uriBuilderRetrieveManifest.toUriString());
+	/**
+	 * Build encoded weasis protocol url with dicomGet or arguments command + weasisConfig
+	 * command
+	 * @param dicomCommand dicom command
+	 * @param argumentCommands arguments command
+	 * @param weasisConfigCommand Weasis Config command
+	 * @return weasis protocol encoded url built
+	 */
+	private static String buildWeasisProtocolCommand(String dicomCommand, String argumentCommands, String weasisConfigCommand) {
+		return WeasisCommandName.LAUNCH_URL_WEASIS_COMMANDS_CONFIG.formatted(URLEncoder
+				.encode("%s %s %s".formatted(dicomCommand, argumentCommands, weasisConfigCommand).trim().replaceAll(" +", " "), StandardCharsets.UTF_8));
+	}
+
+	@Override
+	public String retrieveWeasisQidoLaunchUrl(@Valid ArchiveSearchCriteria searchCriteria) {
+		String dicomCommand = this.retrieveDicomQidoCommand(searchCriteria);
+
+		// Retrieve weasis argument commands if existing: {{argumentCommand}}
+		// {{argumentCommand}}..
+		String argumentCommands = this.retrieveQidoArgumentCommands(searchCriteria);
+
+		// Retrieve weasis config command: $weasis:config
+		String weasisConfigCommand = this.retrieveWeasisConfigCommand(searchCriteria);
+
+		// Build launch url which will depend on argument command existence
+		String launchUrl = buildWeasisProtocolCommand(dicomCommand, argumentCommands, weasisConfigCommand);
+
+		LOG.info("[LAUNCH URL]\n " + launchUrl + " \n[SEARCH CRITERIA] " + searchCriteria);
+		return launchUrl;
+	}
+
+	private String retrieveDicomQidoCommand(ArchiveSearchCriteria searchCriteria) {
+		// Url to retrieve the manifest corresponding to the key
+		List<String> query = new ArrayList<>();
+		if (!searchCriteria.getObjectUID().isEmpty()) {
+			query.add("objectUID=" + String.join(",", searchCriteria.getObjectUID()));
+		}
+		// Series Instance Uid
+		if (!searchCriteria.getSeriesUID().isEmpty()) {
+			query.add("seriesUID=" + String.join(",", searchCriteria.getSeriesUID()));
+		}
+		// Accession Number
+		if (!searchCriteria.getAccessionNumber().isEmpty()) {
+			query.add("accessionNumber=" + String.join(",", searchCriteria.getAccessionNumber()));
+		}
+		// Study Uid
+		if (!searchCriteria.getStudyUID().isEmpty()) {
+			query.add("studyUID=" + String.join(",", searchCriteria.getStudyUID()));
+		}
+		// Patient Id
+		if (!searchCriteria.getPatientID().isEmpty()) {
+			query.add("patientID=" + String.join(",", searchCriteria.getPatientID()));
+		}
+
+		return "%s -r \"%s\"".formatted(WeasisCommandName.WEASIS_DICOM_RS_COMMAND, String.join("&", query));
 	}
 
 	/**
@@ -203,7 +270,7 @@ public class WeasisDisplayServiceImpl implements WeasisDisplayService {
 		}
 
 		// Weasis config command
-		return "%s\"%s\"".formatted(CommandName.WEASIS_CONFIG_COMMAND, uriBuilderLaunchConfig.toUriString());
+		return "%s\"%s\"".formatted(WeasisCommandName.WEASIS_CONFIG_COMMAND, uriBuilderLaunchConfig.toUriString());
 	}
 
 }

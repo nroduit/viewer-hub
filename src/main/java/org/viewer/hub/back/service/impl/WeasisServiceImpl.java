@@ -146,8 +146,8 @@ public class WeasisServiceImpl implements WeasisService {
 	 * basic or oAuth2 wado parameters should be used
 	 * @return Manifest built
 	 */
-	private Manifest buildManifestWithIHESearchCriteria(WeasisIHESearchCriteria searchCriteria,
-			Authentication authentication, String key) {
+	private Manifest buildManifestWithIHESearchCriteria(IHESearchCriteria searchCriteria,
+														Authentication authentication, String key) {
 		LOG.debug("Building manifest with IHE search criteria");
 
 		// TODO: addGeneralViewerMessage...

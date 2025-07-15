@@ -1,0 +1,248 @@
+<mxfile host="Electron" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/26.0.16 Chrome/132.0.6834.196 Electron/34.2.0 Safari/537.36" version="26.0.16">
+  <diagram name="Page-1" id="deSAqjhEXc5CT7bfWmWd">
+    <mxGraphModel dx="2336" dy="690" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="y8I--u5Gp5bFWQCBICnB-1" value="Weasis" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="930" y="40" width="160" height="1080" as="geometry" />
+        </mxCell>
+        <mxCell id="y8I--u5Gp5bFWQCBICnB-2" value="Archive" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="-380" y="40" width="160" height="1080" as="geometry" />
+        </mxCell>
+        <mxCell id="y8I--u5Gp5bFWQCBICnB-4" value="viewer-hub" style="swimlane;whiteSpace=wrap;html=1;startSize=23;align=center;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="-17" y="40" width="797" height="1030" as="geometry">
+            <mxRectangle x="-20" y="30" width="100" height="30" as="alternateBounds" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="y8I--u5Gp5bFWQCBICnB-12" value="" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;fillColor=#1ba1e2;strokeColor=#006EAF;" edge="1" parent="y8I--u5Gp5bFWQCBICnB-4" source="y8I--u5Gp5bFWQCBICnB-50" target="y8I--u5Gp5bFWQCBICnB-47">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="328" y="402" as="sourcePoint" />
+            <mxPoint x="338" y="312" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="y8I--u5Gp5bFWQCBICnB-13" value="get weasis url to open" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];labelBorderColor=light-dark(#006eaf, #ededed);" vertex="1" connectable="0" parent="y8I--u5Gp5bFWQCBICnB-12">
+          <mxGeometry x="0.035" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="y8I--u5Gp5bFWQCBICnB-8" value="" style="endArrow=classic;html=1;rounded=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;exitX=0.5;exitY=0;exitDx=0;exitDy=0;fillColor=#1ba1e2;strokeColor=#006EAF;" edge="1" parent="y8I--u5Gp5bFWQCBICnB-4" source="y8I--u5Gp5bFWQCBICnB-47" target="y8I--u5Gp5bFWQCBICnB-15">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="348" y="192" as="sourcePoint" />
+            <mxPoint x="297.8400000000001" y="142" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="y8I--u5Gp5bFWQCBICnB-9" value="get url to open" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];labelBorderColor=light-dark(#006eaf, #ededed);" vertex="1" connectable="0" parent="y8I--u5Gp5bFWQCBICnB-8">
+          <mxGeometry x="-0.0089" y="-4" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="y8I--u5Gp5bFWQCBICnB-15" value="DisplayContoller" style="swimlane;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;" vertex="1" parent="y8I--u5Gp5bFWQCBICnB-4">
+          <mxGeometry x="265" y="72" width="280" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="y8I--u5Gp5bFWQCBICnB-16" value="Open target viewer in new tab/windows" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="y8I--u5Gp5bFWQCBICnB-15">
+          <mxGeometry x="25" y="31" width="230" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="y8I--u5Gp5bFWQCBICnB-54" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.75;exitY=0;exitDx=0;exitDy=0;entryX=0.25;entryY=1;entryDx=0;entryDy=0;fillColor=#d80073;strokeColor=#A50040;" edge="1" parent="y8I--u5Gp5bFWQCBICnB-4" source="y8I--u5Gp5bFWQCBICnB-71" target="y8I--u5Gp5bFWQCBICnB-59">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="325" y="667" as="sourcePoint" />
+            <mxPoint x="326.00000000000045" y="612" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="y8I--u5Gp5bFWQCBICnB-64" value="get dicom data" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];labelBorderColor=light-dark(#a50040, #ededed);" vertex="1" connectable="0" parent="y8I--u5Gp5bFWQCBICnB-54">
+          <mxGeometry x="0.0966" y="2" relative="1" as="geometry">
+            <mxPoint x="-1" y="2" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="y8I--u5Gp5bFWQCBICnB-47" value="&lt;span style=&quot;&quot;&gt;DisplaySelectViewerRuleService&amp;nbsp;&lt;/span&gt;" style="swimlane;whiteSpace=wrap;html=1;fontStyle=1;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;" vertex="1" parent="y8I--u5Gp5bFWQCBICnB-4">
+          <mxGeometry x="285" y="219" width="240" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="y8I--u5Gp5bFWQCBICnB-48" value="Choose which viewer to call" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="y8I--u5Gp5bFWQCBICnB-47">
+          <mxGeometry x="35" y="30" width="170" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="y8I--u5Gp5bFWQCBICnB-49" value="" style="endArrow=classic;html=1;rounded=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;fillColor=#d80073;strokeColor=#A50040;" edge="1" parent="y8I--u5Gp5bFWQCBICnB-4" source="y8I--u5Gp5bFWQCBICnB-50" target="y8I--u5Gp5bFWQCBICnB-59">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="328" y="462" as="sourcePoint" />
+            <mxPoint x="328" y="522" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="y8I--u5Gp5bFWQCBICnB-53" value="generate weasis dicom manifest" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];labelBorderColor=light-dark(#ba3e6e, #ededed);" vertex="1" connectable="0" parent="y8I--u5Gp5bFWQCBICnB-49">
+          <mxGeometry x="0.0127" y="1" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="y8I--u5Gp5bFWQCBICnB-50" value="&lt;span style=&quot;&quot;&gt;WeasisDisplayService&lt;/span&gt;" style="swimlane;whiteSpace=wrap;html=1;fontStyle=1;align=center;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;" vertex="1" parent="y8I--u5Gp5bFWQCBICnB-4">
+          <mxGeometry x="245" y="360" width="320" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="y8I--u5Gp5bFWQCBICnB-51" value="- generate weasis url to open&lt;br&gt;- call generate weasis dicom manifest to a new thread" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="y8I--u5Gp5bFWQCBICnB-50">
+          <mxGeometry x="10" y="30" width="310" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="y8I--u5Gp5bFWQCBICnB-135" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0.75;entryY=1;entryDx=0;entryDy=0;fillColor=#008a00;strokeColor=#005700;" edge="1" parent="y8I--u5Gp5bFWQCBICnB-4" source="y8I--u5Gp5bFWQCBICnB-55" target="y8I--u5Gp5bFWQCBICnB-59">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="y8I--u5Gp5bFWQCBICnB-137" value="&lt;span style=&quot;background-color: light-dark(#ffffff, var(--ge-dark-color, #121212)); color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;get weasis&lt;/span&gt;&lt;div&gt;&lt;span style=&quot;background-color: light-dark(#ffffff, var(--ge-dark-color, #121212)); color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;manifest&lt;/span&gt;&lt;/div&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];labelBorderColor=light-dark(#408140, #ededed);" vertex="1" connectable="0" parent="y8I--u5Gp5bFWQCBICnB-135">
+          <mxGeometry x="0.4616" y="1" relative="1" as="geometry">
+            <mxPoint y="38" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="y8I--u5Gp5bFWQCBICnB-55" value="CacheService" style="swimlane;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;" vertex="1" parent="y8I--u5Gp5bFWQCBICnB-4">
+          <mxGeometry x="568" y="720" width="160" height="75" as="geometry" />
+        </mxCell>
+        <mxCell id="y8I--u5Gp5bFWQCBICnB-112" value="get or save manifests&lt;div&gt;to/from redis cache&lt;/div&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="y8I--u5Gp5bFWQCBICnB-55">
+          <mxGeometry x="15" y="27.5" width="140" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="y8I--u5Gp5bFWQCBICnB-132" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fillColor=#008a00;strokeColor=#005700;" edge="1" parent="y8I--u5Gp5bFWQCBICnB-4" source="y8I--u5Gp5bFWQCBICnB-59" target="y8I--u5Gp5bFWQCBICnB-92">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="y8I--u5Gp5bFWQCBICnB-133" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=0.75;entryDx=0;entryDy=0;fillColor=#d80073;strokeColor=#A50040;" edge="1" parent="y8I--u5Gp5bFWQCBICnB-4" source="y8I--u5Gp5bFWQCBICnB-59" target="y8I--u5Gp5bFWQCBICnB-55">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="y8I--u5Gp5bFWQCBICnB-136" value="save weasis&lt;div&gt;manifest&lt;/div&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];labelBorderColor=light-dark(#a50040, #ededed);" vertex="1" connectable="0" parent="y8I--u5Gp5bFWQCBICnB-133">
+          <mxGeometry x="-0.526" y="-2" relative="1" as="geometry">
+            <mxPoint x="2" y="-20" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="y8I--u5Gp5bFWQCBICnB-59" value="WeasisService" style="swimlane;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;" vertex="1" parent="y8I--u5Gp5bFWQCBICnB-4">
+          <mxGeometry x="305" y="532" width="200" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="y8I--u5Gp5bFWQCBICnB-60" value="&lt;div&gt;&lt;div&gt;- build weasis manifest&lt;br&gt;&lt;div&gt;- save manifest to cache&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="y8I--u5Gp5bFWQCBICnB-59">
+          <mxGeometry x="10" y="30" width="150" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="y8I--u5Gp5bFWQCBICnB-71" value="WeasisConnectorQueryService" style="swimlane;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;" vertex="1" parent="y8I--u5Gp5bFWQCBICnB-4">
+          <mxGeometry x="106" y="690" width="230" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="y8I--u5Gp5bFWQCBICnB-75" value="Determine which connector to use&amp;nbsp;&lt;div&gt;to retrieve manifest data&lt;/div&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="y8I--u5Gp5bFWQCBICnB-71">
+          <mxGeometry x="8" y="28" width="210" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="y8I--u5Gp5bFWQCBICnB-81" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.25;entryY=1;entryDx=0;entryDy=0;fillColor=#d80073;strokeColor=#A50040;" edge="1" parent="y8I--u5Gp5bFWQCBICnB-4" source="y8I--u5Gp5bFWQCBICnB-76" target="y8I--u5Gp5bFWQCBICnB-71">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="y8I--u5Gp5bFWQCBICnB-128" value="get dicom data" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];labelBorderColor=light-dark(#a50040, #ededed);" vertex="1" connectable="0" parent="y8I--u5Gp5bFWQCBICnB-81">
+          <mxGeometry x="0.0767" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="y8I--u5Gp5bFWQCBICnB-82" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.75;exitY=0;exitDx=0;exitDy=0;fillColor=#d80073;strokeColor=#A50040;" edge="1" parent="y8I--u5Gp5bFWQCBICnB-4" source="y8I--u5Gp5bFWQCBICnB-79">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="308" y="760" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="y8I--u5Gp5bFWQCBICnB-129" value="get dicom data" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];labelBorderColor=light-dark(#a50040, #ededed);" vertex="1" connectable="0" parent="y8I--u5Gp5bFWQCBICnB-82">
+          <mxGeometry x="0.6595" y="2" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="y8I--u5Gp5bFWQCBICnB-79" value="DicomConnectorService" style="swimlane;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;" vertex="1" parent="y8I--u5Gp5bFWQCBICnB-4">
+          <mxGeometry x="89" y="924.48" width="292" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="y8I--u5Gp5bFWQCBICnB-80" value="Retrieve data&amp;nbsp;&lt;div&gt;from Dicom / Dicomweb request&lt;/div&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="y8I--u5Gp5bFWQCBICnB-79">
+          <mxGeometry x="39" y="25" width="190" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="y8I--u5Gp5bFWQCBICnB-92" value="ManifestController" style="swimlane;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;" vertex="1" parent="y8I--u5Gp5bFWQCBICnB-4">
+          <mxGeometry x="580" y="540.5" width="170" height="63" as="geometry" />
+        </mxCell>
+        <mxCell id="y8I--u5Gp5bFWQCBICnB-109" value="retrieve manifest from key" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="y8I--u5Gp5bFWQCBICnB-92">
+          <mxGeometry x="10" y="26.5" width="160" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="y8I--u5Gp5bFWQCBICnB-110" value="&lt;span style=&quot;color: rgba(0, 0, 0, 0); font-family: monospace; font-size: 0px; text-align: start;&quot;&gt;%3CmxGraphModel%3E%3Croot%3E%3CmxCell%20id%3D%220%22%2F%3E%3CmxCell%20id%3D%221%22%20parent%3D%220%22%2F%3E%3CmxCell%20id%3D%222%22%20value%3D%22retrieve%20manifest%20from%20key%22%20style%3D%22text%3Bhtml%3D1%3Balign%3Dcenter%3BverticalAlign%3Dmiddle%3Bresizable%3D0%3Bpoints%3D%5B%5D%3Bautosize%3D1%3BstrokeColor%3Dnone%3BfillColor%3Dnone%3B%22%20vertex%3D%221%22%20parent%3D%221%22%3E%3CmxGeometry%20x%3D%22535%22%20y%3D%22399%22%20width%3D%22160%22%20height%3D%2230%22%20as%3D%22geometry%22%2F%3E%3C%2FmxCell%3E%3C%2Froot%3E%3C%2FmxGraphModel%3E&lt;/span&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="y8I--u5Gp5bFWQCBICnB-4">
+          <mxGeometry x="638" width="20" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="y8I--u5Gp5bFWQCBICnB-76" value="&lt;span style=&quot;&quot;&gt;DBConnectorService&lt;/span&gt;" style="swimlane;whiteSpace=wrap;html=1;fontStyle=1;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;" vertex="1" parent="y8I--u5Gp5bFWQCBICnB-4">
+          <mxGeometry x="70" y="825.48" width="190" height="68" as="geometry" />
+        </mxCell>
+        <mxCell id="y8I--u5Gp5bFWQCBICnB-77" value="Retrieve data directly&lt;div&gt;from archive DB&lt;/div&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="y8I--u5Gp5bFWQCBICnB-76">
+          <mxGeometry x="26" y="24" width="140" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="y8I--u5Gp5bFWQCBICnB-148" value="2" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="y8I--u5Gp5bFWQCBICnB-4">
+          <mxGeometry x="277" y="467" width="40" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="y8I--u5Gp5bFWQCBICnB-5" value="" style="endArrow=classic;html=1;rounded=0;exitX=0.997;exitY=0.097;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fillColor=#1ba1e2;strokeColor=#006EAF;" edge="1" parent="1" source="y8I--u5Gp5bFWQCBICnB-2" target="y8I--u5Gp5bFWQCBICnB-15">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="-240.00000000000003" y="269.99999999999994" as="sourcePoint" />
+            <mxPoint x="10" y="270" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="y8I--u5Gp5bFWQCBICnB-7" value="open a dicom object&lt;div&gt;with viewer&lt;/div&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];labelBorderColor=light-dark(#006eaf, #ededed);" vertex="1" connectable="0" parent="y8I--u5Gp5bFWQCBICnB-5">
+          <mxGeometry x="-0.2096" y="1" relative="1" as="geometry">
+            <mxPoint x="-74" y="2" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="y8I--u5Gp5bFWQCBICnB-139" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.75;exitY=0;exitDx=0;exitDy=0;entryX=0.75;entryY=1;entryDx=0;entryDy=0;fillColor=#008a00;strokeColor=#005700;" edge="1" parent="1" source="y8I--u5Gp5bFWQCBICnB-86" target="y8I--u5Gp5bFWQCBICnB-55">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="y8I--u5Gp5bFWQCBICnB-141" value="get&lt;div&gt;weasis&amp;nbsp;&lt;span style=&quot;background-color: light-dark(#ffffff, var(--ge-dark-color, #121212)); color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;manifest&lt;/span&gt;&lt;/div&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];labelBorderColor=light-dark(#408140, #ededed);" vertex="1" connectable="0" parent="y8I--u5Gp5bFWQCBICnB-139">
+          <mxGeometry x="0.1467" y="-1" relative="1" as="geometry">
+            <mxPoint y="-27" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="y8I--u5Gp5bFWQCBICnB-86" value="redis" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+          <mxGeometry x="550" y="1100" width="160.5" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="y8I--u5Gp5bFWQCBICnB-122" value="" style="endArrow=classic;html=1;rounded=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fillColor=#d80073;strokeColor=#A50040;" edge="1" parent="1" target="y8I--u5Gp5bFWQCBICnB-79">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="-219" y="1000" as="sourcePoint" />
+            <mxPoint x="200" y="900" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="y8I--u5Gp5bFWQCBICnB-125" value="&lt;span style=&quot;color: rgba(0, 0, 0, 0); font-family: monospace; font-size: 0px; text-align: start; background-color: rgb(251, 251, 251);&quot;&gt;%3CmxGraphModel%3E%3Croot%3E%3CmxCell%20id%3D%220%22%2F%3E%3CmxCell%20id%3D%221%22%20parent%3D%220%22%2F%3E%3CmxCell%20id%3D%222%22%20value%3D%22Retrieve%20dicom%20data%22%20style%3D%22edgeLabel%3Bhtml%3D1%3Balign%3Dcenter%3BverticalAlign%3Dmiddle%3Bresizable%3D0%3Bpoints%3D%5B%5D%3BlabelBorderColor%3Ddefault%3B%22%20vertex%3D%221%22%20connectable%3D%220%22%20parent%3D%221%22%3E%3CmxGeometry%20x%3D%22-127.61766319845424%22%20y%3D%22966.192676009575%22%20as%3D%22geometry%22%2F%3E%3C%2FmxCell%3E%3C%2Froot%3E%3C%2FmxGraphModel%3E&lt;/span&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="y8I--u5Gp5bFWQCBICnB-122">
+          <mxGeometry x="-0.2386" y="-1" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="y8I--u5Gp5bFWQCBICnB-126" value="&lt;span style=&quot;color: rgba(0, 0, 0, 0); font-family: monospace; font-size: 0px; text-align: start; background-color: rgb(251, 251, 251);&quot;&gt;%3CmxGraphModel%3E%3Croot%3E%3CmxCell%20id%3D%220%22%2F%3E%3CmxCell%20id%3D%221%22%20parent%3D%220%22%2F%3E%3CmxCell%20id%3D%222%22%20value%3D%22Retrieve%20dicom%20data%22%20style%3D%22edgeLabel%3Bhtml%3D1%3Balign%3Dcenter%3BverticalAlign%3Dmiddle%3Bresizable%3D0%3Bpoints%3D%5B%5D%3BlabelBorderColor%3Ddefault%3B%22%20vertex%3D%221%22%20connectable%3D%220%22%20parent%3D%221%22%3E%3CmxGeometry%20x%3D%22-127.61766319845424%22%20y%3D%22966.192676009575%22%20as%3D%22geometry%22%2F%3E%3C%2FmxCell%3E%3C%2Froot%3E%3C%2FmxGraphModel%3E&lt;/span&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="y8I--u5Gp5bFWQCBICnB-122">
+          <mxGeometry x="-0.2864" y="-1" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="y8I--u5Gp5bFWQCBICnB-127" value="Retrieve dicom data" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];labelBorderColor=light-dark(#a50040, #ededed);" vertex="1" connectable="0" parent="y8I--u5Gp5bFWQCBICnB-122">
+          <mxGeometry x="-0.2466" y="1" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="y8I--u5Gp5bFWQCBICnB-123" value="" style="endArrow=classic;html=1;rounded=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;exitX=1.001;exitY=0.796;exitDx=0;exitDy=0;exitPerimeter=0;fillColor=#d80073;strokeColor=#A50040;" edge="1" parent="1" source="y8I--u5Gp5bFWQCBICnB-2" target="y8I--u5Gp5bFWQCBICnB-76">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="-180" y="1000" as="sourcePoint" />
+            <mxPoint x="-51" y="970" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="y8I--u5Gp5bFWQCBICnB-124" value="Retrieve dicom data" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];labelBorderColor=light-dark(#a50040, #ededed);spacing=20;" vertex="1" connectable="0" parent="y8I--u5Gp5bFWQCBICnB-123">
+          <mxGeometry x="-0.1648" y="-1" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="y8I--u5Gp5bFWQCBICnB-130" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.007;entryY=0.53;entryDx=0;entryDy=0;entryPerimeter=0;fillColor=#008a00;strokeColor=#005700;" edge="1" parent="1" source="y8I--u5Gp5bFWQCBICnB-92" target="y8I--u5Gp5bFWQCBICnB-1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="y8I--u5Gp5bFWQCBICnB-131" value="get weasis manifest" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];labelBorderColor=light-dark(#408140, #ededed);" vertex="1" connectable="0" parent="y8I--u5Gp5bFWQCBICnB-130">
+          <mxGeometry x="0.0471" y="-1" relative="1" as="geometry">
+            <mxPoint x="14" y="-1" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="y8I--u5Gp5bFWQCBICnB-138" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.25;exitY=1;exitDx=0;exitDy=0;entryX=0.25;entryY=0;entryDx=0;entryDy=0;fillColor=#d80073;strokeColor=#A50040;" edge="1" parent="1" source="y8I--u5Gp5bFWQCBICnB-55" target="y8I--u5Gp5bFWQCBICnB-86">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="y8I--u5Gp5bFWQCBICnB-140" value="save&lt;div&gt;weasis manifest&lt;/div&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];labelBorderColor=light-dark(#a50040, #ededed);" vertex="1" connectable="0" parent="y8I--u5Gp5bFWQCBICnB-138">
+          <mxGeometry x="-0.1163" y="-2" relative="1" as="geometry">
+            <mxPoint x="-1" y="15" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="y8I--u5Gp5bFWQCBICnB-144" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;labelBorderColor=light-dark(#00a8ff, #ededed);fillColor=#1ba1e2;strokeColor=#006EAF;" edge="1" parent="1" source="y8I--u5Gp5bFWQCBICnB-15">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="930" y="147" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="y8I--u5Gp5bFWQCBICnB-145" value="open with url" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];labelBorderColor=light-dark(#00a8ff, #ededed);" vertex="1" connectable="0" parent="y8I--u5Gp5bFWQCBICnB-144">
+          <mxGeometry x="0.327" y="-1" relative="1" as="geometry">
+            <mxPoint x="68" y="-2" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="y8I--u5Gp5bFWQCBICnB-147" value="1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="-130" y="90" width="40" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="y8I--u5Gp5bFWQCBICnB-149" value="2 bis" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="830" y="562" width="40" height="40" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

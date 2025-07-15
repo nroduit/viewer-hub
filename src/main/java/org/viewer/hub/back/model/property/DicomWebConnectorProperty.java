@@ -32,7 +32,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 public class DicomWebConnectorProperty {
 
 	@Valid
-	@NotNull
+//	@NotNull
 	@Schema(description = "Wado-rs properties")
 	private ConnectorDicomWebProperty wadoRs;
 

@@ -24,7 +24,6 @@ import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.OAuth2AccessToken;
 import org.springframework.stereotype.Service;
 import org.viewer.hub.back.enums.ConnectorAuthType;
-import org.viewer.hub.back.enums.ConnectorType;
 import org.viewer.hub.back.model.manifest.ArcQuery;
 import org.viewer.hub.back.model.manifest.HttpTag;
 import org.viewer.hub.back.model.manifest.Manifest;
@@ -68,13 +67,13 @@ public class SecurityServiceImpl implements SecurityService {
 
 			// Depending on the type of the connector and the type of authentication
 			// set the token or basic credentials in the manifest
-			if (Objects.equals(ConnectorType.DB, connectorProperty.getType())) {
+			if (connectorProperty.getDbConnector() != null) {
 				handleDbManifestAuthentication(authentication, arcQuery, connectorProperty);
 			}
-			else if (Objects.equals(ConnectorType.DICOM, connectorProperty.getType())) {
+			else if (connectorProperty.getDicomConnector() != null) {
 				handleDicomManifestAuthentication(authentication, arcQuery, connectorProperty);
 			}
-			else if (Objects.equals(ConnectorType.DICOM_WEB, connectorProperty.getType())) {
+			else if (connectorProperty.getDicomWebConnector() != null) {
 				handleDicomWebManifestAuthentication(authentication, arcQuery, connectorProperty);
 			}
 		});

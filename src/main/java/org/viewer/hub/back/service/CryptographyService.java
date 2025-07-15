@@ -35,27 +35,27 @@ public interface CryptographyService {
 	String decode(String toDecode);
 
 	/**
-	 * Encode WeasisSearchCriteria values
-	 * @param weasisSearchCriteria values to encode
+	 * Encode ArchiveSearchCriteria values
+	 * @param archiveSearchCriteria values to encode
 	 */
-	void encode(@Valid ArchiveSearchCriteria weasisSearchCriteria);
+	void encode(@Valid ArchiveSearchCriteria archiveSearchCriteria);
 
 	/**
-	 * Decode WeasisSearchCriteria values
-	 * @param weasisSearchCriteria values to decode
+	 * Decode ArchiveSearchCriteria values
+	 * @param archiveSearchCriteria values to decode
 	 */
-	void decode(ArchiveSearchCriteria weasisSearchCriteria);
+	void decode(ArchiveSearchCriteria archiveSearchCriteria);
 
 	/**
-	 * Encode WeasisIHESearchCriteria values
-	 * @param weasisIHESearchCriteria values to encode
+	 * Encode IHESearchCriteria values
+	 * @param IHESearchCriteria values to encode
 	 */
-	void encode(@Valid IHESearchCriteria weasisIHESearchCriteria);
+	void encode(@Valid IHESearchCriteria IHESearchCriteria);
 
 	/**
-	 * Decode WeasisIHESearchCriteria values
-	 * @param weasisIHESearchCriteria values to decode
+	 * Decode IHESearchCriteria values
+	 * @param IHESearchCriteria values to decode
 	 */
-	void decode(IHESearchCriteria weasisIHESearchCriteria);
+	void decode(IHESearchCriteria IHESearchCriteria);
 
 }
