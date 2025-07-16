@@ -10,6 +10,7 @@ https://weasis.org/en/viewer-hub/index.html
 
 ## Main functionalities
 - Launch of Weasis viewers (several launch endpoints, including IHE IID Profile-compatible launch)
+- Launch of OHIF viewer (several launch endpoints, including IHE IID Profile-compatible launch)
 - Creation and association of user or machine groups
 - Creation of an xml file (manifest) containing the studies, series and instances to be downloaded. This file will then be transmitted to Weasis to load the images into the viewer.
 - Manifest storage in a redis cache
@@ -21,7 +22,6 @@ https://weasis.org/en/viewer-hub/index.html
 - Pacs connectors management
 - Retrieve OAuth2 tokens on IDP to enable Weasis to authenticate on dcm4chee pacs
 - Cryptography of launch urls
-- Retrieve in Nexus the stored package versions of Weasis
 
 ## Launch the different containers in local
 
@@ -85,12 +85,24 @@ In order to access to the pacs dcm4chee:
 http://localhost:8080/dcm4chee-arc/ui2/en/study/study
 ```
 
-As an example, you can import the file "dicom-example" located in the folders "docker -> dcm4chee" by using the dcm4chee interface.
+As an example, you can import the file "dicom-example" located in the folders "docker -> dicom-examples" by using the dcm4chee interface.
 ("More functions" -> "Upload DICOM Object" -> "Select the STOW-RS server": "DCM4CHEE")
 
-## Nexus
 
-- Nexus console accessible at this address: http://localhost:8086/
+## Orthanc
+
+In order to access to the pacs orthanc:
+```
+http://localhost:8042
+```
+
+Use the following credentials:
+- User: `orthanc-user`
+- Password: `password`
+
+As an example, you can import the file "dicom-example" located in the folders "docker -> dicom-examples" by using the orthanc interface.
+("Upload" -> "Select files to upload" and then "Start the upload")
+
 
 ## Run configuration
 
@@ -143,4 +155,11 @@ http://localhost:8761
 Once all the steps above completed, launch the below URL to launch Weasis and load the dicom image stored in the dcm4chee pacs
 ```
 http://localhost:8081/display/weasis?studyUID=1.3.12.2.1107.5.1.4.54023.30000004093013443132800000021&archive=dcm4chee-local
+```
+
+## Launch OHIF
+
+Once all the steps above completed, launch the below URL to launch OHIF and load the dicom image stored in the orthanc pacs
+```
+http://localhost:3000/viewer?StudyInstanceUIDs=1.3.12.2.1107.5.1.4.54023.30000004093013443132800000021
 ```
