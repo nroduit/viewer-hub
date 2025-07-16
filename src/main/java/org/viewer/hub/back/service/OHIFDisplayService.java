@@ -11,10 +11,7 @@
 
 package org.viewer.hub.back.service;
 
-import org.viewer.hub.back.config.DicomWebRequest;
 import org.viewer.hub.back.model.searchcriteria.ArchiveSearchCriteria;
-
-import java.io.IOException;
 
 /**
  * Service used to launch the application OHIF
@@ -25,6 +22,6 @@ public interface OHIFDisplayService {
 	 * Retrieve url which will launch OHIF with the key of the file in the cache
 	 * @param archiveSearchCriteria archive search criteria
 	 */
-	String retrieveDicomUrl(ArchiveSearchCriteria archiveSearchCriteria);
+	String retrieveDicomUrl(ArchiveSearchCriteria archiveSearchCriteria, String archive);
 
 }

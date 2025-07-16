@@ -42,10 +42,6 @@ public class ConnectorProperty {
 	@Schema(description = "Search criteria")
 	private SearchCriteriaProperty searchCriteria;
 
-	// -------- Handle redirects --------
-	@NotNull
-	private boolean handleRedirect;
-
 	// -------- For database --------
 	@Schema(description = "Db connector properties")
 	@Valid

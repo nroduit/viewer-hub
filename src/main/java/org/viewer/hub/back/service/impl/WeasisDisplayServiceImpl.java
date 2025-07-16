@@ -148,14 +148,14 @@ public class WeasisDisplayServiceImpl implements WeasisDisplayService {
 	 * @param searchCriteria Search criteria
 	 * @return weasis argument commands
 	 */
-	private String retrieveQidoArgumentCommands(SearchCriteria searchCriteria) {
+	private String retrieveQidoArgumentCommands(SearchCriteria searchCriteria, String archive) {
 		String commonArguments = retrieveArgumentCommands(searchCriteria);
 		List<String> args = new ArrayList<>();
-		String dicomRsUrl = connectorService.getDicomRsUrl(searchCriteria);
+		String dicomRsUrl = connectorService.getDicomRsUrlFromId(archive);
 		if (dicomRsUrl != null) {
 			args.add("--url \"" + dicomRsUrl + "\"");
 		}
-		String[] credentials = connectorService.getCredentials(searchCriteria);
+		String[] credentials = connectorService.getCredentialsFromId(archive);
 		if (credentials != null) {
 			args.add("-H \"Authorization: Basic " + ConnectorUtil.toBase64(credentials) + "\"");
 		}
@@ -176,12 +176,12 @@ public class WeasisDisplayServiceImpl implements WeasisDisplayService {
 	}
 
 	@Override
-	public String retrieveWeasisQidoLaunchUrl(@Valid ArchiveSearchCriteria searchCriteria) {
+	public String retrieveWeasisQidoLaunchUrl(@Valid ArchiveSearchCriteria searchCriteria, String archive) {
 		String dicomCommand = this.retrieveDicomQidoCommand(searchCriteria);
 
 		// Retrieve weasis argument commands if existing: {{argumentCommand}}
 		// {{argumentCommand}}..
-		String argumentCommands = this.retrieveQidoArgumentCommands(searchCriteria);
+		String argumentCommands = this.retrieveQidoArgumentCommands(searchCriteria, archive);
 
 		// Retrieve weasis config command: $weasis:config
 		String weasisConfigCommand = this.retrieveWeasisConfigCommand(searchCriteria);

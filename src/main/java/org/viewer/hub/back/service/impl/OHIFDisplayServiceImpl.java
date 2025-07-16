@@ -40,12 +40,12 @@ public class OHIFDisplayServiceImpl implements OHIFDisplayService {
 	}
 
 	@Override
-	public String retrieveDicomUrl(ArchiveSearchCriteria archiveSearchCriteria) {
-		String archive = connectorService.getArchiveName(archiveSearchCriteria);
+	public String retrieveDicomUrl(ArchiveSearchCriteria archiveSearchCriteria, String archive) {
+		String archiveName = connectorService.getArchiveNameFromId(archive);
 		String url = ohifServerUrl + "/viewer";
 
-		if (archive != null && !archive.isEmpty()) {
-			url += "/" + archive + "/";
+		if (archiveName != null && !archiveName.isEmpty()) {
+			url += "/" + archiveName + "/";
 		}
 
 		List<String> args = new ArrayList<>();

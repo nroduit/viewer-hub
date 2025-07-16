@@ -19,7 +19,6 @@ import org.springframework.stereotype.Service;
 import org.viewer.hub.back.config.properties.ConnectorConfigurationProperties;
 import org.viewer.hub.back.controller.exception.TechnicalException;
 import org.viewer.hub.back.model.property.ConnectorProperty;
-import org.viewer.hub.back.model.searchcriteria.SearchCriteria;
 import org.viewer.hub.back.service.ConnectorService;
 
 import java.util.*;
@@ -37,11 +36,6 @@ public class ConnectorServiceImpl implements ConnectorService {
 	@Autowired
 	public ConnectorServiceImpl(final ConnectorConfigurationProperties connectorConfigurationProperties) {
 		this.connectorConfigurationProperties = connectorConfigurationProperties;
-	}
-
-	@Override
-	public ConnectorProperty retrieveConnectorFromId(@Valid SearchCriteria searchCriteria) {
-		return retrieveConnectorFromId(searchCriteria.getArchive());
 	}
 
 	@Override
@@ -70,12 +64,13 @@ public class ConnectorServiceImpl implements ConnectorService {
 	}
 
 	@Override
-	public String getArchiveName(@Valid SearchCriteria searchCriteria) {
+	public String getArchiveNameFromId(@Valid String connectorId) {
 		// Retrieve default or specific connectors
-		for (ConnectorProperty connector : this.retrieveConnectors(searchCriteria.getArchive())) {
-			return connector.getName();
+		ConnectorProperty connector = this.retrieveConnectorFromId(connectorId);
+		if (connector == null) {
+			return null;
 		}
-		return null;
+		return connector.getName();
 	}
 
 	/**
@@ -126,37 +121,26 @@ public class ConnectorServiceImpl implements ConnectorService {
 	}
 
 	@Override
-	public String getDicomRsUrl(@Valid SearchCriteria searchCriteria) {
+	public String getDicomRsUrlFromId(@Valid String connectorId) {
 		// Retrieve default or specific connectors
-		for (ConnectorProperty connector : this.retrieveConnectors(searchCriteria.getArchive())) {
-			if (connector.getDicomWebConnector() != null) {
-				return connector.getDicomWebConnector().getQidoRs().getAuthentication().getBasic().getServer().getFullUrl();
-			}
+		ConnectorProperty connector = this.retrieveConnectorFromId(connectorId);
+		if (connector.getDicomWebConnector() != null) {
+			return connector.getDicomWebConnector().getQidoRs().getAuthentication().getBasic().getServer().getFullUrl();
 		}
 		return null;
 	}
 
 	@Override
-	public String[] getCredentials(@Valid SearchCriteria searchCriteria) {
+	public String[] getCredentialsFromId(@Valid String connectorId) {
 		// Retrieve default or specific connectors
-		for (ConnectorProperty connector : this.retrieveConnectors(searchCriteria.getArchive())) {
-			if (connector.getDicomWebConnector() != null) {
-				String[] credentials = new String[2];
-				credentials[0] = connector.getDicomWebConnector().getQidoRs().getAuthentication().getBasic().getLogin();
-				credentials[1] = connector.getDicomWebConnector().getQidoRs().getAuthentication().getBasic().getPassword();
-				return credentials;
-			}
+		ConnectorProperty connector = this.retrieveConnectorFromId(connectorId);
+		if (connector.getDicomWebConnector() != null) {
+			String[] credentials = new String[2];
+			credentials[0] = connector.getDicomWebConnector().getQidoRs().getAuthentication().getBasic().getLogin();
+			credentials[1] = connector.getDicomWebConnector().getQidoRs().getAuthentication().getBasic().getPassword();
+			return credentials;
 		}
 		return null;
-	}
-
-	@Override
-	public boolean canHandleRedirect(@Valid String archive) {
-		// Retrieve default or specific connectors
-		for (ConnectorProperty connector : this.retrieveConnectors(new LinkedHashSet<>(Collections.singletonList(archive)))) {
-			return connector.isHandleRedirect();
-		}
-		return false;
 	}
 
 }

@@ -32,10 +32,7 @@ import org.viewer.hub.back.config.ArchiveViewerMapper;
 import org.viewer.hub.back.config.DicomWebRequest;
 import org.viewer.hub.back.constant.EndPoint;
 import org.viewer.hub.back.constant.ParamName;
-import org.viewer.hub.back.model.searchcriteria.ArchiveSearchCriteria;
-import org.viewer.hub.back.model.searchcriteria.IHESearchCriteria;
-import org.viewer.hub.back.model.searchcriteria.WeasisArchiveSearchCriteria;
-import org.viewer.hub.back.model.searchcriteria.WeasisIHESearchCriteria;
+import org.viewer.hub.back.model.searchcriteria.*;
 import org.viewer.hub.back.service.ConnectorService;
 import org.viewer.hub.back.service.CryptographyService;
 import org.viewer.hub.back.service.WeasisDisplayService;
@@ -66,6 +63,7 @@ public class DisplayController {
 	private final OHIFDisplayService ohifDisplayService;
 
 	private final CryptographyService cryptographyService;
+
 	private final ConnectorService connectorService;
 
 	/**
@@ -104,12 +102,14 @@ public class DisplayController {
 		// If encoding enabled decode values
 		this.cryptographyService.decode(iheSearchCriteria);
 
-		String redirectUrl = null;
-		if (iheSearchCriteria.getViewer().isEmpty()) {
-			LOG.error("No archive specified");
+		String archive = getArchive(request, iheSearchCriteria);
+		String viewer = getViewer(request, iheSearchCriteria, archive);
+		if (archive == null || viewer == null) {
 			return null;
 		}
-		if (Viewer.WEASIS.toString().equals(iheSearchCriteria.getViewer().getFirst())) {
+
+		String redirectUrl = null;
+		if (Viewer.WEASIS.toString().equals(viewer)) {
 			WeasisIHESearchCriteria weasisIHESearchCriteria = (WeasisIHESearchCriteria) iheSearchCriteria;
 			// to do JacksonConfig
 			if (extCfg != null) {
@@ -117,8 +117,8 @@ public class DisplayController {
 			}
 			redirectUrl = this.weasisDisplayService.retrieveWeasisManifestLaunchUrl(weasisIHESearchCriteria, authentication);
 		}
-		else if (Viewer.OHIF.toString().equals(iheSearchCriteria.getViewer().getFirst())) {
-//			redirectUrl = this.ohifDisplayService.retrieveDicomUrl(iheSearchCriteria, authentication);
+		else if (Viewer.OHIF.toString().equals(viewer)) {
+//			redirectUrl = this.ohifDisplayService.retrieveDicomUrl(iheSearchCriteria);
 		}
 
 		if (redirectUrl == null) {
@@ -126,7 +126,8 @@ public class DisplayController {
 			return null;
 		}
 
-		if (!connectorService.canHandleRedirect(iheSearchCriteria.getArchive().getFirst())) {
+		String archiveName = connectorService.getArchiveNameFromId(archive);
+		if (ArchiveViewerMapper.shouldOpenViewerInNewTab(archiveName, viewer)) {
 			manuallyOpenUrl(redirectUrl);
 		}
 		return new RedirectView(redirectUrl);
@@ -175,18 +176,10 @@ public class DisplayController {
 		// If encoding enabled decode values
 		this.cryptographyService.decode(archiveSearchCriteria);
 
-		String viewer = archiveSearchCriteria.getViewer().getFirst();
-		if (viewer == null || viewer.isEmpty()) {
-			String archive = archiveSearchCriteria.getArchive().getFirst();
-			if (archive == null || archive.isEmpty()) {
-				LOG.error("No archive specified");
-				return null;
-			}
-			viewer = ArchiveViewerMapper.getViewer(archive);
-			if (viewer == null || viewer.isEmpty()) {
-				LOG.error("No viewer specified");
-				return null;
-			}
+		String archive = getArchive(request, archiveSearchCriteria);
+		String viewer = getViewer(request, archiveSearchCriteria, archive);
+		if (archive == null || viewer == null) {
+			return null;
 		}
 
 		String redirectUrl = null;
@@ -199,7 +192,7 @@ public class DisplayController {
 			redirectUrl = this.weasisDisplayService.retrieveWeasisManifestLaunchUrl(weasisArchiveSearchCriteria, authentication);
 		}
 		else if (Viewer.OHIF.toString().equals(viewer)) {
-			redirectUrl = this.ohifDisplayService.retrieveDicomUrl(archiveSearchCriteria);
+			redirectUrl = this.ohifDisplayService.retrieveDicomUrl(archiveSearchCriteria, archive);
 		}
 
 		if (redirectUrl == null) {
@@ -207,7 +200,8 @@ public class DisplayController {
 			return null;
 		}
 
-		if (!connectorService.canHandleRedirect(archiveSearchCriteria.getArchive().getFirst())) {
+		String archiveName = connectorService.getArchiveNameFromId(archive);
+		if (ArchiveViewerMapper.shouldOpenViewerInNewTab(archiveName, viewer)) {
 			manuallyOpenUrl(redirectUrl);
 		}
 		return new RedirectView(redirectUrl);
@@ -253,27 +247,19 @@ public class DisplayController {
 			@Context DicomWebRequest dicomWebRequest) throws JSONException, IOException {
 
 		ArchiveSearchCriteria archiveSearchCriteria = resolveViewerDicomWebCriterias(dicomWebRequest);
-		String viewer = archiveSearchCriteria.getViewer().getFirst();
-		String archive = archiveSearchCriteria.getArchive().getFirst();
-		if (viewer == null || viewer.isEmpty()) {
-			if (archive == null || archive.isEmpty()) {
-				LOG.error("No archive specified");
-				return null;
-			}
-			viewer = ArchiveViewerMapper.getViewer(archive);
-			if (viewer == null || viewer.isEmpty()) {
-				LOG.error("No viewer specified");
-				return null;
-			}
+		String archive = getArchive(dicomWebRequest, archiveSearchCriteria);
+		String viewer = getViewer(dicomWebRequest, archiveSearchCriteria, archive);
+		if (archive == null || viewer == null) {
+			return null;
 		}
 
 		String redirectUrl = null;
 		if (Viewer.WEASIS.toString().equals(viewer)) {
 			WeasisArchiveSearchCriteria weasisArchiveSearchCriteria = new WeasisArchiveSearchCriteria(archiveSearchCriteria);
-			redirectUrl = weasisDisplayService.retrieveWeasisQidoLaunchUrl(weasisArchiveSearchCriteria);
+			redirectUrl = weasisDisplayService.retrieveWeasisQidoLaunchUrl(weasisArchiveSearchCriteria, archive);
 		}
 		else if (Viewer.OHIF.toString().equals(viewer)) {
-			redirectUrl = ohifDisplayService.retrieveDicomUrl(archiveSearchCriteria);
+			redirectUrl = ohifDisplayService.retrieveDicomUrl(archiveSearchCriteria, archive);
 		}
 
 		if (redirectUrl == null) {
@@ -281,7 +267,8 @@ public class DisplayController {
 			return null;
 		}
 
-		if (!connectorService.canHandleRedirect(archive)) {
+		String archiveName = connectorService.getArchiveNameFromId(archive);
+		if (ArchiveViewerMapper.shouldOpenViewerInNewTab(archiveName, viewer)) {
 			manuallyOpenUrl(redirectUrl);
 		}
 		return dicomWebRequest.generateResponse(redirectUrl);
@@ -295,25 +282,38 @@ public class DisplayController {
 		archiveSearchCriteria.setStudyUID(Set.of(attributes.getString(org.dcm4che3.data.Tag.StudyInstanceUID)));
 		archiveSearchCriteria.setObjectUID(Set.of(attributes.getString(org.dcm4che3.data.Tag.SOPInstanceUID)));
 		archiveSearchCriteria.setSeriesUID(Set.of(attributes.getString(org.dcm4che3.data.Tag.SeriesInstanceUID)));
-		String archive = request.getHeader("archive");
-		if (archive != null) {
-			archiveSearchCriteria.setArchive(new LinkedHashSet<>(java.util.List.of(archive)));
-		}
-		String viewer = request.getHeader("viewer");
-		if (viewer != null) {
-			archiveSearchCriteria.setViewer(new LinkedHashSet<>(java.util.List.of(viewer)));
-		}
 		return archiveSearchCriteria;
 	}
 
-//	private String getRequestURLOrigin(HttpServletRequest request) {
-//		String url = request.getRequestURL().toString();
-//		String queryString = request.getQueryString();   // d=789
-//		if (queryString != null) {
-//			url += "?"+queryString;
-//		}
-//		return url;
-//	}
+	private String getArchive(HttpServletRequest request, SearchCriteria searchCriteria) {
+		String archive;
+		if (!searchCriteria.getArchive().isEmpty()) {
+			archive = searchCriteria.getArchive().getFirst();
+		}
+		else {
+			archive = request.getHeader("archive");
+		}
+		if (archive == null || archive.isEmpty()) {
+			LOG.error("No archive specified");
+			return null;
+		}
+		return archive;
+	}
+
+	private String getViewer(HttpServletRequest request, SearchCriteria searchCriteria, String archive) {
+		String viewer;
+		if (!searchCriteria.getViewer().isEmpty()) {
+			viewer = searchCriteria.getViewer().getFirst();
+		}
+		else {
+			viewer = request.getHeader("viewer");
+		}
+		if (viewer == null || viewer.isEmpty()) {
+			String archiveName = connectorService.getArchiveNameFromId(archive);
+			viewer = ArchiveViewerMapper.getViewer(archiveName);
+		}
+		return viewer;
+	}
 
 	// Fixme : Temporary code. Because Orthanc does not properly manage RedirectView : probably does not read Location header
 	private void manuallyOpenUrl(String redirectUrl) {

@@ -34,5 +34,5 @@ public interface WeasisDisplayService {
 	 * @param searchCriteria search criteria
 	 * @return url which will launch Weasis
 	 */
-	String retrieveWeasisQidoLaunchUrl(@Valid ArchiveSearchCriteria searchCriteria);
+	String retrieveWeasisQidoLaunchUrl(@Valid ArchiveSearchCriteria searchCriteria, String archive);
 }
