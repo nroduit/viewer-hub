@@ -89,7 +89,6 @@ connector:
       # ------- Search Criteria ----
       search-criteria:
         deactivated: # SOP_INSTANCE_UID, SERIE_INSTANCE_UID, STUDY_INSTANCE_UID, STUDY_ACCESSION_NUMBER, PATIENT_ID
-      handle-redirect: false
       # ----------  Weasis - Manifest -------
       weasis:
         manifest:

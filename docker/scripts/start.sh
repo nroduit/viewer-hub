@@ -6,7 +6,7 @@ case "$ENVIRONMENT" in
     TARGET_ENV=".env" docker compose -p imaging_hub -f docker-compose.yml -f docker-compose.local.yml up -d
     ;;
   secure)
-    TARGET_ENV="secured.env" docker compose -p imaging_hub -f docker-compose.yml -f docker-compose.secure.yml --env-file secured.env up -d
+    TARGET_ENV="secured.env" docker compose -p imaging_hub -f docker-compose.yml -f docker-compose.local.yml up -d
     ;;
   *)
     echo "Usage: $0 {local|secure}"

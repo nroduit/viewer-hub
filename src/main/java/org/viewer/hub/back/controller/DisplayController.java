@@ -33,18 +33,12 @@ import org.viewer.hub.back.config.DicomWebRequest;
 import org.viewer.hub.back.constant.EndPoint;
 import org.viewer.hub.back.constant.ParamName;
 import org.viewer.hub.back.model.searchcriteria.*;
-import org.viewer.hub.back.service.ConnectorService;
-import org.viewer.hub.back.service.CryptographyService;
-import org.viewer.hub.back.service.WeasisDisplayService;
-
-import org.viewer.hub.back.enums.Viewer;
-import org.viewer.hub.back.service.OHIFDisplayService;
+import org.viewer.hub.back.service.*;
 
 import java.awt.*;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.LinkedHashSet;
 import java.util.Set;
 
 /**
@@ -58,9 +52,7 @@ import java.util.Set;
 public class DisplayController {
 
 	// Services
-	private final WeasisDisplayService weasisDisplayService;
-
-	private final OHIFDisplayService ohifDisplayService;
+	private final DisplaySelectViewerRuleService displaySelectViewerRuleService;
 
 	private final CryptographyService cryptographyService;
 
@@ -68,14 +60,13 @@ public class DisplayController {
 
 	/**
 	 * Autowired constructor
-	 * @param weasisDisplayService display service
+	 * @param displaySelectViewerRuleService display service
 	 * @param cryptographyService cryptography service
 	 */
 
 	@Autowired
-	public DisplayController(final WeasisDisplayService weasisDisplayService, final OHIFDisplayService ohifDisplayService, final CryptographyService cryptographyService, final ConnectorService connectorService) {
-		this.weasisDisplayService = weasisDisplayService;
-		this.ohifDisplayService = ohifDisplayService;
+	public DisplayController(final DisplaySelectViewerRuleService displaySelectViewerRuleService, final CryptographyService cryptographyService, final ConnectorService connectorService) {
+		this.displaySelectViewerRuleService = displaySelectViewerRuleService;
 		this.cryptographyService = cryptographyService;
 		this.connectorService = connectorService;
 	}
@@ -108,19 +99,7 @@ public class DisplayController {
 			return null;
 		}
 
-		String redirectUrl = null;
-		if (Viewer.WEASIS.toString().equals(viewer)) {
-			WeasisIHESearchCriteria weasisIHESearchCriteria = (WeasisIHESearchCriteria) iheSearchCriteria;
-			// to do JacksonConfig
-			if (extCfg != null) {
-				weasisIHESearchCriteria.setExtCfg(extCfg);
-			}
-			redirectUrl = this.weasisDisplayService.retrieveWeasisManifestLaunchUrl(weasisIHESearchCriteria, authentication);
-		}
-		else if (Viewer.OHIF.toString().equals(viewer)) {
-//			redirectUrl = this.ohifDisplayService.retrieveDicomUrl(iheSearchCriteria);
-		}
-
+		String redirectUrl = displaySelectViewerRuleService.getViewerUrl(archive, viewer, iheSearchCriteria, extCfg, authentication);
 		if (redirectUrl == null) {
 			LOG.error("No valid archive specified");
 			return null;
@@ -182,19 +161,7 @@ public class DisplayController {
 			return null;
 		}
 
-		String redirectUrl = null;
-		if (Viewer.WEASIS.toString().equals(viewer)) {
-			// to do JacksonConfig
-			WeasisArchiveSearchCriteria weasisArchiveSearchCriteria = new WeasisArchiveSearchCriteria(archiveSearchCriteria);
-			if (extCfg != null) {
-				weasisArchiveSearchCriteria.setExtCfg(extCfg);
-			}
-			redirectUrl = this.weasisDisplayService.retrieveWeasisManifestLaunchUrl(weasisArchiveSearchCriteria, authentication);
-		}
-		else if (Viewer.OHIF.toString().equals(viewer)) {
-			redirectUrl = this.ohifDisplayService.retrieveDicomUrl(archiveSearchCriteria, archive);
-		}
-
+		String redirectUrl = displaySelectViewerRuleService.getViewerUrl(archive, viewer, archiveSearchCriteria, extCfg, authentication);
 		if (redirectUrl == null) {
 			LOG.error("No valid archive specified");
 			return null;
@@ -253,15 +220,7 @@ public class DisplayController {
 			return null;
 		}
 
-		String redirectUrl = null;
-		if (Viewer.WEASIS.toString().equals(viewer)) {
-			WeasisArchiveSearchCriteria weasisArchiveSearchCriteria = new WeasisArchiveSearchCriteria(archiveSearchCriteria);
-			redirectUrl = weasisDisplayService.retrieveWeasisQidoLaunchUrl(weasisArchiveSearchCriteria, archive);
-		}
-		else if (Viewer.OHIF.toString().equals(viewer)) {
-			redirectUrl = ohifDisplayService.retrieveDicomUrl(archiveSearchCriteria, archive);
-		}
-
+		String redirectUrl = displaySelectViewerRuleService.getQidoViewerUrl(archive, viewer, archiveSearchCriteria);
 		if (redirectUrl == null) {
 			LOG.error("No valid archive specified");
 			return null;
