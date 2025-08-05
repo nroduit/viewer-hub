@@ -19,7 +19,7 @@ import java.util.Objects;
  */
 public enum Viewer {
 
-	WEASIS("weasis"), OHIF("ohif");
+	WEASIS("weasis"), OHIF("ohif"), SLICER("slicer");
 
 	private final String code;
 

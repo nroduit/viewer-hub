@@ -11,6 +11,7 @@ https://weasis.org/en/viewer-hub/index.html
 ## Main functionalities
 - Launch of Weasis viewers (several launch endpoints, including IHE IID Profile-compatible launch)
 - Launch of OHIF viewer (several launch endpoints, including IHE IID Profile-compatible launch)
+- Launch of 3D Slicer viewer (several launch endpoints, including IHE IID Profile-compatible launch)
 - Creation and association of user or machine groups
 - Creation of an xml file (manifest) containing the studies, series and instances to be downloaded. This file will then be transmitted to Weasis to load the images into the viewer.
 - Manifest storage in a redis cache
@@ -162,4 +163,13 @@ http://localhost:8081/display/weasis?studyUID=1.3.12.2.1107.5.1.4.54023.30000004
 Once all the steps above completed, launch the below URL to launch OHIF and load the dicom image stored in the orthanc pacs
 ```
 http://localhost:3000/viewer?StudyInstanceUIDs=1.3.12.2.1107.5.1.4.54023.30000004093013443132800000021
+```
+
+## Launch 3D Slicer
+
+You need to install 3D Slicer in your machine to use it.
+You also need to add the DICOMwebBrowser extension. It can be downloaded from the 3D Slicer GUI on View > Extension Manager > Install Extensions > search DICOMwebBrowser
+Once all the steps above completed, launch the below URL to launch 3D Slicer and load the dicom image stored in the dcm4chee pacs
+```
+slicer://viewer/?studyUID=1.3.12.2.1107.5.1.4.54023.30000004093013443132800000021&dicomweb_endpoint=http://localhost:8042/dicomweb
 ```

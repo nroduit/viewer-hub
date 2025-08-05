@@ -146,6 +146,7 @@ public class WeasisDisplayServiceImpl implements WeasisDisplayService {
 	 * Retrieve arguments commands if existing: {{arg}} {{arg}}... Used for example for
 	 * launching dicomizer: weasis://$acquire:patient + ext-cfg=dicomizer
 	 * @param searchCriteria Search criteria
+	 * @param archive Archive name
 	 * @return weasis argument commands
 	 */
 	private String retrieveQidoArgumentCommands(SearchCriteria searchCriteria, String archive) {
@@ -226,7 +227,7 @@ public class WeasisDisplayServiceImpl implements WeasisDisplayService {
 	 */
 	private String retrieveWeasisConfigCommand(SearchCriteria searchCriteria) {
 		UriComponentsBuilder uriBuilderLaunchConfig = UriComponentsBuilder
-			.fromHttpUrl("%s%s".formatted(this.viewerHubServerUrl, EndPoint.LAUNCH_CONFIG_PATH));
+			.fromHttpUrl("%s%s".formatted(this.viewerHubServerUrl, EndPoint.WEASIS_LAUNCH_CONFIG_PATH));
 		// Preference Url
 		// TODO: not necessary ? already handle in launch config endpoint ?
 		// .queryParam("pro", "weasis.pref.url+" + viewerHubServerUrl +

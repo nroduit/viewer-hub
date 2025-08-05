@@ -24,6 +24,8 @@ public class EndPoint {
 
 	// LaunchConfig
 	public static final String LAUNCH_CONFIG_PATH = PREFIX_PATH + "/launchConfig";
+	public static final String WEASIS_LAUNCH_CONFIG_PATH = LAUNCH_CONFIG_PATH + "/weasis";
+	public static final String SLICER_LAUNCH_CONFIG_PATH = LAUNCH_CONFIG_PATH + "/slicer";
 
 	// LaunchPreference and Preference
 	public static final String PREFERENCES_PATH = PREFIX_PATH + "/preferences";
@@ -48,6 +50,9 @@ public class EndPoint {
 
 	// Dicom Web
 	public static final String DICOMWEB_PATH = "/dicomweb";
+
+	// 3D Slicer commands
+	public static final String SLICER_PATH = "/slicer";
 
 	// Weasis commands
 	public static final String WEASIS_PATH = "/weasis";

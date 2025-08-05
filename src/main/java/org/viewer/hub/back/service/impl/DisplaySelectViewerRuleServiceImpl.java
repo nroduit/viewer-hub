@@ -1,7 +1,9 @@
 package org.viewer.hub.back.service.impl;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
+import org.springframework.stereotype.Service;
 import org.viewer.hub.back.enums.Viewer;
 import org.viewer.hub.back.model.searchcriteria.ArchiveSearchCriteria;
 import org.viewer.hub.back.model.searchcriteria.IHESearchCriteria;
@@ -9,18 +11,25 @@ import org.viewer.hub.back.model.searchcriteria.WeasisArchiveSearchCriteria;
 import org.viewer.hub.back.model.searchcriteria.WeasisIHESearchCriteria;
 import org.viewer.hub.back.service.DisplaySelectViewerRuleService;
 import org.viewer.hub.back.service.OHIFDisplayService;
+import org.viewer.hub.back.service.SlicerDisplayService;
 import org.viewer.hub.back.service.WeasisDisplayService;
 
+@Service
+@Slf4j
 public class DisplaySelectViewerRuleServiceImpl implements DisplaySelectViewerRuleService {
 
+    // Services
     private final WeasisDisplayService weasisDisplayService;
     private final OHIFDisplayService ohifDisplayService;
+    private final SlicerDisplayService slicerDisplayService;
 
     @Autowired
     public DisplaySelectViewerRuleServiceImpl(final WeasisDisplayService weasisDisplayService,
-                                     final OHIFDisplayService ohifDisplayService) {
+                                              final OHIFDisplayService ohifDisplayService,
+                                              final SlicerDisplayService slicerDisplayService) {
         this.weasisDisplayService = weasisDisplayService;
         this.ohifDisplayService = ohifDisplayService;
+        this.slicerDisplayService = slicerDisplayService;
     }
 
     @Override
@@ -51,6 +60,8 @@ public class DisplaySelectViewerRuleServiceImpl implements DisplaySelectViewerRu
             return this.weasisDisplayService.retrieveWeasisManifestLaunchUrl(weasisArchiveSearchCriteria, authentication);
         } else if (Viewer.OHIF.toString().equals(viewer)) {
             return this.ohifDisplayService.retrieveDicomUrl(archiveSearchCriteria, archive);
+        } else if (Viewer.SLICER.toString().equals(viewer)) {
+            return this.slicerDisplayService.retrieveSlicerQidoLaunchUrl(archiveSearchCriteria, archive);
         }
         return null;
     }
@@ -63,6 +74,8 @@ public class DisplaySelectViewerRuleServiceImpl implements DisplaySelectViewerRu
         }
         else if (Viewer.OHIF.toString().equals(viewer)) {
             return ohifDisplayService.retrieveDicomUrl(archiveSearchCriteria, archive);
+        } else if (Viewer.SLICER.toString().equals(viewer)) {
+            return this.slicerDisplayService.retrieveSlicerQidoLaunchUrl(archiveSearchCriteria, archive);
         }
         return null;
     }

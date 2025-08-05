@@ -67,12 +67,14 @@ public class SecurityConfiguration {
 						AntPathRequestMatcher.antMatcher(EndPoint.MANIFEST_PATH + EndPoint.ALL_REMAINING_PATH),
 						AntPathRequestMatcher.antMatcher(EndPoint.DICOMWEB_PATH + EndPoint.ALL_REMAINING_PATH),
 						AntPathRequestMatcher.antMatcher(EndPoint.GROUP_PATH + EndPoint.ALL_REMAINING_PATH),
-						AntPathRequestMatcher.antMatcher(EndPoint.LAUNCH_CONFIG_PATH + EndPoint.ALL_REMAINING_PATH),
+						AntPathRequestMatcher.antMatcher(EndPoint.WEASIS_LAUNCH_CONFIG_PATH + EndPoint.ALL_REMAINING_PATH),
 						AntPathRequestMatcher.antMatcher(EndPoint.PREFERENCES_PATH + EndPoint.ALL_REMAINING_PATH),
 						AntPathRequestMatcher.antMatcher(EndPoint.MODULES_PATH + EndPoint.ALL_REMAINING_PATH),
 						AntPathRequestMatcher.antMatcher(EndPoint.OVERRIDE_CONFIG_PATH + EndPoint.ALL_REMAINING_PATH),
 						AntPathRequestMatcher.antMatcher(EndPoint.STATISTIC_PATH + EndPoint.ALL_REMAINING_PATH),
 						AntPathRequestMatcher.antMatcher(EndPoint.TARGET_PATH + EndPoint.ALL_REMAINING_PATH),
+						// Resources for 3D Slicer
+						AntPathRequestMatcher.antMatcher(EndPoint.SLICER_PATH + EndPoint.ALL_REMAINING_PATH),
 						// Resources for weasis
 						AntPathRequestMatcher.antMatcher(EndPoint.WEASIS_PATH + EndPoint.ALL_REMAINING_PATH))
 				.permitAll()

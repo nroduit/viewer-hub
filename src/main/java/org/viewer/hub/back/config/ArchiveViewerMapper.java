@@ -8,8 +8,8 @@ import java.util.Map;
 public class ArchiveViewerMapper {
 
     private static final Map<Archive, Viewer> mapper = Map.of(
-            Archive.DCM4CHEE, Viewer.OHIF,
-            Archive.ORTHANC, Viewer.OHIF
+            Archive.DCM4CHEE, Viewer.SLICER,
+            Archive.ORTHANC, Viewer.SLICER
     );
 
     public static String getViewer(String archive) {
@@ -21,16 +21,13 @@ public class ArchiveViewerMapper {
         Archive targetArchive = Archive.fromString(archive);
         Viewer targetViewer = Viewer.fromString(viewer);
         return switch (targetArchive) {
-            case Archive.DCM4CHEE -> openViewerInNewTabFromDcl4chee(targetViewer);
+            case Archive.DCM4CHEE -> openViewerInNewTabFromDcm4chee(targetViewer);
             case Archive.ORTHANC -> true;
         };
     }
 
-    private static boolean openViewerInNewTabFromDcl4chee(Viewer viewer) {
-        return switch (viewer) {
-            case OHIF -> true;
-            case WEASIS -> false;
-        };
+    private static boolean openViewerInNewTabFromDcm4chee(Viewer viewer) {
+        return false;
     }
 
 }

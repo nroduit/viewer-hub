@@ -63,10 +63,10 @@ public class DicomWebController {
 		this.connectorService = connectorService;
 	}
 
-	@Operation(summary = "Retrieve dicom data in dicom json format for OHIF")
+	@Operation(summary = "Retrieve dicom data in dicom json format")
 	@GetMapping(value = "/{archive}/studies",
 			produces = DicomWebUtils.APPLICATION_DICOM_JSON)
-	public ResponseEntity<?> retrieveOHIFDicomStudies(
+	public ResponseEntity<?> retrieveDicomStudies(
 		HttpServletRequest request,
         @PathVariable(value = "archive") String archive,
 		@Valid DicomWebSearchCriteria dicomWebSearchCriteria
@@ -78,9 +78,9 @@ public class DicomWebController {
 		return dicomWebService.getResponseFrom(targetDicomUrl + queryString, DicomWebUtils.APPLICATION_DICOM_JSON);
 	}
 
-	@Operation(summary = "Retrieve dicom data in dicom json format for OHIF")
+	@Operation(summary = "Retrieve dicom data in dicom json format")
 	@GetMapping(value = "/{archive}/studies/{studyUID}/series")
-	public ResponseEntity<?> retrieveOHIFDicomSeries(
+	public ResponseEntity<?> retrieveDicomSeries(
 			HttpServletRequest request,
 			@PathVariable(value = "archive") String archive,
 			@PathVariable(value = "studyUID") String studyUID,
@@ -94,9 +94,9 @@ public class DicomWebController {
 		return dicomWebService.getResponseFrom(targetDicomUrl + queryString, DicomWebUtils.APPLICATION_DICOM_JSON);
 	}
 
-	@Operation(summary = "Retrieve dicom data in dicom json format for OHIF")
+	@Operation(summary = "Retrieve dicom data in dicom json format")
 	@GetMapping(value = "/{archive}/studies/{studyUID}/series/{seriesUID}/metadata")
-	public ResponseEntity<?> retrieveOHIFDicomSeriesMetadata(
+	public ResponseEntity<?> retrieveDicomSeriesMetadata(
 			HttpServletRequest request,
 			@PathVariable(value = "archive") String archive,
 			@PathVariable(value = "studyUID") String studyUID,
@@ -112,9 +112,9 @@ public class DicomWebController {
 		return dicomWebService.getResponseFrom(targetDicomUrl + queryString, DicomWebUtils.APPLICATION_DICOM_JSON);
 	}
 
-	@Operation(summary = "Retrieve dicom data in dicom json format for OHIF")
+	@Operation(summary = "Retrieve dicom data in dicom json format")
 	@GetMapping(value = "/{archive}/studies/{studyUID}/series/{seriesUID}/instances/{instancesUID}/frames/{frames}")
-	public ResponseEntity<?> retrieveOHIFDicomSeriesMetadata(
+	public ResponseEntity<?> retrieveDicomSeriesMetadata(
 			HttpServletRequest request,
 			@PathVariable(value = "archive") String archive,
 			@PathVariable(value = "studyUID") String studyUID,
