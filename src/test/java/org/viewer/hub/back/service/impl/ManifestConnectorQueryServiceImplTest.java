@@ -46,7 +46,7 @@ import static org.mockito.ArgumentMatchers.any;
 
 @ExtendWith(MockitoExtension.class)
 @Slf4j
-class WeasisConnectorQueryServiceImplTest {
+class ManifestConnectorQueryServiceImplTest {
 
 	private final ConnectorConfigurationProperties connectorConfigurationPropertiesMock = Mockito
 		.mock(ConnectorConfigurationProperties.class);
@@ -58,7 +58,7 @@ class WeasisConnectorQueryServiceImplTest {
 
 	private final ConnectorService connectorServiceMock = Mockito.mock(ConnectorService.class);
 
-	private WeasisConnectorQueryServiceImpl connectorQueryService;
+	private ManifestConnectorQueryServiceImpl connectorQueryService;
 
 	private ConnectorProperty connectorPropertyDbA;
 
@@ -163,7 +163,7 @@ class WeasisConnectorQueryServiceImplTest {
 		Mockito.when(this.connectorConfigurationPropertiesMock.getConnectors()).thenReturn(config);
 
 		// Create mocked service
-		this.connectorQueryService = new WeasisConnectorQueryServiceImpl(this.dbConnectorQueryServiceMock,
+		this.connectorQueryService = new ManifestConnectorQueryServiceImpl(this.dbConnectorQueryServiceMock,
 				this.dicomConnectorQueryServiceMock, this.connectorServiceMock);
 	}
 

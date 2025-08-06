@@ -14,14 +14,16 @@ package org.viewer.hub.back.util;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.viewer.hub.back.enums.Viewer;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
 @Slf4j
 public class PropertiesLoader {
 
-	private static final String LAUNCH_PROPERTIES_FILENAME = "launchConfig.properties";
+	private static final String WEASIS_LAUNCH_PROPERTIES_FILENAME = "weasisLaunchConfig.properties";
 
 	private static final Properties launchProperties = new Properties();
 
@@ -30,21 +32,8 @@ public class PropertiesLoader {
 	public static void loadProperties() {
 		LOG.debug("Load properties");
 
-		try (InputStream is = Thread.currentThread()
-			.getContextClassLoader()
-			.getResourceAsStream(LAUNCH_PROPERTIES_FILENAME)) {
-			launchProperties.load(is);
-
-			launchPropertyMap = new LinkedMultiValueMap<>();
-
-			launchProperties.forEach((key, value) -> {
-				String[] splitProp = ((String) key).split("^property_");
-				if (splitProp.length == 2) {
-					key = "pro";
-					value = String.format("%s %s", splitProp[1], value);
-				}
-				launchPropertyMap.add((String) key, (String) value);
-			});
+		try {
+			loadConfigFile(Viewer.WEASIS);
 		}
 		catch (Exception e) {
 			LOG.error("Error when loading properties");
@@ -58,5 +47,30 @@ public class PropertiesLoader {
 		// Deep copy in order to not interfere with initial property map
 		return launchPropertyMap.deepCopy();
 	}
+
+	private static void loadConfigFile(Viewer viewer) throws IOException {
+		InputStream is = Thread.currentThread()
+				.getContextClassLoader()
+				.getResourceAsStream(getConfigFile(viewer));
+		launchProperties.load(is);
+
+		launchPropertyMap = new LinkedMultiValueMap<>();
+
+		launchProperties.forEach((key, value) -> {
+			String[] splitProp = ((String) key).split("^property_");
+			if (splitProp.length == 2) {
+				key = "pro";
+				value = String.format("%s %s", splitProp[1], value);
+			}
+			launchPropertyMap.add((String) key, (String) value);
+		});
+	}
+
+	private static String getConfigFile(Viewer viewer) {
+        return switch (viewer) {
+            case WEASIS -> WEASIS_LAUNCH_PROPERTIES_FILENAME;
+            default -> null;
+        };
+    }
 
 }

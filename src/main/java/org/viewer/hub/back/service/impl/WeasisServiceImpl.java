@@ -25,7 +25,7 @@ import org.viewer.hub.back.model.searchcriteria.WeasisArchiveSearchCriteria;
 import org.viewer.hub.back.model.searchcriteria.WeasisIHESearchCriteria;
 import org.viewer.hub.back.service.CacheService;
 import org.viewer.hub.back.service.SecurityService;
-import org.viewer.hub.back.service.WeasisConnectorQueryService;
+import org.viewer.hub.back.service.ManifestConnectorQueryService;
 import org.viewer.hub.back.service.WeasisService;
 import org.viewer.hub.back.util.DateTimeUtil;
 
@@ -41,20 +41,20 @@ public class WeasisServiceImpl implements WeasisService {
 	// Services
 	private final CacheService cacheService;
 
-	private final WeasisConnectorQueryService weasisConnectorQueryService;
+	private final ManifestConnectorQueryService manifestConnectorQueryService;
 
 	private final SecurityService securityService;
 
 	/**
 	 * Autowired constructor
 	 * @param cacheService Cache service
-	 * @param weasisConnectorQueryService Connector query service
+	 * @param manifestConnectorQueryService Connector query service
 	 */
 	@Autowired
 	public WeasisServiceImpl(final CacheService cacheService,
-			final WeasisConnectorQueryService weasisConnectorQueryService, final SecurityService securityService) {
+							 final ManifestConnectorQueryService manifestConnectorQueryService, final SecurityService securityService) {
 		this.cacheService = cacheService;
-		this.weasisConnectorQueryService = weasisConnectorQueryService;
+		this.manifestConnectorQueryService = manifestConnectorQueryService;
 		this.securityService = securityService;
 	}
 
@@ -108,27 +108,27 @@ public class WeasisServiceImpl implements WeasisService {
 
 		// Sop Instance Uid
 		if (!searchCriteria.getObjectUID().isEmpty()) {
-			this.weasisConnectorQueryService.buildFromSopInstanceUids(manifest, searchCriteria.getObjectUID(),
+			this.manifestConnectorQueryService.buildFromSopInstanceUids(manifest, searchCriteria.getObjectUID(),
 					searchCriteria.getArchive(), authentication);
 		}
 		// Series Instance Uid
 		if (!searchCriteria.getSeriesUID().isEmpty()) {
-			this.weasisConnectorQueryService.buildFromSeriesInstanceUids(manifest, searchCriteria.getSeriesUID(),
+			this.manifestConnectorQueryService.buildFromSeriesInstanceUids(manifest, searchCriteria.getSeriesUID(),
 					searchCriteria.getArchive(), authentication);
 		}
 		// Accession Number
 		if (!searchCriteria.getAccessionNumber().isEmpty()) {
-			this.weasisConnectorQueryService.buildFromStudyAccessionNumbers(manifest,
+			this.manifestConnectorQueryService.buildFromStudyAccessionNumbers(manifest,
 					searchCriteria.getAccessionNumber(), searchCriteria.getArchive(), authentication);
 		}
 		// Study Uid
 		if (!searchCriteria.getStudyUID().isEmpty()) {
-			this.weasisConnectorQueryService.buildFromStudyInstanceUids(manifest, searchCriteria.getStudyUID(),
+			this.manifestConnectorQueryService.buildFromStudyInstanceUids(manifest, searchCriteria.getStudyUID(),
 					searchCriteria.getArchive(), authentication);
 		}
 		// Patient Id
 		if (!searchCriteria.getPatientID().isEmpty()) {
-			this.weasisConnectorQueryService.buildFromPatientIds(manifest, searchCriteria.getPatientID(),
+			this.manifestConnectorQueryService.buildFromPatientIds(manifest, searchCriteria.getPatientID(),
 					searchCriteria, authentication);
 		}
 
@@ -163,17 +163,17 @@ public class WeasisServiceImpl implements WeasisService {
 		// Study level
 		if (searchCriteria.getRequestType() == IHERequestType.STUDY) {
 			if (!searchCriteria.getAccessionNumber().isEmpty()) {
-				this.weasisConnectorQueryService.buildFromStudyAccessionNumbers(manifest,
+				this.manifestConnectorQueryService.buildFromStudyAccessionNumbers(manifest,
 						searchCriteria.getAccessionNumber(), searchCriteria.getArchive(), authentication);
 			}
 			else if (!searchCriteria.getStudyUID().isEmpty()) {
-				this.weasisConnectorQueryService.buildFromStudyInstanceUids(manifest, searchCriteria.getStudyUID(),
+				this.manifestConnectorQueryService.buildFromStudyInstanceUids(manifest, searchCriteria.getStudyUID(),
 						searchCriteria.getArchive(), authentication);
 			}
 		}
 		// Patient level
 		else if (searchCriteria.getRequestType() == IHERequestType.PATIENT) {
-			this.weasisConnectorQueryService.buildFromPatientIds(manifest, Set.of(searchCriteria.getPatientID()),
+			this.manifestConnectorQueryService.buildFromPatientIds(manifest, Set.of(searchCriteria.getPatientID()),
 					searchCriteria, authentication);
 		}
 

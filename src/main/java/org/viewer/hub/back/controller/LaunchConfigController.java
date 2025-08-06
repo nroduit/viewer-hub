@@ -58,7 +58,7 @@ import static net.logstash.logback.argument.StructuredArguments.kv;
  * Resource class for Weasis Launch configuration manifest
  */
 @Controller
-@RequestMapping(EndPoint.LAUNCH_CONFIG_PATH)
+@RequestMapping(EndPoint.WEASIS_LAUNCH_CONFIG_PATH)
 @Tag(name = "Weasis Config Preference", description = "API Endpoints for Weasis Config Preference")
 @Validated
 @Slf4j
@@ -139,7 +139,7 @@ public class LaunchConfigController {
 
 		LOG.debug("retrieveLaunchConfigPreferences");
 
-		// HANDLE launchConfig.properties PARAMETERS
+		// HANDLE weasisLaunchConfig.properties PARAMETERS
 		MultiValueMap<String, String> launchPropertiesMap = PropertiesLoader.getNewLaunchPropertyMap();
 
 		// HANDLE QUERY REQUEST PARAMETERS

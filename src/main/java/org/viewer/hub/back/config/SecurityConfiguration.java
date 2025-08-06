@@ -75,6 +75,8 @@ public class SecurityConfiguration {
 						AntPathRequestMatcher.antMatcher(EndPoint.TARGET_PATH + EndPoint.ALL_REMAINING_PATH),
 						// Resources for 3D Slicer
 						AntPathRequestMatcher.antMatcher(EndPoint.SLICER_PATH + EndPoint.ALL_REMAINING_PATH),
+						// Resources for RadiAnt
+						AntPathRequestMatcher.antMatcher(EndPoint.RADIANT_PATH + EndPoint.ALL_REMAINING_PATH),
 						// Resources for weasis
 						AntPathRequestMatcher.antMatcher(EndPoint.WEASIS_PATH + EndPoint.ALL_REMAINING_PATH))
 				.permitAll()

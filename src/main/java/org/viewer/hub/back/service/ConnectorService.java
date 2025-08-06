@@ -47,6 +47,12 @@ public interface ConnectorService {
 	String getDicomRsUrlFromId(@Valid String connectorId);
 
 	/**
+	 * get AET of dicom web request
+	 * @param connectorId Connector id to evaluate
+	 */
+	String getAETFromId(@Valid String connectorId);
+
+	/**
 	 * get credentials of dicom web request
 	 * @param connectorId Connector id to evaluate
 	 */

@@ -22,7 +22,7 @@ import org.viewer.hub.back.model.searchcriteria.WeasisArchiveSearchCriteria;
 import org.viewer.hub.back.model.searchcriteria.WeasisIHESearchCriteria;
 import org.viewer.hub.back.service.CacheService;
 import org.viewer.hub.back.service.SecurityService;
-import org.viewer.hub.back.service.WeasisConnectorQueryService;
+import org.viewer.hub.back.service.ManifestConnectorQueryService;
 
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -31,8 +31,8 @@ class WeasisServiceImplTest {
 
 	private final CacheService cacheServiceMock = Mockito.mock(CacheService.class);
 
-	private final WeasisConnectorQueryService connectorQueryServiceMock = Mockito
-		.mock(WeasisConnectorQueryService.class);
+	private final ManifestConnectorQueryService connectorQueryServiceMock = Mockito
+		.mock(ManifestConnectorQueryService.class);
 
 	@Mock
 

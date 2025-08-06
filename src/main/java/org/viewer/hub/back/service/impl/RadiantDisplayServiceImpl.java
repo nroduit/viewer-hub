@@ -15,76 +15,80 @@ import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.viewer.hub.back.constant.SlicerCommandName;
-import org.viewer.hub.back.model.searchcriteria.*;
-import org.viewer.hub.back.service.*;
+import org.viewer.hub.back.constant.RadiantCommandName;
+import org.viewer.hub.back.model.searchcriteria.ArchiveSearchCriteria;
+import org.viewer.hub.back.service.ConnectorService;
+import org.viewer.hub.back.service.RadiantDisplayService;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
 @Slf4j
-public class SlicerDisplayServiceImpl implements SlicerDisplayService {
+public class RadiantDisplayServiceImpl implements RadiantDisplayService {
 
 	// Services
 	private final ConnectorService connectorService;
 
 	@Autowired
-	public SlicerDisplayServiceImpl(final ConnectorService connectorService) {
+	public RadiantDisplayServiceImpl(final ConnectorService connectorService) {
 		this.connectorService = connectorService;
 	}
 
 	@Override
-	public String retrieveSlicerQidoLaunchUrl(@Valid ArchiveSearchCriteria searchCriteria, String archive) {
-		String dicomQuery = this.retrieveDicomQidoQuery(searchCriteria, archive);
+	public String retrieveRadiantQidoLaunchUrl(@Valid ArchiveSearchCriteria searchCriteria, String archive) {
+		String dicomQuery = this.retrieveDicomQidoCommand(searchCriteria, archive);
 
-		String launchUrl = buildSlicerProtocolCommand(dicomQuery);
+		String launchUrl = buildRadiantProtocolCommand(dicomQuery);
 
 		LOG.info("[LAUNCH URL]\n " + launchUrl + " \n[SEARCH CRITERIA] " + searchCriteria);
 		return launchUrl;
 	}
 
-	private String retrieveDicomQidoQuery(ArchiveSearchCriteria searchCriteria, String archive) {
+	private String retrieveDicomQidoCommand(ArchiveSearchCriteria searchCriteria, String archive) {
 		// Url to retrieve the manifest corresponding to the key
 		List<String> query = new ArrayList<>();
-		if (!searchCriteria.getObjectUID().isEmpty()) {
-			query.add("objectUID=" + String.join(",", searchCriteria.getObjectUID()));
+
+		// Dicom aet
+		String aet = connectorService.getAETFromId(archive);
+		if (aet != null) {
+			query.add("n=paet&v=" + aet);
 		}
+
+		query.add("n=pstv");
+
 		// Series Instance Uid
 		if (!searchCriteria.getSeriesUID().isEmpty()) {
-			query.add("seriesUID=" + String.join(",", searchCriteria.getSeriesUID()));
+			query.add("v=" + String.join(",", searchCriteria.getSeriesUID()));
+			query.add("v=%22SERIESUID%22");
 		}
 		// Accession Number
 		if (!searchCriteria.getAccessionNumber().isEmpty()) {
-			query.add("accessionNumber=" + String.join(",", searchCriteria.getAccessionNumber()));
+			query.add("v=" + String.join(",", searchCriteria.getAccessionNumber()));
+			query.add("v=%22ACCESSION-NUMBER%22");
 		}
 		// Study Uid
 		if (!searchCriteria.getStudyUID().isEmpty()) {
-			query.add("studyUID=" + String.join(",", searchCriteria.getStudyUID()));
+			query.add("v=" + String.join(",", searchCriteria.getStudyUID()));
+			query.add("v=%22STUDYUID%22");
 		}
 		// Patient Id
 		if (!searchCriteria.getPatientID().isEmpty()) {
-			query.add("patientID=" + String.join(",", searchCriteria.getPatientID()));
-		}
-		// Dicomweb url
-		String dicomRsUrl = connectorService.getDicomRsUrlFromId(archive);
-		if (dicomRsUrl != null) {
-			query.add("dicomweb_endpoint=" + dicomRsUrl);
+			query.add("v=" + String.join(",", searchCriteria.getPatientID()));
+			query.add("v=%22PATIENTID%22");
 		}
 
 		return "?%s".formatted(String.join("&", query));
 	}
 
 	/**
-	 * Build encoded 3d Slicer protocol url
+	 * Build encoded RadiAnt protocol url
 	 * command
 	 * @param dicomQuery dicom query
 	 * @return weasis protocol encoded url built
 	 */
-	private static String buildSlicerProtocolCommand(String dicomQuery) {
-		return SlicerCommandName.LAUNCH_URL_SLICER_COMMAND.formatted(dicomQuery);
+	private static String buildRadiantProtocolCommand(String dicomQuery) {
+		return RadiantCommandName.LAUNCH_URL_RADIANT_COMMAND.formatted(dicomQuery);
 	}
 
 }

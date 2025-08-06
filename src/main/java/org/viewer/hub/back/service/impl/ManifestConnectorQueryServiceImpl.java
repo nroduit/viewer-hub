@@ -23,14 +23,14 @@ import org.viewer.hub.back.model.searchcriteria.SearchCriteria;
 import org.viewer.hub.back.service.ConnectorService;
 import org.viewer.hub.back.service.DbConnectorQueryService;
 import org.viewer.hub.back.service.DicomConnectorQueryService;
-import org.viewer.hub.back.service.WeasisConnectorQueryService;
+import org.viewer.hub.back.service.ManifestConnectorQueryService;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
 
 @Service
 @Slf4j
-public class WeasisConnectorQueryServiceImpl implements WeasisConnectorQueryService {
+public class ManifestConnectorQueryServiceImpl implements ManifestConnectorQueryService {
 
 	private final DbConnectorQueryService dbConnectorQueryService;
 
@@ -39,8 +39,8 @@ public class WeasisConnectorQueryServiceImpl implements WeasisConnectorQueryServ
 	private final ConnectorService connectorService;
 
 	@Autowired
-	public WeasisConnectorQueryServiceImpl(final DbConnectorQueryService dbConnectorQueryService,
-			final DicomConnectorQueryService dicomConnectorQueryService, final ConnectorService connectorService) {
+	public ManifestConnectorQueryServiceImpl(final DbConnectorQueryService dbConnectorQueryService,
+											 final DicomConnectorQueryService dicomConnectorQueryService, final ConnectorService connectorService) {
 		this.dbConnectorQueryService = dbConnectorQueryService;
 		this.dicomConnectorQueryService = dicomConnectorQueryService;
 		this.connectorService = connectorService;

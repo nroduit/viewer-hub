@@ -21,7 +21,7 @@ import java.util.Set;
 /**
  * Used to make requests to the different configured connectors
  */
-public interface WeasisConnectorQueryService {
+public interface ManifestConnectorQueryService {
 
 	/**
 	 * Fill manifest from patients ids requests

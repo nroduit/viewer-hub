@@ -131,6 +131,17 @@ public class ConnectorServiceImpl implements ConnectorService {
 	}
 
 	@Override
+	public String getAETFromId(@Valid String connectorId) {
+		// Retrieve default or specific connectors
+		ConnectorProperty connector = this.retrieveConnectorFromId(connectorId);
+		if (connector.getDicomConnector() != null) {
+			return connector.getDicomConnector().getDimse().getAet();
+		}
+		return null;
+	}
+
+
+	@Override
 	public String[] getCredentialsFromId(@Valid String connectorId) {
 		// Retrieve default or specific connectors
 		ConnectorProperty connector = this.retrieveConnectorFromId(connectorId);
