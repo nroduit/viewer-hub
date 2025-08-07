@@ -8,8 +8,8 @@ import java.util.Map;
 public class ArchiveViewerMapper {
 
     private static final Map<Archive, Viewer> mapper = Map.of(
-            Archive.DCM4CHEE, Viewer.RADIANT,
-            Archive.ORTHANC, Viewer.RADIANT
+            Archive.DCM4CHEE, Viewer.MICRODICOM,
+            Archive.ORTHANC, Viewer.MICRODICOM
     );
 
     public static String getViewer(String archive) {

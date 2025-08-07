@@ -12,8 +12,6 @@
 package org.viewer.hub.back.service;
 
 import jakarta.validation.Valid;
-import org.springframework.security.core.Authentication;
-import org.viewer.hub.back.model.searchcriteria.ArchiveSearchCriteria;
 import org.viewer.hub.back.model.searchcriteria.SearchCriteria;
 
 /**
@@ -24,7 +22,9 @@ public interface SlicerDisplayService {
 	/**
 	 * Retrieve url which will launch 3D Slicer
 	 * @param searchCriteria search criteria
+	 * @param archive archive
 	 * @return url which will launch 3D Slicer
 	 */
-	String retrieveSlicerQidoLaunchUrl(@Valid ArchiveSearchCriteria searchCriteria, String archive);
+	String retrieveSlicerQidoLaunchUrl(@Valid SearchCriteria searchCriteria, String archive);
+
 }

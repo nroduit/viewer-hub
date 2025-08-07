@@ -15,48 +15,50 @@ import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.viewer.hub.back.constant.RadiantCommandName;
+import org.viewer.hub.back.constant.MicroDicomCommandName;
 import org.viewer.hub.back.model.searchcriteria.ArchiveSearchCriteria;
 import org.viewer.hub.back.model.searchcriteria.IHESearchCriteria;
 import org.viewer.hub.back.model.searchcriteria.SearchCriteria;
 import org.viewer.hub.back.service.ConnectorService;
-import org.viewer.hub.back.service.RadiantDisplayService;
+import org.viewer.hub.back.service.MicroDicomDisplayService;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
 @Slf4j
-public class RadiantDisplayServiceImpl implements RadiantDisplayService {
+public class MicroDicomDisplayServiceImpl implements MicroDicomDisplayService {
 
 	// Services
 	private final ConnectorService connectorService;
 
 	@Autowired
-	public RadiantDisplayServiceImpl(final ConnectorService connectorService) {
+	public MicroDicomDisplayServiceImpl(final ConnectorService connectorService) {
 		this.connectorService = connectorService;
 	}
 
 	@Override
-	public String retrieveRadiantWadoLaunchUrl(@Valid SearchCriteria searchCriteria, String archive) {
+	public String retrieveMicroDicomWadoLaunchUrl(@Valid SearchCriteria searchCriteria, String archive) {
 		String dicomQuery = this.retrieveDicomWadoQuery(searchCriteria, archive);
 
-		String launchUrl = buildRadiantProtocolCommand(dicomQuery);
+		String launchUrl = buildMicroDicomProtocolCommand(dicomQuery);
 
 		LOG.info("[LAUNCH URL]\n " + launchUrl + " \n[SEARCH CRITERIA] " + searchCriteria);
 		return launchUrl;
 	}
 
 	private String retrieveDicomWadoQuery(SearchCriteria searchCriteria, String archive) {
-		List<String> query = searchCriteria instanceof IHESearchCriteria
-				? getQuery((IHESearchCriteria) searchCriteria)
-				: getQuery((ArchiveSearchCriteria) searchCriteria);
+		List<String> query = new ArrayList<>();
 
-		// Dicom aet
-		String aet = connectorService.getAETFromId(archive);
-		if (aet != null) {
-			query.add("n=paet&v=" + aet);
+		// Dicom url should be the first param in query
+		String fullDicomUrl = connectorService.getFullDicomFromId(archive);
+		if (fullDicomUrl != null) {
+			query.add("\"param=\"pacsServer\"&value=\"" + fullDicomUrl + "\"");
 		}
+
+		query.addAll(searchCriteria instanceof IHESearchCriteria
+				? getQuery((IHESearchCriteria) searchCriteria)
+				: getQuery((ArchiveSearchCriteria) searchCriteria));
 
 		return "?%s".formatted(String.join("&", query));
 	}
@@ -64,62 +66,53 @@ public class RadiantDisplayServiceImpl implements RadiantDisplayService {
 	private List<String> getQuery(IHESearchCriteria searchCriteria) {
 		List<String> query = new ArrayList<>();
 
-		query.add("n=pstv");
-
 		// Accession Number
 		if (!searchCriteria.getAccessionNumber().isEmpty()) {
-			query.add("v=" + String.join(",", searchCriteria.getAccessionNumber()));
-			query.add("v=%22ACCESSION-NUMBER%22");
+			query.add("param=pacsTagValue&value=\"" +  String.join(",", searchCriteria.getAccessionNumber()) + "\"&value=\"AccessionNumber\"");
 		}
 		// Study Uid
 		if (!searchCriteria.getStudyUID().isEmpty()) {
-			query.add("v=" + String.join(",", searchCriteria.getStudyUID()));
-			query.add("v=%22STUDYUID%22");
+			query.add("param=pacsTagValue&value=\"" +  String.join(",", searchCriteria.getStudyUID()) + "\"&value=\"StudyUID\"");
 		}
 		// Patient Id
 		if (!searchCriteria.getPatientID().isEmpty()) {
-			query.add("v=" + String.join(",", searchCriteria.getPatientID()));
-			query.add("v=%22PATIENTID%22");
+			query.add("param=pacsTagValue&value=\"" +  String.join(",", searchCriteria.getPatientID()) + "\"&value=\"PatientID\"");
 		}
+
 		return query;
 	}
 
 	private List<String> getQuery(ArchiveSearchCriteria searchCriteria) {
 		List<String> query = new ArrayList<>();
 
-		query.add("n=pstv");
-
 		// Series Instance Uid
 		if (!searchCriteria.getSeriesUID().isEmpty()) {
-			query.add("v=" + String.join(",", searchCriteria.getSeriesUID()));
-			query.add("v=%22SERIESUID%22");
+			query.add("param=pacsTagValue&value=\"" +  String.join(",", searchCriteria.getSeriesUID()) + "\"&value=\"SeriesUID\"");
 		}
 		// Accession Number
 		if (!searchCriteria.getAccessionNumber().isEmpty()) {
-			query.add("v=" + String.join(",", searchCriteria.getAccessionNumber()));
-			query.add("v=%22ACCESSION-NUMBER%22");
+			query.add("param=pacsTagValue&value=\"" +  String.join(",", searchCriteria.getAccessionNumber()) + "\"&value=\"AccessionNumber\"");
 		}
 		// Study Uid
 		if (!searchCriteria.getStudyUID().isEmpty()) {
-			query.add("v=" + String.join(",", searchCriteria.getStudyUID()));
-			query.add("v=%22STUDYUID%22");
+			query.add("param=pacsTagValue&value=\"" +  String.join(",", searchCriteria.getStudyUID()) + "\"&value=\"StudyUID\"");
 		}
 		// Patient Id
 		if (!searchCriteria.getPatientID().isEmpty()) {
-			query.add("v=" + String.join(",", searchCriteria.getPatientID()));
-			query.add("v=%22PATIENTID%22");
+			query.add("param=pacsTagValue&value=\"" +  String.join(",", searchCriteria.getPatientID()) + "\"&value=\"PatientID\"");
 		}
+
 		return query;
 	}
 
 	/**
-	 * Build encoded RadiAnt protocol url
+	 * Build encoded Micro Dicom protocol url
 	 * command
 	 * @param dicomQuery dicom query
 	 * @return weasis protocol encoded url built
 	 */
-	private static String buildRadiantProtocolCommand(String dicomQuery) {
-		return RadiantCommandName.LAUNCH_URL_RADIANT_COMMAND.formatted(dicomQuery);
+	private static String buildMicroDicomProtocolCommand(String dicomQuery) {
+		return MicroDicomCommandName.LAUNCH_URL_MICRODICOM_COMMAND.formatted(dicomQuery);
 	}
 
 }

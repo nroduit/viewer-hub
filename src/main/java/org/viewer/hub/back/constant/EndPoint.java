@@ -56,6 +56,9 @@ public class EndPoint {
 	// RadiAnt commands
 	public static final String RADIANT_PATH = "/radiant";
 
+	// Micro Dicom commands
+	public static final String MICRO_DICOM_PATH = "/microdicom";
+
 	// Weasis commands
 	public static final String WEASIS_PATH = "/weasis";
 

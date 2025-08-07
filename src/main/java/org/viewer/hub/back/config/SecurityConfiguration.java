@@ -73,11 +73,14 @@ public class SecurityConfiguration {
 						AntPathRequestMatcher.antMatcher(EndPoint.OVERRIDE_CONFIG_PATH + EndPoint.ALL_REMAINING_PATH),
 						AntPathRequestMatcher.antMatcher(EndPoint.STATISTIC_PATH + EndPoint.ALL_REMAINING_PATH),
 						AntPathRequestMatcher.antMatcher(EndPoint.TARGET_PATH + EndPoint.ALL_REMAINING_PATH),
+
 						// Resources for 3D Slicer
 						AntPathRequestMatcher.antMatcher(EndPoint.SLICER_PATH + EndPoint.ALL_REMAINING_PATH),
 						// Resources for RadiAnt
 						AntPathRequestMatcher.antMatcher(EndPoint.RADIANT_PATH + EndPoint.ALL_REMAINING_PATH),
-						// Resources for weasis
+						// Resources for Micro Dicom
+						AntPathRequestMatcher.antMatcher(EndPoint.MICRO_DICOM_PATH + EndPoint.ALL_REMAINING_PATH),
+						// Resources for Weasis
 						AntPathRequestMatcher.antMatcher(EndPoint.WEASIS_PATH + EndPoint.ALL_REMAINING_PATH))
 				.permitAll()
 				.requestMatchers(EndpointRequest.to(ShutdownEndpoint.class))

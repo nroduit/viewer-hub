@@ -101,7 +101,7 @@ public class DisplayController {
 
 		String redirectUrl = displaySelectViewerRuleService.getViewerUrl(archive, viewer, iheSearchCriteria, extCfg, authentication);
 		if (redirectUrl == null) {
-			LOG.error("No valid archive specified");
+			LOG.error("No valid redirectUrl specified");
 			return null;
 		}
 
@@ -163,7 +163,7 @@ public class DisplayController {
 
 		String redirectUrl = displaySelectViewerRuleService.getViewerUrl(archive, viewer, archiveSearchCriteria, extCfg, authentication);
 		if (redirectUrl == null) {
-			LOG.error("No valid archive specified");
+			LOG.error("No valid redirectUrl specified");
 			return null;
 		}
 
@@ -222,7 +222,7 @@ public class DisplayController {
 
 		String redirectUrl = displaySelectViewerRuleService.getQidoViewerUrl(archive, viewer, archiveSearchCriteria);
 		if (redirectUrl == null) {
-			LOG.error("No valid archive specified");
+			LOG.error("No valid redirectUrl specified");
 			return null;
 		}
 

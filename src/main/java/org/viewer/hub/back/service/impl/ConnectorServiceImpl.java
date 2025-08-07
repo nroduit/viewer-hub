@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.viewer.hub.back.config.properties.ConnectorConfigurationProperties;
 import org.viewer.hub.back.controller.exception.TechnicalException;
 import org.viewer.hub.back.model.property.ConnectorProperty;
+import org.viewer.hub.back.model.property.DicomConnectorDimseProperty;
 import org.viewer.hub.back.service.ConnectorService;
 
 import java.util.*;
@@ -140,6 +141,16 @@ public class ConnectorServiceImpl implements ConnectorService {
 		return null;
 	}
 
+	@Override
+	public String getFullDicomFromId(@Valid String connectorId) {
+		// Retrieve default or specific connectors
+		ConnectorProperty connector = this.retrieveConnectorFromId(connectorId);
+		if (connector.getDicomConnector() != null) {
+			DicomConnectorDimseProperty dimse = connector.getDicomConnector().getDimse();
+			return "%s:%s:%s:get".formatted(dimse.getHost(), dimse.getAet(), dimse.getPort());
+		}
+		return null;
+	}
 
 	@Override
 	public String[] getCredentialsFromId(@Valid String connectorId) {

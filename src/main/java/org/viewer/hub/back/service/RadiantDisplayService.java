@@ -12,7 +12,7 @@
 package org.viewer.hub.back.service;
 
 import jakarta.validation.Valid;
-import org.viewer.hub.back.model.searchcriteria.ArchiveSearchCriteria;
+import org.viewer.hub.back.model.searchcriteria.SearchCriteria;
 
 /**
  * Service used to launch the application Weasis
@@ -22,7 +22,9 @@ public interface RadiantDisplayService {
 	/**
 	 * Retrieve url which will launch RadiAnt
 	 * @param searchCriteria search criteria
+	 * @param archive archive
 	 * @return url which will launch RadiAnt
 	 */
-	String retrieveRadiantQidoLaunchUrl(@Valid ArchiveSearchCriteria searchCriteria, String archive);
+	String retrieveRadiantWadoLaunchUrl(@Valid SearchCriteria searchCriteria, String archive);
+
 }

@@ -19,8 +19,6 @@ import org.viewer.hub.back.constant.SlicerCommandName;
 import org.viewer.hub.back.model.searchcriteria.*;
 import org.viewer.hub.back.service.*;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,7 +35,7 @@ public class SlicerDisplayServiceImpl implements SlicerDisplayService {
 	}
 
 	@Override
-	public String retrieveSlicerQidoLaunchUrl(@Valid ArchiveSearchCriteria searchCriteria, String archive) {
+	public String retrieveSlicerQidoLaunchUrl(@Valid SearchCriteria searchCriteria, String archive) {
 		String dicomQuery = this.retrieveDicomQidoQuery(searchCriteria, archive);
 
 		String launchUrl = buildSlicerProtocolCommand(dicomQuery);
@@ -46,8 +44,38 @@ public class SlicerDisplayServiceImpl implements SlicerDisplayService {
 		return launchUrl;
 	}
 
-	private String retrieveDicomQidoQuery(ArchiveSearchCriteria searchCriteria, String archive) {
-		// Url to retrieve the manifest corresponding to the key
+	private String retrieveDicomQidoQuery(SearchCriteria searchCriteria, String archive) {
+		List<String> query = searchCriteria instanceof IHESearchCriteria
+				? getQuery((IHESearchCriteria) searchCriteria)
+				: getQuery((ArchiveSearchCriteria) searchCriteria);
+
+		// Dicomweb url
+		String dicomRsUrl = connectorService.getDicomRsUrlFromId(archive);
+		if (dicomRsUrl != null) {
+			query.add("dicomweb_endpoint=" + dicomRsUrl);
+		}
+
+		return "?%s".formatted(String.join("&", query));
+	}
+
+	private List<String> getQuery(IHESearchCriteria iheSearchCriteria) {
+		List<String> query = new ArrayList<>();
+		// Accession Number
+		if (!iheSearchCriteria.getAccessionNumber().isEmpty()) {
+			query.add("accessionNumber=" + String.join(",", iheSearchCriteria.getAccessionNumber()));
+		}
+		// Study Uid
+		if (!iheSearchCriteria.getStudyUID().isEmpty()) {
+			query.add("studyUID=" + String.join(",", iheSearchCriteria.getStudyUID()));
+		}
+		// Patient Id
+		if (!iheSearchCriteria.getPatientID().isEmpty()) {
+			query.add("patientID=" + String.join(",", iheSearchCriteria.getPatientID()));
+		}
+		return query;
+	}
+
+	private List<String> getQuery(ArchiveSearchCriteria searchCriteria) {
 		List<String> query = new ArrayList<>();
 		if (!searchCriteria.getObjectUID().isEmpty()) {
 			query.add("objectUID=" + String.join(",", searchCriteria.getObjectUID()));
@@ -68,13 +96,7 @@ public class SlicerDisplayServiceImpl implements SlicerDisplayService {
 		if (!searchCriteria.getPatientID().isEmpty()) {
 			query.add("patientID=" + String.join(",", searchCriteria.getPatientID()));
 		}
-		// Dicomweb url
-		String dicomRsUrl = connectorService.getDicomRsUrlFromId(archive);
-		if (dicomRsUrl != null) {
-			query.add("dicomweb_endpoint=" + dicomRsUrl);
-		}
-
-		return "?%s".formatted(String.join("&", query));
+		return query;
 	}
 
 	/**

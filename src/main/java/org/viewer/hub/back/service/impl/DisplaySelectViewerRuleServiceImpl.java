@@ -20,67 +20,73 @@ public class DisplaySelectViewerRuleServiceImpl implements DisplaySelectViewerRu
     private final OHIFDisplayService ohifDisplayService;
     private final SlicerDisplayService slicerDisplayService;
     private final RadiantDisplayService radiantDisplayService;
+    private final MicroDicomDisplayService microDicomDisplayService;
 
     @Autowired
     public DisplaySelectViewerRuleServiceImpl(final WeasisDisplayService weasisDisplayService,
                                               final OHIFDisplayService ohifDisplayService,
                                               final SlicerDisplayService slicerDisplayService,
-                                              final RadiantDisplayService radiantDisplayService) {
+                                              final RadiantDisplayService radiantDisplayService,
+                                              final MicroDicomDisplayService microDicomDisplayService) {
         this.weasisDisplayService = weasisDisplayService;
         this.ohifDisplayService = ohifDisplayService;
         this.slicerDisplayService = slicerDisplayService;
         this.radiantDisplayService = radiantDisplayService;
+        this.microDicomDisplayService = microDicomDisplayService;
     }
 
     @Override
     public String getViewerUrl(String archive, String viewer, IHESearchCriteria iheSearchCriteria, String extCfg, Authentication authentication) {
-        if (Viewer.WEASIS.toString().equals(viewer)) {
-            WeasisIHESearchCriteria weasisIHESearchCriteria = (WeasisIHESearchCriteria) iheSearchCriteria;
-            // to do JacksonConfig
-            if (extCfg != null) {
-                weasisIHESearchCriteria.setExtCfg(extCfg);
+        Viewer targetViewer = Viewer.fromString(viewer);
+        // TODO : add other viewer for IHESearchCriteria
+        return switch (targetViewer) {
+            case WEASIS -> {
+                WeasisIHESearchCriteria weasisIHESearchCriteria = (WeasisIHESearchCriteria) iheSearchCriteria;
+                // to do JacksonConfig
+                if (extCfg != null) {
+                    weasisIHESearchCriteria.setExtCfg(extCfg);
+                }
+                yield this.weasisDisplayService.retrieveWeasisManifestLaunchUrl(weasisIHESearchCriteria, authentication);
             }
-            return this.weasisDisplayService.retrieveWeasisManifestLaunchUrl(weasisIHESearchCriteria, authentication);
-        }
-//        else if (Viewer.OHIF.toString().equals(viewer)) {
-//			return this.ohifDisplayService.retrieveDicomUrl(iheSearchCriteria);
-//        }
-        return null;
+            case OHIF -> this.ohifDisplayService.retrieveDicomUrl(iheSearchCriteria, archive);
+            case SLICER -> this.slicerDisplayService.retrieveSlicerQidoLaunchUrl(iheSearchCriteria, archive);
+            case RADIANT -> this.radiantDisplayService.retrieveRadiantWadoLaunchUrl(iheSearchCriteria, archive);
+            case MICRODICOM -> this.microDicomDisplayService.retrieveMicroDicomWadoLaunchUrl(iheSearchCriteria, archive);
+        };
     }
 
     @Override
     public String getViewerUrl(String archive, String viewer, ArchiveSearchCriteria archiveSearchCriteria, String extCfg, Authentication authentication) {
-        String redirectUrl = null;
-        if (Viewer.WEASIS.toString().equals(viewer)) {
-            // to do JacksonConfig
-            WeasisArchiveSearchCriteria weasisArchiveSearchCriteria = new WeasisArchiveSearchCriteria(archiveSearchCriteria);
-            if (extCfg != null) {
-                weasisArchiveSearchCriteria.setExtCfg(extCfg);
+        Viewer targetViewer = Viewer.fromString(viewer);
+        return switch (targetViewer) {
+            case WEASIS -> {
+                // to do JacksonConfig
+                WeasisArchiveSearchCriteria weasisArchiveSearchCriteria = new WeasisArchiveSearchCriteria(archiveSearchCriteria);
+                if (extCfg != null) {
+                    weasisArchiveSearchCriteria.setExtCfg(extCfg);
+                }
+                yield this.weasisDisplayService.retrieveWeasisManifestLaunchUrl(weasisArchiveSearchCriteria, authentication);
             }
-            return this.weasisDisplayService.retrieveWeasisManifestLaunchUrl(weasisArchiveSearchCriteria, authentication);
-        } else if (Viewer.OHIF.toString().equals(viewer)) {
-            return this.ohifDisplayService.retrieveDicomUrl(archiveSearchCriteria, archive);
-        } else if (Viewer.SLICER.toString().equals(viewer)) {
-            return this.slicerDisplayService.retrieveSlicerQidoLaunchUrl(archiveSearchCriteria, archive);
-        } else if (Viewer.RADIANT.toString().equals(viewer)) {
-            return this.radiantDisplayService.retrieveRadiantQidoLaunchUrl(archiveSearchCriteria, archive);
-        }
-        return null;
+            case OHIF -> this.ohifDisplayService.retrieveDicomUrl(archiveSearchCriteria, archive);
+            case SLICER -> this.slicerDisplayService.retrieveSlicerQidoLaunchUrl(archiveSearchCriteria, archive);
+            case RADIANT -> this.radiantDisplayService.retrieveRadiantWadoLaunchUrl(archiveSearchCriteria, archive);
+            case MICRODICOM -> this.microDicomDisplayService.retrieveMicroDicomWadoLaunchUrl(archiveSearchCriteria, archive);
+        };
     }
 
     @Override
     public String getQidoViewerUrl(String archive, String viewer, ArchiveSearchCriteria archiveSearchCriteria) {
-        if (Viewer.WEASIS.toString().equals(viewer)) {
-            WeasisArchiveSearchCriteria weasisArchiveSearchCriteria = new WeasisArchiveSearchCriteria(archiveSearchCriteria);
-            return weasisDisplayService.retrieveWeasisQidoLaunchUrl(weasisArchiveSearchCriteria, archive);
-        }
-        else if (Viewer.OHIF.toString().equals(viewer)) {
-            return ohifDisplayService.retrieveDicomUrl(archiveSearchCriteria, archive);
-        } else if (Viewer.SLICER.toString().equals(viewer)) {
-            return this.slicerDisplayService.retrieveSlicerQidoLaunchUrl(archiveSearchCriteria, archive);
-        }else if (Viewer.RADIANT.toString().equals(viewer)) {
-            return this.radiantDisplayService.retrieveRadiantQidoLaunchUrl(archiveSearchCriteria, archive);
-        }
-        return null;
+        Viewer targetViewer = Viewer.fromString(viewer);
+        return switch (targetViewer) {
+            case WEASIS -> {
+                WeasisArchiveSearchCriteria weasisArchiveSearchCriteria = new WeasisArchiveSearchCriteria(archiveSearchCriteria);
+                yield weasisDisplayService.retrieveWeasisQidoLaunchUrl(weasisArchiveSearchCriteria, archive);
+            }
+            case OHIF -> this.ohifDisplayService.retrieveDicomUrl(archiveSearchCriteria, archive);
+            case SLICER -> this.slicerDisplayService.retrieveSlicerQidoLaunchUrl(archiveSearchCriteria, archive);
+            case RADIANT -> this.radiantDisplayService.retrieveRadiantWadoLaunchUrl(archiveSearchCriteria, archive);
+            case MICRODICOM ->
+                    this.microDicomDisplayService.retrieveMicroDicomWadoLaunchUrl(archiveSearchCriteria, archive);
+        };
     }
 }

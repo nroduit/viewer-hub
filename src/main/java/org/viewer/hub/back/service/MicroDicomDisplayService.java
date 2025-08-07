@@ -11,20 +11,19 @@
 
 package org.viewer.hub.back.service;
 
-import org.viewer.hub.back.model.searchcriteria.ArchiveSearchCriteria;
-import org.viewer.hub.back.model.searchcriteria.IHESearchCriteria;
+import jakarta.validation.Valid;
 import org.viewer.hub.back.model.searchcriteria.SearchCriteria;
 
 /**
- * Service used to launch the application OHIF
+ * Service used to launch the application Weasis
  */
-public interface OHIFDisplayService {
+public interface MicroDicomDisplayService {
 
 	/**
-	 * Retrieve url which will launch OHIF
+	 * Retrieve url which will launch Micro Dicom
 	 * @param searchCriteria search criteria
 	 * @param archive archive
+	 * @return url which will launch 3D Micro Dicom
 	 */
-	String retrieveDicomUrl(SearchCriteria searchCriteria, String archive);
-
+	String retrieveMicroDicomWadoLaunchUrl(@Valid SearchCriteria searchCriteria, String archive);
 }

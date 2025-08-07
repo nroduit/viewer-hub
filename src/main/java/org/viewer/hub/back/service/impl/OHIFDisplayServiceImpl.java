@@ -15,7 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.viewer.hub.back.model.searchcriteria.ArchiveSearchCriteria;
+import org.viewer.hub.back.model.searchcriteria.*;
 import org.viewer.hub.back.service.ConnectorService;
 import org.viewer.hub.back.service.OHIFDisplayService;
 
@@ -40,7 +40,7 @@ public class OHIFDisplayServiceImpl implements OHIFDisplayService {
 	}
 
 	@Override
-	public String retrieveDicomUrl(ArchiveSearchCriteria archiveSearchCriteria, String archive) {
+	public String retrieveDicomUrl(SearchCriteria searchCriteria, String archive) {
 		String archiveName = connectorService.getArchiveNameFromId(archive);
 		String url = ohifServerUrl + "/viewer";
 
@@ -48,6 +48,26 @@ public class OHIFDisplayServiceImpl implements OHIFDisplayService {
 			url += "/" + archiveName + "/";
 		}
 
+		List<String> query = searchCriteria instanceof IHESearchCriteria
+				? getQuery((IHESearchCriteria) searchCriteria)
+				: getQuery((ArchiveSearchCriteria) searchCriteria);
+
+		for (int i=0; i<query.size(); i++) {
+			url += i==0 ? "?" : "&";
+			url += query.get(i);
+		}
+		return url;
+	}
+
+	private List<String> getQuery(IHESearchCriteria iheSearchCriteria) {
+		List<String> query = new ArrayList<>();
+		if (!iheSearchCriteria.getStudyUID().isEmpty()) {
+			query.add("StudyInstanceUIDs=" + String.join(",", iheSearchCriteria.getStudyUID()));
+		}
+		return query;
+	}
+
+	private List<String> getQuery(ArchiveSearchCriteria archiveSearchCriteria) {
 		List<String> args = new ArrayList<>();
 		if (!archiveSearchCriteria.getStudyUID().isEmpty()) {
 			args.add("StudyInstanceUIDs=" + String.join(",", archiveSearchCriteria.getStudyUID()));
@@ -55,11 +75,7 @@ public class OHIFDisplayServiceImpl implements OHIFDisplayService {
 		if (!archiveSearchCriteria.getSeriesUID().isEmpty()) {
 			args.add("SeriesInstanceUIDs=" + String.join(",", archiveSearchCriteria.getSeriesUID()));
 		}
-		for (int i=0; i<args.size(); i++) {
-			url += i==0 ? "?" : "&";
-			url += args.get(i);
-		}
-		return url;
+		return args;
 	}
 
 }
