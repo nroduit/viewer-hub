@@ -38,6 +38,20 @@
           "archive" : "orthanc-local",
           "viewer": "slicer"
         }
+      },
+      "RadiAnt": {
+        "Url": "http://host.docker.internal:8081/display/dicomweb/",
+        "HttpHeaders": {
+          "archive" : "orthanc-local",
+          "viewer": "radiant"
+        }
+      },
+      "MicroDicom": {
+        "Url": "http://host.docker.internal:8081/display/dicomweb/",
+        "HttpHeaders": {
+          "archive" : "orthanc-local",
+          "viewer": "microdicom"
+        }
       }
     }
   },
@@ -53,6 +67,16 @@
   "DicomModalities" : {
     "Weasis": [
       "WEASIS_AE",
+      "127.0.0.1",
+      4242
+    ],
+    "RadiAnt": [
+      "RADIANT",
+      "127.0.0.1",
+      4242
+    ],
+    "MicroDicom": [
+      "MICRODICOM",
       "127.0.0.1",
       4242
     ],
