@@ -38,7 +38,6 @@ public class DisplaySelectViewerRuleServiceImpl implements DisplaySelectViewerRu
     @Override
     public String getViewerUrl(String archive, String viewer, IHESearchCriteria iheSearchCriteria, String extCfg, Authentication authentication) {
         Viewer targetViewer = Viewer.fromString(viewer);
-        // TODO : add other viewer for IHESearchCriteria
         return switch (targetViewer) {
             case WEASIS -> {
                 WeasisIHESearchCriteria weasisIHESearchCriteria = (WeasisIHESearchCriteria) iheSearchCriteria;

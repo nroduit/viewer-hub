@@ -1,17 +1,15 @@
 ﻿
 # ViewerHub
-ViewerHub allows to manage various viewers on a IT Infrastructure. 
+ViewerHub allows to manage various viewers on a IT Infrastructure.
 
 ## Architecture
-![architecture.svg](src/main/resources/documentation/architecture.svg)
+![architecture.svg](src/main/resources/documentation/general.drawio.png)
 
 ## Documentation
 https://weasis.org/en/viewer-hub/index.html
 
-## Main functionalities
-- Launch of Weasis viewers (several launch endpoints, including IHE IID Profile-compatible launch)
-- Launch of OHIF viewer (several launch endpoints, including IHE IID Profile-compatible launch)
-- Launch of 3D Slicer viewer (several launch endpoints, including IHE IID Profile-compatible launch)
+## Current functionalities
+- Launch of multiple viewers (Weasis, OHIF, 3D Slicer, RadiAnt, Micro Dicom) with several launch endpoints, including IHE IID Profile-compatible launch
 - Creation and association of user or machine groups
 - Creation of an xml file (manifest) containing the studies, series and instances to be downloaded. This file will then be transmitted to Weasis to load the images into the viewer.
 - Manifest storage in a redis cache
@@ -23,6 +21,16 @@ https://weasis.org/en/viewer-hub/index.html
 - Pacs connectors management
 - Retrieve OAuth2 tokens on IDP to enable Weasis to authenticate on dcm4chee pacs
 - Cryptography of launch urls
+
+## Main goals
+The goal of this project it to manage interfaces between PACS and Dicom viewers (as EAI for HL7 messages):
+- centralize Dicom flows between PACS and viewer, when possible
+- customize rules to open specific viewer depending on procedure
+- assure authentication and authorization, when possible
+- manage PACS and viewer configurations, when possible
+
+## Viewers workflow
+[Integration schemas](src/main/resources/documentation/integration/README.md)
 
 ## Launch the different containers in local
 
@@ -172,4 +180,22 @@ You also need to add the DICOMwebBrowser extension. It can be downloaded from th
 Once all the steps above completed, launch the below URL to launch 3D Slicer and load the dicom image stored in the dcm4chee pacs
 ```
 slicer://viewer/?studyUID=1.3.12.2.1107.5.1.4.54023.30000004093013443132800000021&dicomweb_endpoint=http://localhost:8042/dicomweb
+```
+
+## Launch RadiAnt
+
+You need to install RadiAnt in your machine to use it.
+You also need to add the DCM4CHEE AET to RadiAnt Dicom configuration
+Once all the steps above completed, launch the below URL to launch RadiAnt and load the dicom image stored in the dcm4chee pacs
+```
+radiant://?n=pstv&v=1.3.12.2.1107.5.1.4.54023.30000004093013443132800000021&v=%22STUDYUID%22&n=paet&v=DCM4CHEE
+```
+
+## Launch Micro Dicom 
+
+You need to install Micro Dicom in your machine to use it.
+You also need to add the DCM4CHEE AET to Micro Dicom configuration
+Once all the steps above completed, launch the below URL to launch Micro Dicom and load the dicom image stored in the dcm4chee pacs
+```
+microdicom://?"param="pacsServer"&value="localhost:ORTHANC:4242:get"&param=pacsTagValue&value="1.3.12.2.1107.5.1.4.54023.30000004093013443132800000021"&value="StudyUID"
 ```
