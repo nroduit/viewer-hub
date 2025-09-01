@@ -19,8 +19,6 @@ public final class ParamName {
 
 	public static final String HOST = "host";
 
-	public static final String EXT_CFG = "ext-cfg";
-
 	public static final String CONFIG = "config";
 
 	public static final String PATIENT_ID = "patientID";

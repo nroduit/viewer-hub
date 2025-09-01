@@ -1,0 +1,17 @@
+microdicom:
+  command:
+    protocol: microdicom://
+    context:
+  archives:
+    dcm4chee-local:
+      # Pacs dcm4chee
+      url: http://localhost
+      port: 11112
+      # Here the context represents the AET to query
+      context: DCM4CHEE
+    orthanc-local:
+      # Pacs orthanc
+      url: http://localhost
+      port: 4242
+      # Here the context represents the AET to query
+      context: ORTHANC

@@ -18,6 +18,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.viewer.hub.back.config.properties.WeasisConfigurationProperties;
+import org.viewer.hub.back.model.property.Command;
 import org.viewer.hub.back.model.searchcriteria.WeasisArchiveSearchCriteria;
 import org.viewer.hub.back.service.CacheService;
 import org.viewer.hub.back.service.WeasisDisplayService;
@@ -35,11 +37,14 @@ class DisplayServiceImplTest {
 
 	private final WeasisService manifestServiceMock = Mockito.mock(WeasisService.class);
 
+	private final WeasisConfigurationProperties weasisConfigurationProperties = Mockito.mock(WeasisConfigurationProperties.class);
+
 	private WeasisDisplayService displayService;
 
 	@BeforeEach
 	public void setUp() {
-		this.displayService = new WeasisDisplayServiceImpl(this.cacheServiceMock, this.manifestServiceMock);
+		Mockito.when(weasisConfigurationProperties.getCommand()).thenReturn(new Command("weasis://", "", "$weasis:config wcfg=", "$dicom:get -w"));
+		this.displayService = new WeasisDisplayServiceImpl(this.cacheServiceMock, this.manifestServiceMock, this.weasisConfigurationProperties);
 		ReflectionTestUtils.setField(this.displayService, "viewerHubServerUrl", "http://test.com");
 	}
 
@@ -97,7 +102,7 @@ class DisplayServiceImplTest {
 		weasisSearchCriteria.setPro(List.of("pro"));
 		weasisSearchCriteria.setUser("user");
 		weasisSearchCriteria.setHost("host");
-		weasisSearchCriteria.setExtCfg("extCfg");
+		weasisSearchCriteria.setConfig("config");
 
 		// Mock
 		Mockito.when(this.cacheServiceMock.constructManifestKeyDependingOnSearchParameters(weasisSearchCriteria))
@@ -108,7 +113,7 @@ class DisplayServiceImplTest {
 
 		// Test results
 		assertEquals(
-				"weasis://%24dicom%3Aget+-w+%22http%3A%2F%2Ftest.com%2Fmanifest%3Fkey%3Dkey%22+%24weasis%3Aconfig+wcfg%3D%22http%3A%2F%2Ftest.com%2Fweasisconfig%2Fws%2FlaunchConfig%3Fpro%3Dpro%26user%3Duser%26host%3Dhost%26ext-cfg%3DextCfg%22",
+				"weasis://%24dicom%3Aget+-w+%22http%3A%2F%2Ftest.com%2Fmanifest%3Fkey%3Dkey%22+%24weasis%3Aconfig+wcfg%3D%22http%3A%2F%2Ftest.com%2Fweasisconfig%2Fws%2FlaunchConfig%3Fpro%3Dpro%26user%3Duser%26host%3Dhost%26config%3Dconfig%22",
 				launchUrl);
 	}
 
@@ -119,7 +124,7 @@ class DisplayServiceImplTest {
 		weasisSearchCriteria.setPro(List.of("pro"));
 		weasisSearchCriteria.setUser("user");
 		weasisSearchCriteria.setHost("host");
-		weasisSearchCriteria.setExtCfg("extCfg");
+		weasisSearchCriteria.setConfig("config");
 		weasisSearchCriteria.setArg(List.of("$acquire:patient -s H4s"));
 
 		// Mock
@@ -131,7 +136,7 @@ class DisplayServiceImplTest {
 
 		// Test results
 		assertEquals(
-				"weasis://%24acquire%3Apatient+-s+H4s+%24weasis%3Aconfig+wcfg%3D%22http%3A%2F%2Ftest.com%2Fweasisconfig%2Fws%2FlaunchConfig%3Fpro%3Dpro%26user%3Duser%26host%3Dhost%26ext-cfg%3DextCfg%22",
+				"weasis://%24acquire%3Apatient+-s+H4s+%24weasis%3Aconfig+wcfg%3D%22http%3A%2F%2Ftest.com%2Fweasisconfig%2Fws%2FlaunchConfig%3Fpro%3Dpro%26user%3Duser%26host%3Dhost%26config%3Dconfig%22",
 				launchUrl);
 	}
 

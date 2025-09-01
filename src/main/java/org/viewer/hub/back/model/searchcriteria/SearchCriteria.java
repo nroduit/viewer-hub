@@ -11,11 +11,17 @@
 
 package org.viewer.hub.back.model.searchcriteria;
 
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import org.springframework.util.MultiValueMap;
+import org.viewer.hub.back.enums.ViewerType;
 import org.viewer.hub.back.model.patient.Patient;
 import org.viewer.hub.back.model.validator.ExistingConnector;
 import org.viewer.hub.back.util.StringUtil;
@@ -31,6 +37,16 @@ import java.util.stream.Collectors;
 
 import static org.weasis.core.util.StringUtil.deAccent;
 
+@JsonTypeInfo(
+		use = JsonTypeInfo.Id.DEDUCTION,
+		defaultImpl= WeasisArchiveSearchCriteria.class
+)
+@JsonSubTypes({
+		@JsonSubTypes.Type(value = ArchiveSearchCriteria.class),
+		@JsonSubTypes.Type(value = IHESearchCriteria.class),
+		@JsonSubTypes.Type(value = WeasisIHESearchCriteria.class),
+		@JsonSubTypes.Type(value = WeasisArchiveSearchCriteria.class)
+})
 @Getter
 @ExistingConnector
 @ToString
@@ -57,6 +73,12 @@ public abstract class SearchCriteria implements Serializable {
 	@Schema(description = "Request should be done by using these archives in parameter", name = "archive",
 			type = "LinkedHashSet<String>", example = "vnaDb, vnaDicom, pacsDcm4chee")
 	private LinkedHashSet<String> archive = new LinkedHashSet<>();
+
+	@Setter
+	@Schema(description = "Request should be done by using this viewer", name = "viewer",
+			type = "ViewerType", example = "WEASIS")
+	private ViewerType viewer;
+
 
 	// Patient request filters
 	@Setter
@@ -170,6 +192,19 @@ public abstract class SearchCriteria implements Serializable {
 					.anyMatch(serie -> this.modalitiesInStudy.contains(serie.getModality())))
 				.collect(Collectors.toSet())));
 		}
+	}
+
+	/**
+	 * Jackson will deduct the object to build based on the criteria received in the request
+	 * @param params Request params received
+	 * @return built object can be one of the following: ArchiveSearchCriteria, IHESearchCriteria,
+	 * WeasisIHESearchCriteria, WeasisArchiveSearchCriteria
+	 */
+	public static SearchCriteria jacksonDeduction(MultiValueMap<String, String> params) {
+		ObjectMapper mapper = new ObjectMapper().findAndRegisterModules()
+				.enable(DeserializationFeature.UNWRAP_SINGLE_VALUE_ARRAYS)
+				.enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY);
+		return mapper.convertValue(params, SearchCriteria.class);
 	}
 
 }

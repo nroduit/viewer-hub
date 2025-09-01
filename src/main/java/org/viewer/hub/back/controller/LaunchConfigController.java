@@ -16,7 +16,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -24,23 +23,13 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.MultiValueMap;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.viewer.hub.back.constant.EndPoint;
 import org.viewer.hub.back.constant.MDCConstants;
 import org.viewer.hub.back.constant.ParamName;
 import org.viewer.hub.back.model.PerformanceModel;
 import org.viewer.hub.back.service.LaunchPreferenceService;
-import org.viewer.hub.back.util.DateTimeUtil;
-import org.viewer.hub.back.util.InetUtil;
-import org.viewer.hub.back.util.MDCUtil;
-import org.viewer.hub.back.util.MultiValueMapUtil;
-import org.viewer.hub.back.util.PackageUtil;
-import org.viewer.hub.back.util.PropertiesLoader;
+import org.viewer.hub.back.util.*;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -155,8 +144,7 @@ public class LaunchConfigController {
 
 		final String userParam = launchPropertiesMap.getFirst(ParamName.USER);
 		final String hostParam = launchPropertiesMap.getFirst(ParamName.HOST);
-		final String configParam = StringUtils.isNotBlank(launchPropertiesMap.getFirst(ParamName.CONFIG))
-				? launchPropertiesMap.getFirst(ParamName.CONFIG) : launchPropertiesMap.getFirst(ParamName.EXT_CFG);
+		final String configParam = launchPropertiesMap.getFirst(ParamName.CONFIG);
 		final String versionParam = launchPropertiesMap.getFirst(PARAM_LAUNCH_VERSION);
 
 		// GET_USER from parameters

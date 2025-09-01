@@ -217,10 +217,7 @@ public class Study implements Serializable {
 			Optional<Serie> optionalSerie = this.series.stream()
 				.filter(s -> Objects.equals(s.getSeriesInstanceUID(), serieToMerge.getSeriesInstanceUID()))
 				.findFirst();
-			if (optionalSerie.isPresent()) {
-				Serie serie = optionalSerie.get();
-				serie.merge(serieToMerge);
-			}
+            optionalSerie.ifPresent(serie -> serie.merge(serieToMerge));
 		});
 	}
 

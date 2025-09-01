@@ -17,14 +17,14 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
-import org.viewer.hub.back.config.properties.ConnectorConfigurationProperties;
-import org.viewer.hub.back.config.properties.EnvironmentOverrideProperties;
-import org.viewer.hub.back.config.properties.WeasisPackageDefaultConfigurationProperties;
+import org.viewer.hub.back.config.properties.*;
 
 @SpringBootApplication
 @EnableAsync
 @EnableConfigurationProperties({ ConnectorConfigurationProperties.class,
-		WeasisPackageDefaultConfigurationProperties.class, EnvironmentOverrideProperties.class })
+		WeasisPackageDefaultConfigurationProperties.class, EnvironmentOverrideProperties.class,
+		WeasisConfigurationProperties.class, OhifConfigurationProperties.class, SlicerConfigurationProperties.class,
+		MicroDicomConfigurationProperties.class})
 @EnableCaching
 @EnableScheduling
 public class ViewerHubApplication {

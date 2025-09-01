@@ -15,101 +15,120 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Valid;
+import jakarta.validation.Validator;
 import jakarta.validation.constraints.NotNull;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.util.MultiValueMap;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.view.RedirectView;
 import org.viewer.hub.back.constant.EndPoint;
-import org.viewer.hub.back.constant.ParamName;
+import org.viewer.hub.back.controller.exception.ConstraintException;
+import org.viewer.hub.back.model.searchcriteria.ArchiveSearchCriteria;
+import org.viewer.hub.back.model.searchcriteria.IHESearchCriteria;
 import org.viewer.hub.back.model.searchcriteria.SearchCriteria;
-import org.viewer.hub.back.model.searchcriteria.WeasisArchiveSearchCriteria;
-import org.viewer.hub.back.model.searchcriteria.WeasisIHESearchCriteria;
 import org.viewer.hub.back.service.CryptographyService;
-import org.viewer.hub.back.service.WeasisDisplayService;
+import org.viewer.hub.back.service.DisplaySelectViewerRuleService;
 import org.viewer.hub.back.util.InetUtil;
 
+import java.util.Set;
+import java.util.stream.Collectors;
+
 /**
- * Controller managing the display of weasis
+ * Controller managing the display of viewers
  */
 @RestController
 @RequestMapping(EndPoint.DISPLAY_PATH)
-@Tag(name = "Display", description = "API Endpoints for managing display")
+@Tag(name = "Display", description = "API Endpoints for displaying viewers")
 @Slf4j
 @Validated
 public class DisplayController {
 
 	// Services
-	private final WeasisDisplayService weasisDisplayService;
-
+	private final DisplaySelectViewerRuleService displaySelectViewerRuleService;
 	private final CryptographyService cryptographyService;
+	private final Validator validator;
 
 	/**
 	 * Autowired constructor
-	 * @param weasisDisplayService display service
+	 * @param displaySelectViewerRuleService service which will select the viewer to launch depending on rules
 	 * @param cryptographyService cryptography service
 	 */
 	@Autowired
-	public DisplayController(final WeasisDisplayService weasisDisplayService,
-			final CryptographyService cryptographyService) {
-		this.weasisDisplayService = weasisDisplayService;
+	public DisplayController(final DisplaySelectViewerRuleService displaySelectViewerRuleService,
+			final CryptographyService cryptographyService,  final Validator validator) {
+		this.displaySelectViewerRuleService = displaySelectViewerRuleService;
 		this.cryptographyService = cryptographyService;
+		this.validator = validator;
 	}
 
 	/**
-	 * Launch Weasis depending on IHE search criteria: not authenticated version
-	 * @param weasisIHESearchCriteria weasis IHE Search Criteria
-	 * @param extCfg ext config
-	 * @return launch weasis with the weasis command thanks to the weasis launch url.
-	 * Build also the manifest corresponding to the search criteria if not present in the
-	 * cache.
+	 * Launch a viewer depending on search criteria: unsecured version
+	 * @param params Search Criteria
+	 * @return RedirectView
 	 */
-	@Operation(summary = "Launch Weasis (IHE)(Not authenticated)",
-			description = "Launch Weasis depending on IHE search criteria: not authenticated version")
+	@Operation(summary = "Launch a viewer (Regular)(Not Authenticated)",
+			description = "Launch a viewer depending on search criteria: not authenticated version")
+	@GetMapping
+	public RedirectView launchViewerWithoutIHEParameters(HttpServletRequest request, Authentication authentication,
+														 @RequestParam MultiValueMap<String,String> params) {
+		return launchViewerByEvaluatingQueryParams(request, authentication, params, ArchiveSearchCriteria.class);
+	}
+
+	/**
+	 * Launch a viewer depending on search criteria: secured version
+	 * @param params Search Criteria
+	 * @return RedirectView
+	 */
+	@Operation(summary = "Launch a viewer (Regular)(Authenticated)",
+			description = "Launch a viewer depending on search criteria: authenticated version")
+	@GetMapping(EndPoint.AUTH_PATH)
+	public RedirectView launchAuthViewerWithoutIHEParameters(HttpServletRequest request,
+															 @Parameter(hidden = true, required = true) @NotNull Authentication authentication,
+															 @RequestParam MultiValueMap<String,String> params) {
+		try {
+			return this.launchViewerWithoutIHEParameters(request, authentication, params);
+		}
+		finally {
+			// Reset the authentication in order to force OAuth2 to login
+			// again and get a new fresh access token when using oauth2Login in
+			// SecurityConfiguration
+			SecurityContextHolder.getContext().setAuthentication(null);
+		}
+	}
+
+	/**
+	 * Launch a viewer depending on IHE search criteria: not authenticated version
+	 * @param params Search Criteria
+	 * @return RedirectView
+	 */
+	@Operation(summary = "Launch a viewer (IHE)(Not authenticated)",
+			description = "Launch a viewer depending on IHE search criteria: not authenticated version")
 	@GetMapping(EndPoint.IHE_INVOKE_IMAGE_DISPLAY_PATH)
-	public RedirectView launchWeasisWithIHEParameters(HttpServletRequest request, Authentication authentication,
-			@Valid WeasisIHESearchCriteria weasisIHESearchCriteria,
-			@RequestParam(value = ParamName.EXT_CFG, required = false) String extCfg) {
-		// TODO: workaround=> currently not working with different name => conflict ?
-		// to do JacksonConfig
-		weasisIHESearchCriteria.setExtCfg(extCfg);
-
-		// Resolve the host of the request in case it is not defined
-		// resolveHostSearchCriteria(request, weasisIHESearchCriteria);
-
-		// If encoding enabled decode values
-		this.cryptographyService.decode(weasisIHESearchCriteria);
-		return new RedirectView(
-				this.weasisDisplayService.retrieveWeasisLaunchUrl(weasisIHESearchCriteria, authentication));
+	public RedirectView launchViewerWithIHEParameters(HttpServletRequest request, Authentication authentication,
+													  @RequestParam MultiValueMap<String,String> params) {
+		return launchViewerByEvaluatingQueryParams(request, authentication, params, IHESearchCriteria.class);
 	}
-
 	/**
-	 * Launch Weasis depending on IHE search criteria: authenticated version
-	 * @param weasisIHESearchCriteria weasis IHE Search Criteria
-	 * @param extCfg ext config
-	 * @return launch weasis with the weasis command thanks to the weasis launch url.
-	 * Build also the manifest corresponding to the search criteria if not present in the
-	 * cache.
+	 * Launch a viewer depending on IHE search criteria: authenticated version
+	 * @param params Search Criteria
+	 * @return RedirectView
 	 */
-	@Operation(summary = "Launch Weasis (IHE)(Authenticated)",
-			description = "Launch Weasis depending on IHE search criteria: authenticated version")
+	@Operation(summary = "Launch a viewer (IHE)(Authenticated)",
+			description = "Launch a viewer depending on IHE search criteria: authenticated version")
 	@GetMapping(EndPoint.AUTH_IHE_INVOKE_IMAGE_DISPLAY_PATH)
-	public RedirectView launchAuthWeasisWithIHEParameters(HttpServletRequest request,
+	public RedirectView launchAuthViewerWithIHEParameters(HttpServletRequest request,
 			@Parameter(hidden = true, required = true) @NotNull Authentication authentication,
-			@Valid WeasisIHESearchCriteria weasisIHESearchCriteria,
-			@RequestParam(value = ParamName.EXT_CFG, required = false) String extCfg) {
+														  @RequestParam MultiValueMap<String,String> params) {
 		try {
-			return this.launchWeasisWithIHEParameters(request, authentication, weasisIHESearchCriteria, extCfg);
+			return this.launchViewerWithIHEParameters(request, authentication, params);
 		}
 		finally {
 			// Reset the authentication in order to force OAuth2 to login
@@ -119,77 +138,49 @@ public class DisplayController {
 		}
 	}
 
-	/**
-	 * Launch Weasis depending on search criteria: unsecured version
-	 * @param weasisArchiveSearchCriteria weasis Search Criteria
-	 * @param extCfg ext config
-	 * @return launch weasis with the weasis command thanks to the weasis launch url.
-	 * Build also the manifest corresponding to the search criteria if not present in the
-	 * cache.
-	 */
-	@Operation(summary = "Launch Weasis (Regular)(Not Authenticated)",
-			description = "Launch Weasis depending on search criteria: not authenticated version")
-	@GetMapping(EndPoint.WEASIS_PATH)
-	public RedirectView launchWeasisWithoutIHEParameters(HttpServletRequest request, Authentication authentication,
-			@Valid WeasisArchiveSearchCriteria weasisArchiveSearchCriteria,
-			@RequestParam(value = ParamName.EXT_CFG, required = false) String extCfg) {
-		// TODO: workaround=> currently not working with different name => conflict ?
-		// to do JacksonConfig
-		weasisArchiveSearchCriteria.setExtCfg(extCfg);
-
-		// Resolve the host of the request in case it is not defined
-		// resolveHostSearchCriteria(request, weasisArchiveSearchCriteria);
-
-		// If encoding enabled decode values
-		this.cryptographyService.decode(weasisArchiveSearchCriteria);
-		return new RedirectView(
-				this.weasisDisplayService.retrieveWeasisLaunchUrl(weasisArchiveSearchCriteria, authentication));
-	}
-
-	/**
-	 * Launch Weasis depending on search criteria: secured version
-	 * @param weasisArchiveSearchCriteria weasis Search Criteria
-	 * @param extCfg ext config
-	 * @return launch weasis with the weasis command thanks to the weasis launch url.
-	 * Build also the manifest corresponding to the search criteria if not present in the
-	 * cache.
-	 */
-	@Operation(summary = "Launch Weasis (Regular)(Authenticated)",
-			description = "Launch Weasis depending on search criteria: authenticated version")
-	@GetMapping(EndPoint.AUTH_WEASIS_PATH)
-	public RedirectView launchAuthWeasisWithoutIHEParameters(HttpServletRequest request,
-			@Parameter(hidden = true, required = true) @NotNull Authentication authentication,
-			@Valid WeasisArchiveSearchCriteria weasisArchiveSearchCriteria,
-			@RequestParam(value = ParamName.EXT_CFG, required = false) String extCfg) {
-		try {
-			return this.launchWeasisWithoutIHEParameters(request, authentication, weasisArchiveSearchCriteria, extCfg);
-		}
-		finally {
-			// Reset the authentication in order to force OAuth2 to login
-			// again and get a new fresh access token when using oauth2Login in
-			// SecurityConfiguration
-			SecurityContextHolder.getContext().setAuthentication(null);
-		}
-	}
-
-	@Operation(summary = "Launch Weasis (Post)(IHE)(Not Authenticated)",
-			description = "Launch Weasis depending on IHE search criteria: not authenticated version => search criteria in body")
+	@Operation(summary = "Launch a viewer (Post)(IHE)(Not Authenticated)",
+			description = "Launch a viewer depending on IHE search criteria: not authenticated version => search criteria in body")
 	@PostMapping(EndPoint.IHE_INVOKE_IMAGE_DISPLAY_PATH)
-	public RedirectView launchWeasisWithIHEParameters(HttpServletRequest request,
-			@RequestBody @Valid WeasisIHESearchCriteria weasisIHESearchCriteria) {
-		return this.launchWeasisWithIHEParameters(request, null, weasisIHESearchCriteria,
-				weasisIHESearchCriteria.getExtCfg());
+	public RedirectView launchViewerWithIHEParameters(HttpServletRequest request,
+			@RequestBody @Valid IHESearchCriteria iheSearchCriteria) {
+		return this.launchViewer(null, iheSearchCriteria);
 	}
 
-	@Operation(summary = "Launch Weasis (Post)(Regular)(Not Authenticated)",
-			description = "Launch Weasis depending on search criteria: not authenticated version => search criteria in body")
-	@PostMapping(EndPoint.WEASIS_PATH)
-	public RedirectView launchWeasisWithoutIHEParameters(HttpServletRequest request,
-			@RequestBody @Valid WeasisArchiveSearchCriteria weasisArchiveSearchCriteria) {
-		return this.launchWeasisWithoutIHEParameters(request, null, weasisArchiveSearchCriteria,
-				weasisArchiveSearchCriteria.getExtCfg());
+	@Operation(summary = "Launch a viewer (Post)(Regular)(Not Authenticated)",
+			description = "Launch a viewer depending on search criteria: not authenticated version => search criteria in body")
+	@PostMapping
+	public RedirectView launchViewerWithoutIHEParameters(HttpServletRequest request,
+			@RequestBody @Valid ArchiveSearchCriteria archiveSearchCriteria) {
+		return this.launchViewer(null, archiveSearchCriteria);
 	}
 
+	/**
+	 * Launch a viewer depending on search criteria in request params
+	 * @param params Search Criteria to evaluate
+	 * @param searchCriteriaClassType Class type expected
+	 * @return RedirectView
+	 */
+	private <T extends SearchCriteria> RedirectView launchViewerByEvaluatingQueryParams(HttpServletRequest request, Authentication authentication, MultiValueMap<String, String> params, Class<T> searchCriteriaClassType) {
+		// Map search criteria to corresponding object and validate inputs
+		SearchCriteria searchCriteria = retrieveSearchCriteriaFromQueryParams(params, searchCriteriaClassType);
+
+		return launchViewer(authentication, searchCriteria);
+	}
+
+	/**
+	 * Launch a viewer depending on search criteria
+	 * @param authentication Authentication
+	 * @param searchCriteria Search Criteria to evaluate
+	 * @return RedirectView
+	 */
+	private RedirectView launchViewer(Authentication authentication, SearchCriteria searchCriteria) {
+		// If encoding enabled decode values
+		this.cryptographyService.decode(searchCriteria);
+
+		// Launch viewer
+		return new RedirectView(
+				this.displaySelectViewerRuleService.determineViewerToDisplay(searchCriteria, authentication));
+	}
 	/**
 	 * Resolve the host of the request in case it is not defined
 	 * @param request Request
@@ -199,6 +190,34 @@ public class DisplayController {
 		if (searchCriteria != null && StringUtils.isBlank(searchCriteria.getHost())) {
 			searchCriteria.setHost(InetUtil.getClientHostFromRequest(request));
 		}
+	}
+
+	/**
+	 * Map search criteria to corresponding object and validate inputs
+	 * @param parameters Parameters to evaluate
+	 * @param classToEvaluate Parent class type expected
+	 * @return SearchCriteria built from parameters
+	 */
+	private SearchCriteria retrieveSearchCriteriaFromQueryParams(MultiValueMap<String, String> parameters, @NotNull Class<?> classToEvaluate) {
+		// let Jackson do its deduction & binding
+		SearchCriteria searchCriteria = SearchCriteria.jacksonDeduction(parameters);
+
+		// Compare with expected parent class
+		if(!classToEvaluate.isInstance(searchCriteria)){
+			if (searchCriteria == null) {
+				throw new ConstraintException("Search criteria cannot be null.");
+			}
+			else {
+				throw new ConstraintException("Wrong type parameters, deducted class %s instead of %s".formatted(searchCriteria.getClass(), classToEvaluate.getTypeName()));
+			}
+		}
+
+		// Validation of constraints
+		Set<ConstraintViolation<SearchCriteria>> violations = validator.validate(searchCriteria);
+		if (!violations.isEmpty()) {
+			throw new ConstraintViolationException("Validation failed: %s".formatted(violations.stream().map(ConstraintViolation::getMessage).collect(Collectors.joining(","))), violations);
+		}
+		return searchCriteria;
 	}
 
 }

@@ -33,18 +33,7 @@ import org.viewer.hub.back.enums.ConnectorAuthType;
 import org.viewer.hub.back.enums.ConnectorType;
 import org.viewer.hub.back.model.patient.DicomPatientSex;
 import org.viewer.hub.back.model.patient.Patient;
-import org.viewer.hub.back.model.property.ConnectorAuthenticationProperty;
-import org.viewer.hub.back.model.property.ConnectorDicomWebProperty;
-import org.viewer.hub.back.model.property.ConnectorProperty;
-import org.viewer.hub.back.model.property.ConnectorWadoProperty;
-import org.viewer.hub.back.model.property.DbConnectorProperty;
-import org.viewer.hub.back.model.property.DbConnectorQueryProperty;
-import org.viewer.hub.back.model.property.DicomConnectorDimseProperty;
-import org.viewer.hub.back.model.property.DicomConnectorProperty;
-import org.viewer.hub.back.model.property.DicomWebConnectorProperty;
-import org.viewer.hub.back.model.property.SearchCriteriaProperty;
-import org.viewer.hub.back.model.property.WeasisConnectorProperty;
-import org.viewer.hub.back.model.property.WeasisManifestConnectorProperty;
+import org.viewer.hub.back.model.property.*;
 import org.viewer.hub.back.model.searchcriteria.ArchiveSearchCriteria;
 import org.viewer.hub.back.service.DicomConnectorQueryService;
 import org.viewer.hub.back.service.DicomWebClientService;
@@ -240,7 +229,7 @@ class DicomConnectorQueryServiceImplTest {
 
 		// Call service
 		Set<Patient> patients = this.dicomConnectorQueryService.retrievePatientsFromPatientIdsDicomConnector(patientIds,
-				this.dicomConnectorProperty, archiveSearchCriteria, null);
+				this.dicomConnectorProperty, null);
 
 		// Test results
 		assertEquals("patientId", patients.stream().findFirst().get().getPatientID());
@@ -261,7 +250,7 @@ class DicomConnectorQueryServiceImplTest {
 
 		// Call service
 		Set<Patient> patients = this.dicomConnectorQueryService.retrievePatientsFromPatientIdsDicomConnector(patientIds,
-				this.dicomWebConnectorProperty, weasisSearchCriteria, null);
+				this.dicomWebConnectorProperty, null);
 
 		// Test results
 		assertEquals("patientId", patients.stream().findFirst().get().getPatientID());

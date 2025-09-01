@@ -19,11 +19,10 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
-import org.viewer.hub.back.entity.LaunchConfigEntity;
-import org.viewer.hub.back.entity.LaunchEntity;
-import org.viewer.hub.back.entity.LaunchEntityPK;
-import org.viewer.hub.back.entity.LaunchPreferredEntity;
-import org.viewer.hub.back.entity.TargetEntity;
+import org.viewer.hub.back.config.properties.MicroDicomConfigurationProperties;
+import org.viewer.hub.back.config.properties.SlicerConfigurationProperties;
+import org.viewer.hub.back.config.properties.WeasisConfigurationProperties;
+import org.viewer.hub.back.entity.*;
 import org.viewer.hub.back.enums.PreferredType;
 import org.viewer.hub.back.enums.TargetType;
 import org.viewer.hub.back.repository.LaunchConfigRepository;
@@ -55,7 +54,16 @@ class LaunchByTargetConfigPreferredSpecificationTest {
 	private TargetRepository targetRepository;
 
 	@MockBean
-	ClientRegistrationRepository clientRegistrationRepository;
+	private ClientRegistrationRepository clientRegistrationRepository;
+
+	@MockBean
+	private WeasisConfigurationProperties weasisConfigurationProperties;
+
+	@MockBean
+	private SlicerConfigurationProperties slicerConfigurationProperties;
+
+	@MockBean
+	private MicroDicomConfigurationProperties microDicomConfigurationProperties;
 
 	@BeforeEach
 	public void init() {

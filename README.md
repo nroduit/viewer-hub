@@ -9,13 +9,13 @@ ViewerHub allows to manage various viewers on a IT Infrastructure.
 https://weasis.org/en/viewer-hub/index.html
 
 ## Main functionalities
-- Launch of Weasis viewers (several launch endpoints, including IHE IID Profile-compatible launch)
+- Launch of multiple viewers (Weasis, OHIF, 3D Slicer, MicroDicom) with several launch endpoints, including IHE IID Profile-compatible launch
 - Creation and association of user or machine groups
 - Creation of an xml file (manifest) containing the studies, series and instances to be downloaded. This file will then be transmitted to Weasis to load the images into the viewer.
 - Manifest storage in a redis cache
 - Storage of resources required by the different versions of Weasis on Minio/S3
 - Creation of versions of Weasis launched only for certain groups
-- Live changed of Weasis properties 
+- Live changes of Weasis properties 
 - Versions management of i18n translations used by Weasis
 - Compatibility management between versions of Weasis installed on clients and versions of resources uploaded in Viewer-Hub (storage on Minio S3 + cache)
 - Pacs connectors management
@@ -85,12 +85,26 @@ In order to access to the pacs dcm4chee:
 http://localhost:8080/dcm4chee-arc/ui2/en/study/study
 ```
 
-As an example, you can import the file "dicom-example" located in the folders "docker -> dcm4chee" by using the dcm4chee interface.
+As an example, you can import the file "dicom-example" located in the folders "docker" -> "dicom-examples" by using the dcm4chee interface.
 ("More functions" -> "Upload DICOM Object" -> "Select the STOW-RS server": "DCM4CHEE")
 
 ## Nexus
 
 - Nexus console accessible at this address: http://localhost:8086/
+
+## Orthanc
+
+In order to access to the pacs orthanc:
+```
+http://localhost:8042
+```
+
+Use the following credentials:
+- User: `orthanc-user`
+- Password: `password`
+
+As an example, you can import the file "dicom-example" located in the folders "docker -> dicom-examples" by using the orthanc interface.
+("Upload" -> "Select files to upload" and then "Start the upload")
 
 ## Run configuration
 
@@ -140,7 +154,59 @@ http://localhost:8761
 
 ## Launch Weasis
 
-Once all the steps above completed, launch the below URL to launch Weasis and load the dicom image stored in the dcm4chee pacs
+Once all the steps above completed, launch the below URL to launch Weasis and the loading of the dicom image stored in the dcm4chee pacs
+
+Dcm4chee:
 ```
-http://localhost:8081/display/weasis?studyUID=1.3.12.2.1107.5.1.4.54023.30000004093013443132800000021&archive=dcm4chee-local
+http://localhost:8081/display?viewer=WEASIS&studyUID=1.3.12.2.1107.5.1.4.54023.30000004093013443132800000021&archive=dcm4chee-local
+```
+
+Orthanc:
+```
+http://localhost:8081/display?viewer=WEASIS&studyUID=1.3.12.2.1107.5.1.4.54023.30000004093013443132800000021&archive=orthanc-local
+```
+
+## Launch Ohif
+
+Once all the steps above completed, launch the below URL to launch Ohif and the loading of the dicom image stored in the dcm4chee pacs
+
+Dcm4chee 
+```
+http://localhost:8081/display?viewer=OHIF&studyUID=1.3.12.2.1107.5.1.4.54023.30000004093013443132800000021&archive=dcm4chee-local
+```
+
+Orthanc (TODO: in local currently needs to open Chrome without cors before launching below url: in cmd => "C:\Program Files\Google\Chrome\Application\chrome.exe" --user-data-dir="C:\chrome-dev-data" --disable-web-security)
+```
+http://localhost:8081/display?viewer=OHIF&studyUID=1.3.12.2.1107.5.1.4.54023.30000004093013443132800000021&archive=orthanc-local
+```
+
+## Launch 3D Slicer
+
+You need to install 3D Slicer in your machine to use it.
+Once all the steps above completed, launch the below URL to launch 3D Slicer and the loading of the dicom image stored in the dcm4chee pacs
+
+Dcm4chee
+```
+http://localhost:8081/display?viewer=SLICER&studyUID=1.3.12.2.1107.5.1.4.54023.30000004093013443132800000021&archive=dcm4chee-local
+```
+
+Orthanc
+```
+http://localhost:8081/display?viewer=SLICER&studyUID=1.3.12.2.1107.5.1.4.54023.30000004093013443132800000021&archive=orthanc-local
+```
+
+## Launch Micro Dicom
+
+You need to install Micro Dicom in your machine to use it.
+You also need to add the MICRODICOM AET to the Dcm4chee pacs and to configure the Dicom server corresponding to the Dcm4chee pacs in MicroDicom (localhost:11112, aet DCM4CHEE)
+Once all the steps above completed, launch the below URL to launch Micro Dicom and the loading of the dicom image stored in the dcm4chee pacs
+
+Dcm4chee
+```
+http://localhost:8081/display?viewer=MICRODICOM&studyUID=1.3.12.2.1107.5.1.4.54023.30000004093013443132800000021&archive=dcm4chee-local
+```
+
+Orthanc
+```
+http://localhost:8081/display?viewer=MICRODICOM&studyUID=1.3.12.2.1107.5.1.4.54023.30000004093013443132800000021&archive=orthanc-local
 ```

@@ -18,7 +18,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.UriComponentsBuilder;
-import org.viewer.hub.back.constant.CommandName;
+import org.viewer.hub.back.config.properties.WeasisConfigurationProperties;
 import org.viewer.hub.back.constant.EndPoint;
 import org.viewer.hub.back.constant.ParamName;
 import org.viewer.hub.back.model.manifest.Manifest;
@@ -45,13 +45,16 @@ public class WeasisDisplayServiceImpl implements WeasisDisplayService {
 
 	private final WeasisService weasisService;
 
+	private final WeasisConfigurationProperties weasisConfigurationProperties;
+
 	@Value("${viewer-hub.server.url}")
 	private String viewerHubServerUrl;
 
 	@Autowired
-	public WeasisDisplayServiceImpl(final CacheService cacheService, final WeasisService weasisService) {
+	public WeasisDisplayServiceImpl(final CacheService cacheService, final WeasisService weasisService, final WeasisConfigurationProperties weasisConfigurationProperties) {
 		this.cacheService = cacheService;
 		this.weasisService = weasisService;
+		this.weasisConfigurationProperties = weasisConfigurationProperties;
 	}
 
 	@Override
@@ -118,9 +121,9 @@ public class WeasisDisplayServiceImpl implements WeasisDisplayService {
 	 * @param weasisConfigCommand Weasis Config command
 	 * @return weasis protocol encoded url built
 	 */
-	private static String buildWeasisProtocolCommand(String dicomGetOrArgumentCommand, String weasisConfigCommand) {
-		return CommandName.LAUNCH_URL_WEASIS_COMMANDS_CONFIG.formatted(URLEncoder
-			.encode("%s %s".formatted(dicomGetOrArgumentCommand, weasisConfigCommand), StandardCharsets.UTF_8));
+	private String buildWeasisProtocolCommand(String dicomGetOrArgumentCommand, String weasisConfigCommand) {
+		return "%s%s".formatted(weasisConfigurationProperties.getCommand().getProtocol(), URLEncoder
+                .encode("%s %s".formatted(dicomGetOrArgumentCommand, weasisConfigCommand), StandardCharsets.UTF_8));
 	}
 
 	/**
@@ -149,7 +152,7 @@ public class WeasisDisplayServiceImpl implements WeasisDisplayService {
 			.queryParam(ParamName.KEY, key);
 
 		// Weasis dicom get command
-		return "%s \"%s\"".formatted(CommandName.WEASIS_DICOM_GET_COMMAND, uriBuilderRetrieveManifest.toUriString());
+		return "%s \"%s\"".formatted(weasisConfigurationProperties.getCommand().getGet(), uriBuilderRetrieveManifest.toUriString());
 	}
 
 	/**
@@ -170,11 +173,6 @@ public class WeasisDisplayServiceImpl implements WeasisDisplayService {
 				? ((WeasisIHESearchCriteria) searchCriteria).getPro()
 				: ((WeasisArchiveSearchCriteria) searchCriteria).getPro();
 
-		// Ext-cfg
-		String extCfg = searchCriteria instanceof IHESearchCriteria
-				? ((WeasisIHESearchCriteria) searchCriteria).getExtCfg()
-				: ((WeasisArchiveSearchCriteria) searchCriteria).getExtCfg();
-
 		// Config
 		String config = searchCriteria instanceof IHESearchCriteria
 				? ((WeasisIHESearchCriteria) searchCriteria).getConfig()
@@ -193,17 +191,13 @@ public class WeasisDisplayServiceImpl implements WeasisDisplayService {
 		if (searchCriteria.getHost() != null && !searchCriteria.getHost().isBlank()) {
 			uriBuilderLaunchConfig.queryParam(ParamName.HOST, searchCriteria.getHost());
 		}
-		// Ext-cfg
-		if (extCfg != null && !extCfg.isBlank()) {
-			uriBuilderLaunchConfig.queryParam(ParamName.EXT_CFG, extCfg);
-		}
 		// Config
 		if (config != null && !config.isBlank()) {
 			uriBuilderLaunchConfig.queryParam(ParamName.CONFIG, config);
 		}
 
 		// Weasis config command
-		return "%s\"%s\"".formatted(CommandName.WEASIS_CONFIG_COMMAND, uriBuilderLaunchConfig.toUriString());
+		return "%s\"%s\"".formatted(weasisConfigurationProperties.getCommand().getConfig(), uriBuilderLaunchConfig.toUriString());
 	}
 
 }
