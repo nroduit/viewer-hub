@@ -55,13 +55,13 @@ public class WeasisConnectorQueryServiceImpl implements WeasisConnectorQueryServ
 			if (!connector.getSearchCriteria().getDeactivated().contains(QueryLevelType.PATIENT_ID)) {
 				if (Objects.equals(ConnectorType.DB, connector.getType())) {
 					manifest.update(this.dbConnectorQueryService.retrievePatientsFromPatientIdsDbConnector(patientIds,
-							connector/*, searchCriteria*/), connector);
+							connector), connector);
 				}
 				else if (Objects.equals(ConnectorType.DICOM, connector.getType())
 						|| Objects.equals(ConnectorType.DICOM_WEB, connector.getType())) {
 					// Update manifest with patients found
 					manifest.update(this.dicomConnectorQueryService.retrievePatientsFromPatientIdsDicomConnector(
-							patientIds, connector, /*searchCriteria,*/ authentication), connector);
+							patientIds, connector, authentication), connector);
 				}
 			}
 		});
