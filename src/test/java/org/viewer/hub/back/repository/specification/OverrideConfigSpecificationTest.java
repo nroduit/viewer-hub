@@ -18,11 +18,10 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
-import org.viewer.hub.back.entity.LaunchConfigEntity;
-import org.viewer.hub.back.entity.OverrideConfigEntity;
-import org.viewer.hub.back.entity.OverrideConfigEntityPK;
-import org.viewer.hub.back.entity.PackageVersionEntity;
-import org.viewer.hub.back.entity.TargetEntity;
+import org.viewer.hub.back.config.properties.MicroDicomConfigurationProperties;
+import org.viewer.hub.back.config.properties.SlicerConfigurationProperties;
+import org.viewer.hub.back.config.properties.WeasisConfigurationProperties;
+import org.viewer.hub.back.entity.*;
 import org.viewer.hub.back.enums.TargetType;
 import org.viewer.hub.back.repository.LaunchConfigRepository;
 import org.viewer.hub.back.repository.OverrideConfigRepository;
@@ -33,9 +32,7 @@ import org.viewer.hub.front.views.bundle.override.component.OverrideConfigFilter
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 @DataJpaTest
 class OverrideConfigSpecificationTest {
@@ -53,7 +50,16 @@ class OverrideConfigSpecificationTest {
 	private OverrideConfigRepository overrideConfigRepository;
 
 	@MockBean
-	ClientRegistrationRepository clientRegistrationRepository;
+	private ClientRegistrationRepository clientRegistrationRepository;
+
+	@MockBean
+	private WeasisConfigurationProperties weasisConfigurationProperties;
+
+	@MockBean
+	private SlicerConfigurationProperties slicerConfigurationProperties;
+
+	@MockBean
+	private MicroDicomConfigurationProperties microDicomConfigurationProperties;
 
 	@BeforeEach
 	void setUp() {

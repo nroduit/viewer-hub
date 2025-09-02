@@ -48,6 +48,9 @@ public class EndPoint {
 
 	public static final String WEASIS_PATH = "/weasis";
 
+
+	public static final String AUTH_PATH = "/auth";
+
 	public static final String AUTH_WEASIS_PATH = "/auth/weasis";
 
 	public static final String IHE_INVOKE_IMAGE_DISPLAY_PATH = "/IHEInvokeImageDisplay";

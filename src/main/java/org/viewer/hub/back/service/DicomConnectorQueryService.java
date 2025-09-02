@@ -15,7 +15,6 @@ import jakarta.validation.Valid;
 import org.springframework.security.core.Authentication;
 import org.viewer.hub.back.model.patient.Patient;
 import org.viewer.hub.back.model.property.ConnectorProperty;
-import org.viewer.hub.back.model.searchcriteria.SearchCriteria;
 
 import java.util.Set;
 
@@ -28,11 +27,10 @@ public interface DicomConnectorQueryService {
 	 * Retrieve patients from patients ids requests with dicom/dicom-web connector
 	 * @param patientIds Patient ids to look for
 	 * @param connector Connector properties
-	 * @param searchCriteria Search criteria
 	 * @param authentication Authentication
 	 */
 	Set<Patient> retrievePatientsFromPatientIdsDicomConnector(Set<String> patientIds,
-			@Valid ConnectorProperty connector, @Valid SearchCriteria searchCriteria, Authentication authentication);
+			@Valid ConnectorProperty connector, Authentication authentication);
 
 	/**
 	 * Retrieve patients from study instance uids requests with dicom/dicom-web connector

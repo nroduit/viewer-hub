@@ -21,13 +21,8 @@ import org.springframework.stereotype.Service;
 import org.viewer.hub.back.config.tenant.TenantIdentifierResolver;
 import org.viewer.hub.back.constant.DbQueryConstant;
 import org.viewer.hub.back.model.connector.DbConnectorResult;
-import org.viewer.hub.back.model.patient.DicomPatientSex;
-import org.viewer.hub.back.model.patient.Instance;
-import org.viewer.hub.back.model.patient.Patient;
-import org.viewer.hub.back.model.patient.Serie;
-import org.viewer.hub.back.model.patient.Study;
+import org.viewer.hub.back.model.patient.*;
 import org.viewer.hub.back.model.property.ConnectorProperty;
-import org.viewer.hub.back.model.searchcriteria.SearchCriteria;
 import org.viewer.hub.back.service.DbConnectorQueryService;
 
 import java.util.HashSet;
@@ -52,12 +47,9 @@ public class DbConnectorQueryServiceImpl implements DbConnectorQueryService {
 
 	@Override
 	public Set<Patient> retrievePatientsFromPatientIdsDbConnector(Set<String> patientIds,
-			@Valid ConnectorProperty connector, @Valid SearchCriteria searchCriteria) {
-		Set<Patient> patientsFound = this.retrieveDbConnectorResults(connector, DbQueryConstant.PARAM_PATIENT_IDS,
+			@Valid ConnectorProperty connector) {
+		return this.retrieveDbConnectorResults(connector, DbQueryConstant.PARAM_PATIENT_IDS,
 				patientIds, connector.getDbConnector().getQuery().getPatientIdColumn(), DbQueryConstant.IN_PATIENT_ID);
-
-		// Apply patient request filters
-		return searchCriteria.applyPatientRequestSearchCriteriaFilters(patientsFound);
 	}
 
 	@Override

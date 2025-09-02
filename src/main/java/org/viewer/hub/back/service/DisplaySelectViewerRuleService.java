@@ -9,19 +9,14 @@
  *
  */
 
-package org.viewer.hub.back.constant;
+package org.viewer.hub.back.service;
 
-public final class CommandName {
+import org.springframework.security.core.Authentication;
+import org.viewer.hub.back.model.searchcriteria.SearchCriteria;
 
-	public static final String WEASIS_CONFIG_COMMAND = "$weasis:config wcfg=";
+public interface DisplaySelectViewerRuleService {
 
-	public static final String WEASIS_DICOM_GET_COMMAND = "$dicom:get -w";
+    String determineViewerToDisplay(SearchCriteria searchCriteria, Authentication authentication);
 
-	// Protocol for launching weasis
-	public static final String LAUNCH_URL_WEASIS_COMMANDS_CONFIG = "weasis://%s";
-
-	private CommandName() {
-		// Private constructor to hide implicit one
-	}
 
 }

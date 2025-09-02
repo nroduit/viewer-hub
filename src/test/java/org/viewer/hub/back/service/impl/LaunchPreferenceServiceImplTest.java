@@ -23,45 +23,21 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.viewer.hub.back.controller.exception.ConstraintException;
 import org.viewer.hub.back.controller.exception.ParameterException;
-import org.viewer.hub.back.entity.GroupEntity;
-import org.viewer.hub.back.entity.GroupEntityPK;
-import org.viewer.hub.back.entity.LaunchConfigEntity;
-import org.viewer.hub.back.entity.LaunchEntity;
-import org.viewer.hub.back.entity.LaunchEntityPK;
-import org.viewer.hub.back.entity.LaunchPreferredEntity;
-import org.viewer.hub.back.entity.PackageVersionEntity;
-import org.viewer.hub.back.entity.TargetEntity;
+import org.viewer.hub.back.entity.*;
 import org.viewer.hub.back.enums.PreferredType;
 import org.viewer.hub.back.enums.TargetType;
-import org.viewer.hub.back.repository.GroupRepositoryTest;
-import org.viewer.hub.back.repository.LaunchConfigRepository;
-import org.viewer.hub.back.repository.LaunchPreferredRepository;
-import org.viewer.hub.back.repository.LaunchRepository;
-import org.viewer.hub.back.repository.LaunchRepositoryTest;
-import org.viewer.hub.back.repository.TargetRepository;
+import org.viewer.hub.back.repository.*;
 import org.viewer.hub.back.service.GroupService;
 import org.viewer.hub.back.service.LaunchPreferenceService;
 import org.viewer.hub.back.service.OverrideConfigService;
 import org.viewer.hub.back.service.PackageService;
 import org.viewer.hub.back.util.PackageUtil;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -101,7 +77,7 @@ class LaunchPreferenceServiceImplTest {
 		LaunchPreferredEntity launchPreferedEntity = new LaunchPreferredEntity();
 		launchPreferedEntity.setId(1L);
 		launchPreferedEntity.setName("launch");
-		launchPreferedEntity.setType(PreferredType.EXT_CFG.getCode());
+		launchPreferedEntity.setType(PreferredType.CONFIG.getCode());
 		// GroupEntity
 		GroupEntity groupEntity = new GroupEntity();
 		GroupEntityPK groupEntityPK = new GroupEntityPK();
@@ -227,7 +203,7 @@ class LaunchPreferenceServiceImplTest {
 
 		// Test results
 		assertEquals(10, map.size());
-		assertEquals("weasis", map.get(PreferredType.EXT_CFG.getCode()).get(0));
+		assertEquals("weasis", map.get(PreferredType.CONFIG.getCode()).get(0));
 	}
 
 	@Test
@@ -382,11 +358,11 @@ class LaunchPreferenceServiceImplTest {
 
 		// Create Launches
 		LaunchEntity launchUser = LaunchRepositoryTest.buildLaunchEntity(1L, "TargetName", TargetType.USER, 1L,
-				"LaunchConfigName", 1L, "xxx", PreferredType.EXT_CFG, "1");
+				"LaunchConfigName", 1L, "xxx", PreferredType.CONFIG, "1");
 		LaunchEntity launchHost = LaunchRepositoryTest.buildLaunchEntity(1L, "TargetName", TargetType.HOST, 1L,
-				"LaunchConfigName", 1L, "XXX", PreferredType.EXT_CFG, "2");
+				"LaunchConfigName", 1L, "XXX", PreferredType.CONFIG, "2");
 		LaunchEntity launchHostGroup = LaunchRepositoryTest.buildLaunchEntity(1L, "TargetName", TargetType.HOST_GROUP,
-				1L, "LaunchConfigName", 1L, "yyy", PreferredType.EXT_CFG, "3");
+				1L, "LaunchConfigName", 1L, "yyy", PreferredType.CONFIG, "3");
 
 		// Add in the list
 		launches.add(launchUser);
@@ -429,8 +405,8 @@ class LaunchPreferenceServiceImplTest {
 		launchPropertiesMap.add(PreferredType.PROPERTY.getCode(), "ccc ddd");
 		launchPropertiesMap.add(PreferredType.ARGUMENT.getCode(), "eee+fff");
 		launchPropertiesMap.add(PreferredType.ARGUMENT.getCode(), "ggg hhh");
-		launchPropertiesMap.add(PreferredType.EXT_CFG.getCode(), "iii");
-		launchPropertiesMap.add(PreferredType.EXT_CFG.getCode(), "jjj");
+		launchPropertiesMap.add(PreferredType.CONFIG.getCode(), "iii");
+		launchPropertiesMap.add(PreferredType.CONFIG.getCode(), "jjj");
 
 		// Call service
 		this.launchPreferenceService.freeMarkerModelMapping(model, launchPropertiesMap);
@@ -438,7 +414,7 @@ class LaunchPreferenceServiceImplTest {
 		// Test model
 		assertTrue(model.containsAttribute(PreferredType.PROPERTY.getCode()));
 		assertTrue(model.containsAttribute(PreferredType.ARGUMENT.getCode()));
-		assertTrue(model.containsAttribute(PreferredType.EXT_CFG.getCode()));
+		assertTrue(model.containsAttribute(PreferredType.CONFIG.getCode()));
 		assertEquals("aaa bbb",
 				((Object[]) Objects.requireNonNull(model.getAttribute(PreferredType.PROPERTY.getCode())))[0]);
 		assertEquals("ccc ddd",
@@ -447,7 +423,7 @@ class LaunchPreferenceServiceImplTest {
 				((Object[]) Objects.requireNonNull(model.getAttribute(PreferredType.ARGUMENT.getCode())))[0]);
 		assertEquals("ggg hhh",
 				((Object[]) Objects.requireNonNull(model.getAttribute(PreferredType.ARGUMENT.getCode())))[1]);
-		assertEquals("iii", model.getAttribute(PreferredType.EXT_CFG.getCode()));
+		assertEquals("iii", model.getAttribute(PreferredType.CONFIG.getCode()));
 	}
 
 	/**
@@ -475,7 +451,7 @@ class LaunchPreferenceServiceImplTest {
 
 		// Test: LaunchEntity Other Empty Values Expected: should return false
 		launchEntity.setSelection(" ");
-		launchEntity.getAssociatedPreferred().setType(PreferredType.EXT_CFG.getCode());
+		launchEntity.getAssociatedPreferred().setType(PreferredType.CONFIG.getCode());
 		assertFalse(this.launchPreferenceService.checkOnEmptyValues(launchEntity));
 
 		// Test: LaunchEntity Other No Empty Values Expected: should return true
@@ -550,7 +526,7 @@ class LaunchPreferenceServiceImplTest {
 		// Init data
 		List<LaunchEntity> launches = new ArrayList<>();
 		LaunchEntity launchUser = LaunchRepositoryTest.buildLaunchEntity(1L, "TargetName", TargetType.USER, 1L,
-				"LaunchConfigName", 1L, "ext-config", PreferredType.EXT_CFG, "alternatecdb");
+				"LaunchConfigName", 1L, "ext-config", PreferredType.CONFIG, "alternatecdb");
 		launches.add(launchUser);
 
 		// Mock repository
@@ -572,7 +548,7 @@ class LaunchPreferenceServiceImplTest {
 		// Init data
 		List<LaunchEntity> launches = new ArrayList<>();
 		LaunchEntity launchUser = LaunchRepositoryTest.buildLaunchEntity(1L, "TargetName", TargetType.USER, 1L,
-				"LaunchConfigName", 1L, "ext-config", PreferredType.EXT_CFG, "alternatecdb");
+				"LaunchConfigName", 1L, "ext-config", PreferredType.CONFIG, "alternatecdb");
 		launches.add(launchUser);
 
 		// Mock repository
@@ -594,7 +570,7 @@ class LaunchPreferenceServiceImplTest {
 		// Init data
 		List<LaunchEntity> launches = new ArrayList<>();
 		LaunchEntity launchUser = LaunchRepositoryTest.buildLaunchEntity(1L, "TargetName", TargetType.USER, 1L,
-				"LaunchConfigName", 1L, "ext-config", PreferredType.EXT_CFG, "alternatecdb");
+				"LaunchConfigName", 1L, "ext-config", PreferredType.CONFIG, "alternatecdb");
 		launches.add(launchUser);
 
 		// Mock repository
@@ -617,7 +593,7 @@ class LaunchPreferenceServiceImplTest {
 		// Init data
 		List<LaunchEntity> launches = new ArrayList<>();
 		LaunchEntity launchUser = LaunchRepositoryTest.buildLaunchEntity(1L, "TargetName", TargetType.USER, 1L,
-				"LaunchConfigName", 1L, "ext-config", PreferredType.EXT_CFG, "alternatecdb");
+				"LaunchConfigName", 1L, "ext-config", PreferredType.CONFIG, "alternatecdb");
 		launches.add(launchUser);
 
 		// Mock repository
@@ -639,7 +615,7 @@ class LaunchPreferenceServiceImplTest {
 
 		// Mock repositories
 		LaunchEntity launch = LaunchRepositoryTest.buildLaunchEntity(1L, "TargetName", TargetType.USER, 1L,
-				"LaunchConfigName", 1L, "LaunchPreferedName", PreferredType.EXT_CFG, "launchValue");
+				"LaunchConfigName", 1L, "LaunchPreferedName", PreferredType.CONFIG, "launchValue");
 		LaunchPreferredEntity launchPreferedEntity = launch.getAssociatedPreferred();
 		LaunchConfigEntity launchConfigEntity = launch.getAssociatedConfig();
 		TargetEntity targetEntity = launch.getAssociatedTarget();
@@ -691,7 +667,7 @@ class LaunchPreferenceServiceImplTest {
 		// Init data
 		List<LaunchEntity> launches = new ArrayList<>();
 		LaunchEntity launchUser = LaunchRepositoryTest.buildLaunchEntity(1L, "TargetName", TargetType.USER, 1L,
-				"LaunchConfigName", 1L, "PreferedName", PreferredType.EXT_CFG, "LaunchValue");
+				"LaunchConfigName", 1L, "PreferedName", PreferredType.CONFIG, "LaunchValue");
 		launches.add(launchUser);
 
 		// Mock repository
@@ -714,7 +690,7 @@ class LaunchPreferenceServiceImplTest {
 		// Init data
 		List<LaunchEntity> launches = new ArrayList<>();
 		LaunchEntity launchUser = LaunchRepositoryTest.buildLaunchEntity(1L, "TargetName", TargetType.USER, 1L,
-				"LaunchConfigName", 1L, "PreferedName", PreferredType.EXT_CFG, "LaunchValue");
+				"LaunchConfigName", 1L, "PreferedName", PreferredType.CONFIG, "LaunchValue");
 		launches.add(launchUser);
 
 		// Mock repository
@@ -739,7 +715,7 @@ class LaunchPreferenceServiceImplTest {
 		// Init data
 		List<LaunchEntity> launches = new ArrayList<>();
 		LaunchEntity launchUser = LaunchRepositoryTest.buildLaunchEntity(1L, "TargetName", TargetType.USER, 1L,
-				"LaunchConfigName", 1L, "PreferedName", PreferredType.EXT_CFG, "LaunchValue");
+				"LaunchConfigName", 1L, "PreferedName", PreferredType.CONFIG, "LaunchValue");
 		launches.add(launchUser);
 
 		// call service

@@ -17,7 +17,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
@@ -100,10 +99,6 @@ public class ManifestController {
 	private static void logManifestRetrieval(HttpServletRequest request, Manifest manifest, String key,
 			LocalDateTime startRetrieveManifest) {
 		if (manifest != null && manifest.getStartManifestRequest() != null) {
-			// Ext-cfg
-			String extCfg = manifest.getSearchCriteria() instanceof IHESearchCriteria
-					? ((WeasisIHESearchCriteria) manifest.getSearchCriteria()).getExtCfg()
-					: ((WeasisArchiveSearchCriteria) manifest.getSearchCriteria()).getExtCfg();
 			// Config
 			String config = manifest.getSearchCriteria() instanceof IHESearchCriteria
 					? ((WeasisIHESearchCriteria) manifest.getSearchCriteria()).getConfig()
@@ -120,7 +115,7 @@ public class ManifestController {
 									? manifest.getSearchCriteria().getUser().toUpperCase() : null),
 					kv("request.client", manifest.getSearchCriteria().getClient()),
 					kv("request.component", request.getHeader("User-Agent")),
-					kv("request.config", StringUtils.isNotBlank(config) ? config : extCfg),
+					kv("request.config", config),
 					kv("request.parameters", JacksonUtil.serializeIntoJson(manifest.getSearchCriteria())),
 					kv("manifest.size", manifest.toString().length()));
 		}

@@ -20,6 +20,7 @@ import org.springframework.security.crypto.encrypt.TextEncryptor;
 import org.springframework.stereotype.Service;
 import org.viewer.hub.back.model.searchcriteria.ArchiveSearchCriteria;
 import org.viewer.hub.back.model.searchcriteria.IHESearchCriteria;
+import org.viewer.hub.back.model.searchcriteria.SearchCriteria;
 import org.viewer.hub.back.service.CryptographyService;
 
 import java.util.stream.Collectors;
@@ -75,34 +76,34 @@ public class CryptographyServiceImpl implements CryptographyService {
 	}
 
 	@Override
-	public void encode(@Valid ArchiveSearchCriteria weasisSearchCriteria) {
+	public void encode(@Valid ArchiveSearchCriteria archiveSearchCriteria) {
 		if (this.enabled) {
 			// Patient Ids
-			weasisSearchCriteria.setPatientID(weasisSearchCriteria.getPatientID()
+			archiveSearchCriteria.setPatientID(archiveSearchCriteria.getPatientID()
 				.stream()
 				.filter(StringUtils::isNotBlank)
 				.map(this::encode)
 				.collect(Collectors.toSet()));
 			// Accession numbers
-			weasisSearchCriteria.setAccessionNumber(weasisSearchCriteria.getAccessionNumber()
+			archiveSearchCriteria.setAccessionNumber(archiveSearchCriteria.getAccessionNumber()
 				.stream()
 				.filter(StringUtils::isNotBlank)
 				.map(this::encode)
 				.collect(Collectors.toSet()));
 			// Study UIDs
-			weasisSearchCriteria.setStudyUID(weasisSearchCriteria.getStudyUID()
+			archiveSearchCriteria.setStudyUID(archiveSearchCriteria.getStudyUID()
 				.stream()
 				.filter(StringUtils::isNotBlank)
 				.map(this::encode)
 				.collect(Collectors.toSet()));
 			// Series UIDs
-			weasisSearchCriteria.setSeriesUID(weasisSearchCriteria.getSeriesUID()
+			archiveSearchCriteria.setSeriesUID(archiveSearchCriteria.getSeriesUID()
 				.stream()
 				.filter(StringUtils::isNotBlank)
 				.map(this::encode)
 				.collect(Collectors.toSet()));
 			// Objects UIDs
-			weasisSearchCriteria.setObjectUID(weasisSearchCriteria.getObjectUID()
+			archiveSearchCriteria.setObjectUID(archiveSearchCriteria.getObjectUID()
 				.stream()
 				.filter(StringUtils::isNotBlank)
 				.map(this::encode)
@@ -111,34 +112,46 @@ public class CryptographyServiceImpl implements CryptographyService {
 	}
 
 	@Override
-	public void decode(@Valid ArchiveSearchCriteria weasisSearchCriteria) {
+	public void decode(@Valid SearchCriteria searchCriteria) {
+		if (this.enabled) {
+			if (searchCriteria instanceof ArchiveSearchCriteria) {
+				this.decode((ArchiveSearchCriteria) searchCriteria);
+			}
+			else if (searchCriteria instanceof IHESearchCriteria) {
+				this.decode((IHESearchCriteria) searchCriteria);
+			}
+		}
+	}
+
+	@Override
+	public void decode(@Valid ArchiveSearchCriteria archiveSearchCriteria) {
 		if (this.enabled) {
 			// Patient Ids
-			weasisSearchCriteria.setPatientID(weasisSearchCriteria.getPatientID()
+			archiveSearchCriteria.setPatientID(archiveSearchCriteria.getPatientID()
 				.stream()
 				.filter(StringUtils::isNotBlank)
 				.map(this::decode)
 				.collect(Collectors.toSet()));
 			// Accession numbers
-			weasisSearchCriteria.setAccessionNumber(weasisSearchCriteria.getAccessionNumber()
+			archiveSearchCriteria.setAccessionNumber(archiveSearchCriteria.getAccessionNumber()
 				.stream()
 				.filter(StringUtils::isNotBlank)
 				.map(this::decode)
 				.collect(Collectors.toSet()));
 			// Study UIDs
-			weasisSearchCriteria.setStudyUID(weasisSearchCriteria.getStudyUID()
+			archiveSearchCriteria.setStudyUID(archiveSearchCriteria.getStudyUID()
 				.stream()
 				.filter(StringUtils::isNotBlank)
 				.map(this::decode)
 				.collect(Collectors.toSet()));
 			// Series UIDs
-			weasisSearchCriteria.setSeriesUID(weasisSearchCriteria.getSeriesUID()
+			archiveSearchCriteria.setSeriesUID(archiveSearchCriteria.getSeriesUID()
 				.stream()
 				.filter(StringUtils::isNotBlank)
 				.map(this::decode)
 				.collect(Collectors.toSet()));
 			// Objects UIDs
-			weasisSearchCriteria.setObjectUID(weasisSearchCriteria.getObjectUID()
+			archiveSearchCriteria.setObjectUID(archiveSearchCriteria.getObjectUID()
 				.stream()
 				.filter(StringUtils::isNotBlank)
 				.map(this::decode)
@@ -147,20 +160,20 @@ public class CryptographyServiceImpl implements CryptographyService {
 	}
 
 	@Override
-	public void encode(@Valid IHESearchCriteria weasisIHESearchCriteria) {
+	public void encode(@Valid IHESearchCriteria iheSearchCriteria) {
 		if (this.enabled) {
 			// Patient Id
-			if (StringUtils.isNotBlank(weasisIHESearchCriteria.getPatientID())) {
-				weasisIHESearchCriteria.setPatientID(this.encode(weasisIHESearchCriteria.getPatientID()));
+			if (StringUtils.isNotBlank(iheSearchCriteria.getPatientID())) {
+				iheSearchCriteria.setPatientID(this.encode(iheSearchCriteria.getPatientID()));
 			}
 			// Accession numbers
-			weasisIHESearchCriteria.setAccessionNumber(weasisIHESearchCriteria.getAccessionNumber()
+			iheSearchCriteria.setAccessionNumber(iheSearchCriteria.getAccessionNumber()
 				.stream()
 				.filter(StringUtils::isNotBlank)
 				.map(this::encode)
 				.collect(Collectors.toSet()));
 			// Study UIDs
-			weasisIHESearchCriteria.setStudyUID(weasisIHESearchCriteria.getStudyUID()
+			iheSearchCriteria.setStudyUID(iheSearchCriteria.getStudyUID()
 				.stream()
 				.filter(StringUtils::isNotBlank)
 				.map(this::encode)
@@ -169,20 +182,20 @@ public class CryptographyServiceImpl implements CryptographyService {
 	}
 
 	@Override
-	public void decode(@Valid IHESearchCriteria weasisIHESearchCriteria) {
+	public void decode(@Valid IHESearchCriteria iheSearchCriteria) {
 		if (this.enabled) {
 			// Patient Id
-			if (StringUtils.isNotBlank(weasisIHESearchCriteria.getPatientID())) {
-				weasisIHESearchCriteria.setPatientID(this.decode(weasisIHESearchCriteria.getPatientID()));
+			if (StringUtils.isNotBlank(iheSearchCriteria.getPatientID())) {
+				iheSearchCriteria.setPatientID(this.decode(iheSearchCriteria.getPatientID()));
 			}
 			// Accession numbers
-			weasisIHESearchCriteria.setAccessionNumber(weasisIHESearchCriteria.getAccessionNumber()
+			iheSearchCriteria.setAccessionNumber(iheSearchCriteria.getAccessionNumber()
 				.stream()
 				.filter(StringUtils::isNotBlank)
 				.map(this::decode)
 				.collect(Collectors.toSet()));
 			// Study UIDs
-			weasisIHESearchCriteria.setStudyUID(weasisIHESearchCriteria.getStudyUID()
+			iheSearchCriteria.setStudyUID(iheSearchCriteria.getStudyUID()
 				.stream()
 				.filter(StringUtils::isNotBlank)
 				.map(this::decode)

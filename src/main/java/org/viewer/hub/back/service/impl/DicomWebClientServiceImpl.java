@@ -28,13 +28,12 @@ import org.viewer.hub.back.model.property.ConnectorBasicAuthProperty;
 import org.viewer.hub.back.model.property.ConnectorDicomWebProperty;
 import org.viewer.hub.back.model.property.ConnectorProperty;
 import org.viewer.hub.back.service.DicomWebClientService;
+import org.viewer.hub.back.util.PathUrlUtil;
 import reactor.core.publisher.Mono;
 
 @Service
 @Slf4j
 public class DicomWebClientServiceImpl implements DicomWebClientService {
-
-	public static final String BASE_URL_FORMAT = "%s:%s";
 
 	private final OAuth2AuthorizedClientManager clientCredentialsAuthorizedClientManager;
 
@@ -88,48 +87,26 @@ public class DicomWebClientServiceImpl implements DicomWebClientService {
 			AuthorizationGrantType authorizationGrantType = clientRegistration != null
 					? clientRegistration.getAuthorizationGrantType() : null;
 
-			// Build the path request
-			String requestUrl = buildRequestUrl(
-					connectorDicomWebProperty.getAuthentication().getOauth2().getServer().getUrl(),
-					connectorDicomWebProperty.getAuthentication().getOauth2().getServer().getPort(),
-					connectorDicomWebProperty.getAuthentication().getOauth2().getServer().getContext());
-
 			// Build the webClient depending on the authorisation grant type
 			webClient = this
 				.createOAuth2WebClientBuilder(
 						AuthorizationGrantType.CLIENT_CREDENTIALS.equals(authorizationGrantType)
 								? clientCredentialsAuthorizedClientManager : authorizationCodeAuthorizedClientManager,
 						connectorId)
-				.baseUrl(requestUrl)
+				.baseUrl(PathUrlUtil.buildUrlFromServerProperty(connectorDicomWebProperty.getAuthentication().getOauth2().getServer()))
 				.exchangeStrategies(strategies)
 				.build();
 		}
 		else {
-			// Build the path request
-			String requestUrl = buildRequestUrl(
-					connectorDicomWebProperty.getAuthentication().getBasic().getServer().getUrl(),
-					connectorDicomWebProperty.getAuthentication().getBasic().getServer().getPort(),
-					connectorDicomWebProperty.getAuthentication().getBasic().getServer().getContext());
-
 			// Basic webClient
 			webClient = this.createBasicWebClientBuilder(connectorDicomWebProperty.getAuthentication().getBasic())
-				.baseUrl(requestUrl)
+				.baseUrl(PathUrlUtil.buildUrlFromServerProperty(connectorDicomWebProperty.getAuthentication().getBasic().getServer()))
 				.exchangeStrategies(strategies)
 				.build();
 		}
 		return webClient;
 	}
 
-	/**
-	 * Build the request url to use
-	 * @param serverUrl Server url
-	 * @param serverPort Server port
-	 * @param path Path of the request
-	 * @return request url
-	 */
-	private static String buildRequestUrl(String serverUrl, String serverPort, String path) {
-		return "%s%s".formatted(BASE_URL_FORMAT.formatted(serverUrl, serverPort), path);
-	}
 
 	/**
 	 * Create Basic WebClient builder.

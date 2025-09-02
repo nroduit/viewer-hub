@@ -17,21 +17,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
-import org.viewer.hub.back.entity.LaunchConfigEntity;
-import org.viewer.hub.back.entity.LaunchEntity;
-import org.viewer.hub.back.entity.LaunchEntityPK;
-import org.viewer.hub.back.entity.LaunchPreferredEntity;
-import org.viewer.hub.back.entity.TargetEntity;
+import org.viewer.hub.back.config.properties.MicroDicomConfigurationProperties;
+import org.viewer.hub.back.config.properties.SlicerConfigurationProperties;
+import org.viewer.hub.back.config.properties.WeasisConfigurationProperties;
+import org.viewer.hub.back.entity.*;
 import org.viewer.hub.back.enums.PreferredType;
 import org.viewer.hub.back.enums.TargetType;
 
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 @DataJpaTest
 @Slf4j
@@ -50,7 +46,16 @@ public class LaunchRepositoryTest {
 	private LaunchConfigRepository launchConfigRepository;
 
 	@MockBean
-	ClientRegistrationRepository clientRegistrationRepository;
+	private ClientRegistrationRepository clientRegistrationRepository;
+
+	@MockBean
+	private WeasisConfigurationProperties weasisConfigurationProperties;
+
+	@MockBean
+	private SlicerConfigurationProperties slicerConfigurationProperties;
+
+	@MockBean
+	private MicroDicomConfigurationProperties microDicomConfigurationProperties;
 
 	/**
 	 * Test save and find by id.
@@ -278,7 +283,7 @@ public class LaunchRepositoryTest {
 	void shouldCheckExistsByLaunchEntityPKTargetId() {
 		// Build launch
 		LaunchEntity launch = LaunchRepositoryTest.buildLaunchEntity(867L, "TargetName", TargetType.USER, 1L,
-				"LaunchConfigName", 1L, "PreferedName", PreferredType.EXT_CFG, "LaunchSelection");
+				"LaunchConfigName", 1L, "PreferedName", PreferredType.CONFIG, "LaunchSelection");
 
 		// Save launch
 		this.launchRepository.saveAndFlush(launch);
@@ -294,7 +299,7 @@ public class LaunchRepositoryTest {
 	void shouldCheckExistsByLaunchEntityPKLaunchConfigId() {
 		// Build launch
 		LaunchEntity launch = LaunchRepositoryTest.buildLaunchEntity(867L, "TargetName", TargetType.USER, 1L,
-				"LaunchConfigName", 1L, "PreferedName", PreferredType.EXT_CFG, "LaunchSelection");
+				"LaunchConfigName", 1L, "PreferedName", PreferredType.CONFIG, "LaunchSelection");
 
 		// Save launch
 		this.launchRepository.saveAndFlush(launch);
@@ -311,7 +316,7 @@ public class LaunchRepositoryTest {
 	void shouldCheckExistsByLaunchEntityPKLaunchPreferedId() {
 		// Build launch
 		LaunchEntity launch = LaunchRepositoryTest.buildLaunchEntity(867L, "TargetName", TargetType.USER, 1L,
-				"LaunchConfigName", 1L, "PreferedName", PreferredType.EXT_CFG, "LaunchSelection");
+				"LaunchConfigName", 1L, "PreferedName", PreferredType.CONFIG, "LaunchSelection");
 
 		// Save launch
 		this.launchRepository.saveAndFlush(launch);
@@ -328,7 +333,7 @@ public class LaunchRepositoryTest {
 	void shouldFindLaunchByTargetId() {
 		// Build launch
 		LaunchEntity launch = LaunchRepositoryTest.buildLaunchEntity(867L, "TargetName", TargetType.USER, 1L,
-				"LaunchConfigName", 1L, "PreferedName", PreferredType.EXT_CFG, "LaunchSelection");
+				"LaunchConfigName", 1L, "PreferedName", PreferredType.CONFIG, "LaunchSelection");
 
 		// Save launch
 		this.launchRepository.saveAndFlush(launch);

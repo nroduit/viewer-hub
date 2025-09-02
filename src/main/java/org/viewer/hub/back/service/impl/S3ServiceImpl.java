@@ -19,7 +19,7 @@ import org.viewer.hub.back.config.s3.DeleteResource;
 import org.viewer.hub.back.config.s3.DownloadResource;
 import org.viewer.hub.back.config.s3.UploadResource;
 import org.viewer.hub.back.service.S3Service;
-import org.viewer.hub.back.util.StringUtil;
+import org.viewer.hub.back.util.PathUrlUtil;
 import software.amazon.awssdk.services.s3.model.DeleteObjectsResponse;
 import software.amazon.awssdk.services.s3.model.PutObjectResponse;
 import software.amazon.awssdk.transfer.s3.model.CompletedCopy;
@@ -51,7 +51,7 @@ public class S3ServiceImpl implements S3Service {
 	@Override
 	public boolean doesS3KeyExists(String key) {
 		if (StringUtils.isNotBlank(key)) {
-			return this.downloadResource.checkS3KeyExists(StringUtil.pathWithS3Separator(key));
+			return this.downloadResource.checkS3KeyExists(PathUrlUtil.pathWithS3Separator(key));
 		}
 		return false;
 	}
@@ -59,7 +59,7 @@ public class S3ServiceImpl implements S3Service {
 	@Override
 	public Set<String> retrieveS3KeysFromPrefix(String prefix) {
 		if (StringUtils.isNotBlank(prefix)) {
-			return this.downloadResource.retrieveS3KeysFromPrefix(StringUtil.pathWithS3Separator(prefix));
+			return this.downloadResource.retrieveS3KeysFromPrefix(PathUrlUtil.pathWithS3Separator(prefix));
 		}
 		return Collections.emptySet();
 	}
@@ -67,7 +67,7 @@ public class S3ServiceImpl implements S3Service {
 	@Override
 	public InputStream retrieveS3Object(String key) {
 		if (StringUtils.isNotBlank(key)) {
-			return this.downloadResource.retrieveS3ObjectInputStream(StringUtil.pathWithS3Separator(key));
+			return this.downloadResource.retrieveS3ObjectInputStream(PathUrlUtil.pathWithS3Separator(key));
 		}
 		return null;
 	}
@@ -75,7 +75,7 @@ public class S3ServiceImpl implements S3Service {
 	@Override
 	public CompletableFuture<PutObjectResponse> uploadObjectInS3(ByteArrayInputStream inputStream, String key) {
 		if (inputStream != null && StringUtils.isNotBlank(key)) {
-			return this.uploadResource.uploadObject(inputStream, StringUtil.pathWithS3Separator(key));
+			return this.uploadResource.uploadObject(inputStream, PathUrlUtil.pathWithS3Separator(key));
 		}
 		return null;
 	}
@@ -83,8 +83,8 @@ public class S3ServiceImpl implements S3Service {
 	@Override
 	public CompletableFuture<CompletedCopy> copyS3ObjectFromTo(String sourceKey, String destinationKey) {
 		if (StringUtils.isNotBlank(sourceKey) && StringUtils.isNotBlank(destinationKey)) {
-			return this.uploadResource.copyObjectFromTo(StringUtil.pathWithS3Separator(sourceKey),
-					StringUtil.pathWithS3Separator(destinationKey));
+			return this.uploadResource.copyObjectFromTo(PathUrlUtil.pathWithS3Separator(sourceKey),
+					PathUrlUtil.pathWithS3Separator(destinationKey));
 		}
 		return null;
 	}
@@ -93,7 +93,7 @@ public class S3ServiceImpl implements S3Service {
 	public CompletableFuture<DeleteObjectsResponse> deleteS3Objects(String prefixKey) {
 		if (StringUtils.isNotBlank(prefixKey)) {
 			return this.deleteResource.deleteObjects(
-					this.downloadResource.retrieveS3KeysFromPrefix(StringUtil.pathWithS3Separator(prefixKey)));
+					this.downloadResource.retrieveS3KeysFromPrefix(PathUrlUtil.pathWithS3Separator(prefixKey)));
 		}
 		return CompletableFuture.completedFuture(null);
 	}

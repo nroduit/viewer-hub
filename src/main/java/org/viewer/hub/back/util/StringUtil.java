@@ -59,15 +59,7 @@ public class StringUtil {
 		return listToReturn;
 	}
 
-	/**
-	 * Ensure that the path will use / separator even when testing on Windows: used for S3
-	 * paths
-	 * @param path Path to transform
-	 * @return Paths updated
-	 */
-	public static String pathWithS3Separator(String path) {
-		return path != null ? path.replace("\\", "/") : null;
-	}
+
 
 	/**
 	 * Convert size in a readable format

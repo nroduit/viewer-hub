@@ -12,7 +12,7 @@ spring:
     name: viewer-hub
     version: '@project.version@'
   profiles:
-    active: oidc, connectors, environment-override, package, cryptography
+    active: oidc, connectors, environment-override, package, cryptography, ohif, weasis, slicer, microdicom
   cloud:
     aws:
       # Region
@@ -114,9 +114,3 @@ server:
 #    min-response-size: 1000000 # => 1 Mo : currently not working as response is chunk encoded and no content-length is sent
   use-relative-redirects: true
 
-#  - Weasis
-weasis:
-  config:
-    filename:
-      properties: config.properties
-      json: base.json

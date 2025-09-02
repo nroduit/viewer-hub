@@ -17,6 +17,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.viewer.hub.back.config.properties.MicroDicomConfigurationProperties;
+import org.viewer.hub.back.config.properties.SlicerConfigurationProperties;
+import org.viewer.hub.back.config.properties.WeasisConfigurationProperties;
 import org.viewer.hub.back.entity.GroupEntity;
 import org.viewer.hub.back.entity.GroupEntityPK;
 import org.viewer.hub.back.entity.TargetEntity;
@@ -25,10 +28,7 @@ import org.viewer.hub.back.enums.TargetType;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 @DataJpaTest
 @Slf4j
@@ -41,7 +41,16 @@ public class GroupRepositoryTest {
 	private TargetRepository targetRepository;
 
 	@MockBean
-	ClientRegistrationRepository clientRegistrationRepository;
+	private ClientRegistrationRepository clientRegistrationRepository;
+
+	@MockBean
+	private WeasisConfigurationProperties weasisConfigurationProperties;
+
+	@MockBean
+	private SlicerConfigurationProperties slicerConfigurationProperties;
+
+	@MockBean
+	private MicroDicomConfigurationProperties microDicomConfigurationProperties;
 
 	/**
 	 * Build a target

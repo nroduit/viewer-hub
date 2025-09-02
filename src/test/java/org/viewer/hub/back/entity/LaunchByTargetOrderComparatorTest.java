@@ -50,11 +50,11 @@ class LaunchByTargetOrderComparatorTest {
 
 		// Create Launches
 		LaunchEntity launchUser = LaunchRepositoryTest.buildLaunchEntity(1L, "TargetName", TargetType.USER, 1L,
-				"LaunchConfigName", 1L, "ext-config", PreferredType.EXT_CFG, "alternatecdb");
+				"LaunchConfigName", 1L, "ext-config", PreferredType.CONFIG, "alternatecdb");
 		LaunchEntity launchHost = LaunchRepositoryTest.buildLaunchEntity(1L, "TargetName", TargetType.HOST, 1L,
-				"LaunchConfigName", 1L, "ext-config", PreferredType.EXT_CFG, "alternatecdb");
+				"LaunchConfigName", 1L, "ext-config", PreferredType.CONFIG, "alternatecdb");
 		LaunchEntity launchHostGroup = LaunchRepositoryTest.buildLaunchEntity(1L, "TargetName", TargetType.HOST_GROUP,
-				1L, "LaunchConfigName", 1L, "ext-config", PreferredType.EXT_CFG, "alternatecdb");
+				1L, "LaunchConfigName", 1L, "ext-config", PreferredType.CONFIG, "alternatecdb");
 
 		// Add in the list
 		launches.add(launchUser);

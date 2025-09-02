@@ -11,6 +11,8 @@
 
 package org.viewer.hub.back.model.searchcriteria;
 
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -23,10 +25,19 @@ import org.viewer.hub.back.util.StringUtil;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Stream;
 
 /**
  * Model which represents the search criteria when launching Weasis with a IHE query
  */
+@JsonTypeInfo(
+		use = JsonTypeInfo.Id.DEDUCTION,
+		defaultImpl= IHESearchCriteria.class
+)
+@JsonSubTypes({
+		@JsonSubTypes.Type(value = WeasisIHESearchCriteria.class),
+		@JsonSubTypes.Type(value = IHESearchCriteria.class)
+})
 @Getter
 @RequiredIHEParameter
 @ToString
@@ -92,4 +103,16 @@ public class IHESearchCriteria extends SearchCriteria {
 		this.accessionNumber = StringUtil.splitCommaSeparatedValuesToList(accessionNumber);
 	}
 
+
+    /**
+     * Check if only one search criteria is filled with only one value
+     * @return true if only one search criteria is filled and has only one value
+     */
+	public boolean hasOnlyOneSearchCriteriaValue() {
+	    return Stream.of(patientID != null && !patientID.isBlank(),
+	                studyUID != null && studyUID.size() == 1,
+	                accessionNumber != null && accessionNumber.size() == 1)
+            .filter(val -> val) // keep only true values
+			.count() == 1;
+	}
 }

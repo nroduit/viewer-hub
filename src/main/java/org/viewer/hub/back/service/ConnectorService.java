@@ -12,6 +12,7 @@
 package org.viewer.hub.back.service;
 
 import org.viewer.hub.back.model.property.ConnectorProperty;
+import org.viewer.hub.back.model.searchcriteria.SearchCriteria;
 
 import java.util.LinkedHashSet;
 
@@ -34,4 +35,10 @@ public interface ConnectorService {
 	 */
 	LinkedHashSet<ConnectorProperty> retrieveConnectors(LinkedHashSet<String> archives);
 
+	/**
+	 * Retrieve first default or first specific connector depending on archive value in Search Criteria
+	 * @param searchCriteria Search Criteria to evaluate
+	 * @return archive found
+	 */
+	String retrieveFirstDefaultOrFirstSpecificConnector(SearchCriteria searchCriteria);
 }

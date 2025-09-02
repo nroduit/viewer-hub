@@ -19,8 +19,6 @@ public final class ParamName {
 
 	public static final String HOST = "host";
 
-	public static final String EXT_CFG = "ext-cfg";
-
 	public static final String CONFIG = "config";
 
 	public static final String PATIENT_ID = "patientID";
@@ -56,6 +54,29 @@ public final class ParamName {
 	public static final String LIMIT = "limit";
 
 	public static final String OFFSET = "offset";
+
+	// Ohif
+	public static final String OHIF_STUDY_INSTANCE_UID = "StudyInstanceUIDs";
+
+	public static final String OHIF_SERIES_INSTANCE_UID = "SeriesInstanceUIDs";
+
+	public static final String OHIF_INITIAL_SERIES_INSTANCE_UID = "initialSeriesInstanceUID";
+
+	public static final String OHIF_INITIAL_SOP_INSTANCE_UID = "initialSopInstanceUID";
+
+	// Slicer
+	public static final String SLICER_STUDY_INSTANCE_UID = "studyUID";
+
+	public static final String SLICER_DICOM_WEB_ENDPOINT = "dicomweb_endpoint";
+
+	// MicroDicom
+	public static final String MICRODICOM_VALUE = "value";
+
+	public static final String MICRODICOM_PARAM = "param";
+
+	public static final String MICRODICOM_PACS_TAG_VALUE = "pacsTagValue";
+
+	public static final String MICRODICOM_PACS_SERVER = "pacsServer";
 
 	private ParamName() {
 		// Private constructor to hide implicit one

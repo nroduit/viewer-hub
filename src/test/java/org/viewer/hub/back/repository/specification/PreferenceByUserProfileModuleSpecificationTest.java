@@ -19,6 +19,9 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.viewer.hub.back.config.properties.MicroDicomConfigurationProperties;
+import org.viewer.hub.back.config.properties.SlicerConfigurationProperties;
+import org.viewer.hub.back.config.properties.WeasisConfigurationProperties;
 import org.viewer.hub.back.entity.ModuleEntity;
 import org.viewer.hub.back.entity.PreferenceEntity;
 import org.viewer.hub.back.entity.ProfileEntity;
@@ -53,7 +56,16 @@ class PreferenceByUserProfileModuleSpecificationTest {
 	private TargetRepository targetRepository;
 
 	@MockBean
-	ClientRegistrationRepository clientRegistrationRepository;
+	private ClientRegistrationRepository clientRegistrationRepository;
+
+	@MockBean
+	private WeasisConfigurationProperties weasisConfigurationProperties;
+
+	@MockBean
+	private SlicerConfigurationProperties slicerConfigurationProperties;
+
+	@MockBean
+	private MicroDicomConfigurationProperties microDicomConfigurationProperties;
 
 	@BeforeEach
 	public void init() {

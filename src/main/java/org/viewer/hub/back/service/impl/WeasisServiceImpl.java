@@ -29,6 +29,7 @@ import org.viewer.hub.back.service.WeasisConnectorQueryService;
 import org.viewer.hub.back.service.WeasisService;
 import org.viewer.hub.back.util.DateTimeUtil;
 
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -38,150 +39,166 @@ import java.util.Set;
 @Slf4j
 public class WeasisServiceImpl implements WeasisService {
 
-	// Services
-	private final CacheService cacheService;
+    // Services
+    private final CacheService cacheService;
 
-	private final WeasisConnectorQueryService weasisConnectorQueryService;
+    private final WeasisConnectorQueryService weasisConnectorQueryService;
 
-	private final SecurityService securityService;
+    private final SecurityService securityService;
 
-	/**
-	 * Autowired constructor
-	 * @param cacheService Cache service
-	 * @param weasisConnectorQueryService Connector query service
-	 */
-	@Autowired
-	public WeasisServiceImpl(final CacheService cacheService,
-			final WeasisConnectorQueryService weasisConnectorQueryService, final SecurityService securityService) {
-		this.cacheService = cacheService;
-		this.weasisConnectorQueryService = weasisConnectorQueryService;
-		this.securityService = securityService;
-	}
+    /**
+     * Autowired constructor
+     *
+     * @param cacheService                Cache service
+     * @param weasisConnectorQueryService Connector query service
+     */
+    @Autowired
+    public WeasisServiceImpl(final CacheService cacheService,
+                             final WeasisConnectorQueryService weasisConnectorQueryService, final SecurityService securityService) {
+        this.cacheService = cacheService;
+        this.weasisConnectorQueryService = weasisConnectorQueryService;
+        this.securityService = securityService;
+    }
 
-	@Override
-	@Async
-	// TODO currently security context propagation not working in @ASync methods call
-	// Normally should work like this
-	// https://www.baeldung.com/spring-security-async-principal-propagation
-	// instead of propagating the authentication parameter in the methods calls
-	// When working should use SecurityContextHolder.getContext().getAuthentication()
-	public void buildManifest(String key, @Valid SearchCriteria searchCriteria, Authentication authentication) {
-		// Build the manifest depending on the configured connectors
-		Manifest manifest = searchCriteria instanceof IHESearchCriteria
-				? this.buildManifestWithIHESearchCriteria((WeasisIHESearchCriteria) searchCriteria, authentication, key)
-				: this.buildManifestWithoutIHESearchCriteria((WeasisArchiveSearchCriteria) searchCriteria,
-						authentication, key);
+    @Override
+    @Async
+    // TODO currently security context propagation not working in @ASync methods call
+    // Normally should work like this
+    // https://www.baeldung.com/spring-security-async-principal-propagation
+    // instead of propagating the authentication parameter in the methods calls
+    // When working should use SecurityContextHolder.getContext().getAuthentication()
+    public void buildManifest(String key, @Valid SearchCriteria searchCriteria, Authentication authentication) {
+        // Build the manifest depending on the configured connectors
+        Manifest manifest = searchCriteria instanceof IHESearchCriteria
+                ? this.buildManifestWithIHESearchCriteria((WeasisIHESearchCriteria) searchCriteria, authentication, key)
+                : this.buildManifestWithoutIHESearchCriteria((WeasisArchiveSearchCriteria) searchCriteria,
+                authentication, key);
 
-		// Update the build duration
-		manifest.setBuildDuration(DateTimeUtil.retrieveDurationFromDateTimeInMs(manifest.getStartManifestRequest()));
+        // Update the build duration
+        manifest.setBuildDuration(DateTimeUtil.retrieveDurationFromDateTimeInMs(manifest.getStartManifestRequest()));
 
-		// Construction of the manifest is over: set the manifest in the cache
-		manifest.setBuildInProgress(false);
-		this.cacheService.putManifest(key, manifest);
-		LOG.info("Manifest built for key:" + key + " and search criteria:" + searchCriteria);
-	}
+        // Construction of the manifest is over: set the manifest in the cache
+        manifest.setBuildInProgress(false);
+        this.cacheService.putManifest(key, manifest);
+        LOG.info("Manifest built for key:" + key + " and search criteria:" + searchCriteria);
+    }
 
-	@Override
-	public Manifest retrieveManifest(String key) {
-		return this.cacheService.getManifest(key);
-	}
+    @Override
+    public Manifest retrieveManifest(String key) {
+        return this.cacheService.getManifest(key);
+    }
 
-	/**
-	 * Build manifest with weasis search criteria
-	 * @param searchCriteria Search criteria
-	 * @param authentication Authentication: used to know depending on the connector if
-	 * basic or oAuth2 wado parameters should be used
-	 * @return Manifest built
-	 */
-	private Manifest buildManifestWithoutIHESearchCriteria(WeasisArchiveSearchCriteria searchCriteria,
-			Authentication authentication, String key) {
-		LOG.debug("Building manifest without IHE search criteria");
-		Manifest manifest = new Manifest(authentication != null, searchCriteria);
+    /**
+     * Build manifest with weasis search criteria
+     *
+     * @param searchCriteria Search criteria
+     * @param authentication Authentication: used to know depending on the connector if
+     *                       basic or oAuth2 wado parameters should be used
+     * @return Manifest built
+     */
+    private Manifest buildManifestWithoutIHESearchCriteria(WeasisArchiveSearchCriteria searchCriteria,
+                                                           Authentication authentication, String key) {
+        LOG.debug("Building manifest without IHE search criteria");
+        Manifest manifest = new Manifest(authentication != null, searchCriteria);
 
-		// Set flag manifest under construction and set it in the cache
-		manifest.setBuildInProgress(true);
-		this.cacheService.putManifestIfAbsent(key, manifest);
+        // Set flag manifest under construction and set it in the cache
+        manifest.setBuildInProgress(true);
+        this.cacheService.putManifestIfAbsent(key, manifest);
 
-		// TODO: addGeneralViewerMessage...
-		// TODO: decrypt..
-		// TODO: doBuildQuery...
+        // TODO: addGeneralViewerMessage...
+        // TODO: decrypt..
+        // TODO: doBuildQuery...
 
-		// Sop Instance Uid
-		if (!searchCriteria.getObjectUID().isEmpty()) {
-			this.weasisConnectorQueryService.buildFromSopInstanceUids(manifest, searchCriteria.getObjectUID(),
-					searchCriteria.getArchive(), authentication);
-		}
-		// Series Instance Uid
-		if (!searchCriteria.getSeriesUID().isEmpty()) {
-			this.weasisConnectorQueryService.buildFromSeriesInstanceUids(manifest, searchCriteria.getSeriesUID(),
-					searchCriteria.getArchive(), authentication);
-		}
-		// Accession Number
-		if (!searchCriteria.getAccessionNumber().isEmpty()) {
-			this.weasisConnectorQueryService.buildFromStudyAccessionNumbers(manifest,
-					searchCriteria.getAccessionNumber(), searchCriteria.getArchive(), authentication);
-		}
-		// Study Uid
-		if (!searchCriteria.getStudyUID().isEmpty()) {
-			this.weasisConnectorQueryService.buildFromStudyInstanceUids(manifest, searchCriteria.getStudyUID(),
-					searchCriteria.getArchive(), authentication);
-		}
-		// Patient Id
-		if (!searchCriteria.getPatientID().isEmpty()) {
-			this.weasisConnectorQueryService.buildFromPatientIds(manifest, searchCriteria.getPatientID(),
-					searchCriteria, authentication);
-		}
+        // Sop Instance Uid
+        if (!searchCriteria.getObjectUID().isEmpty()) {
+            this.weasisConnectorQueryService.buildFromSopInstanceUids(manifest, searchCriteria.getObjectUID(),
+                    searchCriteria.getArchive(), authentication);
+        }
+        // Series Instance Uid
+        if (!searchCriteria.getSeriesUID().isEmpty()) {
+            this.weasisConnectorQueryService.buildFromSeriesInstanceUids(manifest, searchCriteria.getSeriesUID(),
+                    searchCriteria.getArchive(), authentication);
+        }
+        // Accession Number
+        if (!searchCriteria.getAccessionNumber().isEmpty()) {
+            this.weasisConnectorQueryService.buildFromStudyAccessionNumbers(manifest,
+                    searchCriteria.getAccessionNumber(), searchCriteria.getArchive(), authentication);
+        }
+        // Study Uid
+        if (!searchCriteria.getStudyUID().isEmpty()) {
+            this.weasisConnectorQueryService.buildFromStudyInstanceUids(manifest, searchCriteria.getStudyUID(),
+                    searchCriteria.getArchive(), authentication);
+        }
+        // Patient Id
+        if (!searchCriteria.getPatientID().isEmpty()) {
+            this.weasisConnectorQueryService.buildFromPatientIds(manifest, searchCriteria.getPatientID(),
+                    searchCriteria, authentication);
+        }
 
-		// Handle authentication
-		this.securityService.handleManifestAuthentication(manifest, authentication);
+        // Apply search criteria filters
+        manifest.getArcQueries().forEach(aq ->
+                Optional.ofNullable(aq.getPatients())
+                        .filter(p -> !p.isEmpty())
+                        .ifPresent(p ->
+                                aq.setPatients(searchCriteria.applyPatientRequestSearchCriteriaFilters(p))));
 
-		// manifest built
-		return manifest;
-	}
+        // Handle authentication
+        this.securityService.handleManifestAuthentication(manifest, authentication);
 
-	/**
-	 * Build manifest with IHE search criteria
-	 * @param searchCriteria Search criteria
-	 * @param authentication Authentication: used to know depending on the connector if
-	 * basic or oAuth2 wado parameters should be used
-	 * @return Manifest built
-	 */
-	private Manifest buildManifestWithIHESearchCriteria(WeasisIHESearchCriteria searchCriteria,
-			Authentication authentication, String key) {
-		LOG.debug("Building manifest with IHE search criteria");
+        // manifest built
+        return manifest;
+    }
 
-		// TODO: addGeneralViewerMessage...
-		// TODO: decrypt..
-		// TODO: doBuildQuery...
+    /**
+     * Build manifest with IHE search criteria
+     *
+     * @param searchCriteria Search criteria
+     * @param authentication Authentication: used to know depending on the connector if
+     *                       basic or oAuth2 wado parameters should be used
+     * @return Manifest built
+     */
+    private Manifest buildManifestWithIHESearchCriteria(WeasisIHESearchCriteria searchCriteria,
+                                                        Authentication authentication, String key) {
+        LOG.debug("Building manifest with IHE search criteria");
 
-		Manifest manifest = new Manifest(authentication != null, searchCriteria);
+        // TODO: addGeneralViewerMessage...
+        // TODO: decrypt..
+        // TODO: doBuildQuery...
 
-		// Set flag manifest under construction and set it in the cache
-		manifest.setBuildInProgress(true);
-		this.cacheService.putManifestIfAbsent(key, manifest);
+        Manifest manifest = new Manifest(authentication != null, searchCriteria);
 
-		// Study level
-		if (searchCriteria.getRequestType() == IHERequestType.STUDY) {
-			if (!searchCriteria.getAccessionNumber().isEmpty()) {
-				this.weasisConnectorQueryService.buildFromStudyAccessionNumbers(manifest,
-						searchCriteria.getAccessionNumber(), searchCriteria.getArchive(), authentication);
-			}
-			else if (!searchCriteria.getStudyUID().isEmpty()) {
-				this.weasisConnectorQueryService.buildFromStudyInstanceUids(manifest, searchCriteria.getStudyUID(),
-						searchCriteria.getArchive(), authentication);
-			}
-		}
-		// Patient level
-		else if (searchCriteria.getRequestType() == IHERequestType.PATIENT) {
-			this.weasisConnectorQueryService.buildFromPatientIds(manifest, Set.of(searchCriteria.getPatientID()),
-					searchCriteria, authentication);
-		}
+        // Set flag manifest under construction and set it in the cache
+        manifest.setBuildInProgress(true);
+        this.cacheService.putManifestIfAbsent(key, manifest);
 
-		// Handle authentication
-		this.securityService.handleManifestAuthentication(manifest, authentication);
+        // Study level
+        if (searchCriteria.getRequestType() == IHERequestType.STUDY) {
+            if (!searchCriteria.getAccessionNumber().isEmpty()) {
+                this.weasisConnectorQueryService.buildFromStudyAccessionNumbers(manifest,
+                        searchCriteria.getAccessionNumber(), searchCriteria.getArchive(), authentication);
+            } else if (!searchCriteria.getStudyUID().isEmpty()) {
+                this.weasisConnectorQueryService.buildFromStudyInstanceUids(manifest, searchCriteria.getStudyUID(),
+                        searchCriteria.getArchive(), authentication);
+            }
+        }
+        // Patient level
+        else if (searchCriteria.getRequestType() == IHERequestType.PATIENT) {
+            this.weasisConnectorQueryService.buildFromPatientIds(manifest, Set.of(searchCriteria.getPatientID()),
+                    searchCriteria, authentication);
+        }
 
-		// Manifest built
-		return manifest;
-	}
+        // Apply search criteria filters
+        manifest.getArcQueries().forEach(aq ->
+                Optional.ofNullable(aq.getPatients())
+                        .filter(p -> !p.isEmpty())
+                        .ifPresent(p ->
+                                aq.setPatients(searchCriteria.applyPatientRequestSearchCriteriaFilters(p))));
+
+        // Handle authentication
+        this.securityService.handleManifestAuthentication(manifest, authentication);
+
+        // Manifest built
+        return manifest;
+    }
 
 }

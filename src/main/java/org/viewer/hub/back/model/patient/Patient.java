@@ -16,12 +16,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -117,11 +112,22 @@ public class Patient implements Serializable {
 			Optional<Study> optionalStudy = this.studies.stream()
 				.filter(s -> Objects.equals(s.getStudyInstanceUID(), studyAlreadyInPatient.getStudyInstanceUID()))
 				.findFirst();
-			if (optionalStudy.isPresent()) {
-				Study study = optionalStudy.get();
-				study.merge(studyAlreadyInPatient);
-			}
+            optionalStudy.ifPresent(study -> study.merge(studyAlreadyInPatient));
 		});
+	}
+
+	public static void mergePatients(Set<Patient> patients, Set<Patient> toMerge) {
+        toMerge.forEach(p -> {
+            Patient existing = patients.stream()
+                    .filter(bp -> Objects.equals(bp.getPatientID(), p.getPatientID()))
+                    .findFirst()
+                    .orElse(null);
+            if (existing != null) {
+                existing.merge(p);
+            } else {
+                patients.add(p);
+            }
+        });
 	}
 
 }

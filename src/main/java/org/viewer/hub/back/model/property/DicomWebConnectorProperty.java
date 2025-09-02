@@ -15,12 +15,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.springframework.web.reactive.function.client.WebClient;
 
 @Getter
@@ -32,7 +27,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 public class DicomWebConnectorProperty {
 
 	@Valid
-	@NotNull
+//	@NotNull
 	@Schema(description = "Wado-rs properties")
 	private ConnectorDicomWebProperty wadoRs;
 

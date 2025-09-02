@@ -25,12 +25,7 @@ import org.viewer.hub.back.config.tenant.TenantIdentifierResolver;
 import org.viewer.hub.back.enums.ConnectorType;
 import org.viewer.hub.back.model.connector.DbConnectorResult;
 import org.viewer.hub.back.model.manifest.Manifest;
-import org.viewer.hub.back.model.property.ConnectorProperty;
-import org.viewer.hub.back.model.property.DbConnectorProperty;
-import org.viewer.hub.back.model.property.DbConnectorQueryProperty;
-import org.viewer.hub.back.model.property.SearchCriteriaProperty;
-import org.viewer.hub.back.model.property.WeasisConnectorProperty;
-import org.viewer.hub.back.model.property.WeasisManifestConnectorProperty;
+import org.viewer.hub.back.model.property.*;
 import org.viewer.hub.back.model.searchcriteria.ArchiveSearchCriteria;
 import org.viewer.hub.back.service.DbConnectorQueryService;
 
@@ -119,11 +114,10 @@ class DbConnectorQueryServiceImplTest {
 		Manifest manifest = new Manifest();
 		Set<String> patientIds = new HashSet<>();
 		patientIds.add("patientIds");
-		ArchiveSearchCriteria weasisSearchCriteria = new ArchiveSearchCriteria();
+		ArchiveSearchCriteria archiveSearchCriteria = new ArchiveSearchCriteria();
 
 		// Call service
-		this.dbConnectorQueryService.retrievePatientsFromPatientIdsDbConnector(patientIds, this.connectorProperty,
-				weasisSearchCriteria);
+		this.dbConnectorQueryService.retrievePatientsFromPatientIdsDbConnector(patientIds, this.connectorProperty);
 
 		// Test results
 		Mockito.verify(this.currentTenantMock, Mockito.times(1)).setCurrentTenant(Mockito.anyString());

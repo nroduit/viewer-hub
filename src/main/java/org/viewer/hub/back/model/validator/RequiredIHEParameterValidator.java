@@ -25,21 +25,21 @@ import java.util.Objects;
 public class RequiredIHEParameterValidator implements ConstraintValidator<RequiredIHEParameter, IHESearchCriteria> {
 
 	@Override
-	public boolean isValid(IHESearchCriteria weasisIHESearchCriteria,
+	public boolean isValid(IHESearchCriteria iheSearchCriteria,
 			ConstraintValidatorContext constraintValidatorContext) {
 		// case request Patient
-		if (Objects.equals(IHERequestType.PATIENT, weasisIHESearchCriteria.getRequestType())
-				&& weasisIHESearchCriteria.getPatientID() != null
-				&& !weasisIHESearchCriteria.getPatientID().isBlank()) {
+		if (Objects.equals(IHERequestType.PATIENT, iheSearchCriteria.getRequestType())
+				&& iheSearchCriteria.getPatientID() != null
+				&& !iheSearchCriteria.getPatientID().isBlank()) {
 			return true;
 		}
 		// case request Study
 		else {
-			return Objects.equals(IHERequestType.STUDY, weasisIHESearchCriteria.getRequestType())
-					&& (!weasisIHESearchCriteria.getStudyUID().isEmpty()
-							&& weasisIHESearchCriteria.getAccessionNumber().isEmpty()
-							|| weasisIHESearchCriteria.getStudyUID().isEmpty()
-									&& !weasisIHESearchCriteria.getAccessionNumber().isEmpty());
+			return Objects.equals(IHERequestType.STUDY, iheSearchCriteria.getRequestType())
+					&& (!iheSearchCriteria.getStudyUID().isEmpty()
+							&& iheSearchCriteria.getAccessionNumber().isEmpty()
+							|| iheSearchCriteria.getStudyUID().isEmpty()
+									&& !iheSearchCriteria.getAccessionNumber().isEmpty());
 		}
 	}
 

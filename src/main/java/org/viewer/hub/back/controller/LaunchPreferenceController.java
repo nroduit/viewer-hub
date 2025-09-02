@@ -30,14 +30,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.viewer.hub.back.constant.EndPoint;
 import org.viewer.hub.back.controller.exception.NoContentException;
 import org.viewer.hub.back.controller.exception.ParameterException;
@@ -497,7 +490,7 @@ public class LaunchPreferenceController {
 	 * [
 	 *     {
 	 *         "name":"name of the prefered 1",
-	 *         "type":"ext-cfg"
+	 *         "type":"config"
 	 *     },
 	 *     {
 	 *         "name":"name of the prefered 2",
@@ -506,7 +499,7 @@ public class LaunchPreferenceController {
 	 * ]
 	 * </pre>
 	 * @param prefered Prefered to create with name: name of the prefered, type: code of
-	 * the prefered (pro, arg, ext-cfg, launch, ver, svr, etc..)
+	 * the prefered (pro, arg, config, launch, ver, svr, etc..)
 	 * @return Created prefered with theirs created ids
 	 */
 	@PostMapping(value = "/launch_prefered", consumes = { MediaType.APPLICATION_JSON_VALUE },

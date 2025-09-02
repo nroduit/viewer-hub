@@ -15,8 +15,6 @@ import java.util.Arrays;
 
 public enum PreferredType {
 
-	// Extended Config
-	EXT_CFG("ext-cfg"),
 	// Config
 	CONFIG("config"),
 	// Properties

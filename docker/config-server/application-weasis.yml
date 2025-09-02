@@ -1,0 +1,11 @@
+#  - Weasis
+weasis:
+  command:
+    protocol: weasis://
+    context:
+    config: $weasis:config wcfg=
+    get: $dicom:get -w
+  config:
+    filename:
+      properties: config.properties
+      json: base.json
