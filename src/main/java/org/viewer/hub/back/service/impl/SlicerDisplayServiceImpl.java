@@ -18,6 +18,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.viewer.hub.back.config.properties.SlicerConfigurationProperties;
+import org.viewer.hub.back.constant.ParamName;
 import org.viewer.hub.back.controller.exception.NoContentException;
 import org.viewer.hub.back.controller.exception.ParameterException;
 import org.viewer.hub.back.model.patient.Patient;
@@ -82,14 +83,14 @@ public class SlicerDisplayServiceImpl implements SlicerDisplayService {
 					.orElse(null);
 
 			if (StringUtils.isNotBlank(studyUIDFound)) {
-				uriComponentsBuilder = uriComponentsBuilder.queryParam("studyUID", studyUIDFound);
+				uriComponentsBuilder = uriComponentsBuilder.queryParam(ParamName.SLICER_STUDY_INSTANCE_UID, studyUIDFound);
 			}
 			else {
 				throw new NoContentException("Study UID not found for Slicer Launch Url, Search criteria: %s".formatted(searchCriteria));
 			}
 
 			// Dicom endpoint of the archive to query (or viewer gateway for authorization header)
-			uriComponentsBuilder = uriComponentsBuilder.queryParam("dicomweb_endpoint",
+			uriComponentsBuilder = uriComponentsBuilder.queryParam(ParamName.SLICER_DICOM_WEB_ENDPOINT,
 					PathUrlUtil.buildUrlFromServerProperty(this.slicerConfigurationProperties.getArchives().get(archive)));
 
 			// Build the url

@@ -19,6 +19,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.viewer.hub.back.config.properties.OhifConfigurationProperties;
+import org.viewer.hub.back.constant.ParamName;
 import org.viewer.hub.back.controller.exception.ParameterException;
 import org.viewer.hub.back.model.patient.Patient;
 import org.viewer.hub.back.model.patient.Serie;
@@ -117,7 +118,7 @@ public class OhifDisplayServiceImpl implements OhifDisplayService {
     private UriComponentsBuilder fillUriWithUidsFromPatientsFound(UriComponentsBuilder uriComponentsBuilder, Set<Patient> patients, SearchCriteria searchCriteria) {
         if (!patients.isEmpty() && patients.stream().anyMatch(p -> !p.getStudies().isEmpty())){
             // Fill StudyInstanceUIDs url
-            uriComponentsBuilder = uriComponentsBuilder.queryParam("StudyInstanceUIDs", String.join(StringUtil.COMMA, patients.stream()
+            uriComponentsBuilder = uriComponentsBuilder.queryParam(ParamName.OHIF_STUDY_INSTANCE_UID, String.join(StringUtil.COMMA, patients.stream()
                     .flatMap(patient -> patient.getStudies().stream())
                     .map(Study::getStudyInstanceUID)
                     .toList()));
@@ -127,7 +128,7 @@ public class OhifDisplayServiceImpl implements OhifDisplayService {
                     && (((ArchiveSearchCriteria) searchCriteria).getSeriesUID() != null && !((ArchiveSearchCriteria) searchCriteria).getSeriesUID().isEmpty()
                             || ((ArchiveSearchCriteria) searchCriteria).getObjectUID() != null && !((ArchiveSearchCriteria) searchCriteria).getObjectUID().isEmpty())) {
                 // Fill SeriesInstanceUIDs url
-                uriComponentsBuilder = uriComponentsBuilder.queryParam("SeriesInstanceUIDs", String.join(StringUtil.COMMA,  patients.stream()
+                uriComponentsBuilder = uriComponentsBuilder.queryParam(ParamName.OHIF_SERIES_INSTANCE_UID, String.join(StringUtil.COMMA,  patients.stream()
                         .flatMap(patient -> patient.getStudies().stream())
                         .flatMap(study -> study.getSeries().stream())
                         .map(Serie::getSeriesInstanceUID)
@@ -150,13 +151,13 @@ public class OhifDisplayServiceImpl implements OhifDisplayService {
             Set<String> seriesUIDs = ((ArchiveSearchCriteria) searchCriteria).getSeriesUID();
             // Priority is given to the serie uid (vs the sop instance uid)
             if (seriesUIDs.size() == 1){
-                uriComponentsBuilder = uriComponentsBuilder.queryParam("initialSeriesInstanceUID", seriesUIDs.stream().findFirst().get());
+                uriComponentsBuilder = uriComponentsBuilder.queryParam(ParamName.OHIF_INITIAL_SERIES_INSTANCE_UID, seriesUIDs.stream().findFirst().get());
             }
             else {
                 // If available set Ohif initialSopInstanceUID: only if search criteria has only one SopInstanceUID requested
                 Set<String> sopInstanceUIDs = ((ArchiveSearchCriteria) searchCriteria).getObjectUID();
                 if (sopInstanceUIDs.size() == 1){
-                    uriComponentsBuilder = uriComponentsBuilder.queryParam("initialSopInstanceUID", sopInstanceUIDs.stream().findFirst().get());
+                    uriComponentsBuilder = uriComponentsBuilder.queryParam(ParamName.OHIF_INITIAL_SOP_INSTANCE_UID, sopInstanceUIDs.stream().findFirst().get());
                 }
             }
 

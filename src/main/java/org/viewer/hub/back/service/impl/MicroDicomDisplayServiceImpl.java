@@ -20,6 +20,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.viewer.hub.back.config.properties.MicroDicomConfigurationProperties;
+import org.viewer.hub.back.constant.ParamName;
 import org.viewer.hub.back.controller.exception.NoContentException;
 import org.viewer.hub.back.controller.exception.ParameterException;
 import org.viewer.hub.back.model.patient.Patient;
@@ -100,7 +101,7 @@ public class MicroDicomDisplayServiceImpl implements MicroDicomDisplayService {
 	 * @param queryParams Params to fill
 	 */
 	private void buildPacsTagValue(SearchCriteria searchCriteria, Authentication authentication, String archive, List<Map.Entry<String, String>> queryParams) {
-		queryParams.add(Map.entry("param", "pacsTagValue"));
+		queryParams.add(Map.entry(ParamName.MICRODICOM_PARAM, ParamName.MICRODICOM_PACS_TAG_VALUE));
 
 		// Patient ID
 		if (!(searchCriteria instanceof ArchiveSearchCriteria ?
@@ -147,8 +148,8 @@ public class MicroDicomDisplayServiceImpl implements MicroDicomDisplayService {
 				.orElse(null);
 
 		if (StringUtils.isNotBlank(studyUIDFound)) {
-			queryParams.add(Map.entry("value", String.format("%08X", Tag.StudyInstanceUID)));
-			queryParams.add(Map.entry("value", studyUIDFound));
+			queryParams.add(Map.entry(ParamName.MICRODICOM_VALUE, String.format("%08X", Tag.StudyInstanceUID)));
+			queryParams.add(Map.entry(ParamName.MICRODICOM_VALUE, studyUIDFound));
 		}
 		else {
 			throw new NoContentException("Study UID not found for MicroDicom Launch Url, Search criteria: %s".formatted(searchCriteria));
@@ -161,8 +162,8 @@ public class MicroDicomDisplayServiceImpl implements MicroDicomDisplayService {
 	 * @param queryParams Params to fill
 	 */
 	private static void buildPacsTagValueAccessionNumber(SearchCriteria searchCriteria, List<Map.Entry<String, String>> queryParams) {
-		queryParams.add(Map.entry("value", String.format("%08X", Tag.AccessionNumber)));
-		queryParams.add(Map.entry("value", searchCriteria instanceof ArchiveSearchCriteria ?
+		queryParams.add(Map.entry(ParamName.MICRODICOM_VALUE, String.format("%08X", Tag.AccessionNumber)));
+		queryParams.add(Map.entry(ParamName.MICRODICOM_VALUE, searchCriteria instanceof ArchiveSearchCriteria ?
 				((ArchiveSearchCriteria) searchCriteria).getAccessionNumber().stream().findFirst().orElseThrow(BadRequestException::new)
 				: ((IHESearchCriteria) searchCriteria).getAccessionNumber().stream().findFirst().orElseThrow(BadRequestException::new)));
 	}
@@ -173,8 +174,8 @@ public class MicroDicomDisplayServiceImpl implements MicroDicomDisplayService {
 	 * @param queryParams Params to fill
 	 */
 	private static void buildPacsTagValueStudyUid(SearchCriteria searchCriteria, List<Map.Entry<String, String>> queryParams) {
-		queryParams.add(Map.entry("value", String.format("%08X", Tag.StudyInstanceUID)));
-		queryParams.add(Map.entry("value", searchCriteria instanceof ArchiveSearchCriteria ?
+		queryParams.add(Map.entry(ParamName.MICRODICOM_VALUE, String.format("%08X", Tag.StudyInstanceUID)));
+		queryParams.add(Map.entry(ParamName.MICRODICOM_VALUE, searchCriteria instanceof ArchiveSearchCriteria ?
 				((ArchiveSearchCriteria) searchCriteria).getStudyUID().stream().findFirst().orElseThrow(BadRequestException::new)
 				: ((IHESearchCriteria) searchCriteria).getStudyUID().stream().findFirst().orElseThrow(BadRequestException::new)));
 	}
@@ -185,8 +186,8 @@ public class MicroDicomDisplayServiceImpl implements MicroDicomDisplayService {
 	 * @param queryParams Params to fill
 	 */
 	private static void buildPacsTagValuePatientId(SearchCriteria searchCriteria, List<Map.Entry<String, String>> queryParams) {
-		queryParams.add(Map.entry("value", String.format("%08X", Tag.PatientID)));
-		queryParams.add(Map.entry("value", searchCriteria instanceof ArchiveSearchCriteria ?
+		queryParams.add(Map.entry(ParamName.MICRODICOM_VALUE, String.format("%08X", Tag.PatientID)));
+		queryParams.add(Map.entry(ParamName.MICRODICOM_VALUE, searchCriteria instanceof ArchiveSearchCriteria ?
 				((ArchiveSearchCriteria) searchCriteria).getPatientID().stream().findFirst().orElseThrow(BadRequestException::new)
 				: ((IHESearchCriteria) searchCriteria).getPatientID()));
 	}
@@ -197,8 +198,8 @@ public class MicroDicomDisplayServiceImpl implements MicroDicomDisplayService {
 	 * @param queryParams Params to fill
 	 */
 	private void buildPacsServer(String archive, List<Map.Entry<String, String>> queryParams) {
-		queryParams.add(Map.entry("param", "pacsServer"));
-		queryParams.add(Map.entry("value", "%s:%s%s"
+		queryParams.add(Map.entry(ParamName.MICRODICOM_PARAM, ParamName.MICRODICOM_PACS_SERVER));
+		queryParams.add(Map.entry(ParamName.MICRODICOM_VALUE, "%s:%s%s"
 				.formatted(microDicomConfigurationProperties.getArchives().get(archive).getContext(),
 						microDicomConfigurationProperties.getArchives().get(archive).getUrl(),
 						StringUtils.isNotBlank(microDicomConfigurationProperties.getArchives().get(archive).getPort())
