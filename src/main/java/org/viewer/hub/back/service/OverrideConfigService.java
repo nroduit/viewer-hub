@@ -17,7 +17,7 @@ import org.viewer.hub.back.entity.LaunchConfigEntity;
 import org.viewer.hub.back.entity.OverrideConfigEntity;
 import org.viewer.hub.back.entity.PackageVersionEntity;
 import org.viewer.hub.back.entity.TargetEntity;
-import org.viewer.hub.front.views.bundle.override.component.OverrideConfigFilter;
+import org.viewer.hub.front.views.weasis.bundle.override.component.OverrideConfigFilter;
 
 import java.util.Set;
 

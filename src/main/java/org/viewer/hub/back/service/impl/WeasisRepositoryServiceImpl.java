@@ -36,7 +36,7 @@ import org.viewer.hub.back.service.PackageService;
 import org.viewer.hub.back.service.TargetService;
 import org.viewer.hub.back.service.WeasisRepositoryService;
 import org.viewer.hub.back.util.PageUtil;
-import org.viewer.hub.front.views.bundle.repository.component.WeasisAssetFilter;
+import org.viewer.hub.front.views.weasis.bundle.repository.component.WeasisAssetFilter;
 import reactor.core.publisher.Mono;
 
 import java.io.ByteArrayInputStream;

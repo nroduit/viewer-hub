@@ -18,7 +18,7 @@ import jakarta.persistence.criteria.Root;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.jpa.domain.Specification;
 import org.viewer.hub.back.entity.I18nEntity;
-import org.viewer.hub.front.views.i18n.component.I18nFilter;
+import org.viewer.hub.front.views.weasis.i18n.component.I18nFilter;
 
 import java.util.ArrayList;
 import java.util.List;

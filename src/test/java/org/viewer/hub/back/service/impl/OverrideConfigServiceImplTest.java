@@ -26,7 +26,7 @@ import org.viewer.hub.back.enums.TargetType;
 import org.viewer.hub.back.repository.OverrideConfigRepository;
 import org.viewer.hub.back.repository.TargetRepository;
 import org.viewer.hub.back.service.OverrideConfigService;
-import org.viewer.hub.front.views.bundle.override.component.OverrideConfigFilter;
+import org.viewer.hub.front.views.weasis.bundle.override.component.OverrideConfigFilter;
 
 import java.util.HashSet;
 import java.util.List;

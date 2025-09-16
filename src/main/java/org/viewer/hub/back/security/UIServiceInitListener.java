@@ -18,9 +18,9 @@ import org.springframework.stereotype.Component;
 import org.viewer.hub.back.util.SecurityUtil;
 import org.viewer.hub.front.authentication.NotAuthorizedScreen;
 import org.viewer.hub.front.help.HelpView;
-import org.viewer.hub.front.views.association.AssociationView;
-import org.viewer.hub.front.views.bundle.override.OverrideView;
-import org.viewer.hub.front.views.preference.application.ApplicationPreferencesView;
+import org.viewer.hub.front.views.weasis.association.AssociationView;
+import org.viewer.hub.front.views.weasis.bundle.override.OverrideView;
+import org.viewer.hub.front.views.weasis.preference.application.ApplicationPreferencesView;
 
 import java.io.Serial;
 import java.util.Arrays;

@@ -1,0 +1,39 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.0.xsd">
+
+    <changeSet author="weasis-manager" id="1.1-1">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="viewer_association"/>
+            </not>
+        </preConditions>
+        <createTable tableName="viewer_association">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="viewer_association_pkey"/>
+            </column>
+            <column name="archive" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="viewer" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="weasis-manager" id="1.1-11">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="viewer_association"/>
+            <sqlCheck expectedResult="0">SELECT COUNT(*)
+                FROM viewer_association
+                WHERE archive = 'DEFAULT';</sqlCheck>
+        </preConditions>
+        <insert tableName="viewer_association">
+            <column name="id" valueComputed="nextval('hibernate_sequence')"/>
+            <column name="archive" value="DEFAULT"/>
+            <column name="viewer" value="WEASIS"/>
+        </insert>
+    </changeSet>
+
+</databaseChangeLog>

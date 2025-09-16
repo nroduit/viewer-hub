@@ -43,6 +43,7 @@ import org.vaadin.lineawesome.LineAwesomeIcon;
 import org.viewer.hub.back.constant.EndPoint;
 import org.viewer.hub.back.util.SecurityUtil;
 import org.viewer.hub.front.components.ToggleButtonTheme;
+import org.viewer.hub.front.views.Views;
 
 import java.util.List;
 
@@ -90,14 +91,33 @@ public class MainLayout extends AppLayout {
 	private SideNav createNavigation() {
 		SideNav nav = new SideNav();
 
+		// SideNav for Viewer-Hub
+		SideNavItem viewerhubLink = new SideNavItem("Viewer-Hub");
+		// Menu for Viewer-Hub
+		List<MenuEntry> viewerhubMenuEntries = MenuConfiguration.getMenuEntries();
+		viewerhubMenuEntries.forEach(entry -> {
+			if ((entry.path().startsWith("/" + Views.VIEWER_HUB) || entry.path().equals("/"))
+					&& entry.menuClass() != null
+					&& SecurityUtil.isAccessGranted(entry.menuClass())) {
+				if (entry.icon() != null) {
+					viewerhubLink.addItem(new SideNavItem(entry.title(), entry.path(), new SvgIcon(entry.icon())));
+				}
+				else {
+					viewerhubLink.addItem(new SideNavItem(entry.title(), entry.path()));
+				}
+			}
+		});
+		nav.addItem(viewerhubLink);
+
 		// SideNav for Weasis
 		SideNavItem weasisLink = new SideNavItem("Weasis");
 		// weasisLink.setPrefixComponent(new Image("logo/weasis.svg", "Weasis"));
-
 		// Menu for Weasis: not filtered yet by application
 		List<MenuEntry> menuEntries = MenuConfiguration.getMenuEntries();
 		menuEntries.forEach(entry -> {
-			if (entry.menuClass() != null && SecurityUtil.isAccessGranted(entry.menuClass())) {
+			if (entry.path().startsWith("/" + Views.WEASIS)
+					&& entry.menuClass() != null
+					&& SecurityUtil.isAccessGranted(entry.menuClass())) {
 				if (entry.icon() != null) {
 					weasisLink.addItem(new SideNavItem(entry.title(), entry.path(), new SvgIcon(entry.icon())));
 				}
@@ -106,7 +126,6 @@ public class MainLayout extends AppLayout {
 				}
 			}
 		});
-
 		nav.addItem(weasisLink);
 
 		return nav;

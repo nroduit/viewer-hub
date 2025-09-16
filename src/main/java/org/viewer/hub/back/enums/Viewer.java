@@ -11,6 +11,8 @@
 
 package org.viewer.hub.back.enums;
 
+import lombok.Getter;
+
 import java.util.Arrays;
 import java.util.Objects;
 
@@ -25,6 +27,7 @@ public enum Viewer {
 	RADIANT("radiant"),
 	MICRODICOM("microdicom");
 
+	@Getter
 	private final String code;
 
 	Viewer(String code) {
