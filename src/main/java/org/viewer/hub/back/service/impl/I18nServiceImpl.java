@@ -27,7 +27,7 @@ import org.viewer.hub.back.repository.specification.I18nVersionSpecification;
 import org.viewer.hub.back.service.I18nService;
 import org.viewer.hub.back.service.S3Service;
 import org.viewer.hub.back.util.StringUtil;
-import org.viewer.hub.front.views.i18n.component.I18nFilter;
+import org.viewer.hub.front.views.weasis.i18n.component.I18nFilter;
 import software.amazon.awssdk.services.s3.model.DeleteObjectsResponse;
 import software.amazon.awssdk.services.s3.model.PutObjectResponse;
 

@@ -15,7 +15,7 @@ import com.vaadin.flow.data.provider.QuerySortOrder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.viewer.hub.back.model.asset.WeasisAssetModel;
-import org.viewer.hub.front.views.bundle.repository.component.WeasisAssetFilter;
+import org.viewer.hub.front.views.weasis.bundle.repository.component.WeasisAssetFilter;
 
 import java.io.InputStream;
 import java.util.List;

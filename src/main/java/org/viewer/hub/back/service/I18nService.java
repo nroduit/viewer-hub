@@ -14,7 +14,7 @@ package org.viewer.hub.back.service;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.viewer.hub.back.entity.I18nEntity;
-import org.viewer.hub.front.views.i18n.component.I18nFilter;
+import org.viewer.hub.front.views.weasis.i18n.component.I18nFilter;
 
 import java.io.InputStream;
 

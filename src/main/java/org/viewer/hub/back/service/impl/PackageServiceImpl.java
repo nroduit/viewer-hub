@@ -37,7 +37,7 @@ import org.viewer.hub.back.repository.LaunchConfigRepository;
 import org.viewer.hub.back.repository.PackageVersionRepository;
 import org.viewer.hub.back.service.*;
 import org.viewer.hub.back.util.*;
-import org.viewer.hub.front.views.bundle.override.component.RefreshPackageGridEvent;
+import org.viewer.hub.front.views.weasis.bundle.override.component.RefreshPackageGridEvent;
 import software.amazon.awssdk.services.s3.model.DeleteObjectsResponse;
 import software.amazon.awssdk.services.s3.model.PutObjectResponse;
 import software.amazon.awssdk.transfer.s3.model.CompletedCopy;

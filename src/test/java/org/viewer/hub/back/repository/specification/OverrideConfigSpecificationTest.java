@@ -27,7 +27,7 @@ import org.viewer.hub.back.repository.LaunchConfigRepository;
 import org.viewer.hub.back.repository.OverrideConfigRepository;
 import org.viewer.hub.back.repository.PackageVersionRepository;
 import org.viewer.hub.back.repository.TargetRepository;
-import org.viewer.hub.front.views.bundle.override.component.OverrideConfigFilter;
+import org.viewer.hub.front.views.weasis.bundle.override.component.OverrideConfigFilter;
 
 import java.util.Arrays;
 import java.util.List;

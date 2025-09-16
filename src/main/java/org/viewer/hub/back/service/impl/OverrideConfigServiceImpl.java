@@ -30,7 +30,7 @@ import org.viewer.hub.back.repository.TargetRepository;
 import org.viewer.hub.back.repository.specification.OverrideConfigSpecification;
 import org.viewer.hub.back.service.OverrideConfigService;
 import org.viewer.hub.back.util.PageUtil;
-import org.viewer.hub.front.views.bundle.override.component.OverrideConfigFilter;
+import org.viewer.hub.front.views.weasis.bundle.override.component.OverrideConfigFilter;
 
 import java.util.Collections;
 import java.util.Objects;
