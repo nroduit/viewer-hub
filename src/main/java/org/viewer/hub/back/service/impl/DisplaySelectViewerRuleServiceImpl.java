@@ -56,7 +56,7 @@ public class DisplaySelectViewerRuleServiceImpl implements DisplaySelectViewerRu
         List<ViewerAssociationModel> viewerAssociationModels = viewerAssociationService.retrieveViewerAssociationModels();
         ViewerAssociationModel targetAssociation = viewerAssociationModels.stream()
                 .filter(association ->
-                        association.getArchive().equals(iheSearchCriteria.getArchive().getFirst()))
+                        association.getArchive().equals(archive))
                 .findFirst()
                 .orElse(null);
         if (targetAssociation == null) {
@@ -89,7 +89,7 @@ public class DisplaySelectViewerRuleServiceImpl implements DisplaySelectViewerRu
         List<ViewerAssociationModel> viewerAssociationModels = viewerAssociationService.retrieveViewerAssociationModels();
         ViewerAssociationModel targetAssociation = viewerAssociationModels.stream()
                 .filter(association ->
-                        association.getArchive().equals(archiveSearchCriteria.getArchive().getFirst()))
+                        association.getArchive().equals(archive))
                 .findFirst()
                 .orElse(null);
         if (targetAssociation == null) {
@@ -122,7 +122,7 @@ public class DisplaySelectViewerRuleServiceImpl implements DisplaySelectViewerRu
         List<ViewerAssociationModel> viewerAssociationModels = viewerAssociationService.retrieveViewerAssociationModels();
         ViewerAssociationModel targetAssociation = viewerAssociationModels.stream()
                 .filter(association ->
-                        association.getArchive().equals(archiveSearchCriteria.getArchive().getFirst()))
+                        association.getArchive().equals(archive))
                 .findFirst()
                 .orElse(null);
         if (targetAssociation == null) {

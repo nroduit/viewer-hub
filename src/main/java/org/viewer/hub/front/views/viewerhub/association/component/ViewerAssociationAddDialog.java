@@ -14,10 +14,10 @@ package org.viewer.hub.front.views.viewerhub.association.component;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.Shortcuts;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 import org.apache.commons.lang3.StringUtils;
@@ -61,18 +61,18 @@ public class ViewerAssociationAddDialog extends Dialog {
 			.bind(ViewerAssociationModel::getArchive, ViewerAssociationModel::setArchive);
 
 		// Viewer
-		ComboBox<Viewer> targetTypeComboBox = new ComboBox<>();
-		targetTypeComboBox.setLabel("Viewer");
-		targetTypeComboBox.setItemLabelGenerator(Enum::name);
-		targetTypeComboBox.setPlaceholder("Select Viewer");
-		targetTypeComboBox.setItems(Viewer.values());
-		this.binder.forField(targetTypeComboBox)
+		Select<Viewer> targetTypeSelect = new Select<>();
+		targetTypeSelect.setLabel("Viewer");
+		targetTypeSelect.setItemLabelGenerator(Viewer::getCode);
+		targetTypeSelect.setPlaceholder("Select Viewer");
+		targetTypeSelect.setItems(Viewer.values());
+		this.binder.forField(targetTypeSelect)
 			.withValidator(Objects::nonNull, "Viewer is mandatory")
 			.bind(ViewerAssociationModel::getViewer, ViewerAssociationModel::setViewer);
 
 		// Layout
 		HorizontalLayout inputLayout = new HorizontalLayout();
-		inputLayout.addAndExpand(archiveNameField, targetTypeComboBox);
+		inputLayout.addAndExpand(archiveNameField, targetTypeSelect);
 		inputLayout.setWidthFull();
 		inputLayout.setSpacing(true);
 		inputLayout.setAlignItems(FlexComponent.Alignment.CENTER);
