@@ -11,8 +11,8 @@
 
 package org.viewer.hub.front.views.viewerhub.association.component;
 
-import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.function.ValueProvider;
 import org.viewer.hub.back.enums.ViewerType;
 import org.viewer.hub.back.model.ViewerAssociationModel;
@@ -31,11 +31,11 @@ public class ViewerAssociationGrid extends Grid<ViewerAssociationModel> {
 
 	/**
 	 * Constructor
-	 * @param comboBoxViewerValueProvider Value provider for column
+	 * @param viewerValueProvider Value provider for column
 	 * BelongToMemberOf
 	 */
 	public ViewerAssociationGrid(ViewerAssociationDataProvider<ViewerAssociationModel> originalDataProvider,
-								 ValueProvider<ViewerAssociationModel, ComboBox<ViewerType>> comboBoxViewerValueProvider) {
+								 ValueProvider<ViewerAssociationModel, Select<ViewerType>> viewerValueProvider) {
 
 		this.originalDataProvider = originalDataProvider;
 
@@ -46,7 +46,7 @@ public class ViewerAssociationGrid extends Grid<ViewerAssociationModel> {
 		// Archive
 		this.addColumnArchive();
 		// Viewer
-		this.addColumnViewer(comboBoxViewerValueProvider);
+		this.addColumnViewer(viewerValueProvider);
 	}
 
 	/**
@@ -65,8 +65,8 @@ public class ViewerAssociationGrid extends Grid<ViewerAssociationModel> {
 	 * Add column viewer
 	 * @return column built
 	 */
-	private Column<ViewerAssociationModel> addColumnViewer(ValueProvider<ViewerAssociationModel, ComboBox<ViewerType>> multiSelectComboBoxBelongToMemberOfValueProvider) {
-		return this.addComponentColumn(multiSelectComboBoxBelongToMemberOfValueProvider)
+	private Column<ViewerAssociationModel> addColumnViewer(ValueProvider<ViewerAssociationModel, Select<ViewerType>> viewerValueProvider) {
+		return this.addComponentColumn(viewerValueProvider)
 			.setHeader("Viewer")
 			.setWidth("60%")
 			.setSortable(false); // If sortable, define a comparator

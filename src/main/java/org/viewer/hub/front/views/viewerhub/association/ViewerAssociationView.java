@@ -14,11 +14,11 @@ package org.viewer.hub.front.views.viewerhub.association;
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.accordion.Accordion;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.data.binder.BinderValidationStatus;
 import com.vaadin.flow.function.ValueProvider;
@@ -118,10 +118,10 @@ public class ViewerAssociationView extends AbstractView {
 	 * Create a value provider for column BelongToMemberOf
 	 * @return Value Provider created
 	 */
-	private ValueProvider<ViewerAssociationModel, ComboBox<ViewerType>> createComboBoxBelongToMemberOfValueProvider() {
+	private ValueProvider<ViewerAssociationModel, Select<ViewerType>> createComboBoxBelongToMemberOfValueProvider() {
 
 		return viewerAssociationModel -> {
-			ComboBox<ViewerType> comboBox = new ComboBox<>();
+			Select<ViewerType> comboBox = new Select<>();
 			comboBox.setWidth("100%");
 			comboBox.setItems(ViewerType.values());
 			comboBox.setValue(viewerAssociationModel.getViewer());
