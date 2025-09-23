@@ -27,6 +27,7 @@ public interface ViewerAssociationService {
 
 	List<ViewerAssociationModel> retrieveViewerAssociationModels();
 
+	ViewerAssociationModel getViewerAssociation(String archive);
 	/**
 	 * Count the number of association models corresponding to the filters
 	 * @return count number

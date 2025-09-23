@@ -19,8 +19,6 @@ import org.viewer.hub.back.model.ViewerAssociationModel;
 import org.viewer.hub.back.model.searchcriteria.SearchCriteria;
 import org.viewer.hub.back.service.*;
 
-import java.util.List;
-
 @Service
 public class DisplaySelectViewerRuleServiceImpl implements DisplaySelectViewerRuleService {
 
@@ -45,20 +43,7 @@ public class DisplaySelectViewerRuleServiceImpl implements DisplaySelectViewerRu
     @Override
     public String determineViewerToDisplay(SearchCriteria searchCriteria, Authentication authentication) {
         // TODO: rules to select the viewer to display
-        List<ViewerAssociationModel> viewerAssociationModels = viewerAssociationService.retrieveViewerAssociationModels();
-        ViewerAssociationModel targetAssociation = viewerAssociationModels.stream()
-                .filter(association ->
-                        association.getArchive().equals(searchCriteria.getArchive().getFirst()))
-                .findFirst()
-                .orElse(null);
-        if (targetAssociation == null) {
-            targetAssociation = viewerAssociationModels.stream()
-                    .filter(association ->
-                            association.getArchive().equals("DEFAULT"))
-                    .findFirst()
-                    .get();
-        }
-
+        ViewerAssociationModel targetAssociation = viewerAssociationService.getViewerAssociation(searchCriteria.getArchive().getFirst());
         return switch (targetAssociation.getViewer()) {
             case WEASIS -> this.weasisDisplayService.retrieveWeasisLaunchUrl(searchCriteria, authentication);
             case OHIF -> this.ohifDisplayService.retrieveOhifLaunchUrl(searchCriteria, authentication);
