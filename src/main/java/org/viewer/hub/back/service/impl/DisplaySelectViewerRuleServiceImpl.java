@@ -86,20 +86,7 @@ public class DisplaySelectViewerRuleServiceImpl implements DisplaySelectViewerRu
 
     @Override
     public String getViewerUrl(String archive, String viewer, ArchiveSearchCriteria archiveSearchCriteria, String extCfg, Authentication authentication) {
-        List<ViewerAssociationModel> viewerAssociationModels = viewerAssociationService.retrieveViewerAssociationModels();
-        ViewerAssociationModel targetAssociation = viewerAssociationModels.stream()
-                .filter(association ->
-                        association.getArchive().equals(archive))
-                .findFirst()
-                .orElse(null);
-        if (targetAssociation == null) {
-            targetAssociation = viewerAssociationModels.stream()
-                    .filter(association ->
-                            association.getArchive().equals("DEFAULT"))
-                    .findFirst()
-                    .get();
-        }
-
+        ViewerAssociationModel targetAssociation = viewerAssociationService.getViewerAssociation(archive);
         //  Viewer targetViewer = Viewer.fromString(viewer);
         return switch (targetAssociation.getViewer()) {
             case WEASIS -> {
@@ -119,20 +106,7 @@ public class DisplaySelectViewerRuleServiceImpl implements DisplaySelectViewerRu
 
     @Override
     public String getQidoViewerUrl(String archive, String viewer, ArchiveSearchCriteria archiveSearchCriteria) {
-        List<ViewerAssociationModel> viewerAssociationModels = viewerAssociationService.retrieveViewerAssociationModels();
-        ViewerAssociationModel targetAssociation = viewerAssociationModels.stream()
-                .filter(association ->
-                        association.getArchive().equals(archive))
-                .findFirst()
-                .orElse(null);
-        if (targetAssociation == null) {
-            targetAssociation = viewerAssociationModels.stream()
-                    .filter(association ->
-                            association.getArchive().equals("DEFAULT"))
-                    .findFirst()
-                    .get();
-        }
-
+        ViewerAssociationModel targetAssociation = viewerAssociationService.getViewerAssociation(archive);
 //        Viewer targetViewer = Viewer.fromString(viewer);
         return switch (targetAssociation.getViewer()) {
             case WEASIS -> {

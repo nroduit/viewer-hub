@@ -55,6 +55,24 @@ public class ViewerAssociationServiceImpl implements ViewerAssociationService {
 	}
 
 	@Override
+	public ViewerAssociationModel getViewerAssociation(String archive) {
+		List<ViewerAssociationModel> viewerAssociationModels = retrieveViewerAssociationModels();
+		ViewerAssociationModel targetAssociation = viewerAssociationModels.stream()
+				.filter(association ->
+						association.getArchive().equals(archive))
+				.findFirst()
+				.orElse(null);
+		if (targetAssociation == null) {
+			targetAssociation = viewerAssociationModels.stream()
+					.filter(association ->
+							association.getArchive().equals("DEFAULT"))
+					.findFirst()
+					.get();
+		}
+		return targetAssociation;
+	}
+
+	@Override
 	public int countViewerAssociationModels() {
 		return (int) this.viewerAssociationRepository.count();
 	}

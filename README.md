@@ -152,6 +152,11 @@ User: viewer-hub-user
 Password: password
 ```
 
+Here you can associate for each archive a specific viewer
+
+![Viewer Assiciation](src/main/resources/documentation/vh_viewer_association.png)
+
+
 ## Eureka
 
 Once ViewerHub launched, it is possible to see the registration of the service at this address:
