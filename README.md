@@ -3,7 +3,7 @@
 ViewerHub allows to manage various viewers on a IT Infrastructure. 
 
 ## Architecture
-![architecture.svg](src/main/resources/documentation/architecture.svg)
+![high_level_architecture.svg](src/main/resources/documentation/high_level_architecture.svg)
 
 ## Documentation
 https://weasis.org/en/viewer-hub/index.html
@@ -151,6 +151,15 @@ Once ViewerHub launched, it is possible to see the registration of the service a
 ```
 http://localhost:8761
 ```
+
+## Viewer-Hub Gateway
+
+ViewerHub gateway is used to handle different type of authentication in order for viewers to get authentified when requesting data from the pacs.
+
+ViewerHub Gateway handles basic authentication and oAuth2 (client credential and authorization code flow).
+
+In order to run Viewer-hub gateway for the viewers Ohif, 3D Slicer, Microdicom: https://github.com/nroduit/viewer-hub-gateway
+
 
 ## Launch Weasis
 
