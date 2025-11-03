@@ -18,5 +18,4 @@ public interface DisplaySelectViewerRuleService {
 
     String determineViewerToDisplay(SearchCriteria searchCriteria, Authentication authentication);
 
-
 }
