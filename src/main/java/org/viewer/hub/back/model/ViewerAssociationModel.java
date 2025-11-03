@@ -44,11 +44,16 @@ public class ViewerAssociationModel {
 	public Integer priority;
 
 	@Basic
-	@Column(name = "archive", nullable = false, length = 100)
+	@Column(name = "archive", length = 100)
 	@JacksonXmlProperty(localName = "Archive")
 	@Schema(description = "Archive name")
-	@NotNull
 	private String archive;
+
+	@Basic
+	@Column(name = "aet", length = 100)
+	@JacksonXmlProperty(localName = "AET")
+	@Schema(description = "AET")
+	public String aet;
 
 	@Basic
 	@Column(name = "viewer", nullable = false, length = 100)

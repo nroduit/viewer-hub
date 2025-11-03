@@ -22,7 +22,6 @@ import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.function.ValueProvider;
-import com.vaadin.flow.theme.lumo.LumoIcon;
 import lombok.Getter;
 import org.viewer.hub.back.enums.Viewer;
 import org.viewer.hub.back.model.ViewerAssociationModel;
@@ -66,6 +65,8 @@ public class ViewerAssociationGrid extends Grid<ViewerAssociationModel> {
 		// Build columns
 		// Drag icon
 		this.addDragIcon();
+		// AET column
+		this.addColumnAET();
 		// Archive
 		this.addColumnArchive();
 		// Viewer
@@ -78,8 +79,8 @@ public class ViewerAssociationGrid extends Grid<ViewerAssociationModel> {
 		this.setRowsDraggable(true);
 		this.setDropMode(GridDropMode.BETWEEN);
 
-		this.setDragFilter(e -> !e.getArchive().equals("DEFAULT"));
-		this.setDropFilter(e -> !e.getArchive().equals("DEFAULT"));
+		this.setDragFilter(e -> !"DEFAULT".equals(e.getArchive()));
+		this.setDropFilter(e -> !"DEFAULT".equals(e.getArchive()));
 
 		this.addDragStartListener(e -> {
 			draggedItem = e.getDraggedItems().get(0);
@@ -116,9 +117,21 @@ public class ViewerAssociationGrid extends Grid<ViewerAssociationModel> {
 			}
 			Icon dragIcon = VaadinIcon.GRID_SMALL.create();
 			dragIcon.setTooltipText("Drag & drop to update rule priority");
-			dragIcon.getStyle().set("padding", "0.25em");
+			dragIcon.getStyle().set("padding", "0.30em");
 			return dragIcon;
 		});
+	}
+
+	/**
+	 * Add column archive
+	 * @return column archive
+	 */
+	private Column<ViewerAssociationModel> addColumnAET() {
+		return this.addColumn(ViewerAssociationModel::getAet)
+				.setHeader("AET")
+				.setWidth("22%")
+				.setSortable(true)
+				.setKey("aet");
 	}
 
 	/**
@@ -140,7 +153,7 @@ public class ViewerAssociationGrid extends Grid<ViewerAssociationModel> {
 	private Column<ViewerAssociationModel> addColumnViewer(ValueProvider<ViewerAssociationModel, Select<Viewer>> viewerValueProvider) {
 		return this.addComponentColumn(viewerValueProvider)
 			.setHeader("Viewer")
-			.setWidth("60%")
+			.setWidth("40%")
 			.setSortable(false); // If sortable, define a comparator
 	}
 

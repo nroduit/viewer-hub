@@ -13,9 +13,11 @@ package org.viewer.hub.back.service;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.Authentication;
 import org.viewer.hub.back.model.ViewerAssociationModel;
 
 import java.util.List;
+import java.util.Set;
 
 public interface ViewerAssociationService {
 
@@ -27,7 +29,7 @@ public interface ViewerAssociationService {
 
 	List<ViewerAssociationModel> retrieveViewerAssociationModels();
 
-	ViewerAssociationModel getViewerAssociation(String archive);
+	ViewerAssociationModel getViewerAssociation(String archive, Set<String> accessionNumber, Set<String> studyUID, Set<String> seriesUID, Authentication authentication);
 	/**
 	 * Count the number of association models corresponding to the filters
 	 * @return count number

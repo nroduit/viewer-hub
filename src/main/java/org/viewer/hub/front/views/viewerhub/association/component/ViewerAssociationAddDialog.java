@@ -18,7 +18,8 @@ import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.select.Select;
-import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.binder.*;
 import lombok.Getter;
 import org.viewer.hub.back.config.properties.ConnectorConfigurationProperties;
 import org.viewer.hub.back.enums.Viewer;
@@ -40,6 +41,9 @@ public class ViewerAssociationAddDialog extends Dialog {
     @Getter
     Binder<ViewerAssociationModel> binder;
 
+	private final TextField aetField;
+	private final Select<String> archiveNameSelect;
+
 	private final ConnectorConfigurationProperties connectorConfigurationProperties;
 
 	/**
@@ -50,8 +54,8 @@ public class ViewerAssociationAddDialog extends Dialog {
 
 		this.connectorConfigurationProperties = connectorConfigurationProperties;
 
-		this.setWidth("25%");
-		this.setHeight("25%");
+		this.setWidth("50%");
+		this.setHeight("30%");
 		this.setCloseOnEsc(false);
 		this.setCloseOnOutsideClick(false);
 		this.setModal(true);
@@ -60,28 +64,37 @@ public class ViewerAssociationAddDialog extends Dialog {
 		this.binder = new Binder<>(ViewerAssociationModel.class);
 		this.binder.setBean(new ViewerAssociationModel());
 
-		// Archive name
-		Select<String> archiveNameSelect = new Select<>();
+		// AET
+		this.aetField = new TextField();
+		aetField.setLabel("AET");
+
+		// Archive
+		this.archiveNameSelect = new Select<>();
 		archiveNameSelect.setLabel("Archive");
 		archiveNameSelect.setPlaceholder("Select Archive");
 		archiveNameSelect.setItems(archives);
-		this.binder.forField(archiveNameSelect)
-				.withValidator(Objects::nonNull, "Archive is mandatory")
-			.bind(ViewerAssociationModel::getArchive, ViewerAssociationModel::setArchive);
+		archiveNameSelect.setEmptySelectionAllowed(true);
 
 		// Viewer
-		Select<Viewer> targetTypeSelect = new Select<>();
-		targetTypeSelect.setLabel("Viewer");
-		targetTypeSelect.setItemLabelGenerator(Viewer::getCode);
-		targetTypeSelect.setPlaceholder("Select Viewer");
-		targetTypeSelect.setItems(Viewer.values());
-		this.binder.forField(targetTypeSelect)
+		Select<Viewer> viewerNameSelect = new Select<>();
+		viewerNameSelect.setLabel("Viewer");
+		viewerNameSelect.setItemLabelGenerator(Viewer::getCode);
+		viewerNameSelect.setPlaceholder("Select Viewer");
+		viewerNameSelect.setItems(Viewer.values());
+
+		this.binder.forField(aetField)
+				.withValidator(getAtLeatOneFieldValidator())
+				.bind(ViewerAssociationModel::getAet, ViewerAssociationModel::setAet);
+		this.binder.forField(archiveNameSelect)
+				.withValidator(getAtLeatOneFieldValidator())
+				.bind(ViewerAssociationModel::getArchive, ViewerAssociationModel::setArchive);
+		this.binder.forField(viewerNameSelect)
 			.withValidator(Objects::nonNull, "Viewer is mandatory")
 			.bind(ViewerAssociationModel::getViewer, ViewerAssociationModel::setViewer);
 
 		// Layout
 		HorizontalLayout inputLayout = new HorizontalLayout();
-		inputLayout.addAndExpand(archiveNameSelect, targetTypeSelect);
+		inputLayout.addAndExpand(aetField, archiveNameSelect, viewerNameSelect);
 		inputLayout.setWidthFull();
 		inputLayout.setSpacing(true);
 		inputLayout.setAlignItems(FlexComponent.Alignment.CENTER);
@@ -105,6 +118,15 @@ public class ViewerAssociationAddDialog extends Dialog {
 
 		// -- Add components ---
 		this.add(inputLayout, buttonLayout);
+	}
+
+	private Validator<? super Object> getAtLeatOneFieldValidator() {
+		return (value, valueContext) -> {
+			if (aetField.getValue().isEmpty() && archiveNameSelect.getValue() == null) {
+				return ValidationResult.error("You must specify one of these fields");
+			}
+			return ValidationResult.ok();
+		};
 	}
 
 }

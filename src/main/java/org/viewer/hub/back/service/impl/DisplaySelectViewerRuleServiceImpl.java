@@ -16,13 +16,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.viewer.hub.back.model.ViewerAssociationModel;
+import org.viewer.hub.back.model.patient.Patient;
+import org.viewer.hub.back.model.property.ConnectorProperty;
 import org.viewer.hub.back.model.searchcriteria.ArchiveSearchCriteria;
 import org.viewer.hub.back.model.searchcriteria.IHESearchCriteria;
 import org.viewer.hub.back.model.searchcriteria.WeasisArchiveSearchCriteria;
 import org.viewer.hub.back.model.searchcriteria.WeasisIHESearchCriteria;
 import org.viewer.hub.back.service.*;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @Slf4j
@@ -53,21 +57,9 @@ public class DisplaySelectViewerRuleServiceImpl implements DisplaySelectViewerRu
 
     @Override
     public String getViewerUrl(String archive, String viewer, IHESearchCriteria iheSearchCriteria, String extCfg, Authentication authentication) {
-        List<ViewerAssociationModel> viewerAssociationModels = viewerAssociationService.retrieveViewerAssociationModels();
-        ViewerAssociationModel targetAssociation = viewerAssociationModels.stream()
-                .filter(association ->
-                        association.getArchive().equals(archive))
-                .findFirst()
-                .orElse(null);
-        if (targetAssociation == null) {
-            targetAssociation = viewerAssociationModels.stream()
-                    .filter(association ->
-                            association.getArchive().equals("DEFAULT"))
-                    .findFirst()
-                    .get();
-        }
+        ViewerAssociationModel targetAssociation = viewerAssociationService.getViewerAssociation(archive, iheSearchCriteria.getAccessionNumber(), iheSearchCriteria.getStudyUID(), null, authentication);
 
-//          Viewer targetViewer = Viewer.fromString(viewer);
+//        Viewer targetViewer = Viewer.fromString(viewer);
         return switch (targetAssociation.getViewer()) {
             case WEASIS -> {
                 WeasisIHESearchCriteria weasisIHESearchCriteria = (WeasisIHESearchCriteria) iheSearchCriteria;
@@ -86,7 +78,7 @@ public class DisplaySelectViewerRuleServiceImpl implements DisplaySelectViewerRu
 
     @Override
     public String getViewerUrl(String archive, String viewer, ArchiveSearchCriteria archiveSearchCriteria, String extCfg, Authentication authentication) {
-        ViewerAssociationModel targetAssociation = viewerAssociationService.getViewerAssociation(archive);
+        ViewerAssociationModel targetAssociation = viewerAssociationService.getViewerAssociation(archive, archiveSearchCriteria.getAccessionNumber(), archiveSearchCriteria.getStudyUID(), archiveSearchCriteria.getSeriesUID(), authentication);
         //  Viewer targetViewer = Viewer.fromString(viewer);
         return switch (targetAssociation.getViewer()) {
             case WEASIS -> {
@@ -106,7 +98,7 @@ public class DisplaySelectViewerRuleServiceImpl implements DisplaySelectViewerRu
 
     @Override
     public String getQidoViewerUrl(String archive, String viewer, ArchiveSearchCriteria archiveSearchCriteria) {
-        ViewerAssociationModel targetAssociation = viewerAssociationService.getViewerAssociation(archive);
+        ViewerAssociationModel targetAssociation = viewerAssociationService.getViewerAssociation(archive, archiveSearchCriteria.getAccessionNumber(), archiveSearchCriteria.getStudyUID(), archiveSearchCriteria.getSeriesUID(), null);
 //        Viewer targetViewer = Viewer.fromString(viewer);
         return switch (targetAssociation.getViewer()) {
             case WEASIS -> {
@@ -120,4 +112,5 @@ public class DisplaySelectViewerRuleServiceImpl implements DisplaySelectViewerRu
                     this.microDicomDisplayService.retrieveMicroDicomWadoLaunchUrl(archiveSearchCriteria, archive);
         };
     }
+
 }
