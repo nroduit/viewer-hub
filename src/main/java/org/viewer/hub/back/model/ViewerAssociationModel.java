@@ -37,6 +37,13 @@ public class ViewerAssociationModel {
 	private Long id;
 
 	@Basic
+	@Column(name = "priority", nullable = false, unique = true)
+	@JacksonXmlProperty(localName = "Priority")
+	@Schema(description = "Priority of the target")
+	@NotNull
+	public Integer priority;
+
+	@Basic
 	@Column(name = "archive", nullable = false, length = 100)
 	@JacksonXmlProperty(localName = "Archive")
 	@Schema(description = "Archive name")

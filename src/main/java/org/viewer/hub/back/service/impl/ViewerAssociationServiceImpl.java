@@ -16,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.viewer.hub.back.model.ViewerAssociationModel;
@@ -23,6 +24,7 @@ import org.viewer.hub.back.repository.ViewerAssociationRepository;
 import org.viewer.hub.back.service.*;
 
 import java.util.*;
+import java.util.stream.IntStream;
 
 /**
  * Association service
@@ -51,7 +53,7 @@ public class ViewerAssociationServiceImpl implements ViewerAssociationService {
 
 	@Override
 	public List<ViewerAssociationModel> retrieveViewerAssociationModels() {
-		return this.viewerAssociationRepository.findAll();
+		return this.viewerAssociationRepository.findAll(Sort.by(Sort.Direction.ASC, "priority"));
 	}
 
 	@Override
@@ -84,8 +86,35 @@ public class ViewerAssociationServiceImpl implements ViewerAssociationService {
 
 	@Override
 	public boolean createViewerAssociationModel(ViewerAssociationModel viewerAssociationModel) {
-		return !this.viewerAssociationRepository.existsByArchiveIgnoreCase(viewerAssociationModel.getArchive())
+		boolean saved = !this.viewerAssociationRepository.existsByArchiveIgnoreCase(viewerAssociationModel.getArchive())
 				&& !this.viewerAssociationRepository.saveAll(Collections.singletonList(viewerAssociationModel)).isEmpty();
+		if (saved) {
+			updatePriorities();
+		}
+		return saved;
+	}
+
+	@Override
+	public void deleteViewerAssociationModel(ViewerAssociationModel viewerAssociationModel) {
+		this.viewerAssociationRepository.delete(viewerAssociationModel);
+		updatePriorities();
+	}
+
+	@Override
+	public void updatePriority(ViewerAssociationModel draggedItem, int value) {
+		List<ViewerAssociationModel> allItems = this.retrieveViewerAssociationModels();
+		allItems.removeIf(e -> Objects.equals(draggedItem.getId(), e.getId()));
+		allItems.add(Math.min(value, allItems.size()), draggedItem);
+		updatePriorities(allItems);
+	}
+
+	private void updatePriorities() {
+		updatePriorities(this.retrieveViewerAssociationModels());
+	}
+
+	private void updatePriorities(List<ViewerAssociationModel> allItems) {
+		IntStream.range(0, allItems.size()).forEach(i -> allItems.get(i).setPriority(i));
+		this.viewerAssociationRepository.saveAll(allItems);
 	}
 
 }

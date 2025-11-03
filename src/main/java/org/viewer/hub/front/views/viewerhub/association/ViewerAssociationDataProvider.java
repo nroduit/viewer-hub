@@ -44,7 +44,7 @@ public class ViewerAssociationDataProvider<T> extends FilterablePageableDataProv
 		this.viewerAssociationLogic = viewerAssociationLogic;
 		// Default sort order
 		QuerySortOrderBuilder builder = new QuerySortOrderBuilder();
-		builder.thenAsc("archive");
+		builder.thenDesc("priority");
 		this.defaultSortOrders = builder.build();
 	}
 

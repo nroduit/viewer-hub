@@ -13,6 +13,9 @@
             <column name="id" type="BIGINT" autoIncrement="true">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="viewer_association_pkey"/>
             </column>
+            <column name="priority" type="INT">
+                <constraints nullable="false"/>
+            </column>
             <column name="archive" type="VARCHAR(255)">
                 <constraints nullable="false"/>
             </column>
@@ -30,7 +33,8 @@
                 WHERE archive = 'DEFAULT';</sqlCheck>
         </preConditions>
         <insert tableName="viewer_association">
-            <column name="id" valueComputed="nextval('hibernate_sequence')"/>
+            <column name="id" valueComputed="1"/>
+            <column name="priority" valueComputed="0"/>
             <column name="archive" value="DEFAULT"/>
             <column name="viewer" value="WEASIS"/>
         </insert>
