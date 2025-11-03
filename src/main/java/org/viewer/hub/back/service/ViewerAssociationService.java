@@ -48,5 +48,12 @@ public interface ViewerAssociationService {
 	 */
 	boolean createViewerAssociationModel(ViewerAssociationModel viewerAssociationModel);
 
+	/**
+	 * Delete a target entity
+	 * @param viewerAssociationModel ViewerAssociationModel to delete
+	 */
+	void deleteViewerAssociationModel(ViewerAssociationModel viewerAssociationModel);
 
+
+	void updatePriority(ViewerAssociationModel draggedItem, int value);
 }

@@ -70,6 +70,17 @@ public class ViewerAssociationLogic {
 		return this.viewerAssociationService.createViewerAssociationModel(viewerAssociationModel);
 	}
 
+	/**
+	 * Delete a target in backend
+	 * @param viewerAssociationModel ViewerAssociationModel to delete
+	 */
+	public void deleteViewerAssociationModel(@Valid ViewerAssociationModel viewerAssociationModel) {
+		this.viewerAssociationService.deleteViewerAssociationModel(viewerAssociationModel);
+	}
+
+	public void updatePriority(ViewerAssociationModel draggedItem, int value) {
+		this.viewerAssociationService.updatePriority(draggedItem, value);
+	}
 
 	public ViewerAssociationView getAssociationView() {
 		return this.viewerAssociationView;
@@ -78,5 +89,4 @@ public class ViewerAssociationLogic {
 	public void setAssociationView(ViewerAssociationView viewerAssociationView) {
 		this.viewerAssociationView = viewerAssociationView;
 	}
-
 }

@@ -28,13 +28,16 @@ import com.vaadin.flow.router.Route;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.annotation.Secured;
 import org.vaadin.lineawesome.LineAwesomeIconUrl;
+import org.viewer.hub.back.config.properties.ConnectorConfigurationProperties;
 import org.viewer.hub.back.enums.ViewerType;
 import org.viewer.hub.back.model.*;
+import org.viewer.hub.back.service.ViewerAssociationService;
 import org.viewer.hub.front.views.AbstractView;
 import org.viewer.hub.front.views.viewerhub.association.component.ViewerAssociationAddDialog;
 import org.viewer.hub.front.views.viewerhub.association.component.ViewerAssociationGrid;
 
-import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * View managing associations
@@ -56,14 +59,21 @@ public class ViewerAssociationView extends AbstractView {
 	private ViewerAssociationGrid viewerAssociationGrid;
 
 	private final ViewerAssociationDataProvider<ViewerAssociationModel> viewerAssociationDataProvider;
+	private final ConnectorConfigurationProperties connectorConfigurationProperties;
+	private final ViewerAssociationService viewerAssociationService;
 
+	private Button addArchiveButton;
 	private Accordion viewerAccordion;
 
 	@Autowired
 	public ViewerAssociationView(ViewerAssociationLogic viewerAssociationLogic,
-								 ViewerAssociationDataProvider<ViewerAssociationModel> viewerAssociationDataProvider) {
+								 ViewerAssociationDataProvider<ViewerAssociationModel> viewerAssociationDataProvider,
+								 ConnectorConfigurationProperties connectorConfigurationProperties,
+								 ViewerAssociationService viewerAssociationService) {
 		this.viewerAssociationLogic = viewerAssociationLogic;
 		this.viewerAssociationDataProvider = viewerAssociationDataProvider;
+		this.connectorConfigurationProperties = connectorConfigurationProperties;
+		this.viewerAssociationService = viewerAssociationService;
 
 		// Set the view in the service
 		this.viewerAssociationLogic.setAssociationView(this);
@@ -73,6 +83,10 @@ public class ViewerAssociationView extends AbstractView {
 
 		// Add components in the view
 		this.addComponentsView();
+
+		viewerAssociationDataProvider.addDataProviderListener(dataChangeEvent -> {
+			updateView();
+		});
 	}
 
 	/**
@@ -81,7 +95,7 @@ public class ViewerAssociationView extends AbstractView {
 	private void buildComponents() {
 		// Grid + data provider
 		this.viewerAssociationGrid = new ViewerAssociationGrid(this.viewerAssociationDataProvider,
-				this.createComboBoxBelongToMemberOfValueProvider());
+				this.createComboBoxBelongToMemberOfValueProvider(), viewerAssociationLogic);
 		this.viewerAssociationGrid.setDataProvider(this.viewerAssociationDataProvider);
 
 		// BelongTo/MemberOf Launches
@@ -100,11 +114,12 @@ public class ViewerAssociationView extends AbstractView {
 
 		// Grid layout association
 		VerticalLayout gridLayout = new VerticalLayout();
-		Button buttonAddTarget = new Button("Add Archive", new Icon(VaadinIcon.PLUS));
-		buttonAddTarget.addClickListener(event -> this.addArchiveButtonListener());
-		buttonAddTarget.setWidthFull();
+		addArchiveButton = new Button("Add Archive", new Icon(VaadinIcon.PLUS));
+		addArchiveButton.addClickListener(event -> this.archiveButtonListener());
+		addArchiveButton.setWidthFull();
+		addArchiveButton.setEnabled(!getRemainingArchives().isEmpty());
 		this.viewerAssociationGrid.asSingleSelect().addValueChangeListener(this::selectedRowAssociationGridListener);
-		gridLayout.add(buttonAddTarget, this.viewerAssociationGrid);
+		gridLayout.add(addArchiveButton, this.viewerAssociationGrid);
 		gridLayout.setSizeFull();
 
 		// Add in split layout
@@ -140,9 +155,10 @@ public class ViewerAssociationView extends AbstractView {
 	/**
 	 * Listener on add archive button
 	 */
-	private void addArchiveButtonListener() {
+	private void archiveButtonListener() {
 		// Create and open dialog
-		ViewerAssociationAddDialog viewerAssociationAddDialog = new ViewerAssociationAddDialog();
+		ViewerAssociationAddDialog viewerAssociationAddDialog = new ViewerAssociationAddDialog(connectorConfigurationProperties,
+				getRemainingArchives());
 		viewerAssociationAddDialog.open();
 
 		// Listener on create button
@@ -154,6 +170,11 @@ public class ViewerAssociationView extends AbstractView {
 				// Retrieve target to create
 				ViewerAssociationModel targetToCreate = viewerAssociationAddDialog.getBinder().getBean();
 
+				// Increment priority
+				if (targetToCreate.getPriority() == null) {
+					targetToCreate.setPriority(this.viewerAssociationLogic.countAssociationModels());
+				}
+
 				// Create target
 				boolean hasBeenCreated = this.viewerAssociationLogic.addViewerAssociationModel(targetToCreate);
 
@@ -164,6 +185,7 @@ public class ViewerAssociationView extends AbstractView {
 									String.format("Archive %s has been associated", targetToCreate.getArchive())),
 							MessageType.NOTIFICATION_MESSAGE);
 					this.viewerAssociationGrid.getOriginalDataProvider().refreshAll();
+					this.updateView();
 					viewerAssociationAddDialog.close();
 				}
 				else {
@@ -177,6 +199,17 @@ public class ViewerAssociationView extends AbstractView {
 		});
 	}
 
+	private void updateView() {
+		addArchiveButton.setEnabled(!getRemainingArchives().isEmpty());
+	}
+
+	private ArrayList<String> getRemainingArchives() {
+		List<String> associatedArchives = this.viewerAssociationService.retrieveViewerAssociationModels()
+				.stream().map(ViewerAssociationModel::getArchive).toList();
+		ArrayList<String> archives = new ArrayList<>(this.connectorConfigurationProperties.getConnectors().keySet());
+		archives.removeAll(associatedArchives);
+		return archives;
+	}
 
 	/**
 	 * Listener on a row selected in the grid association
@@ -184,9 +217,6 @@ public class ViewerAssociationView extends AbstractView {
 	 */
 	private void selectedRowAssociationGridListener(
 			AbstractField.ComponentValueChangeEvent<Grid<ViewerAssociationModel>, ViewerAssociationModel> event) {
-		// Association model selected
-		ViewerAssociationModel viewerAssociationModelSelected = event.getValue();
-
 		// Remove previous components
 		this.viewerAccordion.getChildren().forEach(c -> this.viewerAccordion.remove(c));
 
