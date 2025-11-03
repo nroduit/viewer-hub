@@ -16,7 +16,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.viewer.hub.back.controller.exception.ParameterException;
 import org.viewer.hub.back.model.ViewerAssociationModel;
-import org.viewer.hub.back.model.searchcriteria.SearchCriteria;
+import org.viewer.hub.back.model.searchcriteria.ArchiveSearchCriteria;
+import org.viewer.hub.back.model.searchcriteria.IHESearchCriteria;
 import org.viewer.hub.back.service.*;
 
 @Service
@@ -41,9 +42,9 @@ public class DisplaySelectViewerRuleServiceImpl implements DisplaySelectViewerRu
     }
 
     @Override
-    public String determineViewerToDisplay(SearchCriteria searchCriteria, Authentication authentication) {
+    public String determineViewerToDisplay(IHESearchCriteria searchCriteria, Authentication authentication) {
         // TODO: rules to select the viewer to display
-        ViewerAssociationModel targetAssociation = viewerAssociationService.getViewerAssociation(searchCriteria.getArchive().getFirst());
+        ViewerAssociationModel targetAssociation = viewerAssociationService.getViewerAssociation(searchCriteria.getArchive(), iheSearchCriteria.getAccessionNumber(), iheSearchCriteria.getStudyUID(), null, authentication);
         return switch (targetAssociation.getViewer()) {
             case WEASIS -> this.weasisDisplayService.retrieveWeasisLaunchUrl(searchCriteria, authentication);
             case OHIF -> this.ohifDisplayService.retrieveOhifLaunchUrl(searchCriteria, authentication);
@@ -52,4 +53,18 @@ public class DisplaySelectViewerRuleServiceImpl implements DisplaySelectViewerRu
             case null -> throw new ParameterException("Invalid viewer");
         };
     }
+
+    @Override
+    public String determineViewerToDisplay(ArchiveSearchCriteria searchCriteria, Authentication authentication) {
+        // TODO: rules to select the viewer to display
+        ViewerAssociationModel targetAssociation = viewerAssociationService.getViewerAssociation(searchCriteria.getArchive(), iheSearchCriteria.getAccessionNumber(), iheSearchCriteria.getStudyUID(), null, authentication);
+        return switch (targetAssociation.getViewer()) {
+            case WEASIS -> this.weasisDisplayService.retrieveWeasisLaunchUrl(searchCriteria, authentication);
+            case OHIF -> this.ohifDisplayService.retrieveOhifLaunchUrl(searchCriteria, authentication);
+            case SLICER -> this.slicerDisplayService.retrieveSlicerLaunchUrl(searchCriteria, authentication);
+            case MICRODICOM -> this.microDicomDisplayService.retrieveMicroDicomLaunchUrl(searchCriteria, authentication);
+            case null -> throw new ParameterException("Invalid viewer");
+        };
+    }
+
 }

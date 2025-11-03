@@ -48,7 +48,7 @@ import java.util.List;
 @Secured({ "ROLE_admin" })
 public class ViewerAssociationView extends AbstractView {
 
-	public static final String VIEW_NAME = "Association";
+	public static final String VIEW_NAME = "Viewer association rules";
 
 	public static final String ROUTE = "association";
 
@@ -62,7 +62,7 @@ public class ViewerAssociationView extends AbstractView {
 	private final ConnectorConfigurationProperties connectorConfigurationProperties;
 	private final ViewerAssociationService viewerAssociationService;
 
-	private Button addArchiveButton;
+	private Button addRuleButton;
 	private Accordion viewerAccordion;
 
 	@Autowired
@@ -95,7 +95,7 @@ public class ViewerAssociationView extends AbstractView {
 	private void buildComponents() {
 		// Grid + data provider
 		this.viewerAssociationGrid = new ViewerAssociationGrid(this.viewerAssociationDataProvider,
-				this.createComboBoxBelongToMemberOfValueProvider(), viewerAssociationLogic);
+				this.createComboBoxRuleValueProvider(), viewerAssociationLogic);
 		this.viewerAssociationGrid.setDataProvider(this.viewerAssociationDataProvider);
 
 		// BelongTo/MemberOf Launches
@@ -114,12 +114,12 @@ public class ViewerAssociationView extends AbstractView {
 
 		// Grid layout association
 		VerticalLayout gridLayout = new VerticalLayout();
-		addArchiveButton = new Button("Add Archive", new Icon(VaadinIcon.PLUS));
-		addArchiveButton.addClickListener(event -> this.archiveButtonListener());
-		addArchiveButton.setWidthFull();
-		addArchiveButton.setEnabled(!getRemainingArchives().isEmpty());
+		addRuleButton = new Button("Add Rule", new Icon(VaadinIcon.PLUS));
+		addRuleButton.addClickListener(event -> this.addRuleButtonListener());
+		addRuleButton.setWidthFull();
+		addRuleButton.setEnabled(!getRemainingArchives().isEmpty());
 		this.viewerAssociationGrid.asSingleSelect().addValueChangeListener(this::selectedRowAssociationGridListener);
-		gridLayout.add(addArchiveButton, this.viewerAssociationGrid);
+		gridLayout.add(addRuleButton, this.viewerAssociationGrid);
 		gridLayout.setSizeFull();
 
 		// Add in split layout
@@ -133,7 +133,7 @@ public class ViewerAssociationView extends AbstractView {
 	 * Create a value provider for column BelongToMemberOf
 	 * @return Value Provider created
 	 */
-	private ValueProvider<ViewerAssociationModel, Select<ViewerType>> createComboBoxBelongToMemberOfValueProvider() {
+	private ValueProvider<ViewerAssociationModel, Select<ViewerType>> createComboBoxRuleValueProvider() {
 
 		return viewerAssociationModel -> {
 			Select<ViewerType> comboBox = new Select<>();
@@ -155,7 +155,7 @@ public class ViewerAssociationView extends AbstractView {
 	/**
 	 * Listener on add archive button
 	 */
-	private void archiveButtonListener() {
+	private void addRuleButtonListener() {
 		// Create and open dialog
 		ViewerAssociationAddDialog viewerAssociationAddDialog = new ViewerAssociationAddDialog(connectorConfigurationProperties,
 				getRemainingArchives());
@@ -175,32 +175,33 @@ public class ViewerAssociationView extends AbstractView {
 					targetToCreate.setPriority(this.viewerAssociationLogic.countAssociationModels());
 				}
 
-				// Create target
-				boolean hasBeenCreated = this.viewerAssociationLogic.addViewerAssociationModel(targetToCreate);
+				// Set aet null if empty
+				if (targetToCreate.getAet() != null && targetToCreate.getAet().trim().isEmpty()) {
+					targetToCreate.setAet(null);
+				}
 
-				if (hasBeenCreated) {
-					// Archive association has been created
+				// Create target
+				boolean created = this.viewerAssociationLogic.addViewerAssociationModel(targetToCreate);
+
+				if (!created) {
 					this.displayMessage(
-							new Message(MessageLevel.INFO, MessageFormat.TEXT,
-									String.format("Archive %s has been associated", targetToCreate.getArchive())),
-							MessageType.NOTIFICATION_MESSAGE);
-					this.viewerAssociationGrid.getOriginalDataProvider().refreshAll();
-					this.updateView();
-					viewerAssociationAddDialog.close();
-				}
-				else {
-					// ViewerAssociationModel has not been created because archive already existing
-					this.displayMessage(
-							new Message(MessageLevel.WARN, MessageFormat.TEXT,
-									String.format("Archive %s already existing!", targetToCreate.getArchive())),
+							new Message(MessageLevel.WARN, MessageFormat.TEXT, "This rule already exists !"),
 							MessageType.NOTIFICATION_MESSAGE);
 				}
+
+				// Archive association has been created
+				this.displayMessage(
+						new Message(MessageLevel.INFO, MessageFormat.TEXT, "Viewer association rule has been associated"),
+						MessageType.NOTIFICATION_MESSAGE);
+				this.viewerAssociationGrid.getOriginalDataProvider().refreshAll();
+				this.updateView();
+				viewerAssociationAddDialog.close();
 			}
 		});
 	}
 
 	private void updateView() {
-		addArchiveButton.setEnabled(!getRemainingArchives().isEmpty());
+		addRuleButton.setEnabled(!getRemainingArchives().isEmpty());
 	}
 
 	private ArrayList<String> getRemainingArchives() {

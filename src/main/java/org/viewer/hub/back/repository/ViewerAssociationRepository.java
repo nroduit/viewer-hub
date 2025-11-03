@@ -21,9 +21,10 @@ public interface ViewerAssociationRepository extends JpaRepository<ViewerAssocia
 
 	/**
 	 * Check if the target corresponding to the archive in parameter exists
+	 * @param aet aet to look for
 	 * @param archive archive to look for
 	 * @return true if the target with the given target name exists
 	 */
-	boolean existsByArchiveIgnoreCase(String archive);
+	boolean existsByAetAndArchive(String aet, String archive);
 
 }

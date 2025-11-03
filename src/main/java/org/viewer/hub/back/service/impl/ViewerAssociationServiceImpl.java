@@ -17,9 +17,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.viewer.hub.back.model.ViewerAssociationModel;
+import org.viewer.hub.back.model.patient.Patient;
+import org.viewer.hub.back.model.property.ConnectorProperty;
 import org.viewer.hub.back.repository.ViewerAssociationRepository;
 import org.viewer.hub.back.service.*;
 
@@ -36,14 +39,20 @@ public class ViewerAssociationServiceImpl implements ViewerAssociationService {
 
 	// Repositories
 	private final ViewerAssociationRepository viewerAssociationRepository;
+	private final DicomConnectorQueryService dicomConnectorQueryService;
+	private final ConnectorService connectorService;
 
 	/**
 	 * Constructor
 	 * @param viewerAssociationRepository viewer association repository
 	 */
 	@Autowired
-	public ViewerAssociationServiceImpl(final ViewerAssociationRepository viewerAssociationRepository) {
+	public ViewerAssociationServiceImpl(final ViewerAssociationRepository viewerAssociationRepository,
+										final DicomConnectorQueryService dicomConnectorQueryService,
+										final ConnectorService connectorService) {
 		this.viewerAssociationRepository = viewerAssociationRepository;
+		this.dicomConnectorQueryService = dicomConnectorQueryService;
+		this.connectorService = connectorService;
 	}
 
 	@Override
@@ -57,21 +66,51 @@ public class ViewerAssociationServiceImpl implements ViewerAssociationService {
 	}
 
 	@Override
-	public ViewerAssociationModel getViewerAssociation(String archive) {
-		List<ViewerAssociationModel> viewerAssociationModels = retrieveViewerAssociationModels();
-		ViewerAssociationModel targetAssociation = viewerAssociationModels.stream()
-				.filter(association ->
-						association.getArchive().equals(archive))
-				.findFirst()
-				.orElse(null);
-		if (targetAssociation == null) {
-			targetAssociation = viewerAssociationModels.stream()
-					.filter(association ->
-							association.getArchive().equals("DEFAULT"))
-					.findFirst()
-					.get();
+	public ViewerAssociationModel getViewerAssociation(String archive, Set<String> accessionNumber, Set<String> studyUID, Set<String> seriesUID, Authentication authentication) {
+		String retrievedAet = null;
+		boolean aetNotFound = false;
+		List<ViewerAssociationModel> viewerAssociationModels = retrieveViewerAssociationModels().reversed();
+		for (ViewerAssociationModel viewerAssociationModel : viewerAssociationModels) {
+
+			if (viewerAssociationModel.getAet() != null) {
+				if (retrievedAet == null && !aetNotFound) {
+					ConnectorProperty connector = this.connectorService.retrieveConnectorFromId(archive);
+					Set<Patient> patients = new HashSet<>();
+					if (seriesUID != null) {
+						patients = dicomConnectorQueryService.retrievePatientsFromSeriesInstanceUidsDicomConnector(seriesUID, connector, authentication);
+					}
+					else if (studyUID != null) {
+						patients = dicomConnectorQueryService.retrievePatientsFromStudyInstanceUidsDicomConnector(studyUID, connector, authentication);
+					}
+					else if (accessionNumber != null) {
+						patients = dicomConnectorQueryService.retrievePatientsFromStudyAccessionNumbersDicomConnector(accessionNumber, connector, authentication);
+					}
+					if (patients.size() == 1) {
+						retrievedAet = patients.stream().findFirst().orElse(null).getStudies().stream().findFirst().orElse(null).getSeries().stream().findFirst().orElse(null).getModality();
+					}
+					if (retrievedAet == null) {
+						aetNotFound = true;
+						continue;
+					}
+				}
+
+				if (!viewerAssociationModel.getAet().equals(retrievedAet)) {
+					continue;
+				}
+			}
+
+			if (viewerAssociationModel.getArchive() != null && !viewerAssociationModel.getArchive().equals(archive)) {
+				continue;
+			}
+
+			return viewerAssociationModel;
 		}
-		return targetAssociation;
+
+		return viewerAssociationModels.stream()
+				.filter(association ->
+						association.getArchive().equals("DEFAULT"))
+				.findFirst()
+				.get();
 	}
 
 	@Override
@@ -86,8 +125,10 @@ public class ViewerAssociationServiceImpl implements ViewerAssociationService {
 
 	@Override
 	public boolean createViewerAssociationModel(ViewerAssociationModel viewerAssociationModel) {
-		boolean saved = !this.viewerAssociationRepository.existsByArchiveIgnoreCase(viewerAssociationModel.getArchive())
-				&& !this.viewerAssociationRepository.saveAll(Collections.singletonList(viewerAssociationModel)).isEmpty();
+		if (this.viewerAssociationRepository.existsByAetAndArchive(viewerAssociationModel.getAet(), viewerAssociationModel.getArchive())) {
+			return false;
+		}
+		boolean saved = !this.viewerAssociationRepository.saveAll(Collections.singletonList(viewerAssociationModel)).isEmpty();
 		if (saved) {
 			updatePriorities();
 		}
