@@ -12,6 +12,7 @@
 package org.viewer.hub.back.util;
 
 import org.springframework.util.MultiValueMap;
+import org.viewer.hub.back.constant.ParamName;
 
 public class MultiValueMapUtil {
 
@@ -31,4 +32,13 @@ public class MultiValueMapUtil {
 		}
 	}
 
+
+	/**
+	 * Clean input params
+	 * @param params Parameters to evaluate
+	 */
+	public static void cleanInputParameters(MultiValueMap<String, String> params) {
+		// Remove following authentication "continue" param
+		params.remove(ParamName.CONTINUE_PARAM);
+	}
 }

@@ -64,6 +64,8 @@ public final class ParamName {
 
 	public static final String OHIF_INITIAL_SOP_INSTANCE_UID = "initialSopInstanceUID";
 
+	public static final String OHIF_TOKEN = "token";
+
 	// Slicer
 	public static final String SLICER_STUDY_INSTANCE_UID = "studyUID";
 
@@ -77,6 +79,9 @@ public final class ParamName {
 	public static final String MICRODICOM_PACS_TAG_VALUE = "pacsTagValue";
 
 	public static final String MICRODICOM_PACS_SERVER = "pacsServer";
+
+	// Controller
+	public static final String CONTINUE_PARAM = "continue";
 
 	private ParamName() {
 		// Private constructor to hide implicit one

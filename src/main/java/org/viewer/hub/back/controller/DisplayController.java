@@ -23,6 +23,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.MultiValueMap;
@@ -37,6 +38,7 @@ import org.viewer.hub.back.model.searchcriteria.SearchCriteria;
 import org.viewer.hub.back.service.CryptographyService;
 import org.viewer.hub.back.service.DisplaySelectViewerRuleService;
 import org.viewer.hub.back.util.InetUtil;
+import org.viewer.hub.back.util.MultiValueMapUtil;
 
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -90,10 +92,12 @@ public class DisplayController {
 	@Operation(summary = "Launch a viewer (Regular)(Authenticated)",
 			description = "Launch a viewer depending on search criteria: authenticated version")
 	@GetMapping(EndPoint.AUTH_PATH)
+	@PreAuthorize("hasRole('viewer_display')")
 	public RedirectView launchAuthViewerWithoutIHEParameters(HttpServletRequest request,
 															 @Parameter(hidden = true, required = true) @NotNull Authentication authentication,
 															 @RequestParam MultiValueMap<String,String> params) {
 		try {
+			MultiValueMapUtil.cleanInputParameters(params);
 			return this.launchViewerWithoutIHEParameters(request, authentication, params);
 		}
 		finally {
@@ -116,6 +120,7 @@ public class DisplayController {
 													  @RequestParam MultiValueMap<String,String> params) {
 		return launchViewerByEvaluatingQueryParams(request, authentication, params, IHESearchCriteria.class);
 	}
+
 	/**
 	 * Launch a viewer depending on IHE search criteria: authenticated version
 	 * @param params Search Criteria
@@ -124,10 +129,12 @@ public class DisplayController {
 	@Operation(summary = "Launch a viewer (IHE)(Authenticated)",
 			description = "Launch a viewer depending on IHE search criteria: authenticated version")
 	@GetMapping(EndPoint.AUTH_IHE_INVOKE_IMAGE_DISPLAY_PATH)
+	@PreAuthorize("hasRole('viewer_display')")
 	public RedirectView launchAuthViewerWithIHEParameters(HttpServletRequest request,
 			@Parameter(hidden = true, required = true) @NotNull Authentication authentication,
 														  @RequestParam MultiValueMap<String,String> params) {
 		try {
+			MultiValueMapUtil.cleanInputParameters(params);
 			return this.launchViewerWithIHEParameters(request, authentication, params);
 		}
 		finally {
@@ -137,7 +144,6 @@ public class DisplayController {
 			SecurityContextHolder.getContext().setAuthentication(null);
 		}
 	}
-
 	@Operation(summary = "Launch a viewer (Post)(IHE)(Not Authenticated)",
 			description = "Launch a viewer depending on IHE search criteria: not authenticated version => search criteria in body")
 	@PostMapping(EndPoint.IHE_INVOKE_IMAGE_DISPLAY_PATH)
@@ -181,6 +187,7 @@ public class DisplayController {
 		return new RedirectView(
 				this.displaySelectViewerRuleService.determineViewerToDisplay(searchCriteria, authentication));
 	}
+
 	/**
 	 * Resolve the host of the request in case it is not defined
 	 * @param request Request
@@ -191,7 +198,6 @@ public class DisplayController {
 			searchCriteria.setHost(InetUtil.getClientHostFromRequest(request));
 		}
 	}
-
 	/**
 	 * Map search criteria to corresponding object and validate inputs
 	 * @param parameters Parameters to evaluate

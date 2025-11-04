@@ -24,6 +24,7 @@ import org.viewer.hub.back.model.property.ConnectorServerProperty;
 @Setter
 public class OhifConfigurationProperties {
 
+	private boolean tokenAuthQueryParam;
 	private ConnectorServerProperty server;
 
 }

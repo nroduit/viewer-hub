@@ -19,6 +19,7 @@ import org.springframework.security.oauth2.client.OAuth2AuthorizeRequest;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.OAuth2AccessToken;
@@ -78,6 +79,14 @@ public class SecurityServiceImpl implements SecurityService {
 				handleDicomWebManifestAuthentication(authentication, arcQuery, connectorProperty);
 			}
 		});
+	}
+
+	@Override
+	public String retrieveAccessToken(OAuth2AuthenticationToken authentication) {
+		OAuth2AuthorizedClient client = oAuth2AuthorizedClientService.loadAuthorizedClient(
+				authentication.getAuthorizedClientRegistrationId(),
+				authentication.getName());
+		return client.getAccessToken().getTokenValue();
 	}
 
 	/**
@@ -319,7 +328,7 @@ public class SecurityServiceImpl implements SecurityService {
 		String accessTokenFound = null;
 		if (clientRegistrationId != null) {
 			OAuth2AuthorizedClient authorizedClient = clientCredentialsAuthorizedClientManager.authorize(
-					OAuth2AuthorizeRequest.withClientRegistrationId(clientRegistrationId).principal("weasis").build());
+					OAuth2AuthorizeRequest.withClientRegistrationId(clientRegistrationId).principal("viewer-hub").build());
 			accessTokenFound = authorizedClient != null && authorizedClient.getAccessToken() != null
 					? authorizedClient.getAccessToken().getTokenValue() : null;
 		}

@@ -12,6 +12,7 @@
 package org.viewer.hub.back.service;
 
 import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.viewer.hub.back.model.manifest.Manifest;
 
 public interface SecurityService {
@@ -23,4 +24,10 @@ public interface SecurityService {
 	 */
 	void handleManifestAuthentication(Manifest manifest, Authentication authentication);
 
+	/**
+	 * Retrieve access token from authentication
+	 * @param authentication Authentication to evaluate
+	 * @return access token found
+	 */
+	String retrieveAccessToken(OAuth2AuthenticationToken authentication);
 }

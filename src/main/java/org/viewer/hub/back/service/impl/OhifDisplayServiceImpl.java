@@ -16,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.viewer.hub.back.config.properties.OhifConfigurationProperties;
@@ -30,6 +31,7 @@ import org.viewer.hub.back.model.searchcriteria.SearchCriteria;
 import org.viewer.hub.back.service.ConnectorQueryService;
 import org.viewer.hub.back.service.ConnectorService;
 import org.viewer.hub.back.service.OhifDisplayService;
+import org.viewer.hub.back.service.SecurityService;
 import org.viewer.hub.back.util.StringUtil;
 
 import java.util.Set;
@@ -45,11 +47,14 @@ public class OhifDisplayServiceImpl implements OhifDisplayService {
 
     private final OhifConfigurationProperties ohifConfigurationProperties;
 
+    private final SecurityService securityService;
+
     @Autowired
-    public OhifDisplayServiceImpl(final ConnectorService connectorService, final OhifConfigurationProperties ohifConfigurationProperties, final ConnectorQueryService connectorQueryService) {
+    public OhifDisplayServiceImpl(final ConnectorService connectorService, final OhifConfigurationProperties ohifConfigurationProperties, final ConnectorQueryService connectorQueryService, final SecurityService securityService) {
         this.connectorService = connectorService;
         this.ohifConfigurationProperties = ohifConfigurationProperties;
         this.connectorQueryService = connectorQueryService;
+        this.securityService = securityService;
     }
 
     @Override
@@ -81,6 +86,11 @@ public class OhifDisplayServiceImpl implements OhifDisplayService {
 
             // Ohif initial search criteria
             uriComponentsBuilder = fillOhifInitialCriteria(searchCriteria, uriComponentsBuilder);
+
+            // If requested is authenticated and ohif configuration use token in query param, add the token in the url in order for Ohif to request the gateway
+            if(ohifConfigurationProperties.isTokenAuthQueryParam() && authentication != null && authentication.isAuthenticated() && authentication instanceof OAuth2AuthenticationToken){
+                uriComponentsBuilder = fillOhifOAuth2Token(uriComponentsBuilder, (OAuth2AuthenticationToken) authentication);
+            }
 
             // Build the url
             ohifLaunchUrl = uriComponentsBuilder.build().toString();
@@ -160,9 +170,17 @@ public class OhifDisplayServiceImpl implements OhifDisplayService {
                     uriComponentsBuilder = uriComponentsBuilder.queryParam(ParamName.OHIF_INITIAL_SOP_INSTANCE_UID, sopInstanceUIDs.stream().findFirst().get());
                 }
             }
-
         }
         return uriComponentsBuilder;
+    }
+
+    /**
+     * Fill the query param token in order for Ohif to connect to the secured gateway/archive
+     * @param authentication Authentication to evaluate
+     * @return UriComponentsBuilder
+     */
+    private UriComponentsBuilder fillOhifOAuth2Token(UriComponentsBuilder uriComponentsBuilder, OAuth2AuthenticationToken authentication) {
+        return uriComponentsBuilder.queryParam(ParamName.OHIF_TOKEN,  securityService.retrieveAccessToken(authentication));
     }
 
 }

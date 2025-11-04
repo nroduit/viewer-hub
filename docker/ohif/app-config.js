@@ -15,6 +15,28 @@ window.config = {
   extensions: [],
   modes: [],
   showStudyList: true,
+
+
+  // =====================
+  // 🔐 Authentification OIDC (Keycloak)
+  // =====================
+  oidc: [
+    {
+      authority: 'http://localhost:8085/realms/viewer-hub',
+      client_id: 'viewer-hub',
+      client_secret: 'peLDyVHEpxTQ1A4GZZzQGK5xsPetlTrV',
+      redirect_uri: 'http://localhost:3000/callback',
+      post_logout_redirect_uri: 'http://localhost:3000',
+      response_type: 'code',
+      scope: 'openid profile email',
+      automaticSilentRenew: true,
+      silent_redirect_uri: 'http://localhost:3000/silent_renew.html',
+      revokeAccessTokenOnSignout: true,
+      monitorSession: true,
+      loadUserInfo: true,
+    },
+  ],
+
   dataSources: [
     {
       namespace: '@ohif/extension-default.dataSourcesModule.dicomweb',
