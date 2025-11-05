@@ -41,8 +41,8 @@ connector:
               # Url used to retrieve images by adding token in manifest
               server:
                 url: http://localhost
-                port: 8080
-                context: /dcm4chee-arc/aets/DCM4CHEE/wado
+                port: 8088
+                context: /DCM4CHEE-LOCAL/wado
             # Retrieve the images by using this basic authentication parameters
             basic:
               # Basic credentials
@@ -78,7 +78,7 @@ connector:
     # ---- ORTHANC PACS ----
     # -----------------------
     orthanc-local:
-      type: DICOM # DB,DICOM,DICOM_WEB
+      type: DICOM_WEB # DB,DICOM,DICOM_WEB
       # ------- Search Criteria ----
       search-criteria:
         deactivated: # SOP_INSTANCE_UID, SERIE_INSTANCE_UID, STUDY_INSTANCE_UID, STUDY_ACCESSION_NUMBER, PATIENT_ID
@@ -98,15 +98,15 @@ connector:
         wado:
           authentication:
             # Type: BASIC, OAUTH2
-            type: BASIC
+            type: OAUTH2
             # Retrieve the token from oidc config (if authorization_code flow, request should be authenticated, otherwise use BASIC authentication) and inject it in the manifest for Weasis to get the images
             oauth2:
               oidc-id: keycloak
               # Url used to retrieve images by adding token in manifest
               server:
                 url: http://localhost
-                port: 8042
-                context: /wado
+                port: 8088
+                context: /ORTHANC-LOCAL/wado
             # Retrieve the images by using this basic authentication parameters
             basic:
               # Basic credentials
@@ -124,15 +124,15 @@ connector:
         qido-rs:
           authentication:
             # Type: BASIC, OAUTH2
-            type: BASIC
+            type: OAUTH2
             # Retrieve the token from oidc config (if authorization_code flow, request should be authenticated, otherwise use BASIC authentication) and inject it in the manifest for Weasis to get the images
             oauth2:
               oidc-id: keycloak
               # Url used to retrieve images by adding token in manifest
               server:
                 url: http://localhost
-                port: 8042
-                context: /dicomweb
+                port: 8088
+                context: /ORTHANC-LOCAL/dicomweb
             # Retrieve the images by using this basic authentication parameters
             basic:
               # Basic credentials
@@ -148,15 +148,15 @@ connector:
         wado-rs:
           authentication:
             # Type: BASIC, OAUTH2
-            type: BASIC
+            type: OAUTH2
             # Retrieve the token from oidc config (if authorization_code flow, request should be authenticated, otherwise use BASIC authentication) and inject it in the manifest for Weasis to get the images
             oauth2:
               oidc-id: keycloak
               # Url used to retrieve images by adding token in manifest
               server:
                 url: http://localhost
-                port: 8042
-                context: /dicomweb
+                port: 8088
+                context: /ORTHANC-LOCAL/dicomweb
             # Retrieve the images by using this basic authentication parameters
             basic:
               # Basic credentials
