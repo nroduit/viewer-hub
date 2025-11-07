@@ -50,10 +50,10 @@ public class ViewerAssociationModel {
 	private String archive;
 
 	@Basic
-	@Column(name = "aet", length = 100)
-	@JacksonXmlProperty(localName = "AET")
-	@Schema(description = "AET")
-	public String aet;
+	@Column(name = "modality", length = 100)
+	@JacksonXmlProperty(localName = "Modality")
+	@Schema(description = "modality")
+	public String modality;
 
 	@Basic
 	@Column(name = "viewer", nullable = false, length = 100)

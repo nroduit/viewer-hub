@@ -16,7 +16,7 @@
             <column name="priority" type="INT">
                 <constraints nullable="false"/>
             </column>
-            <column name="aet" type="VARCHAR(255)">
+            <column name="modality" type="VARCHAR(255)">
             </column>
             <column name="archive" type="VARCHAR(255)">
             </column>
