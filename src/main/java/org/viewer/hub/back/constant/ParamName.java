@@ -71,6 +71,8 @@ public final class ParamName {
 
 	public static final String SLICER_DICOM_WEB_ENDPOINT = "dicomweb_endpoint";
 
+	public static final String SLICER_TOKEN = "access_token";
+
 	// MicroDicom
 	public static final String MICRODICOM_VALUE = "value";
 

@@ -163,7 +163,7 @@ public class SlicerDisplayServiceImpl implements SlicerDisplayService {
 	 * @return UriComponentsBuilder
 	 */
 	private UriComponentsBuilder fillSlicerOAuth2Token(UriComponentsBuilder uriComponentsBuilder, OAuth2AuthenticationToken authentication) {
-		return uriComponentsBuilder.queryParam("access_token",  securityService.retrieveAccessToken(authentication));
+		return uriComponentsBuilder.queryParam(ParamName.SLICER_TOKEN,  securityService.retrieveAccessToken(authentication));
 	}
 
 }
