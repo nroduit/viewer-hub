@@ -15,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.viewer.hub.back.config.properties.SlicerConfigurationProperties;
@@ -28,6 +29,7 @@ import org.viewer.hub.back.model.searchcriteria.IHESearchCriteria;
 import org.viewer.hub.back.model.searchcriteria.SearchCriteria;
 import org.viewer.hub.back.service.ConnectorQueryService;
 import org.viewer.hub.back.service.ConnectorService;
+import org.viewer.hub.back.service.SecurityService;
 import org.viewer.hub.back.service.SlicerDisplayService;
 import org.viewer.hub.back.util.PathUrlUtil;
 
@@ -45,14 +47,17 @@ public class SlicerDisplayServiceImpl implements SlicerDisplayService {
 
 	private final ConnectorQueryService connectorQueryService;
 
+	private final SecurityService securityService;
+
 
 	@Autowired
 	public SlicerDisplayServiceImpl(final ConnectorService connectorService,
 									final ConnectorQueryService connectorQueryService,
-									final SlicerConfigurationProperties slicerConfigurationProperties) {
+									final SlicerConfigurationProperties slicerConfigurationProperties, final SecurityService securityService) {
 		this.connectorService = connectorService;
 		this.connectorQueryService = connectorQueryService;
 		this.slicerConfigurationProperties = slicerConfigurationProperties;
+		this.securityService = securityService;
 	}
 
 	@Override
@@ -92,6 +97,11 @@ public class SlicerDisplayServiceImpl implements SlicerDisplayService {
 			// Dicom endpoint of the archive to query (or viewer gateway for authorization header)
 			uriComponentsBuilder = uriComponentsBuilder.queryParam(ParamName.SLICER_DICOM_WEB_ENDPOINT,
 					PathUrlUtil.buildUrlFromServerProperty(this.slicerConfigurationProperties.getArchives().get(archive)));
+
+			// If requested is authenticated, add the token in the url in order for Slicer to request the gateway
+			if(authentication != null && authentication.isAuthenticated() && authentication instanceof OAuth2AuthenticationToken){
+				uriComponentsBuilder = fillSlicerOAuth2Token(uriComponentsBuilder, (OAuth2AuthenticationToken) authentication);
+			}
 
 			// Build the url
 			slicerLaunchUrl = uriComponentsBuilder.build().toString();
@@ -145,6 +155,15 @@ public class SlicerDisplayServiceImpl implements SlicerDisplayService {
 				});
 			}
 		}
+	}
+
+	/**
+	 * Fill the query param token in order for 3D Slicer to connect to the secured gateway/archive
+	 * @param authentication Authentication to evaluate
+	 * @return UriComponentsBuilder
+	 */
+	private UriComponentsBuilder fillSlicerOAuth2Token(UriComponentsBuilder uriComponentsBuilder, OAuth2AuthenticationToken authentication) {
+		return uriComponentsBuilder.queryParam("access_token",  securityService.retrieveAccessToken(authentication));
 	}
 
 }

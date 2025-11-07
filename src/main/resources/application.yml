@@ -12,7 +12,8 @@ spring:
     name: viewer-hub
     version: '@project.version@'
   profiles:
-    active: oidc, connectors, environment-override, package, cryptography, ohif, weasis, slicer, microdicom
+    # Profiles available to switch between: dicom / dicom web or with or without gateway: connectors-dicom-gtw, connectors-dicom-no-gtw, connectors-dicomweb-gtw
+    active: oidc, connectors-dicom-no-gtw, environment-override, package, cryptography, ohif, weasis, slicer, microdicom
   cloud:
     aws:
       # Region
