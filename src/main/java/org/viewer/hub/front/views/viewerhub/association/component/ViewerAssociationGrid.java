@@ -65,8 +65,8 @@ public class ViewerAssociationGrid extends Grid<ViewerAssociationModel> {
 		// Build columns
 		// Drag icon
 		this.addDragIcon();
-		// AET column
-		this.addColumnAET();
+		// Modality column
+		this.addColumnModality();
 		// Archive
 		this.addColumnArchive();
 		// Viewer
@@ -126,12 +126,12 @@ public class ViewerAssociationGrid extends Grid<ViewerAssociationModel> {
 	 * Add column archive
 	 * @return column archive
 	 */
-	private Column<ViewerAssociationModel> addColumnAET() {
-		return this.addColumn(ViewerAssociationModel::getAet)
-				.setHeader("AET")
+	private Column<ViewerAssociationModel> addColumnModality() {
+		return this.addColumn(ViewerAssociationModel::getModality)
+				.setHeader("Modality")
 				.setWidth("22%")
 				.setSortable(true)
-				.setKey("aet");
+				.setKey("modality");
 	}
 
 	/**

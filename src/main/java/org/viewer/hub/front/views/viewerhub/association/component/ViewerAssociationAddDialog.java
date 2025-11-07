@@ -41,7 +41,7 @@ public class ViewerAssociationAddDialog extends Dialog {
     @Getter
     Binder<ViewerAssociationModel> binder;
 
-	private final TextField aetField;
+	private final TextField modalityField;
 	private final Select<String> archiveNameSelect;
 
 	private final ConnectorConfigurationProperties connectorConfigurationProperties;
@@ -64,9 +64,9 @@ public class ViewerAssociationAddDialog extends Dialog {
 		this.binder = new Binder<>(ViewerAssociationModel.class);
 		this.binder.setBean(new ViewerAssociationModel());
 
-		// AET
-		this.aetField = new TextField();
-		aetField.setLabel("AET");
+		// Modality
+		this.modalityField = new TextField();
+		modalityField.setLabel("Modality");
 
 		// Archive
 		this.archiveNameSelect = new Select<>();
@@ -82,9 +82,9 @@ public class ViewerAssociationAddDialog extends Dialog {
 		viewerNameSelect.setPlaceholder("Select Viewer");
 		viewerNameSelect.setItems(Viewer.values());
 
-		this.binder.forField(aetField)
+		this.binder.forField(modalityField)
 				.withValidator(getAtLeatOneFieldValidator())
-				.bind(ViewerAssociationModel::getAet, ViewerAssociationModel::setAet);
+				.bind(ViewerAssociationModel::getModality, ViewerAssociationModel::setModality);
 		this.binder.forField(archiveNameSelect)
 				.withValidator(getAtLeatOneFieldValidator())
 				.bind(ViewerAssociationModel::getArchive, ViewerAssociationModel::setArchive);
@@ -94,7 +94,7 @@ public class ViewerAssociationAddDialog extends Dialog {
 
 		// Layout
 		HorizontalLayout inputLayout = new HorizontalLayout();
-		inputLayout.addAndExpand(aetField, archiveNameSelect, viewerNameSelect);
+		inputLayout.addAndExpand(modalityField, archiveNameSelect, viewerNameSelect);
 		inputLayout.setWidthFull();
 		inputLayout.setSpacing(true);
 		inputLayout.setAlignItems(FlexComponent.Alignment.CENTER);
@@ -122,7 +122,7 @@ public class ViewerAssociationAddDialog extends Dialog {
 
 	private Validator<? super Object> getAtLeatOneFieldValidator() {
 		return (value, valueContext) -> {
-			if (aetField.getValue().isEmpty() && archiveNameSelect.getValue() == null) {
+			if (modalityField.getValue().isEmpty() && archiveNameSelect.getValue() == null) {
 				return ValidationResult.error("You must specify one of these fields");
 			}
 			return ValidationResult.ok();

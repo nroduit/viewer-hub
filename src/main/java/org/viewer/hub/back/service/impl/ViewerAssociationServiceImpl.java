@@ -67,13 +67,13 @@ public class ViewerAssociationServiceImpl implements ViewerAssociationService {
 
 	@Override
 	public ViewerAssociationModel getViewerAssociation(String archive, Set<String> accessionNumber, Set<String> studyUID, Set<String> seriesUID, Authentication authentication) {
-		String retrievedAet = null;
-		boolean aetNotFound = false;
+		List<String> retrievedModalities = null;
+		boolean modalityNotFound = false;
 		List<ViewerAssociationModel> viewerAssociationModels = retrieveViewerAssociationModels().reversed();
 		for (ViewerAssociationModel viewerAssociationModel : viewerAssociationModels) {
 
-			if (viewerAssociationModel.getAet() != null) {
-				if (retrievedAet == null && !aetNotFound) {
+			if (viewerAssociationModel.getModality() != null) {
+				if (retrievedModalities == null && !modalityNotFound) {
 					ConnectorProperty connector = this.connectorService.retrieveConnectorFromId(archive);
 					Set<Patient> patients = new HashSet<>();
 					if (seriesUID != null) {
@@ -86,15 +86,15 @@ public class ViewerAssociationServiceImpl implements ViewerAssociationService {
 						patients = dicomConnectorQueryService.retrievePatientsFromStudyAccessionNumbersDicomConnector(accessionNumber, connector, authentication);
 					}
 					if (patients.size() == 1) {
-						retrievedAet = patients.stream().findFirst().orElse(null).getStudies().stream().findFirst().orElse(null).getSeries().stream().findFirst().orElse(null).getModality();
+						retrievedModalities = patients.stream().findFirst().orElse(null).getStudies().stream().findFirst().orElse(null).getSeries().stream().map(serie -> serie.getModality()).toList();
 					}
-					if (retrievedAet == null) {
-						aetNotFound = true;
+					if (retrievedModalities == null || retrievedModalities.isEmpty()) {
+						modalityNotFound = true;
 						continue;
 					}
 				}
 
-				if (!viewerAssociationModel.getAet().equals(retrievedAet)) {
+				if (retrievedModalities == null || !retrievedModalities.contains(viewerAssociationModel.getModality())) {
 					continue;
 				}
 			}
@@ -125,7 +125,7 @@ public class ViewerAssociationServiceImpl implements ViewerAssociationService {
 
 	@Override
 	public boolean createViewerAssociationModel(ViewerAssociationModel viewerAssociationModel) {
-		if (this.viewerAssociationRepository.existsByAetAndArchive(viewerAssociationModel.getAet(), viewerAssociationModel.getArchive())) {
+		if (this.viewerAssociationRepository.existsByModalityAndArchive(viewerAssociationModel.getModality(), viewerAssociationModel.getArchive())) {
 			return false;
 		}
 		boolean saved = !this.viewerAssociationRepository.saveAll(Collections.singletonList(viewerAssociationModel)).isEmpty();

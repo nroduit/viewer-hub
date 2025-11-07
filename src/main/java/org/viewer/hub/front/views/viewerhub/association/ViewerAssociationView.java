@@ -31,13 +31,11 @@ import org.vaadin.lineawesome.LineAwesomeIconUrl;
 import org.viewer.hub.back.config.properties.ConnectorConfigurationProperties;
 import org.viewer.hub.back.enums.Viewer;
 import org.viewer.hub.back.model.*;
-import org.viewer.hub.back.service.ViewerAssociationService;
 import org.viewer.hub.front.views.AbstractView;
 import org.viewer.hub.front.views.viewerhub.association.component.ViewerAssociationAddDialog;
 import org.viewer.hub.front.views.viewerhub.association.component.ViewerAssociationGrid;
 
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * View managing associations
@@ -60,20 +58,16 @@ public class ViewerAssociationView extends AbstractView {
 
 	private final ViewerAssociationDataProvider<ViewerAssociationModel> viewerAssociationDataProvider;
 	private final ConnectorConfigurationProperties connectorConfigurationProperties;
-	private final ViewerAssociationService viewerAssociationService;
 
-	private Button addRuleButton;
 	private Accordion viewerAccordion;
 
 	@Autowired
 	public ViewerAssociationView(ViewerAssociationLogic viewerAssociationLogic,
 								 ViewerAssociationDataProvider<ViewerAssociationModel> viewerAssociationDataProvider,
-								 ConnectorConfigurationProperties connectorConfigurationProperties,
-								 ViewerAssociationService viewerAssociationService) {
+								 ConnectorConfigurationProperties connectorConfigurationProperties) {
 		this.viewerAssociationLogic = viewerAssociationLogic;
 		this.viewerAssociationDataProvider = viewerAssociationDataProvider;
 		this.connectorConfigurationProperties = connectorConfigurationProperties;
-		this.viewerAssociationService = viewerAssociationService;
 
 		// Set the view in the service
 		this.viewerAssociationLogic.setAssociationView(this);
@@ -83,10 +77,6 @@ public class ViewerAssociationView extends AbstractView {
 
 		// Add components in the view
 		this.addComponentsView();
-
-		viewerAssociationDataProvider.addDataProviderListener(dataChangeEvent -> {
-			updateView();
-		});
 	}
 
 	/**
@@ -114,10 +104,9 @@ public class ViewerAssociationView extends AbstractView {
 
 		// Grid layout association
 		VerticalLayout gridLayout = new VerticalLayout();
-		addRuleButton = new Button("Add Rule", new Icon(VaadinIcon.PLUS));
+		Button addRuleButton = new Button("Add Rule", new Icon(VaadinIcon.PLUS));
 		addRuleButton.addClickListener(event -> this.addRuleButtonListener());
 		addRuleButton.setWidthFull();
-		addRuleButton.setEnabled(!getRemainingArchives().isEmpty());
 		this.viewerAssociationGrid.asSingleSelect().addValueChangeListener(this::selectedRowAssociationGridListener);
 		gridLayout.add(addRuleButton, this.viewerAssociationGrid);
 		gridLayout.setSizeFull();
@@ -156,9 +145,10 @@ public class ViewerAssociationView extends AbstractView {
 	 * Listener on add archive button
 	 */
 	private void addRuleButtonListener() {
+		ArrayList<String> archives = new ArrayList<>(this.connectorConfigurationProperties.getConnectors().keySet());
 		// Create and open dialog
 		ViewerAssociationAddDialog viewerAssociationAddDialog = new ViewerAssociationAddDialog(connectorConfigurationProperties,
-				getRemainingArchives());
+				archives);
 		viewerAssociationAddDialog.open();
 
 		// Listener on create button
@@ -175,9 +165,9 @@ public class ViewerAssociationView extends AbstractView {
 					targetToCreate.setPriority(this.viewerAssociationLogic.countAssociationModels());
 				}
 
-				// Set aet null if empty
-				if (targetToCreate.getAet() != null && targetToCreate.getAet().trim().isEmpty()) {
-					targetToCreate.setAet(null);
+				// Set modality null if empty
+				if (targetToCreate.getModality() != null && targetToCreate.getModality().trim().isEmpty()) {
+					targetToCreate.setModality(null);
 				}
 
 				// Create target
@@ -194,22 +184,9 @@ public class ViewerAssociationView extends AbstractView {
 						new Message(MessageLevel.INFO, MessageFormat.TEXT, "Viewer association rule has been associated"),
 						MessageType.NOTIFICATION_MESSAGE);
 				this.viewerAssociationGrid.getOriginalDataProvider().refreshAll();
-				this.updateView();
 				viewerAssociationAddDialog.close();
 			}
 		});
-	}
-
-	private void updateView() {
-		addRuleButton.setEnabled(!getRemainingArchives().isEmpty());
-	}
-
-	private ArrayList<String> getRemainingArchives() {
-		List<String> associatedArchives = this.viewerAssociationService.retrieveViewerAssociationModels()
-				.stream().map(ViewerAssociationModel::getArchive).toList();
-		ArrayList<String> archives = new ArrayList<>(this.connectorConfigurationProperties.getConnectors().keySet());
-		archives.removeAll(associatedArchives);
-		return archives;
 	}
 
 	/**
