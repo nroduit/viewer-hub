@@ -162,10 +162,13 @@ ViewerHub Gateway handles basic authentication and oAuth2 (client credential and
 
 In order to run Viewer-hub gateway for the viewers Ohif, 3D Slicer, Microdicom: https://github.com/nroduit/viewer-hub-gateway
 
+## Local Testing
+
+If there is an issue with the cors when testing and launching below urls in local, open Chrome without cors: in cmd => "C:\Program Files\Google\Chrome\Application\chrome.exe" --user-data-dir="C:\chrome-dev-data" --disable-web-security
 
 ## Launch Weasis
 
-Once all the steps above completed, launch the below URL to launch Weasis and the loading of the dicom image stored in the dcm4chee pacs
+Spring profile "connectors-dicom-no-gtw":
 
 Dcm4chee:
 ```
@@ -177,40 +180,66 @@ Orthanc:
 http://localhost:8081/display?viewer=WEASIS&studyUID=1.3.12.2.1107.5.1.4.54023.30000004093013443132800000021&archive=orthanc-local
 ```
 
+Spring profile "connectors-dicom-gtw":
+
+Dcm4chee:
+```
+http://localhost:8081/display/auth?viewer=WEASIS&studyUID=1.3.12.2.1107.5.1.4.54023.30000004093013443132800000021&archive=dcm4chee-local
+```
+
+Orthanc:
+```
+http://localhost:8081/display/auth?viewer=WEASIS&studyUID=1.3.12.2.1107.5.1.4.54023.30000004093013443132800000021&archive=orthanc-local
+```
+
 ## Launch Ohif
 
-Once all the steps above completed, launch the below URL to launch Ohif and the loading of the dicom image stored in the dcm4chee pacs
+Spring profile "connectors-dicom-no-gtw":
 
 Dcm4chee 
 ```
 http://localhost:8081/display?viewer=OHIF&studyUID=1.3.12.2.1107.5.1.4.54023.30000004093013443132800000021&archive=dcm4chee-local
 ```
 
-Orthanc (TODO: in local currently needs to open Chrome without cors before launching below url: in cmd => "C:\Program Files\Google\Chrome\Application\chrome.exe" --user-data-dir="C:\chrome-dev-data" --disable-web-security)
+Orthanc 
 ```
 http://localhost:8081/display?viewer=OHIF&studyUID=1.3.12.2.1107.5.1.4.54023.30000004093013443132800000021&archive=orthanc-local
+```
+
+Spring profile "connectors-dicom-gtw" or "connectors-dicomweb-gtw":
+
+Dcm4chee
+```
+http://localhost:8081/display/auth?viewer=OHIF&studyUID=1.3.12.2.1107.5.1.4.54023.30000004093013443132800000021&archive=dcm4chee-local
+```
+
+Orthanc
+```
+http://localhost:8081/display/auth?viewer=OHIF&studyUID=1.3.12.2.1107.5.1.4.54023.30000004093013443132800000021&archive=orthanc-local
 ```
 
 ## Launch 3D Slicer
 
 You need to install 3D Slicer in your machine to use it.
-Once all the steps above completed, launch the below URL to launch 3D Slicer and the loading of the dicom image stored in the dcm4chee pacs
+
+Spring profile "connectors-dicom-gtw" or "connectors-dicomweb-gtw":
 
 Dcm4chee
 ```
-http://localhost:8081/display?viewer=SLICER&studyUID=1.3.12.2.1107.5.1.4.54023.30000004093013443132800000021&archive=dcm4chee-local
+http://localhost:8081/display/auth?viewer=SLICER&studyUID=1.3.12.2.1107.5.1.4.54023.30000004093013443132800000021&archive=dcm4chee-local
 ```
 
 Orthanc
 ```
-http://localhost:8081/display?viewer=SLICER&studyUID=1.3.12.2.1107.5.1.4.54023.30000004093013443132800000021&archive=orthanc-local
+http://localhost:8081/display/auth?viewer=SLICER&studyUID=1.3.12.2.1107.5.1.4.54023.30000004093013443132800000021&archive=orthanc-local
 ```
 
 ## Launch Micro Dicom
 
 You need to install Micro Dicom in your machine to use it.
 You also need to add the MICRODICOM AET to the Dcm4chee pacs and to configure the Dicom server corresponding to the Dcm4chee pacs in MicroDicom (localhost:11112, aet DCM4CHEE)
-Once all the steps above completed, launch the below URL to launch Micro Dicom and the loading of the dicom image stored in the dcm4chee pacs
+
+Spring profile "connectors-dicom-no-gtw":
 
 Dcm4chee
 ```
