@@ -93,11 +93,11 @@ public class DisplayController {
 		// If encoding enabled decode values
 		this.cryptographyService.decode(iheSearchCriteria);
 
-		String archive = getArchive(request, iheSearchCriteria);
-		String viewer = getViewer(request, iheSearchCriteria, archive);
-		if (archive == null || viewer == null) {
+		String archive = getArchiveInRequest(request, iheSearchCriteria);
+		if (archive == null) {
 			return null;
 		}
+		String viewer = getViewerInRequest(request, iheSearchCriteria, archive);
 
 		String redirectUrl = displaySelectViewerRuleService.getViewerUrl(archive, viewer, iheSearchCriteria, extCfg, authentication);
 		if (redirectUrl == null) {
@@ -155,11 +155,11 @@ public class DisplayController {
 		// If encoding enabled decode values
 		this.cryptographyService.decode(archiveSearchCriteria);
 
-		String archive = getArchive(request, archiveSearchCriteria);
-		String viewer = getViewer(request, archiveSearchCriteria, archive);
-		if (archive == null || viewer == null) {
+		String archive = getArchiveInRequest(request, archiveSearchCriteria);
+		if (archive == null) {
 			return null;
 		}
+		String viewer = getViewerInRequest(request, archiveSearchCriteria, archive);
 
 		String redirectUrl = displaySelectViewerRuleService.getViewerUrl(archive, viewer, archiveSearchCriteria, extCfg, authentication);
 		if (redirectUrl == null) {
@@ -214,11 +214,11 @@ public class DisplayController {
 			@Context DicomWebRequest dicomWebRequest) throws JSONException, IOException {
 
 		ArchiveSearchCriteria archiveSearchCriteria = resolveViewerDicomWebCriterias(dicomWebRequest);
-		String archive = getArchive(dicomWebRequest, archiveSearchCriteria);
-		String viewer = getViewer(dicomWebRequest, archiveSearchCriteria, archive);
-		if (archive == null || viewer == null) {
+		String archive = getArchiveInRequest(dicomWebRequest, archiveSearchCriteria);
+		if (archive == null) {
 			return null;
 		}
+		String viewer = getViewerInRequest(dicomWebRequest, archiveSearchCriteria, archive);
 
 		String redirectUrl = displaySelectViewerRuleService.getQidoViewerUrl(archive, viewer, archiveSearchCriteria);
 		if (redirectUrl == null) {
@@ -244,7 +244,7 @@ public class DisplayController {
 		return archiveSearchCriteria;
 	}
 
-	private String getArchive(HttpServletRequest request, SearchCriteria searchCriteria) {
+	private String getArchiveInRequest(HttpServletRequest request, SearchCriteria searchCriteria) {
 		String archive;
 		if (!searchCriteria.getArchive().isEmpty()) {
 			archive = searchCriteria.getArchive().getFirst();
@@ -259,17 +259,13 @@ public class DisplayController {
 		return archive;
 	}
 
-	private String getViewer(HttpServletRequest request, SearchCriteria searchCriteria, String archive) {
+	private String getViewerInRequest(HttpServletRequest request, SearchCriteria searchCriteria, String archive) {
 		String viewer;
 		if (!searchCriteria.getViewer().isEmpty()) {
 			viewer = searchCriteria.getViewer().getFirst();
 		}
 		else {
 			viewer = request.getHeader("viewer");
-		}
-		if (viewer == null || viewer.isEmpty()) {
-			String archiveName = connectorService.getArchiveNameFromId(archive);
-			viewer = ArchiveViewerMapper.getViewer(archiveName);
 		}
 		return viewer;
 	}

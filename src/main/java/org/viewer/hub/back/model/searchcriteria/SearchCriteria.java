@@ -81,6 +81,12 @@ public abstract class SearchCriteria implements Serializable {
 			name = "containsInDescription", type = "Set<String>", example = "abc, def")
 	private Set<String> containsInDescription = new HashSet<>();
 
+
+	public abstract Set<String> getAccessionNumber();
+	public abstract Set<String> getStudyUID();
+	public abstract Set<String> getSeriesUID();
+
+
 	public void setModalitiesInStudy(Set<String> modalitiesInStudy) {
 		this.modalitiesInStudy = StringUtil.splitCommaSeparatedValuesToList(modalitiesInStudy);
 	}

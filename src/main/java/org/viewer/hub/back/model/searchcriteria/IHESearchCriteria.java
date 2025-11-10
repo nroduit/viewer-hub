@@ -84,6 +84,11 @@ public class IHESearchCriteria extends SearchCriteria {
 		this.accessionNumber = new HashSet<>();
 	}
 
+	@Override
+	public Set<String> getSeriesUID() {
+		return null;
+	}
+
 	public void setStudyUID(Set<String> studyUID) {
 		this.studyUID = StringUtil.splitCommaSeparatedValuesToList(studyUID);
 	}

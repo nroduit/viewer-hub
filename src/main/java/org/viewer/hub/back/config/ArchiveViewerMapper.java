@@ -7,16 +7,6 @@ import java.util.Map;
 
 public class ArchiveViewerMapper {
 
-    private static final Map<Archive, Viewer> mapper = Map.of(
-            Archive.DCM4CHEE, Viewer.MICRODICOM,
-            Archive.ORTHANC, Viewer.MICRODICOM
-    );
-
-    public static String getViewer(String archive) {
-        Archive targetArchive = Archive.fromString(archive);
-        return mapper.get(targetArchive).toString();
-    }
-
     public static boolean shouldOpenViewerInNewTab(String archive, String viewer) {
         Archive targetArchive = Archive.fromString(archive);
         Viewer targetViewer = Viewer.fromString(viewer);

@@ -76,13 +76,13 @@ public class ViewerAssociationServiceImpl implements ViewerAssociationService {
 				if (retrievedModalities == null && !modalityNotFound) {
 					ConnectorProperty connector = this.connectorService.retrieveConnectorFromId(archive);
 					Set<Patient> patients = new HashSet<>();
-					if (seriesUID != null) {
+					if (seriesUID != null && !seriesUID.isEmpty()) {
 						patients = dicomConnectorQueryService.retrievePatientsFromSeriesInstanceUidsDicomConnector(seriesUID, connector, authentication);
 					}
-					else if (studyUID != null) {
+					else if (studyUID != null && !studyUID.isEmpty()) {
 						patients = dicomConnectorQueryService.retrievePatientsFromStudyInstanceUidsDicomConnector(studyUID, connector, authentication);
 					}
-					else if (accessionNumber != null) {
+					else if (accessionNumber != null && !accessionNumber.isEmpty()) {
 						patients = dicomConnectorQueryService.retrievePatientsFromStudyAccessionNumbersDicomConnector(accessionNumber, connector, authentication);
 					}
 					if (patients.size() == 1) {
