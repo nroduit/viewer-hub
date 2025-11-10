@@ -67,6 +67,7 @@ public class ViewerAssociationAddDialog extends Dialog {
 		// Modality
 		this.modalityField = new TextField();
 		modalityField.setLabel("Modality");
+		modalityField.setPlaceholder("Modality 1,Modality2,...");
 
 		// Archive
 		this.archiveNameSelect = new Select<>();

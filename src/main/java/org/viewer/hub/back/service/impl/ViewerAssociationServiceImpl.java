@@ -94,7 +94,9 @@ public class ViewerAssociationServiceImpl implements ViewerAssociationService {
 					}
 				}
 
-				if (retrievedModalities == null || !retrievedModalities.contains(viewerAssociationModel.getModality())) {
+				List<String> modalities = List.of(viewerAssociationModel.getModality().split(","));
+
+				if (retrievedModalities == null || retrievedModalities.stream().noneMatch(modalities::contains)) {
 					continue;
 				}
 			}
