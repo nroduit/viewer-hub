@@ -39,9 +39,10 @@ public interface ViewerAssociationService {
 	/**
 	 * Update values in backend for BelongToMemberOf column
 	 * @param viewerAssociationModel viewer association to save
+	 * @return true if it has been updated
 	 * of backend
 	 */
-	void update(ViewerAssociationModel viewerAssociationModel);
+	boolean update(ViewerAssociationModel viewerAssociationModel);
 
 	/**
 	 * Create a target entity if name not already existing
