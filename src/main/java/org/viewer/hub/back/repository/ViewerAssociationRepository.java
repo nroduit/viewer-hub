@@ -12,7 +12,7 @@
 package org.viewer.hub.back.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.viewer.hub.back.enums.Viewer;
+import org.viewer.hub.back.enums.ViewerType;
 import org.viewer.hub.back.model.ViewerAssociationModel;
 
 /**
@@ -35,6 +35,6 @@ public interface ViewerAssociationRepository extends JpaRepository<ViewerAssocia
 	 * @param viewer viewer to look for
 	 * @return true if the target with the given target name exists
 	 */
-	boolean existsByModalityAndArchiveAndViewer(String modality, String archive, Viewer viewer);
+	boolean existsByModalityAndArchiveAndViewer(String modality, String archive, ViewerType viewer);
 
 }
