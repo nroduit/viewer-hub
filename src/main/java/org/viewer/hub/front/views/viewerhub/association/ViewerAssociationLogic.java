@@ -48,9 +48,10 @@ public class ViewerAssociationLogic {
 	/**
 	 * Following a change in the grid: update the values in backend
 	 * @param viewerAssociationModel Values to update
+	 * @return true if target has been updated
 	 */
-	public void updateViewerAssociationModel(ViewerAssociationModel viewerAssociationModel) {
-		this.viewerAssociationService.update(viewerAssociationModel);
+	public boolean updateViewerAssociationModel(ViewerAssociationModel viewerAssociationModel) {
+		return this.viewerAssociationService.update(viewerAssociationModel);
 	}
 
 	/**

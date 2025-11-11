@@ -121,8 +121,12 @@ public class ViewerAssociationServiceImpl implements ViewerAssociationService {
 	}
 
 	@Override
-	public void update(@Valid ViewerAssociationModel viewerAssociationModel) {
+	public boolean update(@Valid ViewerAssociationModel viewerAssociationModel) {
+		if (this.viewerAssociationRepository.existsByModalityAndArchiveAndViewer(viewerAssociationModel.getModality(), viewerAssociationModel.getArchive(), viewerAssociationModel.getViewer())) {
+			return false;
+		}
 		this.viewerAssociationRepository.save(viewerAssociationModel);
+		return true;
 	}
 
 	@Override

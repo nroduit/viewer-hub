@@ -20,6 +20,7 @@ import com.vaadin.flow.component.grid.dnd.GridDropLocation;
 import com.vaadin.flow.component.grid.dnd.GridDropMode;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.function.ValueProvider;
 import lombok.Getter;
@@ -27,7 +28,9 @@ import org.viewer.hub.back.enums.Viewer;
 import org.viewer.hub.back.model.ViewerAssociationModel;
 import org.viewer.hub.front.views.viewerhub.association.ViewerAssociationDataProvider;
 import org.viewer.hub.front.views.viewerhub.association.ViewerAssociationLogic;
+import org.viewer.hub.front.views.viewerhub.association.ViewerAssociationView;
 
+import java.util.ArrayList;
 import java.util.Objects;
 
 /**
@@ -39,28 +42,34 @@ public class ViewerAssociationGrid extends Grid<ViewerAssociationModel> {
 	// getDataProvider() of the PaginatedGrid returns a temporary filtered data provider:
 	// https://github.com/Klaudeta/grid-pagination/issues/9
 	// Used to refresh the grid
+	private final ViewerAssociationView viewerAssociationView;
 	@Getter
-    private ViewerAssociationDataProvider<ViewerAssociationModel> originalDataProvider;
+	private final ViewerAssociationDataProvider<ViewerAssociationModel> originalDataProvider;
 
 	private final ViewerAssociationLogic viewerAssociationLogic;
+	private final ArrayList<String> archives;
 
 	private ViewerAssociationModel draggedItem = null;
 
 	/**
 	 * Constructor
 	 */
-	public ViewerAssociationGrid(ViewerAssociationDataProvider<ViewerAssociationModel> originalDataProvider,
+	public ViewerAssociationGrid(final ViewerAssociationView viewerAssociationView,
+								 final ViewerAssociationDataProvider<ViewerAssociationModel> originalDataProvider,
 								 ValueProvider<ViewerAssociationModel, Select<Viewer>> viewerValueProvider,
-								 ViewerAssociationLogic viewerAssociationLogic) {
+								 final ViewerAssociationLogic viewerAssociationLogic,
+								 final ArrayList<String> archives) {
 
+		this.viewerAssociationView = viewerAssociationView;
 		this.originalDataProvider = originalDataProvider;
 		this.viewerAssociationLogic = viewerAssociationLogic;
+		this.archives = archives;
 
-        // Set size for the grid
+		// Set size for the grid
 		this.setWidthFull();
 
+		// Permit Drag & Drop
 		addDragListener();
-
 
 		// Build columns
 		// Drag icon
@@ -71,8 +80,8 @@ public class ViewerAssociationGrid extends Grid<ViewerAssociationModel> {
 		this.addColumnArchive();
 		// Viewer
 		this.addColumnViewer(viewerValueProvider);
-		// Delete button
-		this.addDeleteButton();
+		// Edit and Delete buttons
+		this.addButtons();
 	}
 
 	private void addDragListener() {
@@ -153,7 +162,7 @@ public class ViewerAssociationGrid extends Grid<ViewerAssociationModel> {
 	private Column<ViewerAssociationModel> addColumnViewer(ValueProvider<ViewerAssociationModel, Select<Viewer>> viewerValueProvider) {
 		return this.addComponentColumn(viewerValueProvider)
 			.setHeader("Viewer")
-			.setWidth("40%")
+			.setWidth("30%")
 			.setSortable(false); // If sortable, define a comparator
 	}
 
@@ -161,22 +170,41 @@ public class ViewerAssociationGrid extends Grid<ViewerAssociationModel> {
 	 * Add delete button
 	 * @return column delete button
 	 */
-	private Column<ViewerAssociationModel> addDeleteButton() {
+	private Column<ViewerAssociationModel> addButtons() {
 		return this.addComponentColumn(model -> {
 			if (Objects.equals(model.getArchive(), "DEFAULT")) {
 				return null;
 			}
+
+			Button editButton = new Button();
+			editButton.addThemeVariants(ButtonVariant.LUMO_ICON);
+			editButton.setIcon(new Icon(VaadinIcon.EDIT));
+			editButton.addClickListener((ComponentEventListener<ClickEvent<Button>>) event -> {
+				// Create and open dialog
+				ViewerAssociationDialog viewerAssociationDialog = new ViewerAssociationDialog(viewerAssociationLogic,
+						viewerAssociationView, archives, model);
+				viewerAssociationDialog.open();
+			});
+			editButton.setTooltipText("Edit configuration");
+
 			Button deleteButton = new Button();
 			deleteButton.addThemeVariants(ButtonVariant.LUMO_ICON, ButtonVariant.LUMO_PRIMARY,
 					ButtonVariant.LUMO_ERROR);
 			deleteButton.setIcon(new Icon(VaadinIcon.TRASH));
 			deleteButton.addClickListener((ComponentEventListener<ClickEvent<Button>>) event -> {
-                viewerAssociationLogic.deleteViewerAssociationModel(model);
-                originalDataProvider.refreshAll();
-            });
+				viewerAssociationLogic.deleteViewerAssociationModel(model);
+				originalDataProvider.refreshAll();
+			});
 			deleteButton.setTooltipText("Delete configuration");
-            return deleteButton;
-        });
+
+			HorizontalLayout layoutWithoutSpacing = new HorizontalLayout();
+			layoutWithoutSpacing.add(editButton);
+			layoutWithoutSpacing.setPadding(true);
+			layoutWithoutSpacing.add(deleteButton);
+			layoutWithoutSpacing.setWidth("10%");
+
+			return layoutWithoutSpacing;
+		});
 	}
 
 }

@@ -20,11 +20,11 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
-import com.vaadin.flow.data.binder.BinderValidationStatus;
 import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.annotation.Secured;
 import org.vaadin.lineawesome.LineAwesomeIconUrl;
@@ -32,7 +32,7 @@ import org.viewer.hub.back.config.properties.ConnectorConfigurationProperties;
 import org.viewer.hub.back.enums.Viewer;
 import org.viewer.hub.back.model.*;
 import org.viewer.hub.front.views.AbstractView;
-import org.viewer.hub.front.views.viewerhub.association.component.ViewerAssociationAddDialog;
+import org.viewer.hub.front.views.viewerhub.association.component.ViewerAssociationDialog;
 import org.viewer.hub.front.views.viewerhub.association.component.ViewerAssociationGrid;
 
 import java.util.ArrayList;
@@ -54,10 +54,11 @@ public class ViewerAssociationView extends AbstractView {
 	private final transient ViewerAssociationLogic viewerAssociationLogic;
 
 	// Components
+	@Getter
 	private ViewerAssociationGrid viewerAssociationGrid;
 
 	private final ViewerAssociationDataProvider<ViewerAssociationModel> viewerAssociationDataProvider;
-	private final ConnectorConfigurationProperties connectorConfigurationProperties;
+    private final ArrayList<String> archives;
 
 	private Accordion viewerAccordion;
 
@@ -67,7 +68,8 @@ public class ViewerAssociationView extends AbstractView {
 								 ConnectorConfigurationProperties connectorConfigurationProperties) {
 		this.viewerAssociationLogic = viewerAssociationLogic;
 		this.viewerAssociationDataProvider = viewerAssociationDataProvider;
-		this.connectorConfigurationProperties = connectorConfigurationProperties;
+
+		this.archives = new ArrayList<>(connectorConfigurationProperties.getConnectors().keySet());
 
 		// Set the view in the service
 		this.viewerAssociationLogic.setAssociationView(this);
@@ -84,8 +86,8 @@ public class ViewerAssociationView extends AbstractView {
 	 */
 	private void buildComponents() {
 		// Grid + data provider
-		this.viewerAssociationGrid = new ViewerAssociationGrid(this.viewerAssociationDataProvider,
-				this.createComboBoxRuleValueProvider(), viewerAssociationLogic);
+		this.viewerAssociationGrid = new ViewerAssociationGrid(this, this.viewerAssociationDataProvider,
+				this.createComboBoxRuleValueProvider(), viewerAssociationLogic, archives);
 		this.viewerAssociationGrid.setDataProvider(this.viewerAssociationDataProvider);
 
 		// BelongTo/MemberOf Launches
@@ -142,51 +144,13 @@ public class ViewerAssociationView extends AbstractView {
 	}
 
 	/**
-	 * Listener on add archive button
+	 * Listener on add rule button
 	 */
 	private void addRuleButtonListener() {
-		ArrayList<String> archives = new ArrayList<>(this.connectorConfigurationProperties.getConnectors().keySet());
 		// Create and open dialog
-		ViewerAssociationAddDialog viewerAssociationAddDialog = new ViewerAssociationAddDialog(connectorConfigurationProperties,
-				archives);
-		viewerAssociationAddDialog.open();
-
-		// Listener on create button
-		viewerAssociationAddDialog.getCreateButton().addClickListener(buttonClickEvent -> {
-			// Validate inputs
-			BinderValidationStatus<ViewerAssociationModel> validate = viewerAssociationAddDialog.getBinder().validate();
-
-			if (validate.isOk()) {
-				// Retrieve target to create
-				ViewerAssociationModel targetToCreate = viewerAssociationAddDialog.getBinder().getBean();
-
-				// Increment priority
-				if (targetToCreate.getPriority() == null) {
-					targetToCreate.setPriority(this.viewerAssociationLogic.countAssociationModels());
-				}
-
-				// Set modality null if empty
-				if (targetToCreate.getModality() != null && targetToCreate.getModality().trim().isEmpty()) {
-					targetToCreate.setModality(null);
-				}
-
-				// Create target
-				boolean created = this.viewerAssociationLogic.addViewerAssociationModel(targetToCreate);
-
-				if (!created) {
-					this.displayMessage(
-							new Message(MessageLevel.WARN, MessageFormat.TEXT, "This rule already exists !"),
-							MessageType.NOTIFICATION_MESSAGE);
-				}
-
-				// Archive association has been created
-				this.displayMessage(
-						new Message(MessageLevel.INFO, MessageFormat.TEXT, "Viewer association rule has been associated"),
-						MessageType.NOTIFICATION_MESSAGE);
-				this.viewerAssociationGrid.getOriginalDataProvider().refreshAll();
-				viewerAssociationAddDialog.close();
-			}
-		});
+		ViewerAssociationDialog viewerAssociationDialog = new ViewerAssociationDialog(viewerAssociationLogic,
+				this, archives, null);
+		viewerAssociationDialog.open();
 	}
 
 	/**
