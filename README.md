@@ -1,12 +1,43 @@
 ﻿
 # ViewerHub
-ViewerHub allows to manage various viewers on a IT Infrastructure.
+ViewerHub allows you to open the right viewer for each procedure depending on your custom needs.
 
-## Architecture
+## How it works
+
+### Rules definition
+You can create rules to specific which dicom viewer to open depending on:
+- the modality of the exam
+- the archive that requests to open the dicom object
+
+Example:
+
+The first rule in the example configuration bellow is to open the OHIF viewer if both:
+- the Modality is CT or DT
+- the archive is dcm4chee
+
+If the condition is not met, ViewerHub will try the next rules in order, until one is valid (default viewer in last row)
+
+![Viewer Assiciation](src/main/resources/documentation/vh_viewer_association.drawio.png)
+
+You can also force the viewer by adding a `viewer` header or param to the request
+
+### General architecture
 ![architecture.svg](src/main/resources/documentation/general.drawio.png)
 
-## Documentation
+See bellow [Try it yourself](#try-it-yourself) to run the application with all services (no extra configuration required)
+
+### Viewers workflows
+See page [integration schemas](src/main/resources/documentation/integration/README.md) to get details about how each viewer interacts with ViewerHub
+
+### More documentation
 https://weasis.org/en/viewer-hub/index.html
+
+## Main goals
+The goal of this project it to manage interfaces between PACS and Dicom viewers (like EAI for HL7 messages):
+- centralize Dicom flows between PACS and viewer, when possible
+- customize rules to open specific viewer depending on procedure
+- assure authentication and authorization, when possible
+- manage PACS and viewer configurations, when possible
 
 ## Current functionalities
 - Launch of multiple viewers (Weasis, OHIF, 3D Slicer, RadiAnt, Micro Dicom) with several launch endpoints, including IHE IID Profile-compatible launch
@@ -15,24 +46,16 @@ https://weasis.org/en/viewer-hub/index.html
 - Manifest storage in a redis cache
 - Storage of resources required by the different versions of Weasis on Minio/S3
 - Creation of versions of Weasis launched only for certain groups
-- Live changed of Weasis properties 
+- Live changed of Weasis properties
 - Versions management of i18n translations used by Weasis
 - Compatibility management between versions of Weasis installed on clients and versions of resources uploaded in Viewer-Hub (storage on Minio S3 + cache)
 - Pacs connectors management
 - Retrieve OAuth2 tokens on IDP to enable Weasis to authenticate on dcm4chee pacs
 - Cryptography of launch urls
 
-## Main goals
-The goal of this project it to manage interfaces between PACS and Dicom viewers (as EAI for HL7 messages):
-- centralize Dicom flows between PACS and viewer, when possible
-- customize rules to open specific viewer depending on procedure
-- assure authentication and authorization, when possible
-- manage PACS and viewer configurations, when possible
+## Try it yourself
 
-## Viewers workflow
-[Integration schemas](src/main/resources/documentation/integration/README.md)
-
-## Launch the different containers in local
+A ready-to-use development environment has been provided in the repository. It is using docker-compose.
 
 If you want to launch all the containers:
 - Via the terminal, go to the folder "docker": cd docker
@@ -48,7 +71,9 @@ docker compose -p imaging_hub -f docker-compose.yml -f docker-compose.local.yml 
   ./scripts/start.sh local
 ```
 
-## Minio
+You will also need to run ViewerHub with you preferred IDE (see [Viewer Hub](#viewer-hub))
+
+### Minio
 
 The service "create-bucket" in docker-compose.local.yml will launch the creation of a bucket and an access key for ViewerHub.
 
@@ -58,7 +83,7 @@ It is also possible to create the bucket/access key manually:
 ```  
 http://localhost:9090
 ```
-with
+Use the following credentials
 
 ```
 User: viewer-hub
@@ -68,13 +93,13 @@ Password: viewer-hub
 - Once logged, go to Administrator -> Buckets and fill the bucket name with "viewer-hub-bucket", then create the bucket.
 - Then go to User -> Access Keys and create the access key "access-key" with the secret key "secret-key"
 
-## Keycloak
+### Keycloak
 
 In order to access to the keycloak console: 
 ```
 http://localhost:8085
 ```
-with
+Use the following credentials
 ```
 User: admin
 Password: admin
@@ -87,7 +112,7 @@ is directly imported in the keycloak container. This configuration will create:
 - a user "viewer-hub-user" which will have a role "admin" associated in order to access to the different "secured" views of the application
 
 
-## Dcm4chee 
+### Dcm4chee 
 
 In order to access to the pacs dcm4chee:
 ```
@@ -98,7 +123,7 @@ As an example, you can import the file "dicom-example" located in the folders "d
 ("More functions" -> "Upload DICOM Object" -> "Select the STOW-RS server": "DCM4CHEE")
 
 
-## Orthanc
+### Orthanc
 
 In order to access to the pacs orthanc:
 ```
@@ -106,15 +131,18 @@ http://localhost:8042
 ```
 
 Use the following credentials:
-- User: `orthanc-user`
-- Password: `password`
+```
+User: orthanc-user
+Password: password
+```
 
 As an example, you can import the file "dicom-example" located in the folders "docker -> dicom-examples" by using the orthanc interface.
 ("Upload" -> "Select files to upload" and then "Start the upload")
 
 
-## Run configuration
+### Viewer Hub
 
+Launch it with your preferred IDE (bellow configuration is for InteliJ)
 - Configure the run configuration and add in VM options the following properties:
 ```
   -Duser.timezone=UTC
@@ -139,46 +167,40 @@ As an example, you can import the file "dicom-example" located in the folders "d
 ```
 - Then clean/install + run...
 
-## Viewer Hub
 
 In order to access to viewer-hub: 
 ```
 http://localhost:8081
 ```
-with
+Use the following credentials
 
 ```
 User: viewer-hub-user
 Password: password
 ```
 
-Here you can associate for each archive a specific viewer
-
-![Viewer Assiciation](src/main/resources/documentation/vh_viewer_association.png)
-
-
-## Eureka
+### Eureka
 
 Once ViewerHub launched, it is possible to see the registration of the service at this address:
 ```
 http://localhost:8761
 ```
 
-## Launch Weasis
+### Launch Weasis
 
 Once all the steps above completed, launch the below URL to launch Weasis and load the dicom image stored in the dcm4chee pacs
 ```
 http://localhost:8081/display/weasis?studyUID=1.3.12.2.1107.5.1.4.54023.30000004093013443132800000021&archive=dcm4chee-local
 ```
 
-## Launch OHIF
+### Launch OHIF
 
 Once all the steps above completed, launch the below URL to launch OHIF and load the dicom image stored in the orthanc pacs
 ```
 http://localhost:3000/viewer?StudyInstanceUIDs=1.3.12.2.1107.5.1.4.54023.30000004093013443132800000021
 ```
 
-## Launch 3D Slicer
+### Launch 3D Slicer
 
 You need to install 3D Slicer in your machine to use it.
 You also need to add the DICOMwebBrowser extension. It can be downloaded from the 3D Slicer GUI on View > Extension Manager > Install Extensions > search DICOMwebBrowser
@@ -187,19 +209,19 @@ Once all the steps above completed, launch the below URL to launch 3D Slicer and
 slicer://viewer/?studyUID=1.3.12.2.1107.5.1.4.54023.30000004093013443132800000021&dicomweb_endpoint=http://localhost:8042/dicomweb
 ```
 
-## Launch RadiAnt
+### Launch RadiAnt
 
 You need to install RadiAnt in your machine to use it.
-You also need to add the DCM4CHEE AET to RadiAnt Dicom configuration
+You also need to add the DCM4CHEE/Archive AET to RadiAnt Dicom configuration
 Once all the steps above completed, launch the below URL to launch RadiAnt and load the dicom image stored in the dcm4chee pacs
 ```
 radiant://?n=pstv&v=1.3.12.2.1107.5.1.4.54023.30000004093013443132800000021&v=%22STUDYUID%22&n=paet&v=DCM4CHEE
 ```
 
-## Launch Micro Dicom 
+### Launch Micro Dicom 
 
 You need to install Micro Dicom in your machine to use it.
-You also need to add the DCM4CHEE AET to Micro Dicom configuration
+You also need to add the DCM4CHEE/Archive AET to Micro Dicom configuration
 Once all the steps above completed, launch the below URL to launch Micro Dicom and load the dicom image stored in the dcm4chee pacs
 ```
 microdicom://?"param="pacsServer"&value="localhost:ORTHANC:4242:get"&param=pacsTagValue&value="1.3.12.2.1107.5.1.4.54023.30000004093013443132800000021"&value="StudyUID"
