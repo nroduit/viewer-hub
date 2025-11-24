@@ -26,26 +26,15 @@ import java.util.List;
 @Slf4j
 public class OHIFDisplayServiceImpl implements OHIFDisplayService {
 
-	// Services
-	private final ConnectorService connectorService;
-
 	@Value("${ohif.server.url}")
 	private String ohifServerUrl;
 
-	private static final String VIEWER_HUB_DATASOURCE = "viewer-hub";
-
-	@Autowired
-	public OHIFDisplayServiceImpl(final ConnectorService connectorService) {
-		this.connectorService = connectorService;
-	}
-
 	@Override
 	public String retrieveDicomUrl(SearchCriteria searchCriteria, String archive) {
-		String archiveName = connectorService.getArchiveNameFromId(archive);
 		String url = ohifServerUrl + "/viewer";
 
-		if (archiveName != null && !archiveName.isEmpty()) {
-			url += "/" + archiveName + "/";
+		if (archive != null && !archive.isEmpty()) {
+			url += "/" + archive;
 		}
 
 		List<String> query = searchCriteria instanceof IHESearchCriteria

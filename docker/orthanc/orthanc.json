@@ -2,6 +2,7 @@
   "Plugins" : [
     "/usr/local/share/orthanc/plugins/libOrthancAuthorization.so",
     "/usr/local/share/orthanc/plugins/libModalityWorklists.so",
+    "/usr/local/share/orthanc/plugins/libOrthancDicomWeb.so",
     "/usr/local/share/orthanc/plugins/libOrthancViewerHub.so"
   ],
 
@@ -15,9 +16,12 @@
 
   "AuthenticationEnabled" : false,
 
-//  "RegisteredUsers" : {
-//    "orthanc-user" : "password"
-//  },
+  "DicomWeb" : {
+    "Enable" : true,
+    "Root" : "/dicomweb/",
+    "EnableWado" : true,
+    "WadoRoot" : "/wado"
+  },
 
   "DicomModalities" : {
     "Weasis": [

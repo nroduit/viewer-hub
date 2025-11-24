@@ -46,7 +46,7 @@ The goal of this project it to manage interfaces between PACS and Dicom viewers 
 - Manifest storage in a redis cache
 - Storage of resources required by the different versions of Weasis on Minio/S3
 - Creation of versions of Weasis launched only for certain groups
-- Live changed of Weasis properties
+- Live changes of Weasis properties
 - Versions management of i18n translations used by Weasis
 - Compatibility management between versions of Weasis installed on clients and versions of resources uploaded in Viewer-Hub (storage on Minio S3 + cache)
 - Pacs connectors management
@@ -71,7 +71,48 @@ docker compose -p imaging_hub -f docker-compose.yml -f docker-compose.local.yml 
   ./scripts/start.sh local
 ```
 
-You will also need to run ViewerHub with you preferred IDE (see [Viewer Hub](#viewer-hub))
+You will also need to run ViewerHub with you preferred IDE
+
+
+### Viewer Hub
+
+Launch it with your preferred IDE (bellow configuration is for InteliJ)
+- Configure the run configuration and add in VM options the following properties:
+```
+  -Duser.timezone=UTC
+  -DENVIRONMENT=local
+  -DEUREKA_CLIENT_SERVICE_URL_DEFAULT_ZONE=http://localhost:8761/eureka
+  -DREGION=local
+  -DDATACENTER=local
+  -Dserver.port=8081
+  -Dmanagement.server.port=19001
+  -DBACKEND_URI=http://localhost:8081
+  -DDB_HOST=localhost
+  -DDB_PORT=45101
+  -DDB_NAME=viewer-hub
+  -DDB_USER=viewer-hub
+  -DDB_PASSWORD=viewer-hub
+  -DCONFIGSERVER_URI=http://localhost:8888
+  -DS3_ACCESS_KEY=access-key
+  -DS3_SECRET_KEY=secret-key
+  -DS3_ENDPOINT=http://localhost:9080
+  -DS3_BUCKET_NAME=viewer-hub-bucket
+  -DBACKEND_URI=http://localhost:8081
+```
+- Then clean/install + run...
+
+
+In order to access to viewer-hub:
+```
+http://localhost:8081
+```
+Use the following credentials
+
+```
+User: viewer-hub-user
+Password: password
+```
+
 
 ### Minio
 
@@ -92,6 +133,7 @@ Password: viewer-hub
 
 - Once logged, go to Administrator -> Buckets and fill the bucket name with "viewer-hub-bucket", then create the bucket.
 - Then go to User -> Access Keys and create the access key "access-key" with the secret key "secret-key"
+
 
 ### Keycloak
 
@@ -141,48 +183,9 @@ As an example, you can import the file "dicom-example" located in the folders "d
 
 You can also rebuild the ViewerHub Orthanc plugin with the command:
 ```
-docker compose -p imaging_hub -f docker-compose.yml -f docker-compose.local.yml up -d
+docker-compose -f orthanc/orthanc-plugin-builder.yml up -d
 ```
 
-
-### Viewer Hub
-
-Launch it with your preferred IDE (bellow configuration is for InteliJ)
-- Configure the run configuration and add in VM options the following properties:
-```
-  -Duser.timezone=UTC
-  -DENVIRONMENT=local
-  -DEUREKA_CLIENT_SERVICE_URL_DEFAULT_ZONE=http://localhost:8761/eureka
-  -DREGION=local
-  -DDATACENTER=local
-  -Dserver.port=8081
-  -Dmanagement.server.port=19001
-  -DBACKEND_URI=http://localhost:8081
-  -DDB_HOST=localhost
-  -DDB_PORT=45101
-  -DDB_NAME=viewer-hub
-  -DDB_USER=viewer-hub
-  -DDB_PASSWORD=viewer-hub
-  -DCONFIGSERVER_URI=http://localhost:8888
-  -DS3_ACCESS_KEY=access-key
-  -DS3_SECRET_KEY=secret-key
-  -DS3_ENDPOINT=http://localhost:9080
-  -DS3_BUCKET_NAME=viewer-hub-bucket
-  -DBACKEND_URI=http://localhost:8081
-```
-- Then clean/install + run...
-
-
-In order to access to viewer-hub: 
-```
-http://localhost:8081
-```
-Use the following credentials
-
-```
-User: viewer-hub-user
-Password: password
-```
 
 ### Eureka
 

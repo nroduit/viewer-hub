@@ -6,11 +6,11 @@ window.config = {
   dataSources: [
     {
       namespace: '@ohif/extension-default.dataSourcesModule.dicomweb',
-      sourceName: 'orthanc',
+      sourceName: 'orthanc-local',
       configuration: {
         friendlyName: 'Orthanc',
         acceptHeader: [ 'application/dicom+json'],
-        name: 'orthanc',
+        name: 'orthanc-local',
         wadoUriRoot: 'http://localhost:8081/dicomweb/orthanc-local',
         qidoRoot: 'http://localhost:8081/dicomweb/orthanc-local',
         wadoRoot: 'http://localhost:8081/dicomweb/orthanc-local',
@@ -26,10 +26,10 @@ window.config = {
     },
     {
       namespace: '@ohif/extension-default.dataSourcesModule.dicomweb',
-      sourceName: 'dcm4chee',
+      sourceName: 'dcm4chee-local',
       configuration: {
         friendlyName: 'Dcm4chee',
-        name: 'dcm4chee',
+        name: 'dcm4chee-local',
         wadoUriRoot: 'http://localhost:8081/dicomweb/dcm4chee-local',
         qidoRoot: 'http://localhost:8081/dicomweb/dcm4chee-local',
         wadoRoot: 'http://localhost:8081/dicomweb/dcm4chee-local',

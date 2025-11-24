@@ -108,7 +108,7 @@ public class DisplayController {
 		}
 
 		String archiveName = connectorService.getArchiveNameFromId(archive);
-		if (ArchiveViewerMapper.shouldOpenViewerInNewTab(archiveName, viewer)) {
+		if (ArchiveViewerMapper.shouldOpenViewerInNewTab(archiveName)) {
 			manuallyOpenUrl(redirectUrl);
 		}
 		return new RedirectView(redirectUrl);
@@ -171,7 +171,7 @@ public class DisplayController {
 		}
 
 		String archiveName = connectorService.getArchiveNameFromId(archive);
-		if (ArchiveViewerMapper.shouldOpenViewerInNewTab(archiveName, viewer)) {
+		if (ArchiveViewerMapper.shouldOpenViewerInNewTab(archiveName)) {
 			manuallyOpenUrl(redirectUrl);
 		}
 		return new RedirectView(redirectUrl);
@@ -231,7 +231,7 @@ public class DisplayController {
 		}
 
 		String archiveName = connectorService.getArchiveNameFromId(archive);
-		if (ArchiveViewerMapper.shouldOpenViewerInNewTab(archiveName, viewer)) {
+		if (ArchiveViewerMapper.shouldOpenViewerInNewTab(archiveName)) {
 			manuallyOpenUrl(redirectUrl);
 		}
 		return dicomWebRequest.generateResponse(redirectUrl);
