@@ -3,21 +3,21 @@ package org.viewer.hub.back.config;
 import org.viewer.hub.back.enums.Archive;
 import org.viewer.hub.back.enums.Viewer;
 
-import java.util.Map;
-
 public class ArchiveViewerMapper {
 
-    public static boolean shouldOpenViewerInNewTab(String archive, String viewer) {
+    public static boolean shouldOpenViewerInNewTab(String archive, Viewer viewer) {
         Archive targetArchive = Archive.fromString(archive);
-        Viewer targetViewer = Viewer.fromString(viewer);
         return switch (targetArchive) {
-            case Archive.DCM4CHEE -> openViewerInNewTabFromDcm4chee(targetViewer);
-            case Archive.ORTHANC -> true;
+            case Archive.DCM4CHEE -> false;
+            case Archive.ORTHANC -> openViewerInNewTabFromOrthanc(viewer);
         };
     }
 
-    private static boolean openViewerInNewTabFromDcm4chee(Viewer viewer) {
-        return false;
+    private static boolean openViewerInNewTabFromOrthanc(Viewer viewer) {
+        return switch (viewer) {
+            case Viewer.OHIF -> true;
+            default -> false;
+        };
     }
 
 }

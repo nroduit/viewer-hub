@@ -48,36 +48,38 @@ public class DisplaySelectViewerRuleServiceImpl implements DisplaySelectViewerRu
     }
 
     @Override
-    public String getViewerUrl(String archive, String viewer, IHESearchCriteria iheSearchCriteria, String extCfg, Authentication authentication) {
+    public Viewer getViewer(String archive, String viewer, SearchCriteria searchCriteria, Authentication authentication) {
+        if (viewer != null && !viewer.isEmpty()) {
+            return  Viewer.fromString(viewer);
+        }
+        else {
+            ViewerAssociationModel targetAssociation = viewerAssociationService.getViewerAssociation(archive, searchCriteria.getAccessionNumber(), searchCriteria.getStudyUID(), searchCriteria.getSeriesUID(), authentication);
+            return targetAssociation.getViewer();
+        }
+    }
+
+    @Override
+    public String getViewerUrl(String archive, Viewer viewer, IHESearchCriteria iheSearchCriteria, String extCfg, Authentication authentication) {
         WeasisIHESearchCriteria weasisIHESearchCriteria = (WeasisIHESearchCriteria) iheSearchCriteria;
         weasisIHESearchCriteria.setExtCfg(extCfg);
         return getViewerUrl(archive, viewer, weasisIHESearchCriteria, authentication);
     }
 
     @Override
-    public String getViewerUrl(String archive, String viewer, ArchiveSearchCriteria archiveSearchCriteria, String extCfg, Authentication authentication) {
+    public String getViewerUrl(String archive, Viewer viewer, ArchiveSearchCriteria archiveSearchCriteria, String extCfg, Authentication authentication) {
         WeasisArchiveSearchCriteria weasisArchiveSearchCriteria = new WeasisArchiveSearchCriteria(archiveSearchCriteria);
         weasisArchiveSearchCriteria.setExtCfg(extCfg);
         return getViewerUrl(archive, viewer, weasisArchiveSearchCriteria, authentication);
     }
 
     @Override
-    public String getQidoViewerUrl(String archive, String viewer, ArchiveSearchCriteria archiveSearchCriteria) {
+    public String getQidoViewerUrl(String archive, Viewer viewer, ArchiveSearchCriteria archiveSearchCriteria) {
         WeasisArchiveSearchCriteria weasisArchiveSearchCriteria = new WeasisArchiveSearchCriteria(archiveSearchCriteria);
         return getViewerUrl(archive, viewer, weasisArchiveSearchCriteria, null);
     }
 
-    private String getViewerUrl(String archive, String viewer, SearchCriteria searchCriteria, Authentication authentication) {
-        Viewer targetViewer;
-        if (viewer != null && !viewer.isEmpty()) {
-            targetViewer = Viewer.fromString(viewer);
-        }
-        else {
-            ViewerAssociationModel targetAssociation = viewerAssociationService.getViewerAssociation(archive, searchCriteria.getAccessionNumber(), searchCriteria.getStudyUID(), searchCriteria.getSeriesUID(), authentication);
-            targetViewer = targetAssociation.getViewer();
-        }
-
-        return switch (targetViewer) {
+    private String getViewerUrl(String archive, Viewer viewer, SearchCriteria searchCriteria, Authentication authentication) {
+        return switch (viewer) {
             case WEASIS -> this.weasisDisplayService.retrieveWeasisManifestLaunchUrl(searchCriteria, authentication);
             case OHIF -> this.ohifDisplayService.retrieveDicomUrl(searchCriteria, archive);
             case SLICER -> this.slicerDisplayService.retrieveSlicerQidoLaunchUrl(searchCriteria, archive);

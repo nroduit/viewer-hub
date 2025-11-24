@@ -32,6 +32,7 @@ import org.viewer.hub.back.config.ArchiveViewerMapper;
 import org.viewer.hub.back.config.DicomWebRequest;
 import org.viewer.hub.back.constant.EndPoint;
 import org.viewer.hub.back.constant.ParamName;
+import org.viewer.hub.back.enums.Viewer;
 import org.viewer.hub.back.model.searchcriteria.*;
 import org.viewer.hub.back.service.*;
 
@@ -97,7 +98,8 @@ public class DisplayController {
 		if (archive == null) {
 			return null;
 		}
-		String viewer = getViewerInRequest(request, iheSearchCriteria, archive);
+
+		Viewer viewer = getViewerFromRequest(request, iheSearchCriteria, archive, authentication);
 
 		String redirectUrl = displaySelectViewerRuleService.getViewerUrl(archive, viewer, iheSearchCriteria, extCfg, authentication);
 		if (redirectUrl == null) {
@@ -159,7 +161,8 @@ public class DisplayController {
 		if (archive == null) {
 			return null;
 		}
-		String viewer = getViewerInRequest(request, archiveSearchCriteria, archive);
+
+		Viewer viewer = getViewerFromRequest(request, archiveSearchCriteria, archive,authentication);
 
 		String redirectUrl = displaySelectViewerRuleService.getViewerUrl(archive, viewer, archiveSearchCriteria, extCfg, authentication);
 		if (redirectUrl == null) {
@@ -218,7 +221,8 @@ public class DisplayController {
 		if (archive == null) {
 			return null;
 		}
-		String viewer = getViewerInRequest(dicomWebRequest, archiveSearchCriteria, archive);
+
+		Viewer viewer = getViewerFromRequest(dicomWebRequest, archiveSearchCriteria, archive, null);
 
 		String redirectUrl = displaySelectViewerRuleService.getQidoViewerUrl(archive, viewer, archiveSearchCriteria);
 		if (redirectUrl == null) {
@@ -259,7 +263,7 @@ public class DisplayController {
 		return archive;
 	}
 
-	private String getViewerInRequest(HttpServletRequest request, SearchCriteria searchCriteria, String archive) {
+	private Viewer getViewerFromRequest(HttpServletRequest request, SearchCriteria searchCriteria, String archive, Authentication authentication) {
 		String viewer;
 		if (!searchCriteria.getViewer().isEmpty()) {
 			viewer = searchCriteria.getViewer().getFirst();
@@ -267,7 +271,7 @@ public class DisplayController {
 		else {
 			viewer = request.getHeader("viewer");
 		}
-		return viewer;
+		return displaySelectViewerRuleService.getViewer(archive, viewer, searchCriteria, authentication);
 	}
 
 	// Fixme : Temporary code. Because Orthanc does not properly manage RedirectView : probably does not read Location header

@@ -4,6 +4,9 @@
 *.ipr
 *.iws
 
+docker/orthanc/plugin/Build
+docker/orthanc/plugin/ThirdPartyDownloads
+
 # Ignore Maven files
 target/
 

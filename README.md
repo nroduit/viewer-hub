@@ -139,6 +139,11 @@ Password: password
 As an example, you can import the file "dicom-example" located in the folders "docker -> dicom-examples" by using the orthanc interface.
 ("Upload" -> "Select files to upload" and then "Start the upload")
 
+You can also rebuild the ViewerHub Orthanc plugin with the command:
+```
+docker compose -p imaging_hub -f docker-compose.yml -f docker-compose.local.yml up -d
+```
+
 
 ### Viewer Hub
 

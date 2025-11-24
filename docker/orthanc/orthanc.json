@@ -2,7 +2,7 @@
   "Plugins" : [
     "/usr/local/share/orthanc/plugins/libOrthancAuthorization.so",
     "/usr/local/share/orthanc/plugins/libModalityWorklists.so",
-    "/usr/local/share/orthanc/plugins/libOrthancDicomWeb.so"
+    "/usr/local/share/orthanc/plugins/libOrthancViewerHub.so"
   ],
 
   "HttpPort" : 8042,
@@ -10,51 +10,6 @@
   "DicomAet" : "ORTHANC",
 
   "DicomPort" : 4242,
-
-  "DicomWeb" : {
-    "Enable" : true,
-    "Root" : "/dicomweb/",
-    "EnableWado" : true,
-    "WadoRoot" : "/wado",
-
-    "Servers": {
-      "Weasis": {
-        "Url": "http://host.docker.internal:8081/display/dicomweb/",
-        "HttpHeaders": {
-          "archive" : "orthanc-local",
-          "viewer": "weasis"
-        }
-      },
-      "OHIF": {
-        "Url": "http://host.docker.internal:8081/display/dicomweb/",
-        "HttpHeaders": {
-          "archive" : "orthanc-local",
-          "viewer": "ohif"
-        }
-      },
-      "3D Slicer": {
-        "Url": "http://host.docker.internal:8081/display/dicomweb/",
-        "HttpHeaders": {
-          "archive" : "orthanc-local",
-          "viewer": "slicer"
-        }
-      },
-      "RadiAnt": {
-        "Url": "http://host.docker.internal:8081/display/dicomweb/",
-        "HttpHeaders": {
-          "archive" : "orthanc-local",
-          "viewer": "radiant"
-        }
-      },
-      "MicroDicom": {
-        "Url": "http://host.docker.internal:8081/display/dicomweb/",
-        "HttpHeaders": {
-          "archive" : "orthanc-local",
-          "viewer": "microdicom"
-        }
-      }
-    }
-  },
 
   "RemoteAccessAllowed": true,
 
