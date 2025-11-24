@@ -12,6 +12,13 @@
   "RemoteAccessAllowed": true,
   "AuthenticationEnabled" : false,
 
+  "DicomWeb" : {
+    "Enable" : true,
+    "Root" : "/dicomweb/",
+    "EnableWado" : true,
+    "WadoRoot" : "/wado"
+  },
+
   "DicomModalities" : {
     "Weasis": [
       "WEASIS_AE",
