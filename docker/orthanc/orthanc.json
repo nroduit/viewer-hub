@@ -2,29 +2,15 @@
   "Plugins" : [
     "/usr/local/share/orthanc/plugins/libOrthancAuthorization.so",
     "/usr/local/share/orthanc/plugins/libModalityWorklists.so",
-    "/usr/local/share/orthanc/plugins/libOrthancDicomWeb.so"
+    "/usr/local/share/orthanc/plugins/libOrthancViewerHub.so"
   ],
 
   "HttpPort" : 8042,
   "DicomAet" : "ORTHANC",
   "DicomPort" : 4242,
 
-  "DicomWeb" : {
-    "Enable" : true,
-    "Root" : "/dicomweb/",
-    "EnableWado" : true,
-    "WadoRoot" : "/wado",
-
-    "Servers": {
-      "Dcm4chee": {
-        "Url": "http://localhost:8080/dcm4chee-arc/aets/DCM4CHEE/rs"
-      }
-    }
-  },
-
   "RemoteAccessAllowed": true,
   "AuthenticationEnabled" : false,
-
 
   "DicomModalities" : {
     "Weasis": [

@@ -1,0 +1,8 @@
+services:
+  orthanc-plugin-builder:
+    image: jodogne/orthanc-plugins:1.12.6
+    container_name: orthanc-plugin-builder
+    entrypoint: ["/tmp/plugin/entrypoint.sh"]
+    volumes:
+      - ./plugin:/tmp/plugin/
+    

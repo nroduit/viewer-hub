@@ -10,6 +10,8 @@ services:
       - 8042:8042
     secrets:
       - orthanc.json
+    volumes:
+      - ./orthanc/plugin/Build/libOrthancViewerHub.so.mainline:/usr/local/share/orthanc/plugins/libOrthancViewerHub.so
 secrets:
   orthanc.json:
     file: orthanc/orthanc.json
