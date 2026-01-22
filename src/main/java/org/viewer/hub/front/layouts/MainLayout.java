@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2022-2025 Weasis Team and other contributors.
+ *  Copyright (c) 2022-2026 Weasis Team and other contributors.
  *
  *  This program and the accompanying materials are made available under the terms of the Eclipse
  *  Public License 2.0 which is available at https://www.eclipse.org/legal/epl-2.0, or the Apache
@@ -43,6 +43,7 @@ import org.vaadin.lineawesome.LineAwesomeIcon;
 import org.viewer.hub.back.constant.EndPoint;
 import org.viewer.hub.back.util.SecurityUtil;
 import org.viewer.hub.front.components.ToggleButtonTheme;
+import org.viewer.hub.front.views.AbstractView;
 
 import java.util.List;
 
@@ -61,12 +62,18 @@ public class MainLayout extends AppLayout {
 
 	private H1 viewTitle;
 
+	/**
+	 * Constructor
+	 */
 	public MainLayout() {
 		setPrimarySection(Section.DRAWER);
 		addDrawerContent();
 		addHeaderContent();
 	}
 
+	/**
+	 * Create the header content with toggle button and view title
+	 */
 	private void addHeaderContent() {
 		DrawerToggle toggle = new DrawerToggle();
 		toggle.setAriaLabel("Menu toggle");
@@ -77,6 +84,9 @@ public class MainLayout extends AppLayout {
 		addToNavbar(true, toggle, viewTitle);
 	}
 
+	/**
+	 * Create the drawer content with navigation and footer
+	 */
 	private void addDrawerContent() {
 		Span appName = new Span("Viewer-Hub");
 		appName.addClassNames(LumoUtility.FontWeight.SEMIBOLD, LumoUtility.FontSize.LARGE);
@@ -87,17 +97,36 @@ public class MainLayout extends AppLayout {
 		addToDrawer(header, scroller, createFooter());
 	}
 
+	/**
+	 * Create the navigation side nav
+	 */
 	private SideNav createNavigation() {
 		SideNav nav = new SideNav();
+		List<MenuEntry> menuEntries = MenuConfiguration.getMenuEntries();
 
-		// SideNav for Weasis
-		SideNavItem weasisLink = new SideNavItem("Weasis");
+		// Build the settings side nav
+		buildSettingsSideNav(menuEntries, nav);
+
 		// weasisLink.setPrefixComponent(new Image("logo/weasis.svg", "Weasis"));
 
+		// Build the weasis side nav
+		buildWeasisSideNav(menuEntries, nav);
+
+		return nav;
+	}
+
+	/**
+	 * Build the Weasis side nav
+	 * @param menuEntries List of menu available
+	 * @param nav SideNav to populate
+	 */
+	private static void buildWeasisSideNav(List<MenuEntry> menuEntries, SideNav nav) {
+		SideNavItem weasisLink = new SideNavItem("Weasis");
 		// Menu for Weasis: not filtered yet by application
-		List<MenuEntry> menuEntries = MenuConfiguration.getMenuEntries();
 		menuEntries.forEach(entry -> {
-			if (entry.menuClass() != null && SecurityUtil.isAccessGranted(entry.menuClass())) {
+			if (entry.path().startsWith("/" + AbstractView.WEASIS)
+					&& entry.menuClass() != null
+					&& SecurityUtil.isAccessGranted(entry.menuClass())) {
 				if (entry.icon() != null) {
 					weasisLink.addItem(new SideNavItem(entry.title(), entry.path(), new SvgIcon(entry.icon())));
 				}
@@ -106,12 +135,36 @@ public class MainLayout extends AppLayout {
 				}
 			}
 		});
-
 		nav.addItem(weasisLink);
-
-		return nav;
 	}
 
+	/**
+	 * Build the settings side nav
+	 * @param menuEntries List of menu available
+	 * @param nav SideNav to populate
+	 */
+	private static void buildSettingsSideNav(List<MenuEntry> menuEntries, SideNav nav) {
+		// SideNav for Settings
+		SideNavItem settingsLink = new SideNavItem("Settings");
+		// Menu for Settings
+		menuEntries.forEach(entry -> {
+			if ((entry.path().startsWith("/" + AbstractView.SETTINGS) || entry.path().equals("/"))
+					&& entry.menuClass() != null
+					&& SecurityUtil.isAccessGranted(entry.menuClass())) {
+				if (entry.icon() != null) {
+					settingsLink.addItem(new SideNavItem(entry.title(), entry.path(), new SvgIcon(entry.icon())));
+				}
+				else {
+					settingsLink.addItem(new SideNavItem(entry.title(), entry.path()));
+				}
+			}
+		});
+		nav.addItem(settingsLink);
+	}
+
+	/**
+	 * Create the footer with theme toggle and logout button
+	 */
 	private Footer createFooter() {
 		Footer layout = new Footer();
 

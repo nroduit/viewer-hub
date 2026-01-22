@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2022-2025 Weasis Team and other contributors.
+ *  Copyright (c) 2022-2026 Weasis Team and other contributors.
  *
  *  This program and the accompanying materials are made available under the terms of the Eclipse
  *  Public License 2.0 which is available at https://www.eclipse.org/legal/epl-2.0, or the Apache
@@ -18,19 +18,14 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.viewer.hub.back.entity.LaunchConfigEntity;
-import org.viewer.hub.back.entity.OverrideConfigEntity;
-import org.viewer.hub.back.entity.OverrideConfigEntityPK;
-import org.viewer.hub.back.entity.PackageVersionEntity;
-import org.viewer.hub.back.entity.TargetEntity;
-import org.viewer.hub.back.entity.WeasisPropertyEntity;
+import org.viewer.hub.back.entity.*;
 import org.viewer.hub.back.enums.TargetType;
 import org.viewer.hub.back.repository.OverrideConfigRepository;
 import org.viewer.hub.back.repository.TargetRepository;
 import org.viewer.hub.back.repository.specification.OverrideConfigSpecification;
 import org.viewer.hub.back.service.OverrideConfigService;
 import org.viewer.hub.back.util.PageUtil;
-import org.viewer.hub.front.views.bundle.override.component.OverrideConfigFilter;
+import org.viewer.hub.front.views.weasis.bundle.override.component.OverrideConfigFilter;
 
 import java.util.Collections;
 import java.util.Objects;
