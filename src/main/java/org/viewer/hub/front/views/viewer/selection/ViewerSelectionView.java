@@ -81,7 +81,7 @@ public class ViewerSelectionView extends AbstractView {
 	private void buildComponents() {
 		// Grid + data provider
 		this.viewerSelectionGrid = new ViewerSelectionGrid(this, this.viewerSelectionDataProvider,
-				this.createComboBoxRuleValueProvider(), viewerSelectionLogic, archives);
+				this.createViewerComboBoxValueProvider(), this.createArchiveComboBoxValueProvider(), viewerSelectionLogic);
 		this.viewerSelectionGrid.setDataProvider(this.viewerSelectionDataProvider);
 	}
 
@@ -105,7 +105,7 @@ public class ViewerSelectionView extends AbstractView {
 	 * Create a value provider for column viewer
 	 * @return Value Provider created
 	 */
-	private ValueProvider<ViewerSelectionEntity, Select<ViewerType>> createComboBoxRuleValueProvider() {
+	private ValueProvider<ViewerSelectionEntity, Select<ViewerType>> createViewerComboBoxValueProvider() {
 		return viewerSelectionEntity -> {
 			Select<ViewerType> comboBox = new Select<>();
 			comboBox.setWidth("100%");
@@ -124,12 +124,34 @@ public class ViewerSelectionView extends AbstractView {
 	}
 
 	/**
+	 * Create a value provider for column archive
+	 * @return Value Provider created
+	 */
+	private ValueProvider<ViewerSelectionEntity, Select<String>> createArchiveComboBoxValueProvider() {
+		return viewerSelectionEntity -> {
+			Select<String> select = new Select<>();
+			select.setWidth("100%");
+			select.setItems(archives);
+			select.setValue(viewerSelectionEntity.getArchive());
+			select.setEmptySelectionAllowed(true);
+
+			// Change listener => refresh model + update in backend
+			select.addValueChangeListener(event -> {
+				viewerSelectionEntity.setArchive(event.getValue());
+				this.viewerSelectionLogic.updateViewerSelection(viewerSelectionEntity);
+			});
+
+			return select;
+		};
+	}
+
+	/**
 	 * Listener on add rule button
 	 */
 	private void addRuleButtonListener() {
 		// Create and open dialog
 		ViewerSelectionDialog viewerSelectionDialog = new ViewerSelectionDialog(viewerSelectionLogic,
-				this, archives, null);
+				this, archives);
 		viewerSelectionDialog.open();
 	}
 

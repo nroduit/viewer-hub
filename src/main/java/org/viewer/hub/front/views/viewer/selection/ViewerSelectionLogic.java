@@ -19,7 +19,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.viewer.hub.back.entity.ViewerSelectionEntity;
+import org.viewer.hub.back.enums.ModalityType;
+import org.viewer.hub.back.enums.ViewerType;
 import org.viewer.hub.back.service.ViewerSelectionService;
+
+import java.util.List;
 
 /**
  * Logic managing viewer selection
@@ -55,6 +59,20 @@ public class ViewerSelectionLogic {
 	 */
 	public boolean updateViewerSelection(ViewerSelectionEntity viewerSelectionEntity) {
 		return this.viewerSelectionService.update(viewerSelectionEntity);
+	}
+
+
+	/**
+	 * Check for duplicate rule
+	 * @param archive Archive name
+	 * @param viewer Viewer type
+	 * @param modalities List of modalities
+	 * @param excludeId Id to exclude from the check (used during update)
+	 * @return true if a duplicate rule exists
+	 */
+	public boolean checkDuplicateRule(String archive, ViewerType viewer,
+									  List<ModalityType> modalities, Long excludeId) {
+		return viewerSelectionService.checkDuplicate(archive, viewer, modalities, excludeId);
 	}
 
 	/**

@@ -15,10 +15,15 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import org.viewer.hub.back.entity.converter.ViewerTypeConverter;
+import org.viewer.hub.back.enums.ModalityType;
 import org.viewer.hub.back.enums.ViewerType;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Entity for the table viewer_association.
@@ -27,6 +32,7 @@ import org.viewer.hub.back.enums.ViewerType;
 @Table(name = "viewer_selection")
 @Getter
 @Setter
+@EqualsAndHashCode(callSuper = false)
 public class ViewerSelectionEntity {
 
     @Id
@@ -49,11 +55,13 @@ public class ViewerSelectionEntity {
 	@Schema(description = "Archive name")
 	private String archive;
 
-	@Basic
-	@Column(name = "modality", length = 100)
+	@ElementCollection(targetClass = ModalityType.class, fetch = FetchType.EAGER)
+	@Enumerated(EnumType.STRING)
+	@CollectionTable(name = "viewer_selection_modalities", joinColumns = @JoinColumn(name = "viewer_selection_id"))
+	@Column(name = "modality")
 	@JacksonXmlProperty(localName = "Modality")
-	@Schema(description = "modality")
-	public String modality;
+	@Schema(description = "List of modalities")
+	private List<ModalityType> modalities = new ArrayList<>();
 
 	@Basic
 	@Column(name = "viewer", nullable = false, length = 100)

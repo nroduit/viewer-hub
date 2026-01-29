@@ -15,6 +15,7 @@ import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.combobox.MultiSelectComboBox;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.dnd.GridDropLocation;
 import com.vaadin.flow.component.grid.dnd.GridDropMode;
@@ -25,186 +26,255 @@ import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.function.ValueProvider;
 import lombok.Getter;
 import org.viewer.hub.back.entity.ViewerSelectionEntity;
+import org.viewer.hub.back.enums.ModalityType;
 import org.viewer.hub.back.enums.ViewerType;
+import org.viewer.hub.back.model.Message;
+import org.viewer.hub.back.model.MessageFormat;
+import org.viewer.hub.back.model.MessageLevel;
+import org.viewer.hub.back.model.MessageType;
 import org.viewer.hub.front.views.viewer.selection.ViewerSelectionDataProvider;
 import org.viewer.hub.front.views.viewer.selection.ViewerSelectionLogic;
 import org.viewer.hub.front.views.viewer.selection.ViewerSelectionView;
 
-import java.util.ArrayList;
-import java.util.Objects;
+import java.util.*;
+import java.util.function.Consumer;
 
 /**
  * Grid for the viewer selection view
  */
 public class ViewerSelectionGrid extends Grid<ViewerSelectionEntity> {
 
-	public static final String DEFAULT = "DEFAULT";
+    public static final String DEFAULT = "DEFAULT";
 
-	private final ViewerSelectionView viewerSelectionView;
+    private final ViewerSelectionView viewerSelectionView;
 
-	@Getter
-	private final ViewerSelectionDataProvider<ViewerSelectionEntity> originalDataProvider;
+    @Getter
+    private final ViewerSelectionDataProvider<ViewerSelectionEntity> originalDataProvider;
 
-	private final ViewerSelectionLogic viewerSelectionLogic;
+    private final ViewerSelectionLogic viewerSelectionLogic;
 
-	private final ArrayList<String> archives;
+    private ViewerSelectionEntity draggedItem;
 
-	private ViewerSelectionEntity draggedItem;
+    /**
+     * Constructor
+     */
+    public ViewerSelectionGrid(final ViewerSelectionView viewerSelectionView,
+                               final ViewerSelectionDataProvider<ViewerSelectionEntity> originalDataProvider,
+                               ValueProvider<ViewerSelectionEntity, Select<ViewerType>> viewerValueProvider,
+                               ValueProvider<ViewerSelectionEntity, Select<String>> archiveValueProvider,
+                               final ViewerSelectionLogic viewerSelectionLogic) {
+        this.viewerSelectionView = viewerSelectionView;
+        this.originalDataProvider = originalDataProvider;
+        this.viewerSelectionLogic = viewerSelectionLogic;
 
-	/**
-	 * Constructor
-	 */
-	public ViewerSelectionGrid(final ViewerSelectionView viewerSelectionView,
-							   final ViewerSelectionDataProvider<ViewerSelectionEntity> originalDataProvider,
-							   ValueProvider<ViewerSelectionEntity, Select<ViewerType>> viewerValueProvider,
-							   final ViewerSelectionLogic viewerSelectionLogic,
-							   final ArrayList<String> archives) {
-		this.viewerSelectionView = viewerSelectionView;
-		this.originalDataProvider = originalDataProvider;
-		this.viewerSelectionLogic = viewerSelectionLogic;
-		this.archives = archives;
+        // Set size for the grid
+        this.setWidthFull();
+        // Permit Drag & Drop
+        createDragListener();
+        // Build columns
+        // Drag icon
+        this.addDragIcon();
+        // Modality column
+        this.addModalityColumn();
+        // Archive
+        this.addArchiveColumn(archiveValueProvider);
+        // Viewer
+        this.addViewerColumn(viewerValueProvider);
+        // Edit and Delete buttons
+        this.addButtons();
+    }
 
-		// Set size for the grid
-		this.setWidthFull();
+    /**
+     * Add drag listener
+     */
+    private void createDragListener() {
+        this.setRowsDraggable(true);
+        this.setDropMode(GridDropMode.BETWEEN);
 
-		// Permit Drag & Drop
-		createDragListener();
+        this.setDragFilter(e -> !DEFAULT.equals(e.getArchive()));
+        this.setDropFilter(e -> !DEFAULT.equals(e.getArchive()));
 
-		// Build columns
-		// Drag icon
-		this.addDragIcon();
-		// Modality column
-		this.addColumnModality();
-		// Archive
-		this.addColumnArchive();
-		// Viewer
-		this.addColumnViewer(viewerValueProvider);
+        this.addDragStartListener(e -> draggedItem = e.getDraggedItems().getFirst());
+        this.addDragEndListener(e -> draggedItem = null);
 
-		// Edit and Delete buttons
-		this.addButtons();
-	}
+        this.addDropListener(e -> {
+            ViewerSelectionEntity viewerSelectionEntity = e.getDropTargetItem().orElse(null);
+            if (viewerSelectionEntity == null || Objects.equals(draggedItem, viewerSelectionEntity)) {
+                return;
+            }
+            int targetPriority = viewerSelectionEntity.getPriority();
+            if (e.getDropLocation() == GridDropLocation.ABOVE) {
+                targetPriority++;
+            }
+            if (targetPriority == draggedItem.getPriority()) {
+                return;
+            }
+            viewerSelectionLogic.updatePriority(draggedItem, targetPriority);
+            originalDataProvider.refreshAll();
+        });
+    }
 
-	/**
-	 * Add drag listener
-	 */
-	// TODO à tester + refactor ?
-	private void createDragListener() {
-		this.setRowsDraggable(true);
-		this.setDropMode(GridDropMode.BETWEEN);
+    /**
+     * Add drag icon
+     *
+     * @return column drag icon
+     */
+    private Column<ViewerSelectionEntity> addDragIcon() {
+        return this.addComponentColumn(model -> {
+            if (Objects.equals(model.getArchive(), DEFAULT)) {
+                return null;
+            }
+            Icon dragIcon = VaadinIcon.GRID_SMALL.create();
+            dragIcon.setTooltipText("Drag & drop to update rule priority");
+            dragIcon.getStyle().set("padding", "0.30em");
+            return dragIcon;
+        });
+    }
 
-		this.setDragFilter(e -> !DEFAULT.equals(e.getArchive()));
-		this.setDropFilter(e -> !DEFAULT.equals(e.getArchive()));
+    /**
+     * Add modality column
+     *
+     * @return column modality
+     */
+    private Column<ViewerSelectionEntity> addModalityColumn() {
+        return this.addComponentColumn(entity -> {
+                    MultiSelectComboBox<ModalityType> modalityComboBox = new MultiSelectComboBox<>();
+                    modalityComboBox.setItems(ModalityType.values());
+                    modalityComboBox.setItemLabelGenerator(ModalityType::name);
+                    modalityComboBox.setValue(entity.getModalities() != null ? new HashSet<>(entity.getModalities()) : Set.of());
+                    modalityComboBox.setWidthFull();
 
-		this.addDragStartListener(e -> draggedItem = e.getDraggedItems().getFirst());
-		this.addDragEndListener(e -> draggedItem = null);
+                    modalityComboBox.addValueChangeListener(event -> {
+                        Set<ModalityType> newModalities = event.getValue();
+                        ArrayList<ModalityType> modalities = new ArrayList<>(newModalities);
+                        Set<ModalityType> oldModalities = entity.getModalities() != null
+                                ? new HashSet<>(entity.getModalities())
+                                : Set.of();
 
-		this.addDropListener(e -> {
-			ViewerSelectionEntity viewerSelectionEntity = e.getDropTargetItem().orElse(null);
-			if (viewerSelectionEntity == null || Objects.equals(draggedItem, viewerSelectionEntity)) {
-				return;
-			}
-			int targetPriority = viewerSelectionEntity.getPriority();
-			if (e.getDropLocation() == GridDropLocation.ABOVE) {
-				targetPriority++;
-			}
-			if (targetPriority == draggedItem.getPriority()) {
-				return;
-			}
-			viewerSelectionLogic.updatePriority(draggedItem, targetPriority);
-			originalDataProvider.refreshAll();
-		});
-	}
+                        if (!validateAndUpdateEntity(entity, entity.getArchive(), entity.getViewer(),
+                                modalities, e -> e.setModalities(modalities))) {
+                            modalityComboBox.setValue(oldModalities);
+                        }
+                    });
+                    return modalityComboBox;
+                })
+                .setHeader("Modality")
+                .setWidth("45%")
+                .setSortable(false)
+                .setKey("modalities");
+    }
 
-	/**
-	 * Add drag icon
-	 * @return column drag icon
-	 */
-	private Column<ViewerSelectionEntity> addDragIcon() {
-		return this.addComponentColumn(model -> {
-			if (Objects.equals(model.getArchive(), DEFAULT)) {
-				return null;
-			}
-			Icon dragIcon = VaadinIcon.GRID_SMALL.create();
-			dragIcon.setTooltipText("Drag & drop to update rule priority");
-			dragIcon.getStyle().set("padding", "0.30em");
-			return dragIcon;
-		});
-	}
+    /**
+     * Add column archive
+     *
+     * @return column archive
+     */
+    private Column<ViewerSelectionEntity> addArchiveColumn(ValueProvider<ViewerSelectionEntity, Select<String>> archiveValueProvider) {
+        return this.addComponentColumn(entity -> {
+                    Select<String> archiveSelect = archiveValueProvider.apply(entity);
 
-	/**
-	 * Add column archive
-	 * @return column archive
-	 */
-	private Column<ViewerSelectionEntity> addColumnModality() {
-		return this.addColumn(ViewerSelectionEntity::getModality)
-				.setHeader("Modality")
-				.setWidth("22%")
-				.setSortable(true)
-				.setKey("modality");
-	}
+                    archiveSelect.addValueChangeListener(event -> {
+                        String newArchive = event.getValue();
+                        String oldArchive = entity.getArchive();
+                        List<ModalityType> modalities = entity.getModalities() != null
+                                ? entity.getModalities() : new ArrayList<>();
+                        if (!validateAndUpdateEntity(entity, newArchive, entity.getViewer(),
+                                modalities, e -> e.setArchive(newArchive))) {
+                            archiveSelect.setValue(oldArchive);
+                            originalDataProvider.refreshAll();
+                        }
+                    });
+                    return archiveSelect;
+                })
+                .setHeader("Archive")
+                .setWidth("20%")
+                .setSortable(false)
+                .setKey("archive");
+    }
 
-	/**
-	 * Add column archive
-	 * @return column archive
-	 */
-	private Column<ViewerSelectionEntity> addColumnArchive() {
-		return this.addColumn(ViewerSelectionEntity::getArchive)
-			.setHeader("Archive")
-			.setWidth("22%")
-			.setSortable(true)
-			.setKey("archive");
-	}
+    /**
+     * Add column viewer
+     *
+     * @return column viewer
+     */
+    private Column<ViewerSelectionEntity> addViewerColumn(ValueProvider<ViewerSelectionEntity, Select<ViewerType>> viewerValueProvider) {
+        return this.addComponentColumn(entity -> {
+                    Select<ViewerType> viewerSelect = viewerValueProvider.apply(entity);
 
-	/**
-	 * Add column viewer
-	 * @return column viewer
-	 */
-	private Column<ViewerSelectionEntity> addColumnViewer(ValueProvider<ViewerSelectionEntity, Select<ViewerType>> viewerValueProvider) {
-		return this.addComponentColumn(viewerValueProvider)
-			.setHeader("Viewer")
-			.setWidth("30%")
-			.setSortable(false); // If sortable, define a comparator
-	}
+                    viewerSelect.addValueChangeListener(event -> {
+                        ViewerType newViewer = event.getValue();
+                        ViewerType oldViewer = entity.getViewer();
+                        List<ModalityType> modalities = entity.getModalities() != null
+                                ? entity.getModalities() : new ArrayList<>();
 
-	/**
-	 * Add delete button
-	 * @return column delete button
-	 */
-	private Column<ViewerSelectionEntity> addButtons() {
-		return this.addComponentColumn(model -> {
-			if (Objects.equals(model.getArchive(), DEFAULT)) {
-				return null;
-			}
+                        if (!validateAndUpdateEntity(entity, entity.getArchive(), newViewer, modalities,
+                                e -> e.setViewer(newViewer))) {
+                            viewerSelect.setValue(oldViewer);
+                            originalDataProvider.refreshAll();
+                        }
+                    });
+                    return viewerSelect;
+                })
+                .setHeader("Viewer")
+                .setWidth("20%")
+                .setSortable(false);
+    }
 
-			Button editButton = new Button();
-			editButton.addThemeVariants(ButtonVariant.LUMO_ICON);
-			editButton.setIcon(new Icon(VaadinIcon.EDIT));
-			editButton.addClickListener((ComponentEventListener<ClickEvent<Button>>) event -> {
-				// Create and open dialog
-				ViewerSelectionDialog viewerSelectionDialog = new ViewerSelectionDialog(viewerSelectionLogic,
-						viewerSelectionView, archives, model);
-				viewerSelectionDialog.open();
-			});
-			editButton.setTooltipText("Edit configuration");
 
-			Button deleteButton = new Button();
-			deleteButton.addThemeVariants(ButtonVariant.LUMO_ICON, ButtonVariant.LUMO_PRIMARY,
-					ButtonVariant.LUMO_ERROR);
-			deleteButton.setIcon(new Icon(VaadinIcon.TRASH));
-			deleteButton.addClickListener((ComponentEventListener<ClickEvent<Button>>) event -> {
-				viewerSelectionLogic.deleteViewerSelection(model);
-				originalDataProvider.refreshAll();
-			});
-			deleteButton.setTooltipText("Delete configuration");
+    /**
+     * Add delete button
+     *
+     * @return column delete button
+     */
+    private Column<ViewerSelectionEntity> addButtons() {
+        return this.addComponentColumn(model -> {
+            if (Objects.equals(model.getArchive(), DEFAULT)) {
+                return null;
+            }
 
-			HorizontalLayout layoutWithoutSpacing = new HorizontalLayout();
-			layoutWithoutSpacing.add(editButton);
-			layoutWithoutSpacing.setPadding(true);
-			layoutWithoutSpacing.add(deleteButton);
-			layoutWithoutSpacing.setWidth("10%");
+            Button deleteButton = new Button();
+            deleteButton.addThemeVariants(ButtonVariant.LUMO_ICON, ButtonVariant.LUMO_PRIMARY,
+                    ButtonVariant.LUMO_ERROR);
+            deleteButton.setIcon(new Icon(VaadinIcon.TRASH));
+            deleteButton.addClickListener((ComponentEventListener<ClickEvent<Button>>) event -> {
+                viewerSelectionLogic.deleteViewerSelection(model);
+                originalDataProvider.refreshAll();
+            });
+            deleteButton.setTooltipText("Delete configuration");
 
-			return layoutWithoutSpacing;
-		});
-	}
+            HorizontalLayout layoutWithoutSpacing = new HorizontalLayout();
+            layoutWithoutSpacing.setPadding(true);
+            layoutWithoutSpacing.add(deleteButton);
+            layoutWithoutSpacing.setWidth("10%");
+
+            return layoutWithoutSpacing;
+        });
+    }
+
+    /**
+     * Validate and update entity field, checking for duplicate rules
+     *
+     * @param entity       Entity to update
+     * @param archive      Archive value
+     * @param viewer       Viewer value
+     * @param modalities   Modalities list
+     * @param updateAction Action to perform if validation passes
+     * @return true if update was successful, false otherwise
+     */
+    private boolean validateAndUpdateEntity(ViewerSelectionEntity entity, String archive,
+                                            ViewerType viewer, List<ModalityType> modalities,
+                                            Consumer<ViewerSelectionEntity> updateAction) {
+        boolean exists = viewerSelectionLogic.checkDuplicateRule(archive, viewer, modalities, entity.getId());
+
+        if (exists) {
+            viewerSelectionView.displayMessage(new Message(MessageLevel.ERROR, MessageFormat.TEXT,
+                            "A viewer selection rule with the same archive, viewer and modalities already exists!"),
+                    MessageType.NOTIFICATION_MESSAGE);
+            return false;
+        }
+        updateAction.accept(entity);
+        viewerSelectionLogic.updateViewerSelection(entity);
+        return true;
+    }
 
 }

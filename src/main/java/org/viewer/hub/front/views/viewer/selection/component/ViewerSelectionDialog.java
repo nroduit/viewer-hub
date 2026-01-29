@@ -11,20 +11,20 @@
 
 package org.viewer.hub.front.views.viewer.selection.component;
 
-import com.vaadin.flow.component.Key;
-import com.vaadin.flow.component.Shortcuts;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.combobox.MultiSelectComboBox;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.select.Select;
-import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.BinderValidationStatus;
 import com.vaadin.flow.data.binder.ValidationResult;
 import com.vaadin.flow.data.binder.Validator;
 import lombok.Getter;
 import org.viewer.hub.back.entity.ViewerSelectionEntity;
+import org.viewer.hub.back.enums.ModalityType;
 import org.viewer.hub.back.enums.ViewerType;
 import org.viewer.hub.back.model.Message;
 import org.viewer.hub.back.model.MessageFormat;
@@ -34,10 +34,12 @@ import org.viewer.hub.front.views.viewer.selection.ViewerSelectionLogic;
 import org.viewer.hub.front.views.viewer.selection.ViewerSelectionView;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 /**
- * Dialog modal for viewer selection rule  definition
+ * Dialog modal for viewer selection rule definition
  */
 public class ViewerSelectionDialog extends Dialog {
 
@@ -46,9 +48,9 @@ public class ViewerSelectionDialog extends Dialog {
 	@Getter
 	private Button cancelButton;
 
-	private TextField modalityField;
-	private Select<String> archiveNameSelect;
-	private Select<ViewerType> viewerNameSelect;
+	private MultiSelectComboBox<ModalityType> modalityField;
+	private Select<String> archiveField;
+	private Select<ViewerType> viewerField;
 
     @Getter
     Binder<ViewerSelectionEntity> binder;
@@ -60,114 +62,108 @@ public class ViewerSelectionDialog extends Dialog {
 	 */
 	public ViewerSelectionDialog(final ViewerSelectionLogic viewerSelectionLogic,
 								 final ViewerSelectionView viewerSelectionView,
-								 ArrayList<String> archives, ViewerSelectionEntity viewerSelectionEntity) {
+								 final ArrayList<String> archives) {
 		this.viewerSelectionLogic = viewerSelectionLogic;
 
-		this.setWidth("50%");
-		this.setHeight("30%");
-		this.setCloseOnEsc(false);
-		this.setCloseOnOutsideClick(false);
+		// Dialog properties
+		this.setWidth("25%");
+		this.setHeight("auto");
+		this.setCloseOnEsc(true);
+		this.setCloseOnOutsideClick(true);
 		this.setModal(true);
 
 		// Build components
-		buildComponents(viewerSelectionView, archives, viewerSelectionEntity);
+		buildComponents(viewerSelectionView, archives);
 
 		// Add components in the view
 		addComponentsView();
 	}
 
-	private void buildComponents(ViewerSelectionView viewerSelectionView, ArrayList<String> archives, ViewerSelectionEntity viewerSelectionEntity) {
+	/**
+	 * Build components
+	 */
+	private void buildComponents(ViewerSelectionView viewerSelectionView, ArrayList<String> archives) {
 		// --- Inputs ---
 		this.binder = new Binder<>(ViewerSelectionEntity.class);
 		this.binder.setBean(new ViewerSelectionEntity());
 
 		// Modality
-		this.modalityField = new TextField();
+		this.modalityField = new MultiSelectComboBox<>();
 		this.modalityField.setLabel("Modality");
-		this.modalityField.setPlaceholder("Modality1,Modality2,...");
-		this.modalityField.setAllowedCharPattern("[\\w,]");
-		this.modalityField.setPattern("^\\w+(,\\w+)*$");
+		this.modalityField.setPlaceholder("Select Modalities");
+		this.modalityField.setItems(ModalityType.values());
+		this.modalityField.setItemLabelGenerator(ModalityType::name);
 
 		// Archive
-		this.archiveNameSelect = new Select<>();
-		this.archiveNameSelect.setLabel("Archive");
-		this.archiveNameSelect.setPlaceholder("Select Archive");
-		this.archiveNameSelect.setItems(archives);
-		this.archiveNameSelect.setEmptySelectionAllowed(true);
+		this.archiveField = new Select<>();
+		this.archiveField.setLabel("Archive");
+		this.archiveField.setPlaceholder("Select Archive");
+		this.archiveField.setItems(archives);
+		this.archiveField.setEmptySelectionAllowed(true);
 
 		// Viewer
-		this.viewerNameSelect = new Select<>();
-		this.viewerNameSelect.setLabel("Viewer");
-		this.viewerNameSelect.setItemLabelGenerator(ViewerType::getCode);
-		this.viewerNameSelect.setPlaceholder("Select Viewer");
-		this.viewerNameSelect.setItems(ViewerType.values());
-		this.viewerNameSelect.setRequiredIndicatorVisible(true);
+		this.viewerField = new Select<>();
+		this.viewerField.setLabel("Viewer");
+		this.viewerField.setItemLabelGenerator(ViewerType::getCode);
+		this.viewerField.setPlaceholder("Select Viewer");
+		this.viewerField.setItems(ViewerType.values());
+		this.viewerField.setRequiredIndicatorVisible(true);
 
+		// --- Binders ---
 		this.binder.forField(modalityField)
 				.withValidator(atLeatOneFieldValidator())
-				.bind(ViewerSelectionEntity::getModality, ViewerSelectionEntity::setModality);
-		this.binder.forField(archiveNameSelect)
+				.bind(entity -> entity.getModalities() != null ? new HashSet<>(entity.getModalities()) : Set.of(),
+						(entity, value) -> entity.setModalities(new ArrayList<>(value)));
+		this.binder.forField(archiveField)
 				.withValidator(atLeatOneFieldValidator())
 				.bind(ViewerSelectionEntity::getArchive, ViewerSelectionEntity::setArchive);
-		this.binder.forField(viewerNameSelect)
+		this.binder.forField(viewerField)
 				.withValidator(Objects::nonNull, "Viewer is mandatory")
 				.bind(ViewerSelectionEntity::getViewer, ViewerSelectionEntity::setViewer);
 
-		if (viewerSelectionEntity != null) {
-			modalityField.setValue(viewerSelectionEntity.getModality() == null ? "" : viewerSelectionEntity.getModality());
-			archiveNameSelect.setValue(viewerSelectionEntity.getArchive());
-			viewerNameSelect.setValue(viewerSelectionEntity.getViewer());
-		}
-
 		// --- Buttons ---
 		// Create button
-		if (viewerSelectionEntity == null) {
-			this.createButton = new Button("Create");
-		}
-		else {
-			this.createButton = new Button("Edit");
-		}
+		this.createButton = new Button("Create");
 
 		// Listener on create button
-		this.createButton.addClickListener(buttonClickEvent -> {
-			createButtonListener(viewerSelectionView, viewerSelectionEntity);
-		});
+		this.createButton.addClickListener(buttonClickEvent -> createButtonListener(viewerSelectionView));
 
 		// Cancel button
 		this.cancelButton = new Button("Cancel", event -> this.close());
-
-		// Cancel action on ESC press
-		Shortcuts.addShortcutListener(this, event -> this.close(), Key.ESCAPE);
 	}
 
 	/**
 	 * Add components in the view
 	 */
 	private void addComponentsView() {
+		VerticalLayout layout = new VerticalLayout();
+
 		// Components Layout
-		HorizontalLayout inputLayout = new HorizontalLayout();
-		inputLayout.addAndExpand(modalityField, archiveNameSelect, viewerNameSelect);
-		inputLayout.setWidthFull();
-		inputLayout.setSpacing(true);
-		inputLayout.setAlignItems(FlexComponent.Alignment.CENTER);
+		VerticalLayout inputLayout = new VerticalLayout();
+		inputLayout.addAndExpand(modalityField, archiveField, viewerField);
+		inputLayout.setSizeFull();
+		inputLayout.setSpacing(false);
+		inputLayout.setAlignItems(FlexComponent.Alignment.STRETCH);
 
 		// Layout Button
 		HorizontalLayout buttonLayout = new HorizontalLayout();
 		buttonLayout.addAndExpand(this.createButton, cancelButton);
-		buttonLayout.setWidthFull();
-		buttonLayout.setSpacing(true);
+		buttonLayout.setSizeFull();
+		buttonLayout.setSpacing(false);
 		buttonLayout.setAlignItems(FlexComponent.Alignment.CENTER);
 
+		layout.add(inputLayout, buttonLayout);
+		layout.setSizeFull();
+
 		// -- Add components ---
-		this.add(inputLayout, buttonLayout);
+		this.add(layout);
 	}
 
 	/**
 	 * Listener on create button
 	 * @param viewerSelectionView ViewerSelectionView
-	 * @param viewerSelectionEntity ViewerSelectionEntity
 	 */
-	private void createButtonListener(ViewerSelectionView viewerSelectionView, ViewerSelectionEntity viewerSelectionEntity) {
+	private void createButtonListener(ViewerSelectionView viewerSelectionView) {
 		// Validate inputs
 		BinderValidationStatus<ViewerSelectionEntity> validate = this.binder.validate();
 
@@ -176,33 +172,10 @@ public class ViewerSelectionDialog extends Dialog {
 			ViewerSelectionEntity viewerSelection = this.binder.getBean();
 
 			// Increment priority
-			if (viewerSelection.getPriority() == null) {
-				viewerSelection.setPriority(this.viewerSelectionLogic.countViewerSelection());
-			}
+			viewerSelection.setPriority(this.viewerSelectionLogic.countViewerSelection());
 
-			// Trim modality values
-			if (viewerSelection.getModality() != null) {
-				viewerSelection.setModality(viewerSelection.getModality().trim());
-			}
-			// Set modality null if empty
-			if (viewerSelection.getModality() != null && viewerSelection.getModality().isEmpty()) {
-				viewerSelection.setModality(null);
-			}
-
-			boolean saved;
-			if (viewerSelectionEntity == null) {
-				// Create viewerSelection
-				saved = this.viewerSelectionLogic.addViewerSelection(viewerSelection);
-			}
-			else {
-				// Update viewerSelectionEntity
-				viewerSelectionEntity.setModality(viewerSelection.getModality());
-				viewerSelectionEntity.setArchive(viewerSelection.getArchive());
-				viewerSelectionEntity.setViewer(viewerSelection.getViewer());
-				saved = this.viewerSelectionLogic.updateViewerSelection(viewerSelectionEntity);
-			}
-
-			if (!saved) {
+			// Create viewerSelection
+			if (!this.viewerSelectionLogic.addViewerSelection(viewerSelection)) {
 				viewerSelectionView.displayMessage(
 						new Message(MessageLevel.WARN, MessageFormat.TEXT, "This rule already exists !"),
 						MessageType.NOTIFICATION_MESSAGE);
@@ -211,7 +184,7 @@ public class ViewerSelectionDialog extends Dialog {
 
 			// Viewer selection has been created
 			viewerSelectionView.displayMessage(
-					new Message(MessageLevel.INFO, MessageFormat.TEXT, "Viewer selection rule has been updated"),
+					new Message(MessageLevel.INFO, MessageFormat.TEXT, "Viewer selection rule has been created"),
 					MessageType.NOTIFICATION_MESSAGE);
 			viewerSelectionView.getViewerSelectionGrid().getOriginalDataProvider().refreshAll();
 			this.close();
@@ -224,7 +197,7 @@ public class ViewerSelectionDialog extends Dialog {
 	 */
 	private Validator<? super Object> atLeatOneFieldValidator() {
 		return (value, valueContext) -> {
-			if (modalityField.getValue().isEmpty() && archiveNameSelect.getValue() == null) {
+			if (modalityField.getValue().isEmpty() && archiveField.getValue() == null) {
 				return ValidationResult.error("You must specify one of these fields");
 			}
 			return ValidationResult.ok();

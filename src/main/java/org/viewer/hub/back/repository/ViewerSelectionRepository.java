@@ -15,26 +15,26 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.viewer.hub.back.entity.ViewerSelectionEntity;
 import org.viewer.hub.back.enums.ViewerType;
 
+import java.util.List;
+
 /**
- * Repository for the entity Target.
+ * Repository for the entity ViewerSelection.
  */
 public interface ViewerSelectionRepository extends JpaRepository<ViewerSelectionEntity, Long> {
 
 	/**
-	 * Check if the target corresponding to the archive in parameter exists
-	 * @param modality modality to look for
+	 * Find all viewer selections by archive
 	 * @param archive archive to look for
-	 * @return true if the target with the given target name exists
+	 * @return list of viewer selections
 	 */
-	boolean existsByModalityAndArchive(String modality, String archive);
+	List<ViewerSelectionEntity> findByArchive(String archive);
 
 	/**
-	 * Check if the target corresponding to the archive in parameter exists
-	 * @param modality modality to look for
+	 * Find all viewer selections by archive and viewer
 	 * @param archive archive to look for
 	 * @param viewer viewer to look for
-	 * @return true if the target with the given target name exists
+	 * @return list of viewer selections
 	 */
-	boolean existsByModalityAndArchiveAndViewer(String modality, String archive, ViewerType viewer);
+	List<ViewerSelectionEntity> findByArchiveAndViewer(String archive, ViewerType viewer);
 
 }

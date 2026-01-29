@@ -21,6 +21,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.viewer.hub.back.entity.ViewerSelectionEntity;
+import org.viewer.hub.back.enums.ModalityType;
+import org.viewer.hub.back.enums.ViewerType;
 import org.viewer.hub.back.model.patient.Patient;
 import org.viewer.hub.back.model.property.ConnectorProperty;
 import org.viewer.hub.back.repository.ViewerSelectionRepository;
@@ -62,6 +64,17 @@ public class ViewerSelectionServiceImpl implements ViewerSelectionService {
 	}
 
 	@Override
+	public boolean checkDuplicate(String archive, ViewerType viewer,
+								  List<ModalityType> modalities, Long excludeId) {
+		return viewerSelectionRepository.findByArchiveAndViewer(archive, viewer)
+				.stream()
+				.anyMatch(e -> !Objects.equals(e.getId(), excludeId) &&
+						Objects.equals(
+								new HashSet<>(Optional.ofNullable(e.getModalities()).orElse(Collections.emptyList())),
+								new HashSet<>(Optional.ofNullable(modalities).orElse(Collections.emptyList()))));
+	}
+
+	@Override
 	public List<ViewerSelectionEntity> retrieveViewerSelection() {
 		return this.viewerSelectionRepository.findAll(Sort.by(Sort.Direction.ASC, "priority"));
 	}
@@ -76,7 +89,7 @@ public class ViewerSelectionServiceImpl implements ViewerSelectionService {
 		List<ViewerSelectionEntity> viewerSelectionEntities = retrieveViewerSelection().reversed();
 		for (ViewerSelectionEntity viewerSelectionEntity : viewerSelectionEntities) {
 
-			if (viewerSelectionEntity.getModality() != null) {
+			if (viewerSelectionEntity.getModalities() != null && !viewerSelectionEntity.getModalities().isEmpty()) {
 				if (retrievedModalities == null && !modalityNotFound) {
 					ConnectorProperty connector = this.connectorService.retrieveConnectorFromId(archive);
 					Set<Patient> patients = new HashSet<>();
@@ -98,10 +111,7 @@ public class ViewerSelectionServiceImpl implements ViewerSelectionService {
 					}
 				}
 
-				// TODO : rather define a list of modality instead of splitted comma String and in the front view use a badge component for modalities: will be done in another task
-				List<String> modalities = List.of(viewerSelectionEntity.getModality().split(","));
-
-				if (retrievedModalities == null || retrievedModalities.stream().noneMatch(modalities::contains)) {
+				if (retrievedModalities == null || retrievedModalities.stream().noneMatch(viewerSelectionEntity.getModalities()::contains)) {
 					continue;
 				}
 			}
@@ -120,8 +130,6 @@ public class ViewerSelectionServiceImpl implements ViewerSelectionService {
 				.get();
 	}
 
-
-
 	@Override
 	public int countViewerSelection() {
 		return (int) this.viewerSelectionRepository.count();
@@ -129,23 +137,43 @@ public class ViewerSelectionServiceImpl implements ViewerSelectionService {
 
 	@Override
 	public boolean update(@Valid ViewerSelectionEntity viewerSelectionEntity) {
-		if (this.viewerSelectionRepository.existsByModalityAndArchiveAndViewer(viewerSelectionEntity.getModality(), viewerSelectionEntity.getArchive(), viewerSelectionEntity.getViewer())) {
+		List<ViewerSelectionEntity> existing = viewerSelectionRepository
+				.findByArchiveAndViewer(viewerSelectionEntity.getArchive(), viewerSelectionEntity.getViewer())
+				.stream()
+				.filter(e -> !Objects.equals(e.getId(), viewerSelectionEntity.getId()))
+				.filter(e -> Objects.equals(
+						new HashSet<>(Optional.ofNullable(e.getModalities()).orElse(Collections.emptyList())),
+						new HashSet<>(Optional.ofNullable(viewerSelectionEntity.getModalities()).orElse(Collections.emptyList()))))
+				.toList();
+
+		if (!existing.isEmpty()) {
 			return false;
 		}
-		this.viewerSelectionRepository.save(viewerSelectionEntity);
+
+		viewerSelectionRepository.save(viewerSelectionEntity);
 		return true;
 	}
 
 	@Override
 	public boolean createViewerSelection(ViewerSelectionEntity viewerSelectionEntity) {
-		if (this.viewerSelectionRepository.existsByModalityAndArchive(viewerSelectionEntity.getModality(), viewerSelectionEntity.getArchive())) {
+		// Check for existing entry with same archive and modalities
+		List<ViewerSelectionEntity> existing = viewerSelectionRepository
+				.findByArchive(viewerSelectionEntity.getArchive())
+				.stream()
+				.filter(e ->
+						Objects.equals(
+								new HashSet<>(Optional.ofNullable(e.getModalities()).orElse(Collections.emptyList())),
+								new HashSet<>(Optional.ofNullable(viewerSelectionEntity.getModalities()).orElse(Collections.emptyList()))))
+				.toList();
+
+		// If found, do not create and return false
+		if (!existing.isEmpty()) {
 			return false;
 		}
-		boolean saved = !this.viewerSelectionRepository.saveAll(Collections.singletonList(viewerSelectionEntity)).isEmpty();
-		if (saved) {
-			updatePriorities();
-		}
-		return saved;
+
+		viewerSelectionRepository.save(viewerSelectionEntity);
+		updatePriorities();
+		return true;
 	}
 
 	@Override
