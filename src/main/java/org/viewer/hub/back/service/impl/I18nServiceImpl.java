@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2022-2025 Weasis Team and other contributors.
+ *  Copyright (c) 2022-2026 Weasis Team and other contributors.
  *
  *  This program and the accompanying materials are made available under the terms of the Eclipse
  *  Public License 2.0 which is available at https://www.eclipse.org/legal/epl-2.0, or the Apache
@@ -27,7 +27,7 @@ import org.viewer.hub.back.repository.specification.I18nVersionSpecification;
 import org.viewer.hub.back.service.I18nService;
 import org.viewer.hub.back.service.S3Service;
 import org.viewer.hub.back.util.StringUtil;
-import org.viewer.hub.front.views.i18n.component.I18nFilter;
+import org.viewer.hub.front.views.weasis.i18n.component.I18nFilter;
 import software.amazon.awssdk.services.s3.model.DeleteObjectsResponse;
 import software.amazon.awssdk.services.s3.model.PutObjectResponse;
 

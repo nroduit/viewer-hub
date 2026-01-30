@@ -1,0 +1,78 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<!--
+  ~  Copyright (c) 2022-2026 Weasis Team and other contributors.
+  ~
+  ~  This program and the accompanying materials are made available under the terms of the Eclipse
+  ~  Public License 2.0 which is available at https://www.eclipse.org/legal/epl-2.0, or the Apache
+  ~  License, Version 2.0 which is available at https://www.apache.org/licenses/LICENSE-2.0.
+  ~
+  ~  SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
+  ~
+  -->
+
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.0.xsd">
+
+    <changeSet author="viewer-hub" id="1.2-1">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="viewer_selection"/>
+            </not>
+        </preConditions>
+        <createTable tableName="viewer_selection">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="viewer_selection_pkey"/>
+            </column>
+            <column name="priority" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="archive" type="VARCHAR(255)">
+            </column>
+            <column name="viewer" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="viewer-hub" id="1.2-2">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="viewer_selection"/>
+            <sqlCheck expectedResult="0">SELECT COUNT(*)
+                                         FROM viewer_selection
+                                         WHERE archive = 'DEFAULT';</sqlCheck>
+        </preConditions>
+        <insert tableName="viewer_selection">
+            <column name="id" valueComputed="1"/>
+            <column name="priority" valueComputed="0"/>
+            <column name="archive" value="DEFAULT"/>
+            <column name="viewer" value="WEASIS"/>
+        </insert>
+    </changeSet>
+
+    <changeSet author="viewer-hub" id="1.2-3">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="viewer_selection_modalities"/>
+            </not>
+        </preConditions>
+        <createTable tableName="viewer_selection_modalities">
+            <column name="viewer_selection_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="modality" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable> <!-- Add primary key on both columns (recommended for ElementCollection) -->
+        <addPrimaryKey tableName="viewer_selection_modalities"
+                       columnNames="viewer_selection_id, modality"
+                       constraintName="pk_viewer_selection_modalities"/> <!-- Add foreign key to viewer_selection -->
+        <addForeignKeyConstraint baseTableName="viewer_selection_modalities"
+                                 baseColumnNames="viewer_selection_id"
+                                 referencedTableName="viewer_selection"
+                                 referencedColumnNames="id"
+                                 constraintName="fk_viewer_selection_modalities_selection"
+                                 onDelete="CASCADE"/>
+    </changeSet>
+
+</databaseChangeLog>

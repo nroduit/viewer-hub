@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2022-2025 Weasis Team and other contributors.
+ *  Copyright (c) 2022-2026 Weasis Team and other contributors.
  *
  *  This program and the accompanying materials are made available under the terms of the Eclipse
  *  Public License 2.0 which is available at https://www.eclipse.org/legal/epl-2.0, or the Apache
@@ -36,7 +36,7 @@ import org.viewer.hub.back.service.PackageService;
 import org.viewer.hub.back.service.TargetService;
 import org.viewer.hub.back.service.WeasisRepositoryService;
 import org.viewer.hub.back.util.PageUtil;
-import org.viewer.hub.front.views.bundle.repository.component.WeasisAssetFilter;
+import org.viewer.hub.front.views.weasis.bundle.repository.component.WeasisAssetFilter;
 import reactor.core.publisher.Mono;
 
 import java.io.ByteArrayInputStream;

@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2022-2025 Weasis Team and other contributors.
+ *  Copyright (c) 2022-2026 Weasis Team and other contributors.
  *
  *  This program and the accompanying materials are made available under the terms of the Eclipse
  *  Public License 2.0 which is available at https://www.eclipse.org/legal/epl-2.0, or the Apache
@@ -26,20 +26,16 @@ import org.viewer.hub.back.enums.TargetType;
 import org.viewer.hub.back.repository.OverrideConfigRepository;
 import org.viewer.hub.back.repository.TargetRepository;
 import org.viewer.hub.back.service.OverrideConfigService;
-import org.viewer.hub.front.views.bundle.override.component.OverrideConfigFilter;
+import org.viewer.hub.front.views.weasis.bundle.override.component.OverrideConfigFilter;
 
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class OverrideConfigServiceImplTest {

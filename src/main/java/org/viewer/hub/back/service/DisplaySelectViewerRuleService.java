@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2022-2025 Weasis Team and other contributors.
+ *  Copyright (c) 2022-2026 Weasis Team and other contributors.
  *
  *  This program and the accompanying materials are made available under the terms of the Eclipse
  *  Public License 2.0 which is available at https://www.eclipse.org/legal/epl-2.0, or the Apache
@@ -16,7 +16,13 @@ import org.viewer.hub.back.model.searchcriteria.SearchCriteria;
 
 public interface DisplaySelectViewerRuleService {
 
+    /**
+     * Determine which viewer to display based on the provided search criteria
+     *
+     * @param searchCriteria the criteria used determine the viewer to display
+     * @param authentication the authentication information
+     * @return the viewer launch URL
+     */
     String determineViewerToDisplay(SearchCriteria searchCriteria, Authentication authentication);
-
 
 }
