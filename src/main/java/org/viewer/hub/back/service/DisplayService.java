@@ -14,15 +14,15 @@ package org.viewer.hub.back.service;
 import org.springframework.security.core.Authentication;
 import org.viewer.hub.back.model.searchcriteria.SearchCriteria;
 
-public interface DisplaySelectViewerRuleService {
+public interface DisplayService {
 
     /**
-     * Determine which viewer to display based on the provided search criteria
+     * Determine which viewer to display based on the provided search criteria and build the launch URL for the selected viewer.
      *
      * @param searchCriteria the criteria used determine the viewer to display
      * @param authentication the authentication information
      * @return the viewer launch URL
      */
-    String determineViewerToDisplay(SearchCriteria searchCriteria, Authentication authentication);
+    String viewerLaunchUrl(SearchCriteria searchCriteria, Authentication authentication);
 
 }

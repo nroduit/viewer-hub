@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2022-2025 Weasis Team and other contributors.
+ *  Copyright (c) 2022-2026 Weasis Team and other contributors.
  *
  *  This program and the accompanying materials are made available under the terms of the Eclipse
  *  Public License 2.0 which is available at https://www.eclipse.org/legal/epl-2.0, or the Apache
@@ -26,14 +26,13 @@ import org.viewer.hub.back.model.patient.Patient;
 import org.viewer.hub.back.model.patient.Serie;
 import org.viewer.hub.back.model.patient.Study;
 import org.viewer.hub.back.model.searchcriteria.ArchiveSearchCriteria;
-import org.viewer.hub.back.model.searchcriteria.IHESearchCriteria;
 import org.viewer.hub.back.model.searchcriteria.SearchCriteria;
-import org.viewer.hub.back.service.ConnectorQueryService;
 import org.viewer.hub.back.service.ConnectorService;
 import org.viewer.hub.back.service.OhifDisplayService;
 import org.viewer.hub.back.service.SecurityService;
 import org.viewer.hub.back.util.StringUtil;
 
+import java.util.Map;
 import java.util.Set;
 
 @Service
@@ -43,23 +42,20 @@ public class OhifDisplayServiceImpl implements OhifDisplayService {
     // Services
     private final ConnectorService connectorService;
 
-    private final ConnectorQueryService connectorQueryService;
-
     private final OhifConfigurationProperties ohifConfigurationProperties;
 
     private final SecurityService securityService;
 
     @Autowired
-    public OhifDisplayServiceImpl(final ConnectorService connectorService, final OhifConfigurationProperties ohifConfigurationProperties, final ConnectorQueryService connectorQueryService, final SecurityService securityService) {
+    public OhifDisplayServiceImpl(final ConnectorService connectorService, final OhifConfigurationProperties ohifConfigurationProperties, final SecurityService securityService) {
         this.connectorService = connectorService;
         this.ohifConfigurationProperties = ohifConfigurationProperties;
-        this.connectorQueryService = connectorQueryService;
         this.securityService = securityService;
     }
 
     @Override
-    public String retrieveOhifLaunchUrl(SearchCriteria searchCriteria, Authentication authentication) {
-        String ohifLaunchUrl = null;
+    public String retrieveOhifLaunchUrl(SearchCriteria searchCriteria, Map<String, Set<Patient>> patientsByArchive, Authentication authentication) {
+        String ohifLaunchUrl;
 
         // Check request: Ohif supports only one archive
         if (searchCriteria.getArchive() != null && searchCriteria.getArchive().size() > 1){
@@ -69,20 +65,15 @@ public class OhifDisplayServiceImpl implements OhifDisplayService {
         // Retrieve first default or specific connector
         String archive = this.connectorService.retrieveFirstDefaultOrFirstSpecificConnector(searchCriteria);
 
-        if (archive != null) {
+        if (archive != null && patientsByArchive != null && patientsByArchive.containsKey(archive) && !patientsByArchive.get(archive).isEmpty()) {
             // Base + context
             UriComponentsBuilder uriComponentsBuilder = buildOhifBaseUrlAndContext();
 
             // Archive
             uriComponentsBuilder.path("/%s".formatted(archive));
 
-            // Retrieve list of patients containing StudyUids + SeriesUids via viewer-hub connectors
-            Set<Patient> patients = searchCriteria instanceof ArchiveSearchCriteria ?
-                    this.connectorQueryService.retrievePatientsWithoutIHESearchCriteria((ArchiveSearchCriteria) searchCriteria, Set.of(archive), authentication)
-                    : this.connectorQueryService.retrievePatientsWithIHESearchCriteria((IHESearchCriteria) searchCriteria, Set.of(archive), authentication);
-
             // Uids to request
-            uriComponentsBuilder = fillUriWithUidsFromPatientsFound(uriComponentsBuilder, patients, searchCriteria);
+            uriComponentsBuilder = fillUriWithUidsFromPatientsFound(uriComponentsBuilder, patientsByArchive.get(archive), searchCriteria);
 
             // Ohif initial search criteria
             uriComponentsBuilder = fillOhifInitialCriteria(searchCriteria, uriComponentsBuilder);
@@ -94,6 +85,9 @@ public class OhifDisplayServiceImpl implements OhifDisplayService {
 
             // Build the url
             ohifLaunchUrl = uriComponentsBuilder.build().toString();
+        }
+        else {
+            throw new ParameterException("No patient found for determined first archive: %s and search criteria: %s".formatted(archive, searchCriteria));
         }
 
         return ohifLaunchUrl;

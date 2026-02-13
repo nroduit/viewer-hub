@@ -17,20 +17,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.viewer.hub.back.entity.ViewerSelectionEntity;
 import org.viewer.hub.back.enums.ModalityType;
+import org.viewer.hub.back.enums.ViewerSelectionType;
 import org.viewer.hub.back.enums.ViewerType;
 import org.viewer.hub.back.model.patient.Patient;
-import org.viewer.hub.back.model.property.ConnectorProperty;
+import org.viewer.hub.back.model.patient.Serie;
+import org.viewer.hub.back.model.searchcriteria.SearchCriteria;
 import org.viewer.hub.back.repository.ViewerSelectionRepository;
-import org.viewer.hub.back.service.ConnectorService;
-import org.viewer.hub.back.service.DicomConnectorQueryService;
 import org.viewer.hub.back.service.ViewerSelectionService;
 
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 @Service
@@ -38,24 +38,16 @@ import java.util.stream.IntStream;
 @Slf4j
 public class ViewerSelectionServiceImpl implements ViewerSelectionService {
 
-	public static final String DEFAULT = "DEFAULT";
-
 	// Repositories
 	private final ViewerSelectionRepository viewerSelectionRepository;
-	private final DicomConnectorQueryService dicomConnectorQueryService;
-	private final ConnectorService connectorService;
 
 	/**
 	 * Constructor
 	 * @param viewerSelectionRepository viewer selection repository
 	 */
 	@Autowired
-	public ViewerSelectionServiceImpl(final ViewerSelectionRepository viewerSelectionRepository,
-									  final DicomConnectorQueryService dicomConnectorQueryService,
-									  final ConnectorService connectorService) {
+	public ViewerSelectionServiceImpl(final ViewerSelectionRepository viewerSelectionRepository) {
 		this.viewerSelectionRepository = viewerSelectionRepository;
-		this.dicomConnectorQueryService = dicomConnectorQueryService;
-		this.connectorService = connectorService;
 	}
 
 	@Override
@@ -75,59 +67,63 @@ public class ViewerSelectionServiceImpl implements ViewerSelectionService {
 	}
 
 	@Override
-	public List<ViewerSelectionEntity> retrieveViewerSelection() {
-		return this.viewerSelectionRepository.findAll(Sort.by(Sort.Direction.ASC, "priority"));
+	public List<ViewerSelectionEntity> retrieveViewerSelection(Sort.Direction prioritySortDirection) {
+		return this.viewerSelectionRepository.findAll(Sort.by(prioritySortDirection, "priority"));
 	}
 
 	@Override
-	// TODO to refactor with unique call to connectors: will be done in another task
-	// TODO missing search by patient and instance uid: will be done in another task
-	// TODO why condition on only one patient ? : to refactor and improve...
-	public ViewerSelectionEntity retrieveViewerSelectionRule(String archive, Set<String> accessionNumber, Set<String> studyUID, Set<String> seriesUID, Authentication authentication) {
-		List<String> retrievedModalities = null;
-		boolean modalityNotFound = false;
-		List<ViewerSelectionEntity> viewerSelectionEntities = retrieveViewerSelection().reversed();
-		for (ViewerSelectionEntity viewerSelectionEntity : viewerSelectionEntities) {
+	public ViewerSelectionEntity retrieveViewerSelectionRule(SearchCriteria searchCriteria, Map<String, Set<Patient>> patientsByArchive) {
+		// Retrieve default rule
+		ViewerSelectionEntity defaultViewerSelectionEntity = viewerSelectionRepository.findByArchive(ViewerSelectionType.DEFAULT.name()).getFirst();
 
-			if (viewerSelectionEntity.getModalities() != null && !viewerSelectionEntity.getModalities().isEmpty()) {
-				if (retrievedModalities == null && !modalityNotFound) {
-					ConnectorProperty connector = this.connectorService.retrieveConnectorFromId(archive);
-					Set<Patient> patients = new HashSet<>();
-					if (seriesUID != null) {
-						patients = dicomConnectorQueryService.retrievePatientsFromSeriesInstanceUidsDicomConnector(seriesUID, connector, authentication);
-					}
-					else if (studyUID != null) {
-						patients = dicomConnectorQueryService.retrievePatientsFromStudyInstanceUidsDicomConnector(studyUID, connector, authentication);
-					}
-					else if (accessionNumber != null) {
-						patients = dicomConnectorQueryService.retrievePatientsFromStudyAccessionNumbersDicomConnector(accessionNumber, connector, authentication);
-					}
-					if (patients.size() == 1) {
-						retrievedModalities = patients.stream().findFirst().orElse(null).getStudies().stream().findFirst().orElse(null).getSeries().stream().map(serie -> serie.getModality()).toList();
-					}
-					if (retrievedModalities == null || retrievedModalities.isEmpty()) {
-						modalityNotFound = true;
-						continue;
-					}
-				}
-
-				if (retrievedModalities == null || retrievedModalities.stream().noneMatch(viewerSelectionEntity.getModalities()::contains)) {
-					continue;
-				}
-			}
-
-			if (viewerSelectionEntity.getArchive() != null && !viewerSelectionEntity.getArchive().equals(archive)) {
-				continue;
-			}
-
-			return viewerSelectionEntity;
+		// If viewer is specified in search criteria, bypass selection rules
+		if (searchCriteria != null && searchCriteria.getViewer() != null) {
+			return viewerSelectionRepository.findFirstByViewer(searchCriteria.getViewer())
+					.orElse(defaultViewerSelectionEntity);
 		}
 
-		return viewerSelectionEntities.stream()
-				.filter(association ->
-						association.getArchive().equals(DEFAULT))
+		// Only Weasis supports multiple archives for now, so if multiple archives are requested, bypass selection rules and return first Weasis rule
+		if ((searchCriteria != null && searchCriteria.getArchive() != null && searchCriteria.getArchive().size() > 1)
+				|| (patientsByArchive != null && patientsByArchive.size() > 1)) {
+			return viewerSelectionRepository.findFirstByViewer(ViewerType.WEASIS).orElse(defaultViewerSelectionEntity);
+		}
+
+		// If no patients found, bypass selection rules and return default rule
+		if(patientsByArchive == null || patientsByArchive.isEmpty()) {
+			return defaultViewerSelectionEntity;
+		}
+
+		// Extract all modalities from patients
+		List<String> retrievedModalities = patientsByArchive.values().stream()
+				.flatMap(Set::stream)
+				.flatMap(patient -> patient.getStudies().stream())
+				.flatMap(study -> study.getSeries().stream())
+				.map(Serie::getModality)
+				.distinct()
+				.toList();
+
+		// Get all viewer selection rules sorted by priority (reversed for highest priority first)
+		// Find first matching rule
+		return retrieveViewerSelection(Sort.Direction.DESC).stream()
+				.filter(entity -> {
+					// Check modality partial match (at least one modality matches)
+					if (entity.getModalities() != null && !entity.getModalities().isEmpty()
+							&& retrievedModalities.stream().noneMatch(entity.getModalities().stream()
+									.map(ModalityType::name)
+									.collect(Collectors.toSet())::contains)) {
+						return false;
+					}
+
+					// Check archive exact match or ALL
+					return Objects.equals(entity.getArchive(), ViewerSelectionType.ALL.name())
+							|| patientsByArchive.keySet().stream()
+							.findFirst()
+							.map(archive -> Objects.equals(entity.getArchive(), archive))
+							.orElse(false);
+				})
 				.findFirst()
-				.get();
+				// Fallback to default rule if no matching rule found
+				.orElse(defaultViewerSelectionEntity);
 	}
 
 	@Override
@@ -184,7 +180,7 @@ public class ViewerSelectionServiceImpl implements ViewerSelectionService {
 
 	@Override
 	public void updatePriority(ViewerSelectionEntity viewerSelectionEntity, int value) {
-		List<ViewerSelectionEntity> allItems = this.retrieveViewerSelection();
+		List<ViewerSelectionEntity> allItems = this.retrieveViewerSelection(Sort.Direction.ASC);
 		allItems.removeIf(e -> Objects.equals(viewerSelectionEntity.getId(), e.getId()));
 		allItems.add(Math.min(value, allItems.size()), viewerSelectionEntity);
 		updatePriorities(allItems);
@@ -194,7 +190,7 @@ public class ViewerSelectionServiceImpl implements ViewerSelectionService {
 	 * Update priorities of all viewer selection entities
 	 */
 	private void updatePriorities() {
-		updatePriorities(this.retrieveViewerSelection());
+		updatePriorities(this.retrieveViewerSelection(Sort.Direction.ASC));
 	}
 
 	/**

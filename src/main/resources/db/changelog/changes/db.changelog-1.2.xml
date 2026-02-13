@@ -28,6 +28,7 @@
                 <constraints nullable="false"/>
             </column>
             <column name="archive" type="VARCHAR(255)">
+                <constraints nullable="false"/>
             </column>
             <column name="viewer" type="VARCHAR(255)">
                 <constraints nullable="false"/>

@@ -13,12 +13,15 @@ package org.viewer.hub.back.service;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.Authentication;
+import org.springframework.data.domain.Sort;
 import org.viewer.hub.back.entity.ViewerSelectionEntity;
 import org.viewer.hub.back.enums.ModalityType;
 import org.viewer.hub.back.enums.ViewerType;
+import org.viewer.hub.back.model.patient.Patient;
+import org.viewer.hub.back.model.searchcriteria.SearchCriteria;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -43,22 +46,19 @@ public interface ViewerSelectionService {
 	 */
 	boolean checkDuplicate(String archive, ViewerType viewer, List<ModalityType> modalities, Long excludeId);
 
-	/**
-	 * Retrieve all viewer selection entities without pagination
-	 * @return list of viewer selection entities
+	/** Retrieve all viewer selection entities sorted by priority
+	 * @param prioritySortDirection direction to sort by priority (ASC or DESC)
+	 * @return list of viewer selection entities sorted by priority
 	 */
-	List<ViewerSelectionEntity> retrieveViewerSelection();
+	List<ViewerSelectionEntity> retrieveViewerSelection(Sort.Direction prioritySortDirection);
 
 	/**
 	 * Retrieve a viewer selection rule based on provided parameters
-	 * @param archive          the archive identifier
-	 * @param accessionNumber  set of accession numbers
-	 * @param studyUID         set of study UIDs
-	 * @param seriesUID        set of series UIDs
-	 * @param authentication   authentication information
+	 * @param searchCriteria Search criteria of the request
+	 * @param patientsByArchive       Set of patients retrieved gather by archive
 	 * @return the matching ViewerSelectionEntity
 	 */
-	ViewerSelectionEntity retrieveViewerSelectionRule(String archive, Set<String> accessionNumber, Set<String> studyUID, Set<String> seriesUID, Authentication authentication);
+	ViewerSelectionEntity retrieveViewerSelectionRule(SearchCriteria searchCriteria, Map<String, Set<Patient>> patientsByArchive);
 
 	/**
 	 * Count total number of viewer selection entities

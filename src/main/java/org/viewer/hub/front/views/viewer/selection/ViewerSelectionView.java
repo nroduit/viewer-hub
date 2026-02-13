@@ -26,12 +26,14 @@ import org.springframework.security.access.annotation.Secured;
 import org.vaadin.lineawesome.LineAwesomeIconUrl;
 import org.viewer.hub.back.config.properties.ConnectorConfigurationProperties;
 import org.viewer.hub.back.entity.ViewerSelectionEntity;
+import org.viewer.hub.back.enums.ViewerSelectionType;
 import org.viewer.hub.back.enums.ViewerType;
 import org.viewer.hub.front.views.AbstractView;
 import org.viewer.hub.front.views.viewer.selection.component.ViewerSelectionDialog;
 import org.viewer.hub.front.views.viewer.selection.component.ViewerSelectionGrid;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 /**
  * View managing associations
@@ -64,6 +66,7 @@ public class ViewerSelectionView extends AbstractView {
 		this.viewerSelectionDataProvider = viewerSelectionDataProvider;
 
 		this.archives = new ArrayList<>(connectorConfigurationProperties.getConnectors().keySet());
+		this.archives.add(ViewerSelectionType.ALL.name());
 
 		// Set the view in the service
 		this.viewerSelectionLogic.setViewerSelectionView(this);
@@ -131,9 +134,15 @@ public class ViewerSelectionView extends AbstractView {
 		return viewerSelectionEntity -> {
 			Select<String> select = new Select<>();
 			select.setWidth("100%");
-			select.setItems(archives);
+			select.setEmptySelectionAllowed(false);
+
+			if (Objects.equals(viewerSelectionEntity.getArchive(), ViewerSelectionType.DEFAULT.name())){
+				select.setItems(viewerSelectionEntity.getArchive());
+				select.setEnabled(false);
+			} else {
+				select.setItems(archives);
+			}
 			select.setValue(viewerSelectionEntity.getArchive());
-			select.setEmptySelectionAllowed(true);
 
 			// Change listener => refresh model + update in backend
 			select.addValueChangeListener(event -> {

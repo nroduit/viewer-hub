@@ -27,6 +27,7 @@ import com.vaadin.flow.function.ValueProvider;
 import lombok.Getter;
 import org.viewer.hub.back.entity.ViewerSelectionEntity;
 import org.viewer.hub.back.enums.ModalityType;
+import org.viewer.hub.back.enums.ViewerSelectionType;
 import org.viewer.hub.back.enums.ViewerType;
 import org.viewer.hub.back.model.Message;
 import org.viewer.hub.back.model.MessageFormat;
@@ -43,8 +44,6 @@ import java.util.function.Consumer;
  * Grid for the viewer selection view
  */
 public class ViewerSelectionGrid extends Grid<ViewerSelectionEntity> {
-
-    public static final String DEFAULT = "DEFAULT";
 
     private final ViewerSelectionView viewerSelectionView;
 
@@ -91,8 +90,8 @@ public class ViewerSelectionGrid extends Grid<ViewerSelectionEntity> {
         this.setRowsDraggable(true);
         this.setDropMode(GridDropMode.BETWEEN);
 
-        this.setDragFilter(e -> !DEFAULT.equals(e.getArchive()));
-        this.setDropFilter(e -> !DEFAULT.equals(e.getArchive()));
+        this.setDragFilter(e -> !ViewerSelectionType.DEFAULT.name().equals(e.getArchive()));
+        this.setDropFilter(e -> !ViewerSelectionType.DEFAULT.name().equals(e.getArchive()));
 
         this.addDragStartListener(e -> draggedItem = e.getDraggedItems().getFirst());
         this.addDragEndListener(e -> draggedItem = null);
@@ -121,7 +120,7 @@ public class ViewerSelectionGrid extends Grid<ViewerSelectionEntity> {
      */
     private Column<ViewerSelectionEntity> addDragIcon() {
         return this.addComponentColumn(model -> {
-            if (Objects.equals(model.getArchive(), DEFAULT)) {
+            if (Objects.equals(model.getArchive(), ViewerSelectionType.DEFAULT.name())) {
                 return null;
             }
             Icon dragIcon = VaadinIcon.GRID_SMALL.create();
@@ -138,25 +137,29 @@ public class ViewerSelectionGrid extends Grid<ViewerSelectionEntity> {
      */
     private Column<ViewerSelectionEntity> addModalityColumn() {
         return this.addComponentColumn(entity -> {
-                    MultiSelectComboBox<ModalityType> modalityComboBox = new MultiSelectComboBox<>();
-                    modalityComboBox.setItems(ModalityType.values());
-                    modalityComboBox.setItemLabelGenerator(ModalityType::name);
-                    modalityComboBox.setValue(entity.getModalities() != null ? new HashSet<>(entity.getModalities()) : Set.of());
-                    modalityComboBox.setWidthFull();
+                    if (Objects.equals(entity.getArchive(), ViewerSelectionType.DEFAULT.name())) {
+                        return null;
+                    } else {
+                        MultiSelectComboBox<ModalityType> modalityComboBox = new MultiSelectComboBox<>();
+                        modalityComboBox.setItems(ModalityType.values());
+                        modalityComboBox.setItemLabelGenerator(ModalityType::name);
+                        modalityComboBox.setValue(entity.getModalities() != null ? new HashSet<>(entity.getModalities()) : Set.of());
+                        modalityComboBox.setWidthFull();
 
-                    modalityComboBox.addValueChangeListener(event -> {
-                        Set<ModalityType> newModalities = event.getValue();
-                        ArrayList<ModalityType> modalities = new ArrayList<>(newModalities);
-                        Set<ModalityType> oldModalities = entity.getModalities() != null
-                                ? new HashSet<>(entity.getModalities())
-                                : Set.of();
+                        modalityComboBox.addValueChangeListener(event -> {
+                            Set<ModalityType> newModalities = event.getValue();
+                            ArrayList<ModalityType> modalities = new ArrayList<>(newModalities);
+                            Set<ModalityType> oldModalities = entity.getModalities() != null
+                                    ? new HashSet<>(entity.getModalities())
+                                    : Set.of();
 
-                        if (!validateAndUpdateEntity(entity, entity.getArchive(), entity.getViewer(),
-                                modalities, e -> e.setModalities(modalities))) {
-                            modalityComboBox.setValue(oldModalities);
-                        }
-                    });
-                    return modalityComboBox;
+                            if (!validateAndUpdateEntity(entity, entity.getArchive(), entity.getViewer(),
+                                    modalities, e -> e.setModalities(modalities))) {
+                                modalityComboBox.setValue(oldModalities);
+                            }
+                        });
+                        return modalityComboBox;
+                    }
                 })
                 .setHeader("Modality")
                 .setWidth("45%")
@@ -228,7 +231,7 @@ public class ViewerSelectionGrid extends Grid<ViewerSelectionEntity> {
      */
     private Column<ViewerSelectionEntity> addButtons() {
         return this.addComponentColumn(model -> {
-            if (Objects.equals(model.getArchive(), DEFAULT)) {
+            if (Objects.equals(model.getArchive(), ViewerSelectionType.DEFAULT.name())) {
                 return null;
             }
 
@@ -269,6 +272,12 @@ public class ViewerSelectionGrid extends Grid<ViewerSelectionEntity> {
         if (exists) {
             viewerSelectionView.displayMessage(new Message(MessageLevel.ERROR, MessageFormat.TEXT,
                             "A viewer selection rule with the same archive, viewer and modalities already exists!"),
+                    MessageType.NOTIFICATION_MESSAGE);
+            return false;
+        }
+        if (modalities == null || modalities.isEmpty()) {
+            viewerSelectionView.displayMessage(new Message(MessageLevel.ERROR, MessageFormat.TEXT,
+                            "At least one modality must be selected!"),
                     MessageType.NOTIFICATION_MESSAGE);
             return false;
         }
