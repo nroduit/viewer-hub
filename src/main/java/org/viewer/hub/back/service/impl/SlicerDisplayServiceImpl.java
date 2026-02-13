@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2022-2025 Weasis Team and other contributors.
+ *  Copyright (c) 2022-2026 Weasis Team and other contributors.
  *
  *  This program and the accompanying materials are made available under the terms of the Eclipse
  *  Public License 2.0 which is available at https://www.eclipse.org/legal/epl-2.0, or the Apache
@@ -27,13 +27,12 @@ import org.viewer.hub.back.model.patient.Study;
 import org.viewer.hub.back.model.searchcriteria.ArchiveSearchCriteria;
 import org.viewer.hub.back.model.searchcriteria.IHESearchCriteria;
 import org.viewer.hub.back.model.searchcriteria.SearchCriteria;
-import org.viewer.hub.back.service.ConnectorQueryService;
 import org.viewer.hub.back.service.ConnectorService;
 import org.viewer.hub.back.service.SecurityService;
 import org.viewer.hub.back.service.SlicerDisplayService;
 import org.viewer.hub.back.util.PathUrlUtil;
 
-import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 @Service
@@ -44,37 +43,29 @@ public class SlicerDisplayServiceImpl implements SlicerDisplayService {
 
 	// Services
 	private final ConnectorService connectorService;
-
-	private final ConnectorQueryService connectorQueryService;
-
 	private final SecurityService securityService;
-
 
 	@Autowired
 	public SlicerDisplayServiceImpl(final ConnectorService connectorService,
-									final ConnectorQueryService connectorQueryService,
 									final SlicerConfigurationProperties slicerConfigurationProperties, final SecurityService securityService) {
 		this.connectorService = connectorService;
-		this.connectorQueryService = connectorQueryService;
 		this.slicerConfigurationProperties = slicerConfigurationProperties;
 		this.securityService = securityService;
 	}
 
 	@Override
-	public String retrieveSlicerLaunchUrl(SearchCriteria searchCriteria, Authentication authentication) {
-		String slicerLaunchUrl = null;
-
-		// Check search criteria depending on 3D Slicer limitations
-		checkSearchCriteriaDueToSlicerLimitations(searchCriteria, authentication);
+	public String retrieveSlicerLaunchUrl(SearchCriteria searchCriteria, Map<String, Set<Patient>> patientsByArchive, Authentication authentication) {
+		String slicerLaunchUrl;
 
 		// Retrieve first default or specific connector
 		String archive = this.connectorService.retrieveFirstDefaultOrFirstSpecificConnector(searchCriteria);
 
-		if (archive != null) {
+		// Check search criteria depending on 3D Slicer limitations
+		checkSearchCriteriaDueToSlicerLimitations(searchCriteria, patientsByArchive, archive);
+
+		if (archive != null && patientsByArchive != null && patientsByArchive.containsKey(archive) && !patientsByArchive.get(archive).isEmpty()) {
 			// Retrieve list of patients containing one StudyUid via viewer-hub connectors
-			Set<Patient> patients = searchCriteria instanceof ArchiveSearchCriteria ?
-					this.connectorQueryService.retrievePatientsWithoutIHESearchCriteria((ArchiveSearchCriteria) searchCriteria, Set.of(archive), authentication)
-					: this.connectorQueryService.retrievePatientsWithIHESearchCriteria((IHESearchCriteria) searchCriteria, Set.of(archive), authentication);
+			Set<Patient> patients = patientsByArchive.get(archive);
 
 			// Protocol + context
 			UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder
@@ -106,6 +97,9 @@ public class SlicerDisplayServiceImpl implements SlicerDisplayService {
 			// Build the url
 			slicerLaunchUrl = uriComponentsBuilder.build().toString();
 		}
+		else {
+			throw new ParameterException("No patient found for determined first archive: %s and search criteria: %s".formatted(archive, searchCriteria));
+		}
 
 		return slicerLaunchUrl;
 	}
@@ -115,9 +109,9 @@ public class SlicerDisplayServiceImpl implements SlicerDisplayService {
 	 * - only one archive
 	 * - only one study
 	 * @param searchCriteria SearchCriteria to evaluate
-	 * @param authentication Authentication
+	 * @param patientsByArchive Map of patients grouped by archive (archiveId, Set of patients found from this archive)
 	 */
-	private void checkSearchCriteriaDueToSlicerLimitations(SearchCriteria searchCriteria, Authentication authentication) {
+	private void checkSearchCriteriaDueToSlicerLimitations(SearchCriteria searchCriteria, Map<String, Set<Patient>> patientsByArchive, String firstDefaultOrFirstSpecificArchive) {
 		// Check request: Slicer supports only one archive
 		if (searchCriteria.getArchive() != null && searchCriteria.getArchive().size() > 1){
 			throw new ParameterException("3D Slicer supports only one archive parameter, Search criteria: %s".formatted(searchCriteria));
@@ -134,11 +128,7 @@ public class SlicerDisplayServiceImpl implements SlicerDisplayService {
 		if (searchCriteria instanceof ArchiveSearchCriteria ?
 				((ArchiveSearchCriteria) searchCriteria).getPatientID().size() == 1
 				: !((IHESearchCriteria) searchCriteria).getPatientID().isEmpty()) {
-			Set<Patient> patients = new HashSet<>();
-
-			this.connectorQueryService.buildFromPatientIds(patients, searchCriteria instanceof ArchiveSearchCriteria ?
-					((ArchiveSearchCriteria) searchCriteria).getPatientID()
-					: Set.of(((IHESearchCriteria) searchCriteria).getPatientID()), searchCriteria.getArchive(), authentication);
+			Set<Patient> patients = patientsByArchive.get(firstDefaultOrFirstSpecificArchive);
 
 			if (patients.isEmpty()){
 				throw new ParameterException("No studies found, Search criteria: %s".formatted(searchCriteria));

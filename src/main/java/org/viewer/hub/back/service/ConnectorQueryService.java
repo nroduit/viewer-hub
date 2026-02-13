@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2022-2025 Weasis Team and other contributors.
+ *  Copyright (c) 2022-2026 Weasis Team and other contributors.
  *
  *  This program and the accompanying materials are made available under the terms of the Eclipse
  *  Public License 2.0 which is available at https://www.eclipse.org/legal/epl-2.0, or the Apache
@@ -16,6 +16,7 @@ import org.viewer.hub.back.model.patient.Patient;
 import org.viewer.hub.back.model.searchcriteria.ArchiveSearchCriteria;
 import org.viewer.hub.back.model.searchcriteria.IHESearchCriteria;
 
+import java.util.Map;
 import java.util.Set;
 
 public interface ConnectorQueryService {
@@ -78,4 +79,20 @@ public interface ConnectorQueryService {
      * @param archives Archives
      */
     void buildFromPatientIds(Set<Patient> patients, Set<String> patientIds, Set<String> archives, Authentication authentication);
+
+    /**
+     * Retrieve Patients by Archive with ArchiveSearchCriteria
+     * @param searchCriteria ArchiveSearchCriteria
+     * @param authentication Authentication
+     * @return patients found by archive
+     */
+    Map<String, Set<Patient>> retrievePatientsByArchiveWithoutIHESearchCriteria(ArchiveSearchCriteria searchCriteria, Authentication authentication);
+
+    /**
+     * Retrieve Patients by Archive with IHESearchCriteria
+     * @param searchCriteria IHESearchCriteria
+     * @param authentication Authentication
+     * @return patients found by archive
+     */
+    Map<String, Set<Patient>> retrievePatientsByArchiveWithIHESearchCriteria(IHESearchCriteria searchCriteria, Authentication authentication);
 }

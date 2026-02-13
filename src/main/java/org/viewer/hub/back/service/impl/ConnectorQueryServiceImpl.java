@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2022-2025 Weasis Team and other contributors.
+ *  Copyright (c) 2022-2026 Weasis Team and other contributors.
  *
  *  This program and the accompanying materials are made available under the terms of the Eclipse
  *  Public License 2.0 which is available at https://www.eclipse.org/legal/epl-2.0, or the Apache
@@ -25,10 +25,7 @@ import org.viewer.hub.back.service.ConnectorService;
 import org.viewer.hub.back.service.DbConnectorQueryService;
 import org.viewer.hub.back.service.DicomConnectorQueryService;
 
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 @Service
 public class ConnectorQueryServiceImpl implements ConnectorQueryService {
@@ -45,6 +42,30 @@ public class ConnectorQueryServiceImpl implements ConnectorQueryService {
         this.dbConnectorQueryService = dbConnectorQueryService;
         this.dicomConnectorQueryService = dicomConnectorQueryService;
         this.connectorService = connectorService;
+    }
+
+    @Override
+    public Map<String, Set<Patient>> retrievePatientsByArchiveWithoutIHESearchCriteria(ArchiveSearchCriteria searchCriteria, Authentication authentication) {
+        Map<String, Set<Patient>> patientsByArchive = new HashMap<>();
+        this.connectorService.retrieveConnectors(new LinkedHashSet<>(searchCriteria.getArchive())).forEach(archive -> {
+            Set<Patient> patients = retrievePatientsWithoutIHESearchCriteria(searchCriteria, Set.of(archive.getId()), authentication);
+            if (!patients.isEmpty()) {
+                patientsByArchive.put(archive.getId(), patients);
+            }
+        });
+        return patientsByArchive;
+    }
+
+    @Override
+    public Map<String, Set<Patient>> retrievePatientsByArchiveWithIHESearchCriteria(IHESearchCriteria searchCriteria, Authentication authentication) {
+        Map<String, Set<Patient>> patientsByArchive = new HashMap<>();
+        this.connectorService.retrieveConnectors(new LinkedHashSet<>(searchCriteria.getArchive())).forEach(archive -> {
+            Set<Patient> patients = retrievePatientsWithIHESearchCriteria(searchCriteria, Set.of(archive.getId()), authentication);
+            if (!patients.isEmpty()) {
+                patientsByArchive.put(archive.getId(), patients);
+            }
+        });
+        return patientsByArchive;
     }
 
     @Override

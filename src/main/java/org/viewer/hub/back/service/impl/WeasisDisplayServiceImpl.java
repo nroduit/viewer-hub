@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2022-2025 Weasis Team and other contributors.
+ *  Copyright (c) 2022-2026 Weasis Team and other contributors.
  *
  *  This program and the accompanying materials are made available under the terms of the Eclipse
  *  Public License 2.0 which is available at https://www.eclipse.org/legal/epl-2.0, or the Apache
@@ -22,6 +22,7 @@ import org.viewer.hub.back.config.properties.WeasisConfigurationProperties;
 import org.viewer.hub.back.constant.EndPoint;
 import org.viewer.hub.back.constant.ParamName;
 import org.viewer.hub.back.model.manifest.Manifest;
+import org.viewer.hub.back.model.patient.Patient;
 import org.viewer.hub.back.model.searchcriteria.IHESearchCriteria;
 import org.viewer.hub.back.model.searchcriteria.SearchCriteria;
 import org.viewer.hub.back.model.searchcriteria.WeasisArchiveSearchCriteria;
@@ -35,6 +36,8 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @Service
 @Slf4j
@@ -58,7 +61,7 @@ public class WeasisDisplayServiceImpl implements WeasisDisplayService {
 	}
 
 	@Override
-	public String retrieveWeasisLaunchUrl(@Valid SearchCriteria searchCriteria, Authentication authentication) {
+	public String retrieveWeasisLaunchUrl(@Valid SearchCriteria searchCriteria, Map<String, Set<Patient>> patientsByArchive, Authentication authentication) {
 		// Hash parameters to build the key
 		String key = this.cacheService.constructManifestKeyDependingOnSearchParameters(searchCriteria);
 
@@ -71,7 +74,7 @@ public class WeasisDisplayServiceImpl implements WeasisDisplayService {
 		if (!isBuildInProgress) {
 			// Case no manifest built yet: build the manifest asynchronously
 			if (manifest == null) {
-				this.weasisService.buildManifest(key, searchCriteria, authentication);
+				this.weasisService.buildManifest(key, searchCriteria, patientsByArchive, authentication);
 			}
 			// Case manifest already built and in the cache: reset structured arguments
 			// for monitoring

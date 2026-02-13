@@ -20,8 +20,6 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.BinderValidationStatus;
-import com.vaadin.flow.data.binder.ValidationResult;
-import com.vaadin.flow.data.binder.Validator;
 import lombok.Getter;
 import org.viewer.hub.back.entity.ViewerSelectionEntity;
 import org.viewer.hub.back.enums.ModalityType;
@@ -93,13 +91,15 @@ public class ViewerSelectionDialog extends Dialog {
 		this.modalityField.setPlaceholder("Select Modalities");
 		this.modalityField.setItems(ModalityType.values());
 		this.modalityField.setItemLabelGenerator(ModalityType::name);
+		this.modalityField.setRequiredIndicatorVisible(true);
 
 		// Archive
 		this.archiveField = new Select<>();
 		this.archiveField.setLabel("Archive");
 		this.archiveField.setPlaceholder("Select Archive");
 		this.archiveField.setItems(archives);
-		this.archiveField.setEmptySelectionAllowed(true);
+		this.archiveField.setEmptySelectionAllowed(false);
+		this.archiveField.setRequiredIndicatorVisible(true);
 
 		// Viewer
 		this.viewerField = new Select<>();
@@ -111,11 +111,12 @@ public class ViewerSelectionDialog extends Dialog {
 
 		// --- Binders ---
 		this.binder.forField(modalityField)
-				.withValidator(atLeatOneFieldValidator())
+				.withValidator(modalities -> modalities != null && !modalities.isEmpty(),
+						"At least one modality must be selected")
 				.bind(entity -> entity.getModalities() != null ? new HashSet<>(entity.getModalities()) : Set.of(),
 						(entity, value) -> entity.setModalities(new ArrayList<>(value)));
 		this.binder.forField(archiveField)
-				.withValidator(atLeatOneFieldValidator())
+				.withValidator(Objects::nonNull, "Archive is mandatory")
 				.bind(ViewerSelectionEntity::getArchive, ViewerSelectionEntity::setArchive);
 		this.binder.forField(viewerField)
 				.withValidator(Objects::nonNull, "Viewer is mandatory")
@@ -189,19 +190,6 @@ public class ViewerSelectionDialog extends Dialog {
 			viewerSelectionView.getViewerSelectionGrid().getOriginalDataProvider().refreshAll();
 			this.close();
 		}
-	}
-
-	/**
-	 * Validator to check that at least one field is filled
-	 * @return Validator created
-	 */
-	private Validator<? super Object> atLeatOneFieldValidator() {
-		return (value, valueContext) -> {
-			if (modalityField.getValue().isEmpty() && archiveField.getValue() == null) {
-				return ValidationResult.error("You must specify one of these fields");
-			}
-			return ValidationResult.ok();
-		};
 	}
 
 }

@@ -16,6 +16,7 @@ import org.viewer.hub.back.entity.ViewerSelectionEntity;
 import org.viewer.hub.back.enums.ViewerType;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Repository for the entity ViewerSelection.
@@ -36,5 +37,12 @@ public interface ViewerSelectionRepository extends JpaRepository<ViewerSelection
 	 * @return list of viewer selections
 	 */
 	List<ViewerSelectionEntity> findByArchiveAndViewer(String archive, ViewerType viewer);
+
+	/**
+	 * Find the first viewer selection by viewer
+	 * @param viewer viewer to look for
+	 * @return optional of viewer selection
+	 */
+	Optional<ViewerSelectionEntity> findFirstByViewer(ViewerType viewer);
 
 }
