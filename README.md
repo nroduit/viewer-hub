@@ -12,6 +12,7 @@ https://weasis.org/en/viewer-hub/index.html
 
 ## Main functionalities
 - Launch of multiple viewers (Weasis, OHIF, 3D Slicer, MicroDicom) with several launch endpoints, including IHE IID Profile-compatible launch
+- Viewer selection rules based on a combination of list of modalities and archive
 - Creation and association of user or machine groups
 - Creation of an xml file (manifest) containing the studies, series and instances to be downloaded. This file will then be transmitted to Weasis to load the images into the viewer.
 - Manifest storage in a redis cache
