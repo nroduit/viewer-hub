@@ -53,12 +53,12 @@ public interface ViewerSelectionService {
 	List<ViewerSelectionEntity> retrieveViewerSelection(Sort.Direction prioritySortDirection);
 
 	/**
-	 * Retrieve a viewer selection rule based on provided parameters
+	 * Retrieve a type of viewer from viewer selection rules based on provided parameters
 	 * @param searchCriteria Search criteria of the request
-	 * @param patientsByArchive       Set of patients retrieved gather by archive
-	 * @return the matching ViewerSelectionEntity
+	 * @param patientsByArchive Set of patients retrieved gather by archive
+	 * @return the matching ViewerType
 	 */
-	ViewerSelectionEntity retrieveViewerSelectionRule(SearchCriteria searchCriteria, Map<String, Set<Patient>> patientsByArchive);
+	ViewerType retrieveViewerTypeFromViewerSelectionRules(SearchCriteria searchCriteria, Map<String, Set<Patient>> patientsByArchive);
 
 	/**
 	 * Count total number of viewer selection entities

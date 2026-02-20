@@ -72,25 +72,28 @@ public class ViewerSelectionServiceImpl implements ViewerSelectionService {
 	}
 
 	@Override
-	public ViewerSelectionEntity retrieveViewerSelectionRule(SearchCriteria searchCriteria, Map<String, Set<Patient>> patientsByArchive) {
-		// Retrieve default rule
-		ViewerSelectionEntity defaultViewerSelectionEntity = viewerSelectionRepository.findByArchive(ViewerSelectionType.DEFAULT.name()).getFirst();
+	public ViewerType retrieveViewerTypeFromViewerSelectionRules(SearchCriteria searchCriteria, Map<String, Set<Patient>> patientsByArchive) {
+		// Retrieve default viewer
+		ViewerType defaultViewer = viewerSelectionRepository.findByArchive(ViewerSelectionType.DEFAULT.name())
+				.stream()
+				.findFirst()
+				.map(ViewerSelectionEntity::getViewer)
+				.orElse(ViewerType.WEASIS);
 
 		// If viewer is specified in search criteria, bypass selection rules
 		if (searchCriteria != null && searchCriteria.getViewer() != null) {
-			return viewerSelectionRepository.findFirstByViewer(searchCriteria.getViewer())
-					.orElse(defaultViewerSelectionEntity);
+			return searchCriteria.getViewer();
 		}
 
-		// Only Weasis supports multiple archives for now, so if multiple archives are requested, bypass selection rules and return first Weasis rule
+		// Only Weasis supports multiple archives for now, so if multiple archives are requested, bypass selection rules and return Weasis viewer
 		if ((searchCriteria != null && searchCriteria.getArchive() != null && searchCriteria.getArchive().size() > 1)
 				|| (patientsByArchive != null && patientsByArchive.size() > 1)) {
-			return viewerSelectionRepository.findFirstByViewer(ViewerType.WEASIS).orElse(defaultViewerSelectionEntity);
+			return ViewerType.WEASIS;
 		}
 
-		// If no patients found, bypass selection rules and return default rule
+		// If no patients found, bypass selection rules and return default viewer
 		if(patientsByArchive == null || patientsByArchive.isEmpty()) {
-			return defaultViewerSelectionEntity;
+			return defaultViewer;
 		}
 
 		// Extract all modalities from patients
@@ -105,25 +108,11 @@ public class ViewerSelectionServiceImpl implements ViewerSelectionService {
 		// Get all viewer selection rules sorted by priority (reversed for highest priority first)
 		// Find first matching rule
 		return retrieveViewerSelection(Sort.Direction.DESC).stream()
-				.filter(entity -> {
-					// Check modality partial match (at least one modality matches)
-					if (entity.getModalities() != null && !entity.getModalities().isEmpty()
-							&& retrievedModalities.stream().noneMatch(entity.getModalities().stream()
-									.map(ModalityType::name)
-									.collect(Collectors.toSet())::contains)) {
-						return false;
-					}
-
-					// Check archive exact match or ALL
-					return Objects.equals(entity.getArchive(), ViewerSelectionType.ALL.name())
-							|| patientsByArchive.keySet().stream()
-							.findFirst()
-							.map(archive -> Objects.equals(entity.getArchive(), archive))
-							.orElse(false);
-				})
+				.filter(entity -> viewerSelectionRulesMatchingCondition(patientsByArchive, entity, retrievedModalities))
 				.findFirst()
+				.map(ViewerSelectionEntity::getViewer)
 				// Fallback to default rule if no matching rule found
-				.orElse(defaultViewerSelectionEntity);
+				.orElse(defaultViewer);
 	}
 
 	@Override
@@ -184,6 +173,30 @@ public class ViewerSelectionServiceImpl implements ViewerSelectionService {
 		allItems.removeIf(e -> Objects.equals(viewerSelectionEntity.getId(), e.getId()));
 		allItems.add(Math.min(value, allItems.size()), viewerSelectionEntity);
 		updatePriorities(allItems);
+	}
+
+	/**
+	 * Check if viewer selection rules match the search criteria and retrieved patients modalities
+	 * @param patientsByArchive Map of patients by archive
+	 * @param entity Viewer selection entity to check
+	 * @param retrievedModalities List of modalities retrieved from patients
+	 * @return true if rules match, false otherwise
+	 */
+	private static boolean viewerSelectionRulesMatchingCondition(Map<String, Set<Patient>> patientsByArchive, ViewerSelectionEntity entity, List<String> retrievedModalities) {
+		// Check modality partial match (at least one modality matches)
+		if (entity.getModalities() != null && !entity.getModalities().isEmpty()
+				&& retrievedModalities.stream().noneMatch(entity.getModalities().stream()
+				.map(ModalityType::name)
+				.collect(Collectors.toSet())::contains)) {
+			return false;
+		}
+
+		// Check archive exact match or ALL
+		return Objects.equals(entity.getArchive(), ViewerSelectionType.ALL.name())
+				|| patientsByArchive.keySet().stream()
+				.findFirst()
+				.map(archive -> Objects.equals(entity.getArchive(), archive))
+				.orElse(false);
 	}
 
 	/**

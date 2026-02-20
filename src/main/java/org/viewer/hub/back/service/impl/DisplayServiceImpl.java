@@ -15,7 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.viewer.hub.back.controller.exception.ParameterException;
-import org.viewer.hub.back.entity.ViewerSelectionEntity;
 import org.viewer.hub.back.enums.ViewerType;
 import org.viewer.hub.back.model.patient.Patient;
 import org.viewer.hub.back.model.searchcriteria.ArchiveSearchCriteria;
@@ -64,19 +63,20 @@ public class DisplayServiceImpl implements DisplayService {
         }
 
         // Select viewer and retrieve viewer launch URL
-        return retrieveViewerLaunchUrl(viewerSelectionService.retrieveViewerSelectionRule(searchCriteria, patientsByArchive), searchCriteria, patientsByArchive, authentication);
+        return retrieveViewerLaunchUrl(viewerSelectionService.retrieveViewerTypeFromViewerSelectionRules(searchCriteria, patientsByArchive), searchCriteria, patientsByArchive, authentication);
     }
 
     /**
      * Retrieve the viewer launch URL based on the selected viewer
      *
-     * @param viewerSelection The viewer selection entity
+     * @param viewerType     The viewer type
      * @param searchCriteria  The search criteria
+     * @param patientsByArchive The patients by archive map
      * @param authentication  The authentication object
      * @return The viewer launch URL
      */
-    private String retrieveViewerLaunchUrl(ViewerSelectionEntity viewerSelection, SearchCriteria searchCriteria, Map<String, Set<Patient>> patientsByArchive, Authentication authentication) {
-        return switch (viewerSelection.getViewer()) {
+    private String retrieveViewerLaunchUrl(ViewerType viewerType, SearchCriteria searchCriteria, Map<String, Set<Patient>> patientsByArchive, Authentication authentication) {
+        return switch (viewerType) {
             case WEASIS -> weasisDisplayService.retrieveWeasisLaunchUrl(searchCriteria, patientsByArchive, authentication);
             case OHIF -> ohifDisplayService.retrieveOhifLaunchUrl(searchCriteria, patientsByArchive, authentication);
             case SLICER -> slicerDisplayService.retrieveSlicerLaunchUrl(searchCriteria, patientsByArchive, authentication);
