@@ -218,44 +218,37 @@ class ViewerSelectionServiceImplTest {
 	// ========== Test retrieveViewerSelectionRule ==========
 
 	@Test
-	void when_retrieveViewerSelectionRule_with_viewerSpecified_should_returnRuleForThatViewer() {
+	void when_retrieveViewerSelectionRule_with_viewerSpecified_should_returnRuleForThatViewerTypeFrom() {
 		// Given
 		ArchiveSearchCriteria searchCriteria = new ArchiveSearchCriteria();
 		searchCriteria.setViewer(ViewerType.OHIF);
 		Map<String, Set<Patient>> patientsByArchive = new HashMap<>();
 
-		when(viewerSelectionRepository.findFirstByViewer(ViewerType.OHIF))
-				.thenReturn(Optional.of(ohifRule));
-
 		// When
-		ViewerSelectionEntity result = viewerSelectionService.retrieveViewerSelectionRule(searchCriteria, patientsByArchive);
+		ViewerType result = viewerSelectionService.retrieveViewerTypeFromViewerSelectionRules(searchCriteria, patientsByArchive);
 
 		// Then
 		assertNotNull(result);
-		assertEquals(ViewerType.OHIF, result.getViewer());
-		verify(viewerSelectionRepository).findFirstByViewer(ViewerType.OHIF);
+		assertEquals(ViewerType.OHIF, result);
 	}
 
 	@Test
-	void when_retrieveViewerSelectionRule_with_viewerSpecifiedButNotFound_should_returnDefault() {
+	void when_retrieveViewerSelectionRule_with_viewerTypeSpecified_should_returnSpecifiedViewer() {
 		// Given
 		ArchiveSearchCriteria searchCriteria = new ArchiveSearchCriteria();
 		searchCriteria.setViewer(ViewerType.SLICER);
 		Map<String, Set<Patient>> patientsByArchive = new HashMap<>();
 
-		when(viewerSelectionRepository.findFirstByViewer(ViewerType.SLICER))
-				.thenReturn(Optional.empty());
-
 		// When
-		ViewerSelectionEntity result = viewerSelectionService.retrieveViewerSelectionRule(searchCriteria, patientsByArchive);
+		ViewerType result = viewerSelectionService.retrieveViewerTypeFromViewerSelectionRules(searchCriteria, patientsByArchive);
 
 		// Then
 		assertNotNull(result);
-		assertEquals(defaultRule.getId(), result.getId());
+		assertEquals(ViewerType.SLICER, result); // Returns the specified viewer directly
 	}
 
 	@Test
-	void when_retrieveViewerSelectionRule_with_multipleArchives_should_returnWeasisRule() {
+	void when_retrieveViewerTypeFromViewerSelectionRule_with_multipleArchives_should_returnWeasisRules() {
 		// Given
 		ArchiveSearchCriteria searchCriteria = new ArchiveSearchCriteria();
 		LinkedHashSet<String> archives = new LinkedHashSet<>();
@@ -265,66 +258,60 @@ class ViewerSelectionServiceImplTest {
 
 		Map<String, Set<Patient>> patientsByArchive = new HashMap<>();
 
-		when(viewerSelectionRepository.findFirstByViewer(ViewerType.WEASIS))
-				.thenReturn(Optional.of(weasisRule));
-
 		// When
-		ViewerSelectionEntity result = viewerSelectionService.retrieveViewerSelectionRule(searchCriteria, patientsByArchive);
+		ViewerType result = viewerSelectionService.retrieveViewerTypeFromViewerSelectionRules(searchCriteria, patientsByArchive);
 
 		// Then
 		assertNotNull(result);
-		assertEquals(ViewerType.WEASIS, result.getViewer());
-		verify(viewerSelectionRepository).findFirstByViewer(ViewerType.WEASIS);
+		assertEquals(ViewerType.WEASIS, result);
 	}
 
 	@Test
-	void when_retrieveViewerSelectionRule_with_multipleArchivesInPatients_should_returnWeasisRule() {
+	void when_retrieveViewerTypeFromViewerSelectionRule_with_multipleArchivesInPatients_should_returnWeasisRules() {
 		// Given
 		ArchiveSearchCriteria searchCriteria = new ArchiveSearchCriteria();
 		Map<String, Set<Patient>> patientsByArchive = new HashMap<>();
 		patientsByArchive.put("dcm4chee", new HashSet<>());
 		patientsByArchive.put("orthanc", new HashSet<>());
 
-		when(viewerSelectionRepository.findFirstByViewer(ViewerType.WEASIS))
-				.thenReturn(Optional.of(weasisRule));
 
 		// When
-		ViewerSelectionEntity result = viewerSelectionService.retrieveViewerSelectionRule(searchCriteria, patientsByArchive);
+		ViewerType result = viewerSelectionService.retrieveViewerTypeFromViewerSelectionRules(searchCriteria, patientsByArchive);
 
 		// Then
 		assertNotNull(result);
-		assertEquals(ViewerType.WEASIS, result.getViewer());
+		assertEquals(ViewerType.WEASIS, result);
 	}
 
 	@Test
-	void when_retrieveViewerSelectionRule_with_nullPatients_should_returnDefault() {
+	void when_retrieveViewerTypeFromViewerSelectionRules_with_nullPatients_should_returnDefault() {
 		// Given
 		ArchiveSearchCriteria searchCriteria = new ArchiveSearchCriteria();
 
 		// When
-		ViewerSelectionEntity result = viewerSelectionService.retrieveViewerSelectionRule(searchCriteria, null);
+		ViewerType result = viewerSelectionService.retrieveViewerTypeFromViewerSelectionRules(searchCriteria, null);
 
 		// Then
 		assertNotNull(result);
-		assertEquals(defaultRule.getId(), result.getId());
+		assertEquals(defaultRule.getViewer(), result);
 	}
 
 	@Test
-	void when_retrieveViewerSelectionRule_with_emptyPatients_should_returnDefault() {
+	void when_retrieveViewerTypeFromViewerSelectionRules_with_emptyPatients_should_returnDefault() {
 		// Given
 		ArchiveSearchCriteria searchCriteria = new ArchiveSearchCriteria();
 		Map<String, Set<Patient>> patientsByArchive = new HashMap<>();
 
 		// When
-		ViewerSelectionEntity result = viewerSelectionService.retrieveViewerSelectionRule(searchCriteria, patientsByArchive);
+		ViewerType result = viewerSelectionService.retrieveViewerTypeFromViewerSelectionRules(searchCriteria, patientsByArchive);
 
 		// Then
 		assertNotNull(result);
-		assertEquals(defaultRule.getId(), result.getId());
+		assertEquals(defaultRule.getViewer(), result);
 	}
 
 	@Test
-	void when_retrieveViewerSelectionRule_with_matchingModalityAndArchive_should_returnMatchingRule() {
+	void when_retrieveViewerTypeFromViewerSelectionRule_with_matchingModalityAndArchive_should_returnMatchingRules() {
 		// Given
 		ArchiveSearchCriteria searchCriteria = new ArchiveSearchCriteria();
 
@@ -340,16 +327,15 @@ class ViewerSelectionServiceImplTest {
 				.thenReturn(allRules);
 
 		// When
-		ViewerSelectionEntity result = viewerSelectionService.retrieveViewerSelectionRule(searchCriteria, patientsByArchive);
+		ViewerType result = viewerSelectionService.retrieveViewerTypeFromViewerSelectionRules(searchCriteria, patientsByArchive);
 
 		// Then
 		assertNotNull(result);
-		assertEquals(ViewerType.WEASIS, result.getViewer());
-		assertEquals("dcm4chee", result.getArchive());
+		assertEquals(ViewerType.WEASIS, result);
 	}
 
 	@Test
-	void when_retrieveViewerSelectionRule_with_noMatchingModality_should_returnDefault() {
+	void when_retrieveViewerTypeFromViewerSelectionRules_with_noMatchingModality_should_returnDefault() {
 		// Given
 		ArchiveSearchCriteria searchCriteria = new ArchiveSearchCriteria();
 
@@ -365,15 +351,15 @@ class ViewerSelectionServiceImplTest {
 				.thenReturn(allRules);
 
 		// When
-		ViewerSelectionEntity result = viewerSelectionService.retrieveViewerSelectionRule(searchCriteria, patientsByArchive);
+		ViewerType result = viewerSelectionService.retrieveViewerTypeFromViewerSelectionRules(searchCriteria, patientsByArchive);
 
 		// Then
 		assertNotNull(result);
-		assertEquals(defaultRule.getId(), result.getId());
+		assertEquals(defaultRule.getViewer(), result);
 	}
 
 	@Test
-	void when_retrieveViewerSelectionRule_with_archiveALL_should_match() {
+	void when_retrieveViewerTypeFromViewerSelectionRules_with_archiveALL_should_match() {
 		// Given
 		ArchiveSearchCriteria searchCriteria = new ArchiveSearchCriteria();
 
@@ -396,11 +382,11 @@ class ViewerSelectionServiceImplTest {
 				.thenReturn(allRules);
 
 		// When
-		ViewerSelectionEntity result = viewerSelectionService.retrieveViewerSelectionRule(searchCriteria, patientsByArchive);
+		ViewerType result = viewerSelectionService.retrieveViewerTypeFromViewerSelectionRules(searchCriteria, patientsByArchive);
 
 		// Then
 		assertNotNull(result);
-		assertEquals(allArchiveRule.getId(), result.getId());
+		assertEquals(ViewerType.OHIF, result);
 	}
 
 	// ========== Test countViewerSelection ==========
@@ -618,4 +604,5 @@ class ViewerSelectionServiceImplTest {
 		return patient;
 	}
 }
+
 
