@@ -34,19 +34,10 @@ import org.viewer.hub.back.constant.EndPoint;
 import org.viewer.hub.back.constant.Message;
 import org.viewer.hub.back.constant.ParamName;
 import org.viewer.hub.back.controller.exception.TechnicalException;
-import org.viewer.hub.back.enums.ConnectorAuthType;
-import org.viewer.hub.back.enums.ConnectorType;
-import org.viewer.hub.back.enums.DicomWebLevelLimitType;
-import org.viewer.hub.back.enums.HeaderType;
-import org.viewer.hub.back.enums.SearchCriteriaType;
-import org.viewer.hub.back.model.patient.DicomPatientSex;
-import org.viewer.hub.back.model.patient.Instance;
-import org.viewer.hub.back.model.patient.Patient;
-import org.viewer.hub.back.model.patient.Serie;
-import org.viewer.hub.back.model.patient.Study;
+import org.viewer.hub.back.enums.*;
+import org.viewer.hub.back.model.patient.*;
 import org.viewer.hub.back.model.property.ConnectorAuthenticationProperty;
 import org.viewer.hub.back.model.property.ConnectorProperty;
-import org.viewer.hub.back.model.searchcriteria.SearchCriteria;
 import org.viewer.hub.back.service.DicomConnectorQueryService;
 import org.viewer.hub.back.service.DicomWebClientService;
 import org.viewer.hub.back.util.ConnectorUtil;
@@ -61,13 +52,7 @@ import reactor.core.publisher.Mono;
 
 import java.net.URI;
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -116,12 +101,9 @@ public class DicomConnectorQueryServiceImpl implements DicomConnectorQueryServic
 
 	@Override
 	public Set<Patient> retrievePatientsFromPatientIdsDicomConnector(Set<String> patientIds,
-			@Valid ConnectorProperty connector, @Valid SearchCriteria searchCriteria, Authentication authentication) {
-		Set<Patient> patientsFound = this.retrieveDicomConnectorResults(connector, patientIds,
+			@Valid ConnectorProperty connector, Authentication authentication) {
+		return this.retrieveDicomConnectorResults(connector, patientIds,
 				SearchCriteriaType.PATIENT_ID, authentication);
-
-		// Apply patient request filters
-		return searchCriteria.applyPatientRequestSearchCriteriaFilters(patientsFound);
 	}
 
 	@Override
@@ -1016,7 +998,7 @@ public class DicomConnectorQueryServiceImpl implements DicomConnectorQueryServic
 				// Return Keys
 				CFind.PatientID, CFind.IssuerOfPatientID, CFind.PatientName, CFind.PatientBirthDate, CFind.PatientSex,
 				CFind.ReferringPhysicianName, CFind.StudyDescription, CFind.StudyDate, CFind.StudyTime,
-				CFind.AccessionNumber, CFind.StudyInstanceUID, CFind.StudyID, CFind.Modality, CFind.SeriesNumber,
+				CFind.AccessionNumber, CFind.StudyInstanceUID, CFind.StudyID, CFind.SeriesInstanceUID, CFind.Modality, CFind.SeriesNumber,
 				CFind.SeriesDescription, CFind.InstanceNumber);
 	}
 

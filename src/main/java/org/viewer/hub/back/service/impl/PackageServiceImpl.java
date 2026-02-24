@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2022-2025 Weasis Team and other contributors.
+ *  Copyright (c) 2022-2026 Weasis Team and other contributors.
  *
  *  This program and the accompanying materials are made available under the terms of the Eclipse
  *  Public License 2.0 which is available at https://www.eclipse.org/legal/epl-2.0, or the Apache
@@ -28,28 +28,16 @@ import org.springframework.stereotype.Service;
 import org.viewer.hub.back.config.properties.EnvironmentOverrideProperties;
 import org.viewer.hub.back.constant.PropertiesFileName;
 import org.viewer.hub.back.controller.exception.TechnicalException;
-import org.viewer.hub.back.entity.LaunchConfigEntity;
-import org.viewer.hub.back.entity.OverrideConfigEntity;
-import org.viewer.hub.back.entity.OverrideConfigEntityPK;
-import org.viewer.hub.back.entity.PackageVersionEntity;
-import org.viewer.hub.back.entity.TargetEntity;
-import org.viewer.hub.back.entity.WeasisPropertyEntity;
+import org.viewer.hub.back.entity.*;
 import org.viewer.hub.back.enums.LaunchConfigType;
 import org.viewer.hub.back.enums.TargetType;
 import org.viewer.hub.back.enums.WeasisProperties;
 import org.viewer.hub.back.model.version.MinimalReleaseVersion;
 import org.viewer.hub.back.repository.LaunchConfigRepository;
 import org.viewer.hub.back.repository.PackageVersionRepository;
-import org.viewer.hub.back.service.CacheService;
-import org.viewer.hub.back.service.OverrideConfigService;
-import org.viewer.hub.back.service.PackageService;
-import org.viewer.hub.back.service.S3Service;
-import org.viewer.hub.back.service.TargetService;
-import org.viewer.hub.back.util.JacksonUtil;
-import org.viewer.hub.back.util.PackageUtil;
-import org.viewer.hub.back.util.StringUtil;
-import org.viewer.hub.back.util.VersionUtil;
-import org.viewer.hub.front.views.bundle.override.component.RefreshPackageGridEvent;
+import org.viewer.hub.back.service.*;
+import org.viewer.hub.back.util.*;
+import org.viewer.hub.front.views.weasis.bundle.override.component.RefreshPackageGridEvent;
 import software.amazon.awssdk.services.s3.model.DeleteObjectsResponse;
 import software.amazon.awssdk.services.s3.model.PutObjectResponse;
 import software.amazon.awssdk.transfer.s3.model.CompletedCopy;
@@ -61,16 +49,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -78,12 +57,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
-import static org.viewer.hub.back.constant.PropertiesFileName.BIN_DIST_WEASIS_PATH;
-import static org.viewer.hub.back.constant.PropertiesFileName.BIN_DIST_WEASIS_RESOURCES_PATH;
-import static org.viewer.hub.back.constant.PropertiesFileName.CONF_FOLDER_NAME;
-import static org.viewer.hub.back.constant.PropertiesFileName.EXT_CONFIG_PROPERTIES_FILENAME;
-import static org.viewer.hub.back.constant.PropertiesFileName.RESOURCES_ZIP_FILE_NAME;
-import static org.viewer.hub.back.constant.PropertiesFileName.VERSION_COMPATIBILITY_FILE_NAME;
+import static org.viewer.hub.back.constant.PropertiesFileName.*;
 
 @Service
 @Slf4j
@@ -679,8 +653,8 @@ public class PackageServiceImpl implements PackageService {
 			zis.transferTo(byteArrayOutputStream);
 			try (InputStream inputStream = new ByteArrayInputStream(byteArrayOutputStream.toByteArray())) {
 				// Copy to zip output stream
-				zos.putNextEntry(new ZipEntry(StringUtil.pathWithS3Separator(
-						Paths.get(StringUtil.pathWithS3Separator(outDir.toString())).relativize(filePath).toString())));
+				zos.putNextEntry(new ZipEntry(PathUrlUtil.pathWithS3Separator(
+						Paths.get(PathUrlUtil.pathWithS3Separator(outDir.toString())).relativize(filePath).toString())));
 				zos.write(inputStream.readAllBytes());
 				zos.closeEntry();
 			}
@@ -1043,14 +1017,14 @@ public class PackageServiceImpl implements PackageService {
 			// Needed to be effectively final
 			final OverrideConfigEntity[] defaultOverrideConfig = { null };
 			// Config folder key for this version
-			String configFolderKey = StringUtil.pathWithS3Separator(
+			String configFolderKey = PathUrlUtil.pathWithS3Separator(
 					Paths
 						.get(this.viewerHubResourcesPackagesWeasisPackagePath, availableVersion,
 								PropertiesFileName.PATH_CONF_FOLDER)
 						.toString());
 
 			// Default properties file key for this version
-			String defaultConfigPropertiesFileKey = StringUtil.pathWithS3Separator(
+			String defaultConfigPropertiesFileKey = PathUrlUtil.pathWithS3Separator(
 					Paths
 						.get(configFolderKey,
 								useJsonParsing ? PropertiesFileName.BASE_JSON_FILENAME

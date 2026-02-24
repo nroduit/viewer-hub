@@ -16,8 +16,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <!-- Viewer Hub -->
-    <artifactId>viewer-hub</artifactId>
     <groupId>org.viewer.hub</groupId>
+    <artifactId>viewer-hub</artifactId>
     <name>${project.artifactId}</name>
     <version>${revision}</version>
     <description>Viewer Hub</description>
@@ -39,13 +39,13 @@
         <liquibase.version>4.23.0</liquibase.version>
         <postgresql.version>42.7.2</postgresql.version>
         <ojdbc.version>23.3.0.23.09</ojdbc.version>
-        <jackson.version>2.15.3</jackson.version>
+        <jackson.version>2.16.1</jackson.version>
         <h2.version>2.2.224</h2.version>
         <vaadin.version>24.6.5</vaadin.version>
         <weasis-dicom-tools.version>5.32.0</weasis-dicom-tools.version>
         <maven.artifact.version>3.8.6</maven.artifact.version>
         <node.version>v23.6.0</node.version>
-        <awssdk.version>2.21.29</awssdk.version>
+        <awssdk.version>2.27.0</awssdk.version>
         <io.awspring.cloud.version>3.2.1</io.awspring.cloud.version>
         <lombok.version>1.18.30</lombok.version>
         <maven-compiler-plugin.version>3.12.1</maven-compiler-plugin.version>

@@ -14,7 +14,6 @@ package org.viewer.hub.back.service;
 import jakarta.validation.Valid;
 import org.viewer.hub.back.model.patient.Patient;
 import org.viewer.hub.back.model.property.ConnectorProperty;
-import org.viewer.hub.back.model.searchcriteria.SearchCriteria;
 
 import java.util.Set;
 
@@ -27,10 +26,8 @@ public interface DbConnectorQueryService {
 	 * Retrieve patients from patients ids requests with DB connector
 	 * @param patientIds Patient ids to look for
 	 * @param connector Connector properties
-	 * @param searchCriteria Search criteria
 	 */
-	Set<Patient> retrievePatientsFromPatientIdsDbConnector(Set<String> patientIds, @Valid ConnectorProperty connector,
-			@Valid SearchCriteria searchCriteria);
+	Set<Patient> retrievePatientsFromPatientIdsDbConnector(Set<String> patientIds, @Valid ConnectorProperty connector);
 
 	/**
 	 * Retrieve patients from study accession numbers requests with DB connector
@@ -38,7 +35,6 @@ public interface DbConnectorQueryService {
 	 * @param connector Connector properties
 	 */
 	Set<Patient> retrievePatientsFromStudyAccessionNumbersDbConnector(Set<String> studyAccessionNumbers,
-
 			@Valid ConnectorProperty connector);
 
 	/**

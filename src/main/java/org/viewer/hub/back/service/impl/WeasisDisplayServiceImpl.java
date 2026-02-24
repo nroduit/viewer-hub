@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2022-2025 Weasis Team and other contributors.
+ *  Copyright (c) 2022-2026 Weasis Team and other contributors.
  *
  *  This program and the accompanying materials are made available under the terms of the Eclipse
  *  Public License 2.0 which is available at https://www.eclipse.org/legal/epl-2.0, or the Apache
@@ -18,10 +18,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.UriComponentsBuilder;
-import org.viewer.hub.back.constant.CommandName;
+import org.viewer.hub.back.config.properties.WeasisConfigurationProperties;
 import org.viewer.hub.back.constant.EndPoint;
 import org.viewer.hub.back.constant.ParamName;
 import org.viewer.hub.back.model.manifest.Manifest;
+import org.viewer.hub.back.model.patient.Patient;
 import org.viewer.hub.back.model.searchcriteria.IHESearchCriteria;
 import org.viewer.hub.back.model.searchcriteria.SearchCriteria;
 import org.viewer.hub.back.model.searchcriteria.WeasisArchiveSearchCriteria;
@@ -35,6 +36,8 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @Service
 @Slf4j
@@ -45,17 +48,20 @@ public class WeasisDisplayServiceImpl implements WeasisDisplayService {
 
 	private final WeasisService weasisService;
 
+	private final WeasisConfigurationProperties weasisConfigurationProperties;
+
 	@Value("${viewer-hub.server.url}")
 	private String viewerHubServerUrl;
 
 	@Autowired
-	public WeasisDisplayServiceImpl(final CacheService cacheService, final WeasisService weasisService) {
+	public WeasisDisplayServiceImpl(final CacheService cacheService, final WeasisService weasisService, final WeasisConfigurationProperties weasisConfigurationProperties) {
 		this.cacheService = cacheService;
 		this.weasisService = weasisService;
+		this.weasisConfigurationProperties = weasisConfigurationProperties;
 	}
 
 	@Override
-	public String retrieveWeasisLaunchUrl(@Valid SearchCriteria searchCriteria, Authentication authentication) {
+	public String retrieveWeasisLaunchUrl(@Valid SearchCriteria searchCriteria, Map<String, Set<Patient>> patientsByArchive, Authentication authentication) {
 		// Hash parameters to build the key
 		String key = this.cacheService.constructManifestKeyDependingOnSearchParameters(searchCriteria);
 
@@ -68,7 +74,7 @@ public class WeasisDisplayServiceImpl implements WeasisDisplayService {
 		if (!isBuildInProgress) {
 			// Case no manifest built yet: build the manifest asynchronously
 			if (manifest == null) {
-				this.weasisService.buildManifest(key, searchCriteria, authentication);
+				this.weasisService.buildManifest(key, searchCriteria, patientsByArchive, authentication);
 			}
 			// Case manifest already built and in the cache: reset structured arguments
 			// for monitoring
@@ -118,9 +124,9 @@ public class WeasisDisplayServiceImpl implements WeasisDisplayService {
 	 * @param weasisConfigCommand Weasis Config command
 	 * @return weasis protocol encoded url built
 	 */
-	private static String buildWeasisProtocolCommand(String dicomGetOrArgumentCommand, String weasisConfigCommand) {
-		return CommandName.LAUNCH_URL_WEASIS_COMMANDS_CONFIG.formatted(URLEncoder
-			.encode("%s %s".formatted(dicomGetOrArgumentCommand, weasisConfigCommand), StandardCharsets.UTF_8));
+	private String buildWeasisProtocolCommand(String dicomGetOrArgumentCommand, String weasisConfigCommand) {
+		return "%s%s".formatted(weasisConfigurationProperties.getCommand().getProtocol(), URLEncoder
+                .encode("%s %s".formatted(dicomGetOrArgumentCommand, weasisConfigCommand), StandardCharsets.UTF_8));
 	}
 
 	/**
@@ -149,7 +155,7 @@ public class WeasisDisplayServiceImpl implements WeasisDisplayService {
 			.queryParam(ParamName.KEY, key);
 
 		// Weasis dicom get command
-		return "%s \"%s\"".formatted(CommandName.WEASIS_DICOM_GET_COMMAND, uriBuilderRetrieveManifest.toUriString());
+		return "%s \"%s\"".formatted(weasisConfigurationProperties.getCommand().getGet(), uriBuilderRetrieveManifest.toUriString());
 	}
 
 	/**
@@ -170,11 +176,6 @@ public class WeasisDisplayServiceImpl implements WeasisDisplayService {
 				? ((WeasisIHESearchCriteria) searchCriteria).getPro()
 				: ((WeasisArchiveSearchCriteria) searchCriteria).getPro();
 
-		// Ext-cfg
-		String extCfg = searchCriteria instanceof IHESearchCriteria
-				? ((WeasisIHESearchCriteria) searchCriteria).getExtCfg()
-				: ((WeasisArchiveSearchCriteria) searchCriteria).getExtCfg();
-
 		// Config
 		String config = searchCriteria instanceof IHESearchCriteria
 				? ((WeasisIHESearchCriteria) searchCriteria).getConfig()
@@ -193,17 +194,13 @@ public class WeasisDisplayServiceImpl implements WeasisDisplayService {
 		if (searchCriteria.getHost() != null && !searchCriteria.getHost().isBlank()) {
 			uriBuilderLaunchConfig.queryParam(ParamName.HOST, searchCriteria.getHost());
 		}
-		// Ext-cfg
-		if (extCfg != null && !extCfg.isBlank()) {
-			uriBuilderLaunchConfig.queryParam(ParamName.EXT_CFG, extCfg);
-		}
 		// Config
 		if (config != null && !config.isBlank()) {
 			uriBuilderLaunchConfig.queryParam(ParamName.CONFIG, config);
 		}
 
 		// Weasis config command
-		return "%s\"%s\"".formatted(CommandName.WEASIS_CONFIG_COMMAND, uriBuilderLaunchConfig.toUriString());
+		return "%s\"%s\"".formatted(weasisConfigurationProperties.getCommand().getConfig(), uriBuilderLaunchConfig.toUriString());
 	}
 
 }

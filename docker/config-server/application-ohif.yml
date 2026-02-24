@@ -1,0 +1,7 @@
+# - OHIF
+ohif:
+  token-auth-query-param: false
+  server:
+    url: http://localhost
+    port: 3000
+    context:

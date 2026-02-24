@@ -255,7 +255,23 @@
         "attributes" : { }
       } ],
       "security-admin-console" : [ ],
-      "viewer-hub" : [ {
+      "viewer-hub" : [{
+        "id": "aa0453be-2d31-4764-99dd-5ed5d5999f71",
+        "name": "imaging-gateway_read",
+        "description": "",
+        "composite": false,
+        "clientRole": true,
+        "containerId": "db84fd24-d124-4d74-9df9-cb5a5cd315ae",
+        "attributes": {}
+        }, {
+          "id": "1fcfd755-2219-4637-90fb-f5c85a184631",
+          "name": "viewer_display",
+          "description": "",
+          "composite": false,
+          "clientRole": true,
+          "containerId": "db84fd24-d124-4d74-9df9-cb5a5cd315ae",
+          "attributes": {}
+        }, {
         "id" : "a1f94f1c-0681-46b4-8c3e-1f853dc5a351",
         "name" : "admin",
         "description" : "",
@@ -429,7 +445,7 @@
     "requiredActions" : [ ],
     "realmRoles" : [ "default-roles-viewer-hub" ],
     "clientRoles" : {
-      "viewer-hub" : [ "admin" ]
+      "viewer-hub" : [ "admin", "imaging-gateway_read", "viewer_display" ]
     },
     "notBefore" : 0,
     "groups" : [ ]

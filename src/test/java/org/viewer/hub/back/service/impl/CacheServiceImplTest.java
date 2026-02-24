@@ -34,15 +34,10 @@ import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doCallRealMethod;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 @Slf4j
@@ -100,11 +95,11 @@ class CacheServiceImplTest {
 	@Test
 	void when_searchParametersChange_then_keyBuiltShouldBeDifferent() {
 		// Build keys
-		ArchiveSearchCriteria weasisSearchCriteria = new ArchiveSearchCriteria();
-		weasisSearchCriteria.setArchive(new LinkedHashSet<>(List.of("A", "B")));
-		String key = this.cacheService.constructManifestKeyDependingOnSearchParameters(weasisSearchCriteria);
-		weasisSearchCriteria.getArchive().add("C");
-		String keyToCompare = this.cacheService.constructManifestKeyDependingOnSearchParameters(weasisSearchCriteria);
+		ArchiveSearchCriteria archiveSearchCriteria = new ArchiveSearchCriteria();
+		archiveSearchCriteria.setArchive(new LinkedHashSet<>(List.of("A", "B")));
+		String key = this.cacheService.constructManifestKeyDependingOnSearchParameters(archiveSearchCriteria);
+		archiveSearchCriteria.getArchive().add("C");
+		String keyToCompare = this.cacheService.constructManifestKeyDependingOnSearchParameters(archiveSearchCriteria);
 
 		// Test keys
 		assertNotEquals(key, keyToCompare);

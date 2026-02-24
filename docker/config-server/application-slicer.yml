@@ -1,0 +1,15 @@
+slicer:
+  command:
+    protocol: slicer://
+    context: viewer
+  archives:
+    dcm4chee-local:
+      #  Viewer-hub Gateway for dcm4chee
+        url: http://localhost
+        port: 8088
+        context: /DCM4CHEE-LOCAL/rs
+    orthanc-local:
+      #  Viewer-hub Gateway for orthanc
+      url: http://localhost
+      port: 8088
+      context: /ORTHANC-LOCAL/dicomweb

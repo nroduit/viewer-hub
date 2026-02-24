@@ -1,0 +1,10 @@
+name: ohif-local
+
+services:
+  ohif:
+    image: ohif/app:v3.10.1
+    container_name: ohif
+    ports:
+      - 3000:80
+    volumes:
+      - ./ohif/app-config.js:/usr/share/nginx/html/app-config.js

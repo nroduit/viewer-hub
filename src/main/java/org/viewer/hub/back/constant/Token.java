@@ -11,7 +11,7 @@
 package org.viewer.hub.back.constant;
 
 /**
- * Constants dealing used for token management
+ * Constants used for token management
  */
 public class Token {
 

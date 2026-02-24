@@ -11,6 +11,8 @@
 
 package org.viewer.hub.back.model.searchcriteria;
 
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import lombok.EqualsAndHashCode;
@@ -20,11 +22,19 @@ import org.viewer.hub.back.util.StringUtil;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Stream;
 
 /**
  * Model which represents the search criteria when launching Weasis
  */
-
+@JsonTypeInfo(
+		use = JsonTypeInfo.Id.DEDUCTION,
+		defaultImpl= ArchiveSearchCriteria.class
+)
+@JsonSubTypes({
+		@JsonSubTypes.Type(value = WeasisArchiveSearchCriteria.class),
+		@JsonSubTypes.Type(value = ArchiveSearchCriteria.class)
+})
 @Getter
 @NotNull
 @ToString
@@ -80,5 +90,18 @@ public class ArchiveSearchCriteria extends SearchCriteria {
 	public void setObjectUID(Set<String> objectUID) {
 		this.objectUID = StringUtil.splitCommaSeparatedValuesToList(objectUID);
 	}
+
+	/**
+	 * Check if only one search criteria is filled with only one value
+	 * @return true if only one search criteria is filled and has only one value
+	 */
+	public boolean hasOnlyOneSearchCriteriaValue() {
+		return Stream.of(patientID, studyUID, accessionNumber, seriesUID, objectUID)
+				.allMatch(s -> s.isEmpty() || s.size() == 1)  &&
+				Stream.of(patientID, studyUID, accessionNumber, seriesUID, objectUID)
+				.filter(s -> s.size() == 1)
+				.count() == 1;
+	}
+
 
 }

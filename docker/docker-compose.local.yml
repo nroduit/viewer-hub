@@ -4,6 +4,8 @@ include:
   - technical-stack.yml
   - keycloak.yml
   - dcm4chee.yml
+  - orthanc.yml
+  - ohif.yml
 
 services:
 

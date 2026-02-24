@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.viewer.hub.back.config.properties.ConnectorConfigurationProperties;
 import org.viewer.hub.back.controller.exception.TechnicalException;
 import org.viewer.hub.back.model.property.ConnectorProperty;
+import org.viewer.hub.back.model.searchcriteria.SearchCriteria;
 import org.viewer.hub.back.service.ConnectorService;
 
 import java.util.LinkedHashSet;
@@ -64,6 +65,13 @@ public class ConnectorServiceImpl implements ConnectorService {
 				? this.areDefaultConnectorsValid() ? this.retrieveConnectorsFromIds(this.defaultConnectors)
 						: new LinkedHashSet<>(this.connectorConfigurationProperties.getConnectors().values())
 				: this.retrieveConnectorsFromIds(archives);
+	}
+
+	@Override
+	public String retrieveFirstDefaultOrFirstSpecificConnector(SearchCriteria searchCriteria) {
+		ConnectorProperty connectorProperty = this.retrieveConnectors(searchCriteria != null ?
+				searchCriteria.getArchive() : new LinkedHashSet<>()).stream().findFirst().orElse(null);
+		return connectorProperty != null ? connectorProperty.getId() : null;
 	}
 
 	/**
