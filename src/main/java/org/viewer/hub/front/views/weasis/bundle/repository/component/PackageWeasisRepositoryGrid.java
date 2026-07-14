@@ -12,7 +12,6 @@ package org.viewer.hub.front.views.weasis.bundle.repository.component;
 
 import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.grid.HeaderRow;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -72,7 +71,7 @@ public class PackageWeasisRepositoryGrid extends Grid<WeasisAssetModel> {
 		this.setHeightFull();
 
 		// Themes of the grid
-		this.addThemeVariants(GridVariant.LUMO_NO_BORDER, GridVariant.LUMO_ROW_STRIPES);
+		this.getElement().setAttribute("theme", "no-border row-stripes");
 
 		// Case no assets in the repository or not connected to a nexus repository
 		this.setEmptyStateText(
@@ -123,7 +122,7 @@ public class PackageWeasisRepositoryGrid extends Grid<WeasisAssetModel> {
 		this.setHeightFull();
 
 		// Themes of the grid
-		this.addThemeVariants(GridVariant.LUMO_NO_BORDER, GridVariant.LUMO_ROW_STRIPES);
+		this.getElement().setAttribute("theme", "no-border row-stripes");
 
 		// Artifact name filter
 		this.createArtifactNameFilter(artifactNameColumn, filterRow);
@@ -277,7 +276,7 @@ public class PackageWeasisRepositoryGrid extends Grid<WeasisAssetModel> {
 			icon = VaadinIcon.CLOSE_SMALL.create();
 			icon.getElement().getThemeList().add("badge error");
 		}
-		icon.getStyle().set("padding", "var(--lumo-space-xs");
+		icon.getStyle().set("padding", "0.25rem");
 		return icon;
 	}
 

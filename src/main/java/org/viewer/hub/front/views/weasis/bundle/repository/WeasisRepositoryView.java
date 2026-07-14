@@ -12,7 +12,6 @@
 package org.viewer.hub.front.views.weasis.bundle.repository;
 
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -82,7 +81,7 @@ public class WeasisRepositoryView extends AbstractView {
 		this.refreshGridButton.addClickListener(buttonClickEvent -> this.weasisAssetDataProvider.refreshAll());
 		this.refreshGridButton.setSizeFull();
 
-		this.refreshGridButton.addThemeVariants(ButtonVariant.MATERIAL_CONTAINED);
+		this.refreshGridButton.getElement().getThemeList().add("primary");
 	}
 
 	/**

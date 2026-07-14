@@ -17,8 +17,10 @@ import com.vaadin.flow.component.html.Div;
 public class BoxShadowComponent extends Div {
 
 	public BoxShadowComponent(Component... component) {
-		this.getElement().getStyle().set("box-shadow", "var(--lumo-box-shadow-s)");
-		this.getElement().getStyle().set("border-radius", "var(--lumo-border-radius-m)");
+		this.getElement()
+			.getStyle()
+			.set("box-shadow", "0 1px 4px 0 color-mix(in srgb, var(--vaadin-text-color) 15%, transparent)");
+		this.getElement().getStyle().set("border-radius", "var(--vaadin-radius-m, 0.5rem)");
 		this.getElement().getStyle().set("background-color", "hsla(245, 100%, 100%, 0.03)");
 		this.add(component);
 	}

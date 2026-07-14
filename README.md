@@ -39,7 +39,7 @@ docker compose -p imaging_hub -f docker-compose.yml -f docker-compose.local.yml 
 - Or launch via this command script:
 
 ```bash
-  ./scripts/start.sh local
+  cd docker && ./scripts/start.sh local
 ```
 
 ## Minio

@@ -4,7 +4,7 @@ services:
 
   # Ldap: dcm4chee configuration
   ldap:
-    image: dcm4che/slapd-dcm4chee:2.6.7-33.0
+    image: dcm4che/slapd-dcm4chee:2.6.10-34.3
     container_name: dcm4chee_ldap
     logging:
       driver: json-file
@@ -23,7 +23,7 @@ services:
 
   # Postgres SQL for dcm4chee
   db:
-    image: dcm4che/postgres-dcm4chee:16.4-33
+    image: dcm4che/postgres-dcm4chee:17.4-34
     container_name: dcm4chee_db
     logging:
       driver: json-file
@@ -39,10 +39,15 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - /etc/timezone:/etc/timezone:ro
       - /var/local/dcm4chee-arc/db:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U pacs -d pacsdb" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   # Dcm4chee web portal
   arc:
-    image: dcm4che/dcm4chee-arc-psql:5.33.0
+    image: dcm4che/dcm4chee-arc-psql:5.34.3
     container_name: dcm4chee
     logging:
       driver: json-file
@@ -66,10 +71,23 @@ services:
       WILDFLY_ADMIN_USER: root
       WILDFLY_ADMIN_PASSWORD: changeit
     depends_on:
-      - ldap
-      - db
+      ldap:
+        condition: service_healthy
+      db:
+        condition: service_healthy
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /etc/timezone:/etc/timezone:ro
       - /var/local/dcm4chee-arc/wildfly:/opt/wildfly/standalone
       - /var/local/dcm4chee-arc/storage:/storage
+    healthcheck:
+      # WildFly HTTP listener up = archive deployed; TCP probe avoids guessing an endpoint
+      test: [ "CMD", "bash", "-c", "exec 3<>/dev/tcp/localhost/8080" ]
+      interval: 20s
+      timeout: 5s
+      retries: 10
+      start_period: 180s
+
+volumes:
+  ldap_data:
+  ldap_config:

@@ -12,7 +12,6 @@ package org.viewer.hub.front.views.weasis.i18n.component;
 
 import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.grid.HeaderRow;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
@@ -56,7 +55,7 @@ public class I18nGrid extends Grid<I18nEntity> {
 		this.setHeight(91, Unit.PERCENTAGE);
 
 		// Themes of the grid
-		this.addThemeVariants(GridVariant.LUMO_NO_BORDER, GridVariant.LUMO_ROW_STRIPES);
+		this.getElement().setAttribute("theme", "no-border row-stripes");
 
 		// Build columns
 		// I18n

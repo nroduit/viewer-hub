@@ -12,7 +12,6 @@
 package org.viewer.hub.front.views.weasis.bundle.repository.component;
 
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -47,8 +46,7 @@ public class PackageWeasisRepositoryActionContent extends HorizontalLayout {
 			if (weasisAssetModel.isAlreadyInstalled()) {
 				// Button Delete
 				Button buttonRemove = new Button();
-				buttonRemove.addThemeVariants(ButtonVariant.LUMO_ICON, ButtonVariant.LUMO_PRIMARY,
-						ButtonVariant.LUMO_ERROR);
+				buttonRemove.getElement().setAttribute("theme", "icon-button primary error");
 				buttonRemove.setIcon(new Icon(VaadinIcon.TRASH));
 				this.weasisRepositoryView.addActionButtonRemoveClickListener(buttonRemove, weasisAssetModel);
 				UIUtil.setTooltip(buttonRemove, TOOLTIP_REMOVE_VERSION);
@@ -57,8 +55,7 @@ public class PackageWeasisRepositoryActionContent extends HorizontalLayout {
 			else {
 				// Button download
 				Button buttonDownload = new Button();
-				buttonDownload.addThemeVariants(ButtonVariant.LUMO_ICON, ButtonVariant.LUMO_PRIMARY,
-						ButtonVariant.LUMO_TERTIARY);
+				buttonDownload.getElement().setAttribute("theme", "icon-button primary tertiary");
 				buttonDownload.setIcon(new Icon(VaadinIcon.DOWNLOAD));
 				this.weasisRepositoryView.addActionButtonImportClickListener(buttonDownload, weasisAssetModel);
 				UIUtil.setTooltip(buttonDownload, TOOLTIP_DOWNLOAD_VERSION);

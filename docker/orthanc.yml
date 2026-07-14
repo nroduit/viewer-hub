@@ -2,14 +2,21 @@ name: orthanc-local
 
 services:
   orthanc:
-    image: jodogne/orthanc-plugins:1.12.6
+    image: orthancteam/orthanc:25.6.2
     container_name: orthanc
     command: /run/secrets/  # Path to the configuration files (stored as secrets)
     ports:
-      - 4242:4242
-      - 8042:8042
+      - "4242:4242"
+      - "8042:8042"
     secrets:
       - orthanc.json
+    healthcheck:
+      # Orthanc has python3 but no curl; REST API is open (AuthenticationEnabled=false)
+      test: [ "CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8042/system')" ]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
 secrets:
   orthanc.json:
     file: orthanc/orthanc.json

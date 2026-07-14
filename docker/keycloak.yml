@@ -4,7 +4,7 @@ services:
 
   # Postgres SQL for Keycloak
   keycloak-db:
-    image: postgres:17-alpine
+    image: postgres:17.10-alpine
     container_name: keycloak_db
     volumes:
       - keycloak_db_data:/var/lib/postgresql/data
@@ -12,10 +12,15 @@ services:
       POSTGRES_DB: keycloak_db
       POSTGRES_USER: keycloak_db_user
       POSTGRES_PASSWORD: keycloak_db_password
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U keycloak_db_user -d keycloak_db" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   # Keycloak
   keycloak:
-    image: keycloak/keycloak:26.0
+    image: keycloak/keycloak:26.0.8
     container_name: keycloak
     command:
       - start
@@ -35,10 +40,18 @@ services:
     volumes:
       - ./keycloak/import.json:/opt/keycloak/data/import/viewer-hub-realm.json
     ports:
-      - 8085:8080
+      - "8085:8080"
     restart: always
     depends_on:
-      - keycloak-db
+      keycloak-db:
+        condition: service_healthy
+    healthcheck:
+      # Keycloak ships no curl/wget; probe the health port (9000) over bash's /dev/tcp
+      test: [ 'CMD', 'bash', '-c', 'exec 3<>/dev/tcp/localhost/9000; printf "GET /health/ready HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n" >&3; grep -q UP <&3' ]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 60s
 
 volumes:
   keycloak_db_data:

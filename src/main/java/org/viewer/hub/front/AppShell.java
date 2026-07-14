@@ -10,10 +10,21 @@
  */
 package org.viewer.hub.front;
 
+import com.vaadin.flow.component.dependency.CssImport;
+import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.page.AppShellConfigurator;
-import com.vaadin.flow.theme.Theme;
+import com.vaadin.flow.theme.aura.Aura;
 
-@Theme(value = "viewer-hub")
+/**
+ * Application shell configuration.
+ *
+ * <p>
+ * Vaadin 25 replaces the Lumo-based {@code @Theme} annotation with the Aura theme loaded via
+ * {@code @StyleSheet(Aura.STYLESHEET)}. The application's own styles (formerly pulled in through the
+ * {@code viewer-hub} theme folder) are now loaded explicitly with {@code @CssImport}.
+ */
+@StyleSheet(Aura.STYLESHEET)
+@CssImport("./themes/viewer-hub/styles.css")
 public class AppShell implements AppShellConfigurator {
 
 }

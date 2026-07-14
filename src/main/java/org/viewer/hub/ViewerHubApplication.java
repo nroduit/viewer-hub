@@ -14,7 +14,6 @@ package org.viewer.hub;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.viewer.hub.back.config.properties.*;
@@ -25,7 +24,6 @@ import org.viewer.hub.back.config.properties.*;
 		WeasisPackageDefaultConfigurationProperties.class, EnvironmentOverrideProperties.class,
 		WeasisConfigurationProperties.class, OhifConfigurationProperties.class, SlicerConfigurationProperties.class,
 		MicroDicomConfigurationProperties.class})
-@EnableCaching
 @EnableScheduling
 public class ViewerHubApplication {
 

@@ -14,8 +14,8 @@ package org.viewer.hub.back.repository;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.viewer.hub.back.config.properties.MicroDicomConfigurationProperties;
 import org.viewer.hub.back.config.properties.SlicerConfigurationProperties;
@@ -40,16 +40,16 @@ public class GroupRepositoryTest {
 	@Autowired
 	private TargetRepository targetRepository;
 
-	@MockBean
+	@MockitoBean
 	private ClientRegistrationRepository clientRegistrationRepository;
 
-	@MockBean
+	@MockitoBean
 	private WeasisConfigurationProperties weasisConfigurationProperties;
 
-	@MockBean
+	@MockitoBean
 	private SlicerConfigurationProperties slicerConfigurationProperties;
 
-	@MockBean
+	@MockitoBean
 	private MicroDicomConfigurationProperties microDicomConfigurationProperties;
 
 	/**

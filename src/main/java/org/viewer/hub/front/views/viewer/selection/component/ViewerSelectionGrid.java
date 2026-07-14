@@ -14,7 +14,6 @@ package org.viewer.hub.front.views.viewer.selection.component;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.MultiSelectComboBox;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.dnd.GridDropLocation;
@@ -236,8 +235,7 @@ public class ViewerSelectionGrid extends Grid<ViewerSelectionEntity> {
             }
 
             Button deleteButton = new Button();
-            deleteButton.addThemeVariants(ButtonVariant.LUMO_ICON, ButtonVariant.LUMO_PRIMARY,
-                    ButtonVariant.LUMO_ERROR);
+            deleteButton.getElement().setAttribute("theme", "icon-button primary error");
             deleteButton.setIcon(new Icon(VaadinIcon.TRASH));
             deleteButton.addClickListener((ComponentEventListener<ClickEvent<Button>>) event -> {
                 viewerSelectionLogic.deleteViewerSelection(model);

@@ -2,9 +2,14 @@ name: ohif-local
 
 services:
   ohif:
-    image: ohif/app:v3.10.1
+    image: ohif/app:v3.12.6
     container_name: ohif
     ports:
-      - 3000:80
+      - "3000:80"
     volumes:
       - ./ohif/app-config.js:/usr/share/nginx/html/app-config.js
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:80/" ]
+      interval: 15s
+      timeout: 5s
+      retries: 5

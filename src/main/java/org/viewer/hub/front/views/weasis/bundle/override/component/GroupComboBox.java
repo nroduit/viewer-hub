@@ -21,7 +21,7 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import lombok.Getter;
-import org.apache.commons.lang.StringUtils;
+import org.springframework.util.StringUtils;
 import org.viewer.hub.back.entity.TargetEntity;
 import org.viewer.hub.back.enums.TargetType;
 
@@ -110,12 +110,12 @@ public class GroupComboBox extends HorizontalLayout {
 			icon = new Icon(VaadinIcon.QUESTION);
 			icon.setColor("grey");
 		}
-		icon.getStyle().set("padding", "var(--lumo-space-wide-xs");
+		icon.getStyle().set("padding", "0.1875rem 0.375rem");
 		return icon;
 	}
 
 	public void setLabel(String label) {
-		if (StringUtils.isNotBlank(label)) {
+		if (StringUtils.hasText(label)) {
 			comboBox.setLabel(label);
 			iconButton.getStyle().set("margin-top", "12%");
 			iconButton.getStyle().set("margin-right", "-3%");
@@ -123,7 +123,7 @@ public class GroupComboBox extends HorizontalLayout {
 	}
 
 	public void setPlaceHolder(String placeHolder) {
-		if (StringUtils.isNotBlank(placeHolder)) {
+		if (StringUtils.hasText(placeHolder)) {
 			comboBox.setPlaceholder(placeHolder);
 		}
 	}

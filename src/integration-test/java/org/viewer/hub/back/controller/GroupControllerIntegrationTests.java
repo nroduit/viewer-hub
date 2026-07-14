@@ -15,8 +15,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -56,16 +56,16 @@ class GroupControllerIntegrationTests {
 	// @Autowired
 	// private WebTestClient webTestClient;
 
-	@MockBean
+	@MockitoBean
 	private TargetService targetService;
 
-	@MockBean
+	@MockitoBean
 	private GroupService groupService;
 
-	@MockBean
+	@MockitoBean
 	private S3ClientConfigurationProperties s3ClientConfigurationProperties;
 
-	@MockBean
+	@MockitoBean
 	ClientRegistrationRepository clientRegistrationRepository;
 
 	@BeforeEach

@@ -4,19 +4,30 @@ services:
 
   eureka:
 #    image: springcloud/eureka:latest
-    image: taskbeez/eureka-server:master
+    # Tag ':master' is mutable, so it is pinned to an immutable digest
+    image: taskbeez/eureka-server:master@sha256:10c3505cbf5ae456cb31381fceadf3c08898e5c4cfeb3f81e5c9e86c07558dca
+    platform: linux/amd64 # No arm64 image published; run under emulation on Apple Silicon
     container_name: technical-stack_eureka
     ports:
       - "8761:8761"
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8761/" ]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
   config-server:
     #    image:  springcloud/configserver:latest
-    image: hyness/spring-cloud-config-server:4.1
+    image: hyness/spring-cloud-config-server:4.1@sha256:7ff715e15708c77b8d887be390e8db5bdfda32bd405f913e8f64cad2e7aeebf9
+    platform: linux/amd64 # No arm64 image published; run under emulation on Apple Silicon
+    # No healthcheck: distroless image, ships no shell or HTTP client to probe with
     container_name: technical-stack_config-server
     environment:
       SPRING_PROFILES_ACTIVE: native
     depends_on:
-      - eureka
+      eureka:
+        condition: service_healthy
     volumes:
       - ./config-server:/config
     ports:

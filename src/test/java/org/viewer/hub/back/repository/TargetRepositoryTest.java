@@ -14,8 +14,8 @@ package org.viewer.hub.back.repository;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -40,16 +40,16 @@ class TargetRepositoryTest {
 	@Autowired
 	private TargetRepository repository;
 
-	@MockBean
+	@MockitoBean
 	private ClientRegistrationRepository clientRegistrationRepository;
 
-	@MockBean
+	@MockitoBean
 	private WeasisConfigurationProperties weasisConfigurationProperties;
 
-	@MockBean
+	@MockitoBean
 	private SlicerConfigurationProperties slicerConfigurationProperties;
 
-	@MockBean
+	@MockitoBean
 	private MicroDicomConfigurationProperties microDicomConfigurationProperties;
 
 	/**

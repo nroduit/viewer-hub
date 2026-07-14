@@ -1,0 +1,14 @@
+**/.git
+**/.gitignore
+**/.dockerignore
+**/Dockerfile
+**/README.md
+**/.DS_Store
+**/docker
+**/docs
+node_modules/
+.idea/
+.claude/
+# keep target out of context except the prebuilt jar used by src/main/docker/Dockerfile
+target/*
+!target/viewer-hub-*.jar
