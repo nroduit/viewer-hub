@@ -232,8 +232,12 @@ class PackageServiceImplTest {
 				"resources/packages/weasis/mapping-minimal-version.json");
 		Mockito.when(this.s3Service.retrieveS3KeysFromPrefix(any()))
 			.thenReturn(Set.of("resources/packages/weasis/package/4.1.0-QUALIFIER/test"));
+		// Fresh stream per call: the refresh now reads the <version>/current build pointer in
+		// addition to the mapping-minimal-version.json, so a single (soon-closed) stream would be
+		// consumed twice.
 		Mockito.when(this.s3Service.retrieveS3Object(any()))
-			.thenReturn(new FileInputStream(ResourceUtils.getFile("classpath:weasis/mapping-minimal-version.json")));
+			.thenAnswer(invocation -> new FileInputStream(
+					ResourceUtils.getFile("classpath:weasis/mapping-minimal-version.json")));
 		Mockito.when(this.overrideConfigService.existOverrideConfigWithVersionConfigTarget(any(), any(), any()))
 			.thenReturn(true);
 

@@ -1,0 +1,46 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<!--
+  ~  Copyright (c) 2022-2026 Weasis Team and other contributors.
+  ~
+  ~  This program and the accompanying materials are made available under the terms of the Eclipse
+  ~  Public License 2.0 which is available at https://www.eclipse.org/legal/epl-2.0, or the Apache
+  ~  License, Version 2.0 which is available at https://www.apache.org/licenses/LICENSE-2.0.
+  ~
+  ~  SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
+  ~
+  -->
+
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.0.xsd">
+
+    <!-- Build stamp of the immutable S3 sub-directory that holds the files of a given package
+         version. Each upload writes to <version>/<build_id>/... and pins <build_id> in the launch
+         codebase URL, so a re-uploaded (e.g. SNAPSHOT) version never overwrites files that a client
+         is downloading. Nullable: legacy versions uploaded before this change keep their files at
+         the top level <version>/... and have a null build_id. -->
+    <changeSet author="viewer-hub" id="1.3-1">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="package_version" columnName="build_id"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="package_version">
+            <column name="build_id" type="VARCHAR(255)"/>
+        </addColumn>
+    </changeSet>
+
+    <!-- Build stamp of the immutable S3 sub-directory that holds the files of a given i18n version.
+         Same semantics as package_version.build_id. -->
+    <changeSet author="viewer-hub" id="1.3-2">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="i18n" columnName="build_id"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="i18n">
+            <column name="build_id" type="VARCHAR(255)"/>
+        </addColumn>
+    </changeSet>
+
+</databaseChangeLog>

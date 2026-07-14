@@ -32,25 +32,24 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-        <springboot.version>3.2.7</springboot.version>
-        <spring-security-oauth2.version>2.5.2.RELEASE</spring-security-oauth2.version>
-        <springcloud.version>4.1.0</springcloud.version>
-        <spring-security-test.version>6.2.2</spring-security-test.version>
-        <liquibase.version>4.23.0</liquibase.version>
-        <postgresql.version>42.7.2</postgresql.version>
-        <ojdbc.version>23.3.0.23.09</ojdbc.version>
-        <jackson.version>2.16.1</jackson.version>
-        <h2.version>2.2.224</h2.version>
-        <vaadin.version>24.6.5</vaadin.version>
-        <weasis-dicom-tools.version>5.32.0</weasis-dicom-tools.version>
-        <maven.artifact.version>3.8.6</maven.artifact.version>
-        <node.version>v23.6.0</node.version>
-        <awssdk.version>2.27.0</awssdk.version>
-        <io.awspring.cloud.version>3.2.1</io.awspring.cloud.version>
-        <lombok.version>1.18.30</lombok.version>
-        <maven-compiler-plugin.version>3.12.1</maven-compiler-plugin.version>
-        <spring-boot-maven-plugin.version>3.2.3</spring-boot-maven-plugin.version>
-        <jacoco-maven-plugin.version>0.8.11</jacoco-maven-plugin.version>
+        <!-- BOM versions (manage the rest transitively) -->
+        <springboot.version>4.1.0</springboot.version>
+        <springcloud.version>2025.1.2</springcloud.version>
+        <io.awspring.cloud.version>4.0.2</io.awspring.cloud.version>
+        <vaadin.version>25.2.1</vaadin.version>
+
+        <liquibase.version>4.33.0</liquibase.version>
+        <postgresql.version>42.7.7</postgresql.version>
+        <ojdbc.version>23.9.0.25.07</ojdbc.version>
+        <h2.version>2.3.232</h2.version>
+        <weasis-dicom-tools.version>5.34.3.1</weasis-dicom-tools.version>
+        <maven.artifact.version>3.9.11</maven.artifact.version>
+        <vaadin.node.version>v24.11.0</vaadin.node.version>
+        <awssdk.version>2.35.6</awssdk.version>
+        <lombok.version>1.18.42</lombok.version>
+        <maven-compiler-plugin.version>3.15.0</maven-compiler-plugin.version>
+        <spring-boot-maven-plugin.version>${springboot.version}</spring-boot-maven-plugin.version>
+        <jacoco-maven-plugin.version>0.8.15</jacoco-maven-plugin.version>
         <jakarta-json.version>2.0.1</jakarta-json.version>
         <springdoc-openapi-starter-webmvc-ui.version>2.8.13</springdoc-openapi-starter-webmvc-ui.version>
 

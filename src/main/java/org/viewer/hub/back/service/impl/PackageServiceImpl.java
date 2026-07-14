@@ -11,9 +11,11 @@
 
 package org.viewer.hub.back.service.impl;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.PropertyNamingStrategies;
+import tools.jackson.databind.json.JsonMapper;
 import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotNull;
 import lombok.extern.slf4j.Slf4j;
@@ -46,6 +48,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -146,22 +149,49 @@ public class PackageServiceImpl implements PackageService {
 	public void handlePackageVersionToUpload(InputStream fileData, String versionToUpload) {
 		try (fileData) {
 			if (versionToUpload != null && !versionToUpload.isBlank()) {
-				// Determine the output directory key where the zip file will be uploaded
-				Path outDir = Paths.get(this.viewerHubResourcesPackagesWeasisPackagePath).resolve(versionToUpload);
+				// Each upload lands in its own immutable build-stamped sub-directory
+				// (<version>/<buildId>/...) so a re-uploaded (e.g. SNAPSHOT) version never
+				// overwrites files a client may currently be downloading.
+				String buildId = UUID.randomUUID().toString();
+				Path outDir = Paths.get(this.viewerHubResourcesPackagesWeasisPackagePath)
+					.resolve(versionToUpload)
+					.resolve(buildId);
 
-				// Upload version package in S3,zip resource folder, check if the
-				// mapping-minimal-version.json file should be updated with a more
-				// recent version and refresh cache and db
+				// Upload version package in S3, then - strictly after every file is durably
+				// written - zip the resources folder, replace the mapping-minimal-version.json
+				// if a more recent one is provided, flip the <version>/current pointer to this
+				// build, and only then refresh the cache/db and the grid. Chaining the stages
+				// (instead of racing two independent allOf callbacks on the same futures list)
+				// guarantees the version never becomes visible/launchable until all of its files
+				// - including the generated resources.zip - are present in S3, so a client can
+				// never fetch a half-written package folder.
 
-				// Upload version package in S3
+				// 1. Upload version package files in S3
 				List<CompletableFuture<PutObjectResponse>> completableFutures = this.uploadVersionInS3(fileData,
 						outDir);
 
-				// Manage zip of the resources folder when all future are terminated
-				this.handleZipResourceFolder(fileData, completableFutures, outDir);
-
-				// When all uploads have been done
-				this.handleReplacementOfMappingMinimalVersionAndRefresh(completableFutures, outDir);
+				CompletableFuture.allOf(completableFutures.toArray(new CompletableFuture[0]))
+					// 2. Zip the resources folder at the root of the package folder
+					.thenCompose(unused -> {
+						resetInputStream(fileData);
+						return this.zipResourcesFolderToRootPackageFolder(fileData, outDir);
+					})
+					// 3. Replace mapping-minimal-version.json if a more recent one was imported
+					.thenCompose(unused -> this.compareReplaceMappingMinimalVersion(outDir))
+					// 4. Atomic publish: flip the <version>/current pointer to this build id
+					.thenCompose(unused -> this.writeCurrentBuildPointer(versionToUpload, buildId))
+					// 5. Everything is durably in S3: refresh cache/db and the front grid
+					.whenComplete((result, throwable) -> {
+						if (throwable == null) {
+							this.refreshAvailablePackageVersion();
+							this.applicationEventPublisher.publishEvent(new RefreshPackageGridEvent());
+						}
+						else {
+							throw new TechnicalException(
+									"Issue when uploading package version in S3, at least one future didn't end well:%s"
+										.formatted(throwable.getMessage()));
+						}
+					});
 			}
 		}
 		catch (IOException e) {
@@ -427,60 +457,6 @@ public class PackageServiceImpl implements PackageService {
 	 * @param completableFutures future to wait for
 	 * @param outDir Output path
 	 */
-	private void handleReplacementOfMappingMinimalVersionAndRefresh(
-			List<CompletableFuture<PutObjectResponse>> completableFutures, Path outDir) {
-		CompletableFuture.allOf(completableFutures.toArray(new CompletableFuture[completableFutures.size()]))
-			.whenComplete((result, throwable) -> {
-				if (throwable == null) {
-					// Check if mapping-minimal-version.json should be overridden:
-					// if yes replace it with the new version at the root level of
-					// the package to import
-					this.compareReplaceMappingMinimalVersion(outDir).whenComplete((resultMin, comparaisonThrowable) -> {
-						// If no issue when processing comparison
-						if (comparaisonThrowable == null) {
-							// Update db and cache based on new files added in
-							// package
-							this.refreshAvailablePackageVersion();
-							// Send event to the front in order to refresh the
-							// grid
-							this.applicationEventPublisher.publishEvent(new RefreshPackageGridEvent());
-						}
-					});
-				}
-				else {
-					throw new TechnicalException(
-							"Issue when uploading files in S3, at least one future didn't end well:%s"
-								.formatted(throwable.getMessage()));
-				}
-			});
-	}
-
-	/**
-	 * Manage zip of the resources folder when all future are terminated
-	 * @param fileData InputStream
-	 * @param completableFutures Futures to wait for
-	 * @param outDir Output path
-	 */
-	private void handleZipResourceFolder(InputStream fileData,
-			List<CompletableFuture<PutObjectResponse>> completableFutures, Path outDir) {
-		CompletableFuture.allOf(completableFutures.toArray(new CompletableFuture[completableFutures.size()]))
-			.whenComplete((result, throwable) -> {
-				if (throwable == null) {
-					// Reset the stream
-					resetInputStream(fileData);
-
-					// Zip resources folder and set the zipped file at the root
-					// level of the package folder
-					completableFutures.add(this.zipResourcesFolderToRootPackageFolder(fileData, outDir));
-				}
-				else {
-					throw new TechnicalException(
-							"Issue when uploading files in S3, at least one future didn't end well:%s"
-								.formatted(throwable.getMessage()));
-				}
-			});
-	}
-
 	/**
 	 * Retrieve in S3 available Weasis package version
 	 * @return Set of versions available
@@ -924,43 +900,49 @@ public class PackageServiceImpl implements PackageService {
 		// Retrieve all package versions in db
 		List<PackageVersionEntity> existingVersionsInDb = this.packageVersionRepository.findAll();
 
-		// Format the versions in xx.xx.xx-QUALIFIER
-		List<String> formattedExistingVersionsInDb = existingVersionsInDb.stream()
-			.map(e -> e.getQualifier() != null ? e.getVersionNumber() + e.getQualifier() : e.getVersionNumber())
-			.toList();
+		List<PackageVersionEntity> entitiesToSave = new ArrayList<>();
+		for (String version : availableWeasisPackageVersions) {
+			if (version == null) {
+				continue;
+			}
+			// Split version folder name into version number / qualifier (qualifier keeps its
+			// leading hyphen, ex: 4.9.0-QUALIFIER -> 4.9.0 + "-QUALIFIER")
+			String versionNumber = version.contains(StringUtil.HYPHEN)
+					? version.substring(0, version.indexOf(StringUtil.HYPHEN)) : version;
+			String qualifier = version.contains(StringUtil.HYPHEN)
+					? version.substring(version.indexOf(StringUtil.HYPHEN)) : null;
 
-		// Retrieve the versions available in the weasis/package but not set in the db
-		List<String> versionsNotExistingInDb = new ArrayList<>(availableWeasisPackageVersions.stream()
-			.filter(Objects::nonNull)
-			.filter(av -> !formattedExistingVersionsInDb.contains(av))
-			.toList());
+			// Active build id for this version (null for a legacy version without pointer)
+			String buildId = this.readCurrentBuildPointer(version);
 
-		// Case no hyphen
-		Set<PackageVersionEntity> versionsToAddInDb = versionsNotExistingInDb.stream()
-			.filter(v -> !v.contains(StringUtil.HYPHEN))
-			.map(v -> {
+			PackageVersionEntity existing = existingVersionsInDb.stream()
+				.filter(e -> Objects.equals(e.getVersionNumber(), versionNumber)
+						&& Objects.equals(e.getQualifier(), qualifier))
+				.findFirst()
+				.orElse(null);
+
+			if (existing == null) {
+				// New version: create the catalog row
 				PackageVersionEntity packageVersionEntity = new PackageVersionEntity();
-				packageVersionEntity.setVersionNumber(v);
-				packageVersionEntity.setI18nVersion(this.retrieveI18nFromVersionNumber(v, minimalReleaseVersions));
-				packageVersionEntity.setDescription("Version %s".formatted(v));
-				return packageVersionEntity;
-			})
-			.collect(Collectors.toSet());
+				packageVersionEntity.setVersionNumber(versionNumber);
+				packageVersionEntity.setQualifier(qualifier);
+				packageVersionEntity
+					.setI18nVersion(this.retrieveI18nFromVersionNumber(versionNumber, minimalReleaseVersions));
+				packageVersionEntity.setDescription("Version %s".formatted(version));
+				packageVersionEntity.setBuildId(buildId);
+				entitiesToSave.add(packageVersionEntity);
+			}
+			else if (buildId != null && !Objects.equals(existing.getBuildId(), buildId)) {
+				// Existing version re-uploaded with a new build: update the pinned build id
+				existing.setBuildId(buildId);
+				entitiesToSave.add(existing);
+			}
+		}
 
-		// Case hyphen
-		versionsToAddInDb.addAll(versionsNotExistingInDb.stream().filter(v -> v.contains(StringUtil.HYPHEN)).map(v -> {
-			PackageVersionEntity packageVersionEntity = new PackageVersionEntity();
-			String versionNumber = v.substring(0, v.indexOf(StringUtil.HYPHEN));
-			packageVersionEntity.setVersionNumber(versionNumber);
-			packageVersionEntity.setQualifier(v.substring(v.indexOf(StringUtil.HYPHEN)));
-			packageVersionEntity
-				.setI18nVersion(this.retrieveI18nFromVersionNumber(versionNumber, minimalReleaseVersions));
-			packageVersionEntity.setDescription("Version %s".formatted(v));
-			return packageVersionEntity;
-		}).collect(Collectors.toSet()));
-
-		// Save in the db the missing versions
-		this.packageVersionRepository.saveAll(versionsToAddInDb);
+		// Save the created/updated versions
+		if (!entitiesToSave.isEmpty()) {
+			this.packageVersionRepository.saveAll(entitiesToSave);
+		}
 	}
 
 	/**
@@ -1016,12 +998,15 @@ public class PackageServiceImpl implements PackageService {
 
 			// Needed to be effectively final
 			final OverrideConfigEntity[] defaultOverrideConfig = { null };
-			// Config folder key for this version
-			String configFolderKey = PathUrlUtil.pathWithS3Separator(
-					Paths
-						.get(this.viewerHubResourcesPackagesWeasisPackagePath, availableVersion,
-								PropertiesFileName.PATH_CONF_FOLDER)
-						.toString());
+			// Config folder key for this version. Config files live inside the immutable
+			// build-stamped sub-directory (<version>/<buildId>/conf), except for legacy versions
+			// (null build id) whose files are still at the top level (<version>/conf).
+			String buildId = packageVersionEntity != null ? packageVersionEntity.getBuildId() : null;
+			Path versionDir = buildId == null || buildId.isBlank()
+					? Paths.get(this.viewerHubResourcesPackagesWeasisPackagePath, availableVersion)
+					: Paths.get(this.viewerHubResourcesPackagesWeasisPackagePath, availableVersion, buildId);
+			String configFolderKey = PathUrlUtil
+				.pathWithS3Separator(versionDir.resolve(PropertiesFileName.PATH_CONF_FOLDER).toString());
 
 			// Default properties file key for this version
 			String defaultConfigPropertiesFileKey = PathUrlUtil.pathWithS3Separator(
@@ -1260,8 +1245,10 @@ public class PackageServiceImpl implements PackageService {
 	 */
 	List<MinimalReleaseVersion> retrieveS3MinimalReleaseVersions(String key) {
 		try (InputStream responseInputStream = this.s3Service.retrieveS3Object(key)) {
-			ObjectMapper objectMapper = new ObjectMapper()
-				.setPropertyNamingStrategy(PropertyNamingStrategies.KEBAB_CASE);
+			ObjectMapper objectMapper = JsonMapper.builder()
+				.configureForJackson2()
+				.propertyNamingStrategy(PropertyNamingStrategies.KEBAB_CASE)
+				.build();
 
 			// Retrieve the minimal release versions
 			List<MinimalReleaseVersion> minimalReleaseVersions = objectMapper.readValue(responseInputStream,
@@ -1273,7 +1260,7 @@ public class PackageServiceImpl implements PackageService {
 
 			return minimalReleaseVersions;
 		}
-		catch (IOException e) {
+		catch (IOException | JacksonException e) {
 			throw new TechnicalException("Issue when trying to retrieve minimal release versions from file %s: %s"
 				.formatted(key, e.getMessage()));
 		}
@@ -1541,6 +1528,43 @@ public class PackageServiceImpl implements PackageService {
 		String versionNumber = version.contains(StringUtil.HYPHEN)
 				? version.substring(0, version.indexOf(StringUtil.HYPHEN)) : version;
 		return this.packageVersionRepository.findByVersionNumberAndQualifier(versionNumber, qualifier);
+	}
+
+	/**
+	 * Write the &lt;version&gt;/current pointer object with the given build id (the atomic publish
+	 * marker for a package version).
+	 * @param version Version folder name
+	 * @param buildId Build id to publish
+	 * @return CompletableFuture of the pointer upload
+	 */
+	private CompletableFuture<PutObjectResponse> writeCurrentBuildPointer(String version, String buildId) {
+		String pointerKey = "%s/%s/%s".formatted(this.viewerHubResourcesPackagesWeasisPackagePath, version,
+				PackageUtil.CURRENT_BUILD_POINTER_FILE);
+		return this.s3Service.uploadObjectInS3(new ByteArrayInputStream(buildId.getBytes(StandardCharsets.UTF_8)),
+				pointerKey);
+	}
+
+	/**
+	 * Read the active build id from the &lt;version&gt;/current pointer object.
+	 * @param version Version folder name
+	 * @return the active build id, or null when no pointer exists (legacy version)
+	 */
+	private String readCurrentBuildPointer(String version) {
+		String pointerKey = "%s/%s/%s".formatted(this.viewerHubResourcesPackagesWeasisPackagePath, version,
+				PackageUtil.CURRENT_BUILD_POINTER_FILE);
+		if (!this.s3Service.doesS3KeyExists(pointerKey)) {
+			return null;
+		}
+		try (InputStream is = this.s3Service.retrieveS3Object(pointerKey)) {
+			if (is == null) {
+				return null;
+			}
+			String buildId = new String(is.readAllBytes(), StandardCharsets.UTF_8).trim();
+			return buildId.isBlank() ? null : buildId;
+		}
+		catch (IOException e) {
+			throw new TechnicalException("Issue when reading package build pointer:%s".formatted(e.getMessage()));
+		}
 	}
 
 }

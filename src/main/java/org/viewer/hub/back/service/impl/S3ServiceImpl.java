@@ -22,13 +22,17 @@ import org.viewer.hub.back.service.S3Service;
 import org.viewer.hub.back.util.PathUrlUtil;
 import software.amazon.awssdk.services.s3.model.DeleteObjectsResponse;
 import software.amazon.awssdk.services.s3.model.PutObjectResponse;
+import software.amazon.awssdk.services.s3.model.S3Object;
 import software.amazon.awssdk.transfer.s3.model.CompletedCopy;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.time.Instant;
 import java.util.Collections;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -62,6 +66,16 @@ public class S3ServiceImpl implements S3Service {
 			return this.downloadResource.retrieveS3KeysFromPrefix(PathUrlUtil.pathWithS3Separator(prefix));
 		}
 		return Collections.emptySet();
+	}
+
+	@Override
+	public Map<String, Instant> retrieveS3ObjectsLastModifiedFromPrefix(String prefix) {
+		if (StringUtils.isNotBlank(prefix)) {
+			return this.downloadResource.retrieveS3ObjectsFromPrefix(PathUrlUtil.pathWithS3Separator(prefix))
+				.stream()
+				.collect(Collectors.toMap(S3Object::key, S3Object::lastModified, (existing, replacement) -> existing));
+		}
+		return Collections.emptyMap();
 	}
 
 	@Override

@@ -35,4 +35,6 @@ public class PackageUtil {
 
 	public static final String FREEMARKER_PROPERTIES_I18N_VERSION = "i18nVersion";
 
+	public static final String CURRENT_BUILD_POINTER_FILE = "current";
+
 }

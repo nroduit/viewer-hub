@@ -43,6 +43,8 @@ public class PackageVersionEntity extends AuditEntity implements Serializable {
 
 	private String description;
 
+	private String buildId;
+
 	@Id
 	@Column(name = "id", nullable = false)
 	@GeneratedValue(strategy = GenerationType.AUTO)
@@ -87,6 +89,14 @@ public class PackageVersionEntity extends AuditEntity implements Serializable {
 		this.description = description;
 	}
 
+	public String getBuildId() {
+		return this.buildId;
+	}
+
+	public void setBuildId(String buildId) {
+		this.buildId = buildId;
+	}
+
 	@Override
 	public boolean equals(Object o) {
 		if (this == o)
@@ -108,7 +118,7 @@ public class PackageVersionEntity extends AuditEntity implements Serializable {
 	public String toString() {
 		return "PackageVersionEntity{" + "id=" + this.id + ", versionNumber='" + this.versionNumber + '\''
 				+ ", qualifier='" + this.qualifier + '\'' + ", i18nVersion='" + this.i18nVersion + '\''
-				+ ", description='" + this.description + '\'' + '}';
+				+ ", description='" + this.description + '\'' + ", buildId='" + this.buildId + '\'' + '}';
 	}
 
 }

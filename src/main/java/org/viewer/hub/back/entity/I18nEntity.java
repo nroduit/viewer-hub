@@ -51,6 +51,8 @@ public class I18nEntity extends AuditEntity implements Serializable {
 
 	private String description;
 
+	private String buildId;
+
 	@Override
 	public boolean equals(Object o) {
 		if (this == o)

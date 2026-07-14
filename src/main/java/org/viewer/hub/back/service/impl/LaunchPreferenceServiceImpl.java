@@ -44,6 +44,7 @@ import org.viewer.hub.back.repository.LaunchRepository;
 import org.viewer.hub.back.repository.TargetRepository;
 import org.viewer.hub.back.repository.specification.LaunchByTargetConfigPreferredSpecification;
 import org.viewer.hub.back.service.GroupService;
+import org.viewer.hub.back.service.I18nService;
 import org.viewer.hub.back.service.LaunchPreferenceService;
 import org.viewer.hub.back.service.OverrideConfigService;
 import org.viewer.hub.back.service.PackageService;
@@ -89,6 +90,8 @@ public class LaunchPreferenceServiceImpl implements LaunchPreferenceService {
 
 	private final PackageService packageService;
 
+	private final I18nService i18nService;
+
 	/**
 	 * Autowired constructor with parameters
 	 * @param launchRepository Launch Repository
@@ -101,7 +104,7 @@ public class LaunchPreferenceServiceImpl implements LaunchPreferenceService {
 			final LaunchConfigRepository launchConfigRepository,
 			final LaunchPreferredRepository launchPreferredRepository, final TargetRepository targetRepository,
 			final GroupService groupService, final PackageService packageService,
-			final OverrideConfigService overrideConfigService) {
+			final OverrideConfigService overrideConfigService, final I18nService i18nService) {
 		this.launchRepository = launchRepository;
 		this.launchConfigRepository = launchConfigRepository;
 		this.launchPreferredRepository = launchPreferredRepository;
@@ -109,6 +112,7 @@ public class LaunchPreferenceServiceImpl implements LaunchPreferenceService {
 		this.groupService = groupService;
 		this.packageService = packageService;
 		this.overrideConfigService = overrideConfigService;
+		this.i18nService = i18nService;
 	}
 
 	@Override
@@ -200,8 +204,18 @@ public class LaunchPreferenceServiceImpl implements LaunchPreferenceService {
 		launchProperties.add(PackageUtil.PROPERTIES_PACKAGE_VERSION_NAME,
 				packageVersion.getVersionNumber() + packageVersion.getQualifier());
 
-		// I18n
-		launchProperties.add(PackageUtil.FREEMARKER_PROPERTIES_I18N_VERSION, packageVersion.getI18nVersion());
+		// I18n. When the i18n version is build-stamped, pin the weasis.i18n URL to the immutable
+		// <i18nVersion>/<buildId> sub-directory so the session downloads a single coherent
+		// snapshot; fall back to the legacy top-level URL (no build stamp) otherwise.
+		String i18nVersion = packageVersion.getI18nVersion();
+		String i18nSegment = i18nVersion;
+		if (i18nVersion != null && !i18nVersion.isBlank()) {
+			String i18nBuildId = this.i18nService.retrieveI18nBuildId(i18nVersion);
+			if (i18nBuildId != null && !i18nBuildId.isBlank()) {
+				i18nSegment = i18nVersion + "/" + i18nBuildId;
+			}
+		}
+		launchProperties.add(PackageUtil.FREEMARKER_PROPERTIES_I18N_VERSION, i18nSegment);
 
 		if (launchConfig == null) {
 			this.fillFreeMarkerPropertiesDefaultLaunchConfig(launchProperties);
@@ -374,11 +388,16 @@ public class LaunchPreferenceServiceImpl implements LaunchPreferenceService {
 					"Version not installed on server", WeasisLevelMessageType.WARN)));
 		}
 
-		// Set in the variables of freemarker
-		launchPropertiesMap
-			.add(PackageUtil.FREEMARKER_PACKAGE_VERSION, packageVersionEntityToReturn.getQualifier() == null
-					? packageVersionEntityToReturn.getVersionNumber()
-					: packageVersionEntityToReturn.getVersionNumber() + packageVersionEntityToReturn.getQualifier());
+		// Set in the variables of freemarker. When the version is build-stamped, pin the launch
+		// codebase URL to the immutable <version>/<buildId> sub-directory so the whole session
+		// downloads a single coherent snapshot even if the version is re-uploaded meanwhile.
+		String packageVersionSegment = packageVersionEntityToReturn.getQualifier() == null
+				? packageVersionEntityToReturn.getVersionNumber()
+				: packageVersionEntityToReturn.getVersionNumber() + packageVersionEntityToReturn.getQualifier();
+		if (packageVersionEntityToReturn.getBuildId() != null && !packageVersionEntityToReturn.getBuildId().isBlank()) {
+			packageVersionSegment = packageVersionSegment + "/" + packageVersionEntityToReturn.getBuildId();
+		}
+		launchPropertiesMap.add(PackageUtil.FREEMARKER_PACKAGE_VERSION, packageVersionSegment);
 
 		return packageVersionEntityToReturn;
 	}
