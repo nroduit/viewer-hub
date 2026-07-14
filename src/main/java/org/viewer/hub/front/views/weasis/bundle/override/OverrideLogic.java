@@ -31,9 +31,9 @@ import org.viewer.hub.back.model.MessageType;
 import org.viewer.hub.back.service.OverrideConfigService;
 import org.viewer.hub.back.service.PackageService;
 import org.viewer.hub.front.views.weasis.bundle.override.component.OverrideConfigFilter;
-import org.viewer.hub.front.views.weasis.bundle.override.component.PackageVersionFileUpload;
 import org.viewer.hub.front.views.weasis.bundle.override.component.RefreshPackageGridEvent;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Set;
@@ -153,8 +153,8 @@ public class OverrideLogic {
 	/**
 	 * Handle upload of package version
 	 */
-	public void handleUploadWeasisNative(PackageVersionFileUpload packageVersionFileUpload) {
-		try (InputStream fileDataInputStream = packageVersionFileUpload.getMemoryBuffer().getInputStream()) {
+	public void handleUploadWeasisNative(byte[] fileData) {
+		try (InputStream fileDataInputStream = new ByteArrayInputStream(fileData)) {
 			if (this.packageService.isImportCoherent(fileDataInputStream)) {
 
 				// Determine the version to upload, if incorrect format return null

@@ -41,6 +41,7 @@ public class I18nDataProvider<T> extends FilterablePageableDataProvider<T, I18nF
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	protected Page<T> fetchFromBackEnd(Query<T, I18nFilter> query, Pageable pageable) {
 		I18nFilter filter = query.getFilter().orElse(new I18nFilter());
 		return (Page<T>) this.i18nLogic.retrieveI18nVersions(filter, pageable);

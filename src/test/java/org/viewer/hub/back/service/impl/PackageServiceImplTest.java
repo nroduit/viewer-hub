@@ -11,8 +11,9 @@
 
 package org.viewer.hub.back.service.impl;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.PropertyNamingStrategies;
+import tools.jackson.databind.json.JsonMapper;
 import jakarta.validation.constraints.NotNull;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -454,8 +455,9 @@ class PackageServiceImplTest {
 			// === Version Compatibility ===
 
 			// Serialize the object into JSON string
-			String jsonContentMinimalReleaseVersions = objectMapper
-				.setPropertyNamingStrategy(PropertyNamingStrategies.KEBAB_CASE)
+			String jsonContentMinimalReleaseVersions = JsonMapper.builder()
+				.propertyNamingStrategy(PropertyNamingStrategies.KEBAB_CASE)
+				.build()
 				.writeValueAsString(minimalReleaseVersions);
 
 			// Create a zip entry for the JSON file
@@ -475,9 +477,10 @@ class PackageServiceImplTest {
 
 	private InputStream buildInputStreamPreviousVersionsCompatibility(
 			List<MinimalReleaseVersion> minimalReleaseVersions) throws IOException {
-		ObjectMapper objectMapper = new ObjectMapper();
-		String jsonString = objectMapper.setPropertyNamingStrategy(PropertyNamingStrategies.KEBAB_CASE)
-			.writeValueAsString(minimalReleaseVersions);
+		ObjectMapper objectMapper = JsonMapper.builder()
+			.propertyNamingStrategy(PropertyNamingStrategies.KEBAB_CASE)
+			.build();
+		String jsonString = objectMapper.writeValueAsString(minimalReleaseVersions);
 
 		// Create an InputStream from the JSON string
 		return new ByteArrayInputStream(jsonString.getBytes());

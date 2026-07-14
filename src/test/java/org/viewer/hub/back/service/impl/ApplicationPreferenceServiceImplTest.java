@@ -36,6 +36,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(MockitoExtension.class)
+@SuppressWarnings("unchecked") // raw Specification matchers in Mockito stubs
 class ApplicationPreferenceServiceImplTest {
 
 	private final PreferenceRepository preferenceRepositoryMock = Mockito.mock(PreferenceRepository.class);

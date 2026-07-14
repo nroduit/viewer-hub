@@ -50,6 +50,7 @@ public class WeasisManifestConnectorProperty {
 	private Set<@Pattern(
 			regexp = "0x[0-9A-F][0-9A-F][0-9A-F][0-9A-F][0-9A-F][0-9A-F][0-9A-F][0-9A-F]") String> overrideDicomTags;
 
+	@Builder.Default
 	@Schema(description = "Http tags")
 	private Map<String, String> httpTags = new HashMap<>();
 

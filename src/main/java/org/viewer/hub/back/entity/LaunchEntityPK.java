@@ -11,7 +11,7 @@
 
 package org.viewer.hub.back.entity;
 
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import tools.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import jakarta.persistence.Embeddable;
 
 import java.io.Serial;

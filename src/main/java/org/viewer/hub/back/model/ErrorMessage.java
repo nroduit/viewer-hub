@@ -11,11 +11,11 @@
 
 package org.viewer.hub.back.model;
 
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import com.fasterxml.jackson.annotation.JsonRootName;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.Objects;
 
-@JacksonXmlRootElement(localName = "Error")
+@JsonRootName("Error")
 public class ErrorMessage {
 
 	@Schema(description = "Error message", example = "Wrong parameters")

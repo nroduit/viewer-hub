@@ -1,0 +1,12 @@
+/*
+ * Styling for vaadin-notification-card.
+ *
+ * Applied as global light-DOM CSS through the component's exposed ::part() shadow parts
+ */
+vaadin-notification-card::part(overlay) {
+	padding: 0px;
+}
+
+vaadin-notification-card::part(content) {
+	display: block;
+}

@@ -11,6 +11,7 @@
 
 package org.viewer.hub.front.views.viewer.selection.component;
 
+import com.vaadin.flow.component.ModalityMode;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.MultiSelectComboBox;
 import com.vaadin.flow.component.dialog.Dialog;
@@ -68,7 +69,7 @@ public class ViewerSelectionDialog extends Dialog {
 		this.setHeight("auto");
 		this.setCloseOnEsc(true);
 		this.setCloseOnOutsideClick(true);
-		this.setModal(true);
+		this.setModality(ModalityMode.STRICT);
 
 		// Build components
 		buildComponents(viewerSelectionView, archives);

@@ -13,8 +13,9 @@ package org.viewer.hub.back.model.searchcriteria;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -201,9 +202,15 @@ public abstract class SearchCriteria implements Serializable {
 	 * WeasisIHESearchCriteria, WeasisArchiveSearchCriteria
 	 */
 	public static SearchCriteria jacksonDeduction(MultiValueMap<String, String> params) {
-		ObjectMapper mapper = new ObjectMapper().findAndRegisterModules()
-				.enable(DeserializationFeature.UNWRAP_SINGLE_VALUE_ARRAYS)
-				.enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY);
+		// Jackson 3 mappers are immutable: features/modules are set through the builder.
+		// configureForJackson2() keeps the Jackson 2 defaults - notably reading enums by name()
+		// rather than toString() (ViewerType has a Lombok @ToString), so "WEASIS" still maps.
+		ObjectMapper mapper = JsonMapper.builder()
+			.configureForJackson2()
+			.findAndAddModules()
+			.enable(DeserializationFeature.UNWRAP_SINGLE_VALUE_ARRAYS)
+			.enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY)
+			.build();
 		return mapper.convertValue(params, SearchCriteria.class);
 	}
 

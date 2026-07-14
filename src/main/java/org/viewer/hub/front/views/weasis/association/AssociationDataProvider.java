@@ -49,6 +49,7 @@ public class AssociationDataProvider<T> extends FilterablePageableDataProvider<T
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	protected Page<T> fetchFromBackEnd(Query<T, AssociationModelFilter> query, Pageable pageable) {
 		AssociationModelFilter filter = query.getFilter().orElse(new AssociationModelFilter());
 		return (Page<T>) this.associationLogic.retrieveAssociationModels(filter, pageable);

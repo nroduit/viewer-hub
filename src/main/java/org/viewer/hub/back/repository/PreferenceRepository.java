@@ -20,7 +20,8 @@ import java.util.List;
 /**
  * Repository for the entity Preference.
  */
-public interface PreferenceRepository extends JpaRepository<PreferenceEntity, Long>, JpaSpecificationExecutor {
+public interface PreferenceRepository
+		extends JpaRepository<PreferenceEntity, Long>, JpaSpecificationExecutor<PreferenceEntity> {
 
 	/**
 	 * Get all the PreferenceEntity with target name in parameter

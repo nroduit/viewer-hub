@@ -14,8 +14,6 @@ package org.viewer.hub.back.model.patient;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import org.viewer.hub.back.util.DateTimeUtil;
@@ -38,38 +36,33 @@ public class Study implements Serializable {
 	@Serial
 	private static final long serialVersionUID = 6556153607975946470L;
 
-	@JacksonXmlElementWrapper(useWrapping = false)
+	@Builder.Default
 	@JsonProperty("Series")
 	private Set<Serie> series = new HashSet<>();
 
-	@JacksonXmlProperty(isAttribute = true, localName = "StudyInstanceUID")
 	private String studyInstanceUID;
 
-	@JacksonXmlProperty(isAttribute = true, localName = "StudyDescription")
 	private String studyDescription;
 
-	@JacksonXmlProperty(isAttribute = true, localName = "StudyDate")
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyyMMdd")
 	private LocalDate studyDate;
 
-	@JacksonXmlProperty(isAttribute = true, localName = "StudyTime")
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HHmmss")
 	private LocalTime studyTime;
 
-	@JacksonXmlProperty(isAttribute = true, localName = "AccessionNumber")
 	private String accessionNumber;
 
-	@JacksonXmlProperty(isAttribute = true, localName = "StudyID")
 	private String studyID;
 
-	@JacksonXmlProperty(isAttribute = true, localName = "ReferringPhysicianName")
 	private String referringPhysicianName;
 
 	public Study() {
+		this.series = new HashSet<>();
 	}
 
 	public Study(String studyInstanceUID, String studyDescription, LocalDate studyDate, LocalTime studyTime,
 			String accessionNumber, String studyID, String referringPhysicianName) {
+		this.series = new HashSet<>();
 		this.studyInstanceUID = studyInstanceUID;
 		this.studyDescription = studyDescription;
 		this.studyDate = studyDate;
@@ -81,6 +74,7 @@ public class Study implements Serializable {
 
 	public Study(String studyInstanceUID, String studyDescription, LocalDate studyDate, String accessionNumber,
 			String studyID, String referringPhysicianName) {
+		this.series = new HashSet<>();
 		this.studyInstanceUID = studyInstanceUID;
 		this.studyDescription = studyDescription;
 		this.studyDate = studyDate;

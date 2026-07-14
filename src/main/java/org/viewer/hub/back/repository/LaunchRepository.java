@@ -21,7 +21,8 @@ import java.util.List;
 /**
  * Repository for the entity Launch.
  */
-public interface LaunchRepository extends JpaRepository<LaunchEntity, LaunchEntityPK>, JpaSpecificationExecutor {
+public interface LaunchRepository
+		extends JpaRepository<LaunchEntity, LaunchEntityPK>, JpaSpecificationExecutor<LaunchEntity> {
 
 	/**
 	 * Check if a target is associated to a launch

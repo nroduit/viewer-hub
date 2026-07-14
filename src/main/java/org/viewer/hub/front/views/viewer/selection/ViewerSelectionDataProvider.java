@@ -51,6 +51,7 @@ public class ViewerSelectionDataProvider<T> extends FilterablePageableDataProvid
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	protected Page<T> fetchFromBackEnd(Query<T, ViewerSelectionFilter> query, Pageable pageable) {
 		return (Page<T>) this.viewerSelectionLogic.retrieveViewerSelection(pageable);
 	}

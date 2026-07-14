@@ -11,9 +11,9 @@
 
 package org.viewer.hub.back.model;
 
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import tools.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
+import tools.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import com.fasterxml.jackson.annotation.JsonRootName;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
@@ -26,7 +26,7 @@ import java.util.List;
 @Getter
 @EqualsAndHashCode
 @AllArgsConstructor
-@JacksonXmlRootElement(localName = "weasisModules")
+@JsonRootName("weasisModules")
 public class WeasisModules {
 
 	@JacksonXmlProperty(localName = "weasisModule")

@@ -11,14 +11,15 @@
 
 package org.viewer.hub.back.util;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.PropertyNamingStrategies;
-import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.fasterxml.jackson.databind.ser.std.StdSerializer;
-import com.fasterxml.jackson.dataformat.javaprop.JavaPropsMapper;
-import com.fasterxml.jackson.dataformat.javaprop.JavaPropsSchema;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.PropertyNamingStrategies;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.module.SimpleModule;
+import tools.jackson.databind.ser.std.StdSerializer;
+import tools.jackson.dataformat.javaprop.JavaPropsMapper;
+import tools.jackson.dataformat.javaprop.JavaPropsSchema;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.viewer.hub.back.controller.exception.TechnicalException;
@@ -44,9 +45,9 @@ public class JacksonUtil {
 	public static String serializeIntoJson(Object objectToSerialize) {
 		String objectSerialized = null;
 		try {
-			objectSerialized = new ObjectMapper().writeValueAsString(objectToSerialize);
+			objectSerialized = jsonMapper().writeValueAsString(objectToSerialize);
 		}
-		catch (JsonProcessingException e) {
+		catch (JacksonException e) {
 			LOG.error("Issue when serializing:%s".formatted(e.getMessage()));
 		}
 		return objectSerialized;
@@ -60,9 +61,9 @@ public class JacksonUtil {
 	public static String serializeIntoProperties(Object objectToSerialize) {
 		String objectSerialized = null;
 		try {
-			objectSerialized = new JavaPropsMapper().writeValueAsString(objectToSerialize);
+			objectSerialized = javaPropsMapper().writeValueAsString(objectToSerialize);
 		}
-		catch (JsonProcessingException e) {
+		catch (JacksonException e) {
 			LOG.error("Issue when serializing:%s".formatted(e.getMessage()));
 		}
 		return objectSerialized;
@@ -79,11 +80,11 @@ public class JacksonUtil {
 		try {
 			SimpleModule module = new SimpleModule();
 			module.addSerializer(classToSerialize, stdSerializer);
-			JavaPropsMapper javaPropsMapper = new JavaPropsMapper();
-			javaPropsMapper.registerModule(module);
+			// Jackson 3 mappers are immutable: modules are registered through the builder.
+			JavaPropsMapper javaPropsMapper = JavaPropsMapper.builder().configureForJackson2().addModule(module).build();
 			objectSerialized = javaPropsMapper.writeValueAsString(objectToSerialize);
 		}
-		catch (JsonProcessingException e) {
+		catch (JacksonException e) {
 			LOG.error("Issue when serializing:%s".formatted(e.getMessage()));
 		}
 		return objectSerialized;
@@ -96,7 +97,7 @@ public class JacksonUtil {
 	 */
 	public static OverrideConfigEntity deserializeJsonOverrideConfigEntity(InputStream inputStream) {
 		OverrideConfigEntity overrideConfigEntity;
-		ObjectMapper objectMapper = new ObjectMapper();
+		ObjectMapper objectMapper = jsonMapper();
 		try {
 			overrideConfigEntity = objectMapper.readValue(inputStream, new TypeReference<>() {
 			});
@@ -104,7 +105,7 @@ public class JacksonUtil {
 			// The default value corresponds to the value of the property
 			overrideConfigEntity.getWeasisPropertyEntities().forEach(p -> p.setDefaultValue(p.getValue()));
 		}
-		catch (IOException e) {
+		catch (JacksonException e) {
 			throw new TechnicalException(
 					"Issue when deserializing Json OverrideConfigEntity InputStream:" + e.getMessage());
 		}
@@ -121,9 +122,7 @@ public class JacksonUtil {
 		OverrideConfigEntity overrideConfigEntity;
 		JavaPropsSchema schema = JavaPropsSchema.emptySchema().withoutPathSeparator();
 		try {
-			Map<String, String> map = new JavaPropsMapper().readerFor(HashMap.class)
-				.with(schema)
-				.readValue(inputStream);
+			Map<String, String> map = javaPropsMapper().readerFor(HashMap.class).with(schema).readValue(inputStream);
 			overrideConfigEntity = OverrideConfigEntity.builder()
 				.weasisPropertyEntities(map.keySet()
 					.stream()
@@ -131,7 +130,7 @@ public class JacksonUtil {
 					.toList())
 				.build();
 		}
-		catch (IOException e) {
+		catch (JacksonException e) {
 			throw new TechnicalException(
 					"Issue when deserializing Properties OverrideConfigEntity InputStream:" + e.getMessage());
 		}
@@ -147,8 +146,10 @@ public class JacksonUtil {
 	public static List<MinimalReleaseVersion> deserializeMinimalReleaseVersionsFromInputStream(
 			InputStream inputStream) {
 		try (inputStream) {
-			ObjectMapper objectMapper = new ObjectMapper()
-				.setPropertyNamingStrategy(PropertyNamingStrategies.KEBAB_CASE);
+			ObjectMapper objectMapper = JsonMapper.builder()
+				.configureForJackson2()
+				.propertyNamingStrategy(PropertyNamingStrategies.KEBAB_CASE)
+				.build();
 
 			// Retrieve the minimal release versions
 			List<MinimalReleaseVersion> minimalReleaseVersions = objectMapper.readValue(inputStream,
@@ -160,10 +161,27 @@ public class JacksonUtil {
 
 			return minimalReleaseVersions;
 		}
-		catch (IOException e) {
+		catch (IOException | JacksonException e) {
 			throw new TechnicalException(
 					"Issue when trying to retrieve minimal release versions: %s".formatted(e.getMessage()));
 		}
+	}
+
+	/**
+	 * Jackson 3 JSON mapper configured to keep the Jackson 2 defaults (enums by name(),
+	 * dates as timestamps, ...) so serialization/deserialization stays backward compatible.
+	 * @return the configured mapper
+	 */
+	private static ObjectMapper jsonMapper() {
+		return JsonMapper.builder().configureForJackson2().build();
+	}
+
+	/**
+	 * Jackson 3 Java properties mapper configured to keep the Jackson 2 defaults.
+	 * @return the configured mapper
+	 */
+	private static JavaPropsMapper javaPropsMapper() {
+		return JavaPropsMapper.builder().configureForJackson2().build();
 	}
 
 }

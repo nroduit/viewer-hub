@@ -18,6 +18,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
+import software.amazon.awssdk.core.checksums.RequestChecksumCalculation;
+import software.amazon.awssdk.core.checksums.ResponseChecksumValidation;
 import software.amazon.awssdk.http.async.SdkAsyncHttpClient;
 import software.amazon.awssdk.http.nio.netty.NettyNioAsyncHttpClient;
 import software.amazon.awssdk.services.s3.S3AsyncClient;
@@ -45,7 +47,6 @@ public class S3ClientConfiguration {
 			.maxConcurrency(this.s3ClientConfigurationProperties.getMaxConcurrency())
 			.build();
 		S3Configuration serviceConfiguration = S3Configuration.builder()
-			.checksumValidationEnabled(false)
 			.chunkedEncodingEnabled(true)
 			.pathStyleAccessEnabled(true)
 			.build();
@@ -58,6 +59,13 @@ public class S3ClientConfiguration {
 			.credentialsProvider(StaticCredentialsProvider
 				.create(AwsBasicCredentials.create(this.s3ClientConfigurationProperties.getAccessKeyId(),
 						this.s3ClientConfigurationProperties.getSecretAccessKey())))
+			// WHEN_SUPPORTED (instead of WHEN_REQUIRED): the SDK computes a checksum on every upload
+			// and validates it on every download, so a truncated/corrupted transfer is detected
+			// instead of silently stored or served. Note: this adds x-amz-checksum-* handling on the
+			// wire - verify against the target MinIO/S3 version; revert to WHEN_REQUIRED if the store
+			// rejects the checksum headers.
+			.requestChecksumCalculation(RequestChecksumCalculation.WHEN_SUPPORTED)
+			.responseChecksumValidation(ResponseChecksumValidation.WHEN_SUPPORTED)
 			.serviceConfiguration(serviceConfiguration);
 		if (this.s3ClientConfigurationProperties.getEndpoint() != null) {
 			clientBuilder = clientBuilder.endpointOverride(this.s3ClientConfigurationProperties.getEndpoint());

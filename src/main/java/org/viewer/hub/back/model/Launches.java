@@ -11,16 +11,16 @@
 
 package org.viewer.hub.back.model;
 
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import tools.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
+import tools.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import com.fasterxml.jackson.annotation.JsonRootName;
 import io.swagger.v3.oas.annotations.media.Schema;
 import org.viewer.hub.back.entity.LaunchEntity;
 
 import java.util.List;
 import java.util.Objects;
 
-@JacksonXmlRootElement(localName = "Launches")
+@JsonRootName("Launches")
 public class Launches {
 
 	@Schema(description = "Logging level of the message", name = "level", type = "MessageLevel", example = "INFO")

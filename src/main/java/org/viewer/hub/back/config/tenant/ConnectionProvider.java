@@ -22,7 +22,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 @Component
-public class ConnectionProvider implements MultiTenantConnectionProvider {
+public class ConnectionProvider implements MultiTenantConnectionProvider<Object> {
 
 	@Serial
 	private static final long serialVersionUID = -8823226847957235585L;
@@ -60,11 +60,12 @@ public class ConnectionProvider implements MultiTenantConnectionProvider {
 	}
 
 	@Override
-	public boolean isUnwrappableAs(Class unwrapType) {
+	public boolean isUnwrappableAs(Class<?> unwrapType) {
 		return MultiTenantConnectionProvider.class.isAssignableFrom(unwrapType);
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public <T> T unwrap(Class<T> unwrapType) {
 		if (MultiTenantConnectionProvider.class.isAssignableFrom(unwrapType)) {
 			return (T) this;

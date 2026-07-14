@@ -39,6 +39,7 @@ public class OverrideDataProvider<T> extends FilterablePageableDataProvider<T, O
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	protected Page<T> fetchFromBackEnd(Query<T, OverrideConfigFilter> query, Pageable pageable) {
 		OverrideConfigFilter filter = query.getFilter().orElse(new OverrideConfigFilter());
 		return (Page<T>) this.overrideLogic.retrieveOverrideConfigs(filter, pageable);

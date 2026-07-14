@@ -42,6 +42,7 @@ public class WeasisAssetDataProvider<T> extends FilterablePageableDataProvider<T
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	protected Page<T> fetchFromBackEnd(Query<T, WeasisAssetFilter> query, Pageable pageable) {
 		return (Page<T>) this.weasisRepositoryLogic
 			.retrieveWeasisAssets(query.getFilter().orElse(new WeasisAssetFilter()), query.getSortOrders(), pageable);

@@ -11,7 +11,7 @@
 
 package org.viewer.hub.back.controller.exception;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
+import tools.jackson.core.JacksonException;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -52,7 +52,7 @@ public class ExceptionControllerAdvice {
 		return ResponseEntity.noContent().build();
 	}
 
-	@ExceptionHandler({ TechnicalException.class, SQLException.class, JsonProcessingException.class })
+	@ExceptionHandler({ TechnicalException.class, SQLException.class, JacksonException.class })
 	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
 	public ResponseEntity<String> technicalIssue(Throwable ex) {
 		LOG.error("Technical issue:{}", ex.getMessage());

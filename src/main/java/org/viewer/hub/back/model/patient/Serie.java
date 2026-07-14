@@ -14,8 +14,6 @@ package org.viewer.hub.back.model.patient;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
@@ -41,38 +39,33 @@ public class Serie implements Serializable {
 	@Serial
 	private static final long serialVersionUID = -3455369892278940902L;
 
-	@JacksonXmlElementWrapper(useWrapping = false)
+	@Builder.Default
 	@JsonProperty("Instance")
 	private Set<Instance> instances = new HashSet<>();
 
-	@JacksonXmlProperty(isAttribute = true, localName = "SeriesInstanceUID")
 	private String seriesInstanceUID;
 
-	@JacksonXmlProperty(isAttribute = true, localName = "SeriesDescription")
 	private String seriesDescription;
 
-	@JacksonXmlProperty(isAttribute = true, localName = "SeriesNumber")
 	private Integer seriesNumber;
 
-	@JacksonXmlProperty(isAttribute = true, localName = "Modality")
 	private String modality;
 
-	@JacksonXmlProperty(isAttribute = true, localName = "WadoTransferSyntaxUID")
 	@JsonInclude(Include.NON_EMPTY)
 	private String wadoTransferSyntaxUID;
 
-	@JacksonXmlProperty(isAttribute = true, localName = "WadoCompressionRate")
 	private Integer wadoCompressionRate;
 
-	@JacksonXmlProperty(isAttribute = true, localName = "DirectDownloadThumbnail")
 	// TODO later: not implemented yet
 	private String directDownloadThumbnail;
 
 	public Serie() {
+		this.instances = new HashSet<>();
 	}
 
 	public Serie(String seriesInstanceUID, String seriesDescription, Integer seriesNumber, String modality,
 			String wadoTransferSyntaxUID, Integer wadoCompressionRate) {
+		this.instances = new HashSet<>();
 		this.seriesInstanceUID = seriesInstanceUID;
 		this.seriesDescription = seriesDescription;
 		this.seriesNumber = seriesNumber;

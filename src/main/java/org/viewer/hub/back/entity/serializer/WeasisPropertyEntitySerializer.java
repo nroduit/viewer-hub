@@ -11,13 +11,11 @@
 
 package org.viewer.hub.back.entity.serializer;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.ser.std.StdSerializer;
-import org.viewer.hub.back.controller.exception.TechnicalException;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.databind.SerializationContext;
+import tools.jackson.databind.ser.std.StdSerializer;
 import org.viewer.hub.back.entity.WeasisPropertyEntity;
 
-import java.io.IOException;
 import java.io.Serial;
 
 public class WeasisPropertyEntitySerializer extends StdSerializer<WeasisPropertyEntity> {
@@ -30,17 +28,12 @@ public class WeasisPropertyEntitySerializer extends StdSerializer<WeasisProperty
 	}
 
 	@Override
-	public void serialize(WeasisPropertyEntity value, JsonGenerator jgen, SerializerProvider provider) {
-		try {
-			if (value != null && value.getCode() != null) {
-				jgen.writeStartObject();
-				jgen.writeStringField(value.getCode(), value.getValue());
-				jgen.writeEndObject();
-			}
-		}
-		catch (IOException e) {
-			throw new TechnicalException(
-					"Issue when serializing WeasisPropertyEntity in properties format%s".formatted(e.getMessage()));
+	public void serialize(WeasisPropertyEntity value, JsonGenerator jgen, SerializationContext context) {
+		// Jackson 3 generator methods throw the unchecked JacksonException, no checked IOException.
+		if (value != null && value.getCode() != null) {
+			jgen.writeStartObject();
+			jgen.writeStringProperty(value.getCode(), value.getValue());
+			jgen.writeEndObject();
 		}
 	}
 

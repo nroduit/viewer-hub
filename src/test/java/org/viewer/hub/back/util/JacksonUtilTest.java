@@ -11,7 +11,7 @@
 
 package org.viewer.hub.back.util;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
+import tools.jackson.core.JacksonException;
 import org.junit.jupiter.api.Test;
 import org.viewer.hub.back.entity.OverrideConfigEntity;
 import org.viewer.hub.back.entity.WeasisPropertyEntity;
@@ -53,7 +53,7 @@ class JacksonUtilTest {
 
 	// TODO W-34: to improve
 	@Test
-	void testDeserializeOverrideConfigEntityPropertiesFromInputStream() throws JsonProcessingException {
+	void testDeserializeOverrideConfigEntityPropertiesFromInputStream() throws JacksonException {
 
 		String test = "weasis.code=valueCode\nweasis.name=valueName";
 

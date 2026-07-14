@@ -37,6 +37,7 @@ import java.util.Set;
 
 @ExtendWith(MockitoExtension.class)
 @Slf4j
+@SuppressWarnings("unchecked") // raw JdbcTemplate row-mapper matchers in Mockito stubs
 class DbConnectorQueryServiceImplTest {
 
 	private final NamedParameterJdbcTemplate namedParameterJdbcTemplateMock = Mockito

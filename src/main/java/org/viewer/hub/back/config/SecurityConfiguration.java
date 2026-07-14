@@ -13,8 +13,8 @@ package org.viewer.hub.back.config;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.actuate.autoconfigure.security.servlet.EndpointRequest;
 import org.springframework.boot.actuate.context.ShutdownEndpoint;
+import org.springframework.boot.security.autoconfigure.actuate.web.servlet.EndpointRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -30,7 +30,6 @@ import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.viewer.hub.back.constant.EndPoint;
 import org.viewer.hub.back.constant.Token;
 import org.viewer.hub.back.security.OpenIdConnectLogoutHandler;
@@ -54,27 +53,26 @@ public class SecurityConfiguration {
 		http
 			// Disables cross-site request forgery (CSRF) protection for main route and
 			// login
-			.csrf(csrf -> csrf.ignoringRequestMatchers(AntPathRequestMatcher.antMatcher(EndPoint.ALL_REMAINING_PATH),
-					AntPathRequestMatcher.antMatcher(LOGIN_URL)))
+			.csrf(csrf -> csrf.ignoringRequestMatchers(EndPoint.ALL_REMAINING_PATH, LOGIN_URL))
 			.authorizeHttpRequests(authorize -> authorize
 				// TODO: currently no security on these endpoints: find a way for Weasis
 				// (kiosque) + wait for secured client requests
-				.requestMatchers(AntPathRequestMatcher.antMatcher("/actuator/**"),
+				.requestMatchers("/actuator/**",
 						// Controllers
-						AntPathRequestMatcher.antMatcher(EndPoint.DISPLAY_PATH + EndPoint.WEASIS_PATH),
-						AntPathRequestMatcher
-							.antMatcher(EndPoint.DISPLAY_PATH + EndPoint.IHE_INVOKE_IMAGE_DISPLAY_PATH),
-						AntPathRequestMatcher.antMatcher(EndPoint.GROUP_PATH + EndPoint.ALL_REMAINING_PATH),
-						AntPathRequestMatcher.antMatcher(EndPoint.LAUNCH_CONFIG_PATH + EndPoint.ALL_REMAINING_PATH),
-						AntPathRequestMatcher.antMatcher(EndPoint.PREFERENCES_PATH + EndPoint.ALL_REMAINING_PATH),
-						AntPathRequestMatcher.antMatcher(EndPoint.MANIFEST_PATH + EndPoint.ALL_REMAINING_PATH),
-						AntPathRequestMatcher.antMatcher(EndPoint.MODULES_PATH + EndPoint.ALL_REMAINING_PATH),
-						AntPathRequestMatcher.antMatcher(EndPoint.OVERRIDE_CONFIG_PATH + EndPoint.ALL_REMAINING_PATH),
-						AntPathRequestMatcher.antMatcher(EndPoint.PREFERENCES_PATH + EndPoint.ALL_REMAINING_PATH),
-						AntPathRequestMatcher.antMatcher(EndPoint.STATISTIC_PATH + EndPoint.ALL_REMAINING_PATH),
-						AntPathRequestMatcher.antMatcher(EndPoint.TARGET_PATH + EndPoint.ALL_REMAINING_PATH),
+						EndPoint.DISPLAY_PATH,
+						EndPoint.DISPLAY_PATH + EndPoint.WEASIS_PATH,
+						EndPoint.DISPLAY_PATH + EndPoint.IHE_INVOKE_IMAGE_DISPLAY_PATH,
+						EndPoint.GROUP_PATH + EndPoint.ALL_REMAINING_PATH,
+						EndPoint.LAUNCH_CONFIG_PATH + EndPoint.ALL_REMAINING_PATH,
+						EndPoint.PREFERENCES_PATH + EndPoint.ALL_REMAINING_PATH,
+						EndPoint.MANIFEST_PATH + EndPoint.ALL_REMAINING_PATH,
+						EndPoint.MODULES_PATH + EndPoint.ALL_REMAINING_PATH,
+						EndPoint.OVERRIDE_CONFIG_PATH + EndPoint.ALL_REMAINING_PATH,
+						EndPoint.PREFERENCES_PATH + EndPoint.ALL_REMAINING_PATH,
+						EndPoint.STATISTIC_PATH + EndPoint.ALL_REMAINING_PATH,
+						EndPoint.TARGET_PATH + EndPoint.ALL_REMAINING_PATH,
 						// Resources for weasis
-						AntPathRequestMatcher.antMatcher(EndPoint.WEASIS_PATH + EndPoint.ALL_REMAINING_PATH))
+						EndPoint.WEASIS_PATH + EndPoint.ALL_REMAINING_PATH)
 				.permitAll()
 				.requestMatchers(EndpointRequest.to(ShutdownEndpoint.class))
 				.denyAll()
@@ -130,9 +128,10 @@ public class SecurityConfiguration {
 	 * @param jwt access token
 	 * @return Roles found
 	 */
+	@SuppressWarnings("unchecked")
 	Set<SimpleGrantedAuthority> retrieveRolesFromAccessToken(Jwt jwt) {
 		// Build roles
-		return Optional.ofNullable(jwt.getClaims())
+		return Optional.of(jwt.getClaims())
 			.map(claims -> (Map<String, Object>) claims.get(Token.RESOURCE_ACCESS))
 			.map(resourceAccess -> (Map<String, Object>) resourceAccess.get(Token.RESOURCE_NAME))
 			.map(resourceNameMap -> (List<String>) resourceNameMap.get(Token.ROLES))

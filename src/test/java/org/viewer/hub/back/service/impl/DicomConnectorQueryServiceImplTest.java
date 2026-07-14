@@ -11,7 +11,7 @@
 
 package org.viewer.hub.back.service.impl;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
+import tools.jackson.core.JacksonException;
 import lombok.extern.slf4j.Slf4j;
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
@@ -50,6 +50,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(MockitoExtension.class)
 @Slf4j
+@SuppressWarnings("unchecked") // raw WebClient mock chains in Mockito stubs
 class DicomConnectorQueryServiceImplTest {
 
 	private DicomConnectorQueryService dicomConnectorQueryService;
@@ -153,7 +154,7 @@ class DicomConnectorQueryServiceImplTest {
 		Attributes attributes = new Attributes();
 		attributes.setValue(Tag.PatientID, VR.LO, "patientId");
 		attributes.setValue(Tag.PatientSex, VR.CS, "O");
-		dicomState.getDicomRSP().add(attributes);
+		dicomState.addDicomRSP(attributes);
 		this.cFindMock.when(() -> CFind.process(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.eq(0),
 				Mockito.any(), Mockito.any(DicomParam[].class)))
 			.thenReturn(dicomState);
@@ -201,7 +202,7 @@ class DicomConnectorQueryServiceImplTest {
 
 	@Test
 	void when_buildingFromStudyAccessionNumber_withDicomWebConnector_with_validData_should_addCorrectValuesInManifest()
-			throws JsonProcessingException {
+			throws JacksonException {
 		// Init data
 		Set<String> studyAccessionNumbers = new HashSet<>();
 		studyAccessionNumbers.add("studyAccessionNumber");

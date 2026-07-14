@@ -14,8 +14,6 @@ package org.viewer.hub.back.model.manifest;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -47,43 +45,35 @@ public class ArcQuery implements Serializable {
 	@Serial
 	private static final long serialVersionUID = -5561644584316122648L;
 
-	@JacksonXmlElementWrapper(useWrapping = false)
 	@JsonProperty("Patient")
 	private Set<Patient> patients;
 
-	@JacksonXmlElementWrapper(useWrapping = false)
 	@JsonProperty("httpTag")
 	private Set<HttpTag> httpTags;
 
-	@JacksonXmlElementWrapper(useWrapping = false)
 	private Set<Message> messages;
 
-	@JacksonXmlProperty(isAttribute = true, localName = "arcId")
 	private String arcId;
 
-	@JacksonXmlProperty(isAttribute = true, localName = "baseUrl")
+	@Builder.Default
 	private String baseUrl = "";
 
-	@JacksonXmlProperty(isAttribute = true, localName = "webLogin")
 	private String webLogin;
 
-	@JacksonXmlProperty(isAttribute = true, localName = "requireOnlySOPInstanceUID")
 	private boolean requireOnlySOPInstanceUID;
 
-	@JacksonXmlProperty(isAttribute = true, localName = "additionnalParameters")
 	private String additionnalParameters;
 
-	@JacksonXmlProperty(isAttribute = true, localName = "overrideDicomTagsList")
 	@Getter(AccessLevel.NONE)
 	private String overrideDicomTagsList;
 
 	@JsonIgnore
 	private Set<String> overrideDicomTags;
 
-	@JacksonXmlProperty(isAttribute = true, localName = "queryMode")
 	private ConnectorType queryMode;
 
 	public ArcQuery() {
+		this.baseUrl = "";
 		this.patients = new HashSet<>();
 		this.httpTags = new HashSet<>();
 		this.messages = new HashSet<>();

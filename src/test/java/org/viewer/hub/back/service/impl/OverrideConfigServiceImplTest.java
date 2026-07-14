@@ -38,6 +38,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
+@SuppressWarnings("unchecked") // raw Specification matchers in Mockito stubs
 class OverrideConfigServiceImplTest {
 
 	private final OverrideConfigRepository overrideConfigRepositoryMock = mock(OverrideConfigRepository.class);
