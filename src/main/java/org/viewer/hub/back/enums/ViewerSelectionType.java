@@ -20,6 +20,6 @@ import lombok.ToString;
 @Getter
 public enum ViewerSelectionType {
 
-    DEFAULT, ALL;
+	DEFAULT, ALL;
 
 }

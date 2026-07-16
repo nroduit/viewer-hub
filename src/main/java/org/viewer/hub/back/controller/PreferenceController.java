@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2022-2025 Weasis Team and other contributors.
+ *  Copyright (c) 2022-2026 Weasis Team and other contributors.
  *
  *  This program and the accompanying materials are made available under the terms of the Eclipse
  *  Public License 2.0 which is available at https://www.eclipse.org/legal/epl-2.0, or the Apache
@@ -20,12 +20,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.viewer.hub.back.constant.ApiVersion;
 import org.viewer.hub.back.constant.EndPoint;
 import org.viewer.hub.back.controller.exception.ParameterException;
 import org.viewer.hub.back.enums.OperationType;
@@ -59,10 +55,6 @@ public class PreferenceController {
 		this.applicationPreferenceService = applicationPreferenceService;
 	}
 
-	@Operation(
-			summary = "Returns the Weasis application preferences for a given user as well as for a given Weasis profile",
-			description = "Returns the Weasis application preferences for a given user as well as for a given Weasis profile",
-			tags = "Weasis Preference")
 	/**
 	 * Returns the Weasis application preferences for a given user as well as for a given
 	 * Weasis profile
@@ -71,7 +63,13 @@ public class PreferenceController {
 	 * @return the Weasis application preferences for a given user as well as for a given
 	 * Weasis profile
 	 */
-	@GetMapping(produces = { "text/x-java-properties" })
+	@Operation(
+			summary = "Returns the Weasis application preferences for a given user as well as for a given Weasis profile",
+			description = "Returns the Weasis application preferences for a given user as well as for a given Weasis profile",
+			tags = "Weasis Preference")
+	@GetMapping(produces = { ApiVersion.V1_TEXT_X_JAVA_PROPERTIES_VALUE })
+	// @PreAuthorize("hasAuthority('viewerhub_search')")
+	// TODO temporary deactivate security: wait for Weasis to make secured calls
 	public ResponseEntity<String> getWeasisPreferences(@RequestParam(value = PARAM_USER, required = false) String user,
 			@RequestParam(value = PARAM_PROFILE, required = false) String profile) throws SQLException {
 		LOG.debug("getWeasisPreferences");
@@ -90,10 +88,6 @@ public class PreferenceController {
 		return response;
 	}
 
-	@Operation(
-			summary = "Returns the Weasis module preferences for a given user as well as for a given Weasis profile and a Weasis module",
-			description = "Returns the Weasis module preferences for a given user as well as for a given Weasis profile and a Weasis module",
-			tags = "Weasis Preference")
 	/**
 	 * Returns the Weasis module preferences for a given user as well as for a given
 	 * Weasis profile and a Weasis module
@@ -103,7 +97,13 @@ public class PreferenceController {
 	 * @return the Weasis module preferences for a given user as well as for a given
 	 * Weasis profile and a Weasis module
 	 */
-	@GetMapping(produces = { MediaType.TEXT_PLAIN_VALUE })
+	@Operation(
+			summary = "Returns the Weasis module preferences for a given user as well as for a given Weasis profile and a Weasis module",
+			description = "Returns the Weasis module preferences for a given user as well as for a given Weasis profile and a Weasis module",
+			tags = "Weasis Preference")
+	@GetMapping(produces = { ApiVersion.V1_TEXT_PLAIN_VALUE })
+	// @PreAuthorize("hasAuthority('viewerhub_search')")
+	// TODO temporary deactivate security: wait for Weasis to make secured calls
 	public ResponseEntity<String> getWeasisPreferences(@RequestParam(value = PARAM_USER, required = false) String user,
 			@RequestParam(value = PARAM_PROFILE, required = false) String profile,
 			@RequestParam(value = PARAM_MODULE, required = false) String module) throws SQLException {
@@ -128,19 +128,21 @@ public class PreferenceController {
 		return response;
 	}
 
-	@Operation(
-			summary = "Updates the Weasis application preferences for a given user as well as for a given Weasis profile",
-			description = "Updates the Weasis application preferences for a given user as well as for a given Weasis profile",
-			tags = "Weasis Preference")
 	/**
 	 * Updates the Weasis application preferences for a given user as well as for a given
 	 * Weasis profile
 	 * @param user User identifier
 	 * @param profile Weasis Profile
-	 * @param is Weasis application preferences to store
+	 * @param preferences Weasis application preferences to store
 	 * @return ResponseEntity<String>
 	 */
-	@PostMapping(consumes = { "text/x-java-properties" })
+	@Operation(
+			summary = "Updates the Weasis application preferences for a given user as well as for a given Weasis profile",
+			description = "Updates the Weasis application preferences for a given user as well as for a given Weasis profile",
+			tags = "Weasis Preference")
+	@PostMapping(consumes = { ApiVersion.V1_TEXT_X_JAVA_PROPERTIES_VALUE })
+	// @PreAuthorize("hasAuthority('viewerhub_update')")
+	// TODO temporary deactivate security: wait for Weasis to make secured calls
 	public ResponseEntity<String> updateWeasisPreferences(
 			@RequestParam(value = PARAM_USER, required = false) String user,
 			@RequestParam(value = PARAM_PROFILE, required = false) String profile,
@@ -170,20 +172,22 @@ public class PreferenceController {
 		return response;
 	}
 
-	@Operation(
-			summary = "Updates a Weasis module preferences for a given user as well as for a given Weasis profile and a Weasis module",
-			description = "Updates a Weasis module preferences for a given user as well as for a given Weasis profile and a Weasis module",
-			tags = "Weasis Preference")
 	/**
 	 * Updates a Weasis module preferences for a given user as well as for a given Weasis
 	 * profile and a Weasis module
 	 * @param user User identifier
 	 * @param profile Weasis Profile
 	 * @param module Weasis Module
-	 * @param is Weasis module preferences to store
+	 * @param preferences Weasis module preferences to store
 	 * @return ResponseEntity<String>
 	 */
-	@PostMapping(consumes = { MediaType.TEXT_PLAIN_VALUE })
+	@Operation(
+			summary = "Updates a Weasis module preferences for a given user as well as for a given Weasis profile and a Weasis module",
+			description = "Updates a Weasis module preferences for a given user as well as for a given Weasis profile and a Weasis module",
+			tags = "Weasis Preference")
+	@PostMapping(consumes = { ApiVersion.V1_TEXT_PLAIN_VALUE })
+	// @PreAuthorize("hasAuthority('viewerhub_update')")
+	// TODO temporary deactivate security: wait for Weasis to make secured calls
 	public ResponseEntity<String> updateWeasisPreferences(
 			@RequestParam(value = PARAM_USER, required = false) String user,
 			@RequestParam(value = PARAM_PROFILE, required = false) String profile,

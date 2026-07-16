@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2022-2025 Weasis Team and other contributors.
+ *  Copyright (c) 2022-2026 Weasis Team and other contributors.
  *
  *  This program and the accompanying materials are made available under the terms of the Eclipse
  *  Public License 2.0 which is available at https://www.eclipse.org/legal/epl-2.0, or the Apache
@@ -106,9 +106,10 @@ class CacheServiceImplTest {
 	}
 
 	@Test
-	void given_newEntryInCache_when_addingInManifestCache_then_shouldReturnManifestAdded(){
+	void given_newEntryInCache_when_addingInManifestCache_then_shouldReturnManifestAdded() {
 		// Given
-		when(this.manifestCacheMock.putIfAbsent(anyString(), any(Manifest.class))).thenReturn(this.manifestValueWrapper);
+		when(this.manifestCacheMock.putIfAbsent(anyString(), any(Manifest.class)))
+			.thenReturn(this.manifestValueWrapper);
 
 		// When
 		Manifest manifestReturned = this.cacheService.putManifestIfAbsent("hash", this.manifest);
@@ -119,7 +120,7 @@ class CacheServiceImplTest {
 	}
 
 	@Test
-	void given_existingEntryInManifestCache_when_retrievingThisEntry_then_shouldReturnExistingManifest(){
+	void given_existingEntryInManifestCache_when_retrievingThisEntry_then_shouldReturnExistingManifest() {
 		// Given
 		when(this.manifestCacheMock.get(anyString())).thenReturn(this.manifestValueWrapper);
 
@@ -144,10 +145,10 @@ class CacheServiceImplTest {
 	}
 
 	@Test
-	void given_existingEntriesInManifestCache_when_retrievingTheseEntries_then_shouldReturnExistingManifests(){
+	void given_existingEntriesInManifestCache_when_retrievingTheseEntries_then_shouldReturnExistingManifests() {
 		// Given
 		when(this.manifestCacheMock.get(anyString())).thenReturn(this.manifestValueWrapper);
-		when(this.manifestRedisTemplateMock.keys(anyString())).thenReturn(Set.of(CacheName.MANIFEST+"::"+"hash"));
+		when(this.manifestRedisTemplateMock.keys(anyString())).thenReturn(Set.of(CacheName.MANIFEST + "::" + "hash"));
 
 		// When
 		Collection<Manifest> manifestsReturned = this.cacheService.getAllManifest();
@@ -175,12 +176,14 @@ class CacheServiceImplTest {
 	// ============================= Package Version =========================
 
 	@Test
-	void given_newEntryInCache_when_addingInPackageVersionCache_then_shouldReturnPackageVersionAdded(){
+	void given_newEntryInCache_when_addingInPackageVersionCache_then_shouldReturnPackageVersionAdded() {
 		// Given
-		when(this.packageVersionCacheMock.putIfAbsent(anyString(), any(PackageVersionEntity.class))).thenReturn(this.packageVersionValueWrapper);
+		when(this.packageVersionCacheMock.putIfAbsent(anyString(), any(PackageVersionEntity.class)))
+			.thenReturn(this.packageVersionValueWrapper);
 
 		// When
-		PackageVersionEntity packageVersionReturned = this.cacheService.putPackageVersion("versionRequested", this.packageVersionEntity);
+		PackageVersionEntity packageVersionReturned = this.cacheService.putPackageVersion("versionRequested",
+				this.packageVersionEntity);
 
 		// Then
 		assertThat(packageVersionReturned).isNotNull();
@@ -188,7 +191,7 @@ class CacheServiceImplTest {
 	}
 
 	@Test
-	void given_existingEntryInPackageVersionCache_when_retrievingThisEntry_then_shouldReturnExistingPackageVersion(){
+	void given_existingEntryInPackageVersionCache_when_retrievingThisEntry_then_shouldReturnExistingPackageVersion() {
 		// Given
 		when(this.packageVersionCacheMock.get(anyString())).thenReturn(this.packageVersionValueWrapper);
 
@@ -213,10 +216,11 @@ class CacheServiceImplTest {
 	}
 
 	@Test
-	void given_existingEntriesInPackageVersionCache_when_retrievingTheseEntries_then_shouldReturnExistingPackageVersions(){
+	void given_existingEntriesInPackageVersionCache_when_retrievingTheseEntries_then_shouldReturnExistingPackageVersions() {
 		// Given
 		when(this.packageVersionCacheMock.get(anyString())).thenReturn(this.packageVersionValueWrapper);
-		when(this.packageVersionRedisTemplateMock.keys(anyString())).thenReturn(Set.of(CacheName.PACKAGE_VERSION+"::"+"versionRequested"));
+		when(this.packageVersionRedisTemplateMock.keys(anyString()))
+			.thenReturn(Set.of(CacheName.PACKAGE_VERSION + "::" + "versionRequested"));
 
 		// When
 		Collection<PackageVersionEntity> allPackageVersion = this.cacheService.getAllPackageVersion();

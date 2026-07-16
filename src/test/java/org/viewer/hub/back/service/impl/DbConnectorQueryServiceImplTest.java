@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2022-2025 Weasis Team and other contributors.
+ *  Copyright (c) 2022-2026 Weasis Team and other contributors.
  *
  *  This program and the accompanying materials are made available under the terms of the Eclipse
  *  Public License 2.0 which is available at https://www.eclipse.org/legal/epl-2.0, or the Apache
@@ -30,6 +30,7 @@ import org.viewer.hub.back.model.searchcriteria.ArchiveSearchCriteria;
 import org.viewer.hub.back.service.DbConnectorQueryService;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -53,9 +54,9 @@ class DbConnectorQueryServiceImplTest {
 		// Mock
 		List<DbConnectorResult> dbConnectorResults = new ArrayList<>();
 		DbConnectorResult dbConnectorResult = new DbConnectorResult("patientName", "patientId",
-				LocalDate.of(2023, 1, 1), "O", "studyInstanceUid", "studyId", LocalDate.of(2023, 1, 1),
+				LocalDate.of(2023, 1, 1), "O", "studyInstanceUid", "studyId", LocalDateTime.of(2023, 1, 1, 23, 55, 0),
 				"accessionNumber", "referringPhysicianName", "studyDescription", "seriesInstanceUid", "modality",
-				"seriesDescription", 2, "sopInstanceUid", 1);
+				LocalDateTime.of(2025, 1, 1, 23, 59, 0), "seriesDescription", 2, "sopInstanceUid", "sopClassUid", 1);
 		dbConnectorResults.add(dbConnectorResult);
 
 		Mockito

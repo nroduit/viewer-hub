@@ -56,12 +56,13 @@ public class ViewerSelectionView extends AbstractView {
 	private ViewerSelectionGrid viewerSelectionGrid;
 
 	private final ViewerSelectionDataProvider<ViewerSelectionEntity> viewerSelectionDataProvider;
-    private final ArrayList<String> archives;
+
+	private final ArrayList<String> archives;
 
 	@Autowired
 	public ViewerSelectionView(ViewerSelectionLogic viewerSelectionLogic,
-							   ViewerSelectionDataProvider<ViewerSelectionEntity> viewerSelectionDataProvider,
-							   ConnectorConfigurationProperties connectorConfigurationProperties) {
+			ViewerSelectionDataProvider<ViewerSelectionEntity> viewerSelectionDataProvider,
+			ConnectorConfigurationProperties connectorConfigurationProperties) {
 		this.viewerSelectionLogic = viewerSelectionLogic;
 		this.viewerSelectionDataProvider = viewerSelectionDataProvider;
 
@@ -84,7 +85,8 @@ public class ViewerSelectionView extends AbstractView {
 	private void buildComponents() {
 		// Grid + data provider
 		this.viewerSelectionGrid = new ViewerSelectionGrid(this, this.viewerSelectionDataProvider,
-				this.createViewerComboBoxValueProvider(), this.createArchiveComboBoxValueProvider(), viewerSelectionLogic);
+				this.createViewerComboBoxValueProvider(), this.createArchiveComboBoxValueProvider(),
+				viewerSelectionLogic);
 		this.viewerSelectionGrid.setDataProvider(this.viewerSelectionDataProvider);
 	}
 
@@ -136,10 +138,11 @@ public class ViewerSelectionView extends AbstractView {
 			select.setWidth("100%");
 			select.setEmptySelectionAllowed(false);
 
-			if (Objects.equals(viewerSelectionEntity.getArchive(), ViewerSelectionType.DEFAULT.name())){
+			if (Objects.equals(viewerSelectionEntity.getArchive(), ViewerSelectionType.DEFAULT.name())) {
 				select.setItems(viewerSelectionEntity.getArchive());
 				select.setEnabled(false);
-			} else {
+			}
+			else {
 				select.setItems(archives);
 			}
 			select.setValue(viewerSelectionEntity.getArchive());
@@ -159,8 +162,7 @@ public class ViewerSelectionView extends AbstractView {
 	 */
 	private void addRuleButtonListener() {
 		// Create and open dialog
-		ViewerSelectionDialog viewerSelectionDialog = new ViewerSelectionDialog(viewerSelectionLogic,
-				this, archives);
+		ViewerSelectionDialog viewerSelectionDialog = new ViewerSelectionDialog(viewerSelectionLogic, this, archives);
 		viewerSelectionDialog.open();
 	}
 

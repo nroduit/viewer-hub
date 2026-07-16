@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2022-2025 Weasis Team and other contributors.
+ *  Copyright (c) 2022-2026 Weasis Team and other contributors.
  *
  *  This program and the accompanying materials are made available under the terms of the Eclipse
  *  Public License 2.0 which is available at https://www.eclipse.org/legal/epl-2.0, or the Apache
@@ -16,13 +16,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
-import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.viewer.hub.back.constant.ApiVersion;
 import org.viewer.hub.back.constant.EndPoint;
 import org.viewer.hub.back.constant.MDCConstants;
 import org.viewer.hub.back.model.PerformanceModel;
@@ -64,8 +60,10 @@ public class StatisticController {
 	 */
 	@Operation(summary = "Log performances of weasis in Kibana", description = "Log performances of weasis in Kibana",
 			tags = "Statistic")
-	@PostMapping(value = "/perf", consumes = { MediaType.APPLICATION_JSON_VALUE })
+	@PostMapping(value = "/perf", consumes = { ApiVersion.V1_APPLICATION_JSON_VALUE })
 	@ResponseBody
+	// @PreAuthorize("hasAuthority('viewerhub_create')")
+	// TODO temporary deactivate security: wait for Weasis to make secured calls
 	public void logWeasisPerf(@RequestBody @Valid PerformanceModel performanceModel) {
 		Instant tStart = Instant.now();
 		try {

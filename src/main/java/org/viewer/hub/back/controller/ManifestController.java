@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2022-2025 Weasis Team and other contributors.
+ *  Copyright (c) 2022-2026 Weasis Team and other contributors.
  *
  *  This program and the accompanying materials are made available under the terms of the Eclipse
  *  Public License 2.0 which is available at https://www.eclipse.org/legal/epl-2.0, or the Apache
@@ -18,14 +18,13 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.viewer.hub.back.constant.ApiVersion;
 import org.viewer.hub.back.constant.EndPoint;
 import org.viewer.hub.back.model.manifest.Manifest;
-import org.viewer.hub.back.model.searchcriteria.IHESearchCriteria;
 import org.viewer.hub.back.model.searchcriteria.WeasisArchiveSearchCriteria;
 import org.viewer.hub.back.model.searchcriteria.WeasisIHESearchCriteria;
 import org.viewer.hub.back.service.WeasisService;
@@ -66,7 +65,9 @@ public class ManifestController {
 	 */
 	@Operation(summary = "Retrieve manifest",
 			description = "Retrieve the XML manifest for Weasis and log kv for Kibana regarding request and manifest creation/retrieval")
-	@GetMapping(produces = { MediaType.APPLICATION_XML_VALUE })
+	@GetMapping(produces = { ApiVersion.V1_APPLICATION_XML_VALUE })
+	// @PreAuthorize("hasAuthority('viewerhub_search')")
+	// TODO temporary deactivate security: wait for Weasis to make secured calls
 	public Manifest retrieveXmlManifest(HttpServletRequest request, @Valid @NotBlank String key) {
 		LocalDateTime startTimeRetrieveManifest = LocalDateTime.now();
 
@@ -100,9 +101,10 @@ public class ManifestController {
 			LocalDateTime startRetrieveManifest) {
 		if (manifest != null && manifest.getStartManifestRequest() != null) {
 			// Config
-			String config = manifest.getSearchCriteria() instanceof IHESearchCriteria
-					? ((WeasisIHESearchCriteria) manifest.getSearchCriteria()).getConfig()
-					: ((WeasisArchiveSearchCriteria) manifest.getSearchCriteria()).getConfig();
+			String config = (manifest.getSearchCriteria() instanceof WeasisIHESearchCriteria weasisIHE)
+					? weasisIHE.getConfig()
+					: (manifest.getSearchCriteria() instanceof WeasisArchiveSearchCriteria weasisArchive)
+							? weasisArchive.getConfig() : null;
 
 			LOG.info("Manifest with key %s has been retrieved".formatted(key),
 					kv("weasis.manifest.launch.time",
@@ -114,8 +116,7 @@ public class ManifestController {
 							(manifest.getSearchCriteria().getUser() != null)
 									? manifest.getSearchCriteria().getUser().toUpperCase() : null),
 					kv("request.client", manifest.getSearchCriteria().getClient()),
-					kv("request.component", request.getHeader("User-Agent")),
-					kv("request.config", config),
+					kv("request.component", request.getHeader("User-Agent")), kv("request.config", config),
 					kv("request.parameters", JacksonUtil.serializeIntoJson(manifest.getSearchCriteria())),
 					kv("manifest.size", manifest.toString().length()));
 		}

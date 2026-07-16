@@ -64,6 +64,7 @@ class SlicerDisplayServiceImplTest {
 	private OAuth2AuthenticationToken oAuth2Authentication;
 
 	private Command command;
+
 	private Map<String, ConnectorServerProperty> archivesConfig;
 
 	@BeforeEach
@@ -73,10 +74,10 @@ class SlicerDisplayServiceImplTest {
 		command.setContext("viewer");
 
 		ConnectorServerProperty archiveProperty = ConnectorServerProperty.builder()
-				.url("http://dicomweb-server.com")
-				.port("8080")
-				.context("/dicomweb")
-				.build();
+			.url("http://dicomweb-server.com")
+			.port("8080")
+			.context("/dicomweb")
+			.build();
 
 		archivesConfig = new HashMap<>();
 		archivesConfig.put("test-archive", archiveProperty);
@@ -179,17 +180,16 @@ class SlicerDisplayServiceImplTest {
 		assertTrue(result.contains("studyUID=1.2.3.4.5"));
 	}
 
-
 	// ========== Tests with server without port ==========
 
 	@Test
 	void when_retrieveSlicerLaunchUrl_with_serverWithoutPort_should_returnValidUrl() {
 		// Given
 		ConnectorServerProperty serverPropertyNoPort = ConnectorServerProperty.builder()
-				.url("http://dicomweb-server.com")
-				.port(null)
-				.context("/dicomweb")
-				.build();
+			.url("http://dicomweb-server.com")
+			.port(null)
+			.context("/dicomweb")
+			.build();
 
 		archivesConfig.put("test-archive", serverPropertyNoPort);
 
@@ -225,10 +225,10 @@ class SlicerDisplayServiceImplTest {
 	void when_retrieveSlicerLaunchUrl_with_serverWithoutContext_should_returnValidUrl() {
 		// Given
 		ConnectorServerProperty serverPropertyNoContext = ConnectorServerProperty.builder()
-				.url("http://dicomweb-server.com")
-				.port("8080")
-				.context(null)
-				.build();
+			.url("http://dicomweb-server.com")
+			.port("8080")
+			.context(null)
+			.build();
 
 		archivesConfig.put("test-archive", serverPropertyNoContext);
 
@@ -286,7 +286,8 @@ class SlicerDisplayServiceImplTest {
 		when(connectorService.retrieveFirstDefaultOrFirstSpecificConnector(any())).thenReturn("test-archive");
 
 		// When
-		String result = slicerDisplayService.retrieveSlicerLaunchUrl(searchCriteria, patientsByArchive, oAuth2Authentication);
+		String result = slicerDisplayService.retrieveSlicerLaunchUrl(searchCriteria, patientsByArchive,
+				oAuth2Authentication);
 
 		// Then
 		assertNotNull(result);
@@ -370,8 +371,8 @@ class SlicerDisplayServiceImplTest {
 		Map<String, Set<Patient>> patientsByArchive = new HashMap<>();
 
 		// When & Then
-		ParameterException exception = assertThrows(ParameterException.class, () ->
-				slicerDisplayService.retrieveSlicerLaunchUrl(searchCriteria, patientsByArchive, authentication));
+		ParameterException exception = assertThrows(ParameterException.class,
+				() -> slicerDisplayService.retrieveSlicerLaunchUrl(searchCriteria, patientsByArchive, authentication));
 
 		assertTrue(exception.getMessage().contains("3D Slicer supports only one archive parameter"));
 	}
@@ -389,8 +390,8 @@ class SlicerDisplayServiceImplTest {
 		when(connectorService.retrieveFirstDefaultOrFirstSpecificConnector(any())).thenReturn(null);
 
 		// When & Then
-		ParameterException exception = assertThrows(ParameterException.class, () ->
-				slicerDisplayService.retrieveSlicerLaunchUrl(searchCriteria, patientsByArchive, authentication));
+		ParameterException exception = assertThrows(ParameterException.class,
+				() -> slicerDisplayService.retrieveSlicerLaunchUrl(searchCriteria, patientsByArchive, authentication));
 
 		assertNotNull(exception.getMessage());
 	}
@@ -406,8 +407,8 @@ class SlicerDisplayServiceImplTest {
 		when(connectorService.retrieveFirstDefaultOrFirstSpecificConnector(any())).thenReturn("test-archive");
 
 		// When & Then
-		ParameterException exception = assertThrows(ParameterException.class, () ->
-				slicerDisplayService.retrieveSlicerLaunchUrl(searchCriteria, null, authentication));
+		ParameterException exception = assertThrows(ParameterException.class,
+				() -> slicerDisplayService.retrieveSlicerLaunchUrl(searchCriteria, null, authentication));
 
 		assertNotNull(exception.getMessage());
 	}
@@ -426,8 +427,8 @@ class SlicerDisplayServiceImplTest {
 		when(connectorService.retrieveFirstDefaultOrFirstSpecificConnector(any())).thenReturn("test-archive");
 
 		// When & Then
-		ParameterException exception = assertThrows(ParameterException.class, () ->
-				slicerDisplayService.retrieveSlicerLaunchUrl(searchCriteria, patientsByArchive, authentication));
+		ParameterException exception = assertThrows(ParameterException.class,
+				() -> slicerDisplayService.retrieveSlicerLaunchUrl(searchCriteria, patientsByArchive, authentication));
 
 		assertNotNull(exception.getMessage());
 	}
@@ -446,8 +447,8 @@ class SlicerDisplayServiceImplTest {
 		when(connectorService.retrieveFirstDefaultOrFirstSpecificConnector(any())).thenReturn("test-archive");
 
 		// When & Then
-		ParameterException exception = assertThrows(ParameterException.class, () ->
-				slicerDisplayService.retrieveSlicerLaunchUrl(searchCriteria, patientsByArchive, authentication));
+		ParameterException exception = assertThrows(ParameterException.class,
+				() -> slicerDisplayService.retrieveSlicerLaunchUrl(searchCriteria, patientsByArchive, authentication));
 
 		assertNotNull(exception.getMessage());
 	}
@@ -472,8 +473,8 @@ class SlicerDisplayServiceImplTest {
 		when(connectorService.retrieveFirstDefaultOrFirstSpecificConnector(any())).thenReturn("test-archive");
 
 		// When & Then
-		ParameterException exception = assertThrows(ParameterException.class, () ->
-				slicerDisplayService.retrieveSlicerLaunchUrl(searchCriteria, patientsByArchive, authentication));
+		ParameterException exception = assertThrows(ParameterException.class,
+				() -> slicerDisplayService.retrieveSlicerLaunchUrl(searchCriteria, patientsByArchive, authentication));
 
 		assertTrue(exception.getMessage().contains("3D Slicer supports only one study UID parameter"));
 	}
@@ -496,8 +497,8 @@ class SlicerDisplayServiceImplTest {
 		when(connectorService.retrieveFirstDefaultOrFirstSpecificConnector(any())).thenReturn("test-archive");
 
 		// When & Then
-		ParameterException exception = assertThrows(ParameterException.class, () ->
-				slicerDisplayService.retrieveSlicerLaunchUrl(searchCriteria, patientsByArchive, authentication));
+		ParameterException exception = assertThrows(ParameterException.class,
+				() -> slicerDisplayService.retrieveSlicerLaunchUrl(searchCriteria, patientsByArchive, authentication));
 
 		assertTrue(exception.getMessage().contains("3D Slicer supports only one study UID parameter"));
 	}
@@ -527,8 +528,8 @@ class SlicerDisplayServiceImplTest {
 		when(connectorService.retrieveFirstDefaultOrFirstSpecificConnector(any())).thenReturn("test-archive");
 
 		// When & Then
-		ParameterException exception = assertThrows(ParameterException.class, () ->
-				slicerDisplayService.retrieveSlicerLaunchUrl(searchCriteria, patientsByArchive, authentication));
+		ParameterException exception = assertThrows(ParameterException.class,
+				() -> slicerDisplayService.retrieveSlicerLaunchUrl(searchCriteria, patientsByArchive, authentication));
 
 		assertTrue(exception.getMessage().contains("No studies found"));
 	}
@@ -555,8 +556,8 @@ class SlicerDisplayServiceImplTest {
 		when(connectorService.retrieveFirstDefaultOrFirstSpecificConnector(any())).thenReturn("test-archive");
 
 		// When & Then
-		ParameterException exception = assertThrows(ParameterException.class, () ->
-				slicerDisplayService.retrieveSlicerLaunchUrl(searchCriteria, patientsByArchive, authentication));
+		ParameterException exception = assertThrows(ParameterException.class,
+				() -> slicerDisplayService.retrieveSlicerLaunchUrl(searchCriteria, patientsByArchive, authentication));
 
 		assertTrue(exception.getMessage().contains("3D Slicer only supports to display one study"));
 	}
@@ -579,8 +580,8 @@ class SlicerDisplayServiceImplTest {
 		when(connectorService.retrieveFirstDefaultOrFirstSpecificConnector(any())).thenReturn("test-archive");
 
 		// When & Then
-		ParameterException exception = assertThrows(ParameterException.class, () ->
-				slicerDisplayService.retrieveSlicerLaunchUrl(searchCriteria, patientsByArchive, authentication));
+		ParameterException exception = assertThrows(ParameterException.class,
+				() -> slicerDisplayService.retrieveSlicerLaunchUrl(searchCriteria, patientsByArchive, authentication));
 
 		assertTrue(exception.getMessage().contains("No studies found"));
 	}
@@ -612,12 +613,11 @@ class SlicerDisplayServiceImplTest {
 		when(connectorService.retrieveFirstDefaultOrFirstSpecificConnector(any())).thenReturn("test-archive");
 
 		// When & Then
-		NoContentException exception = assertThrows(NoContentException.class, () ->
-				slicerDisplayService.retrieveSlicerLaunchUrl(searchCriteria, patientsByArchive, authentication));
+		NoContentException exception = assertThrows(NoContentException.class,
+				() -> slicerDisplayService.retrieveSlicerLaunchUrl(searchCriteria, patientsByArchive, authentication));
 
 		assertTrue(exception.getMessage().contains("Study UID not found for Slicer Launch Url"));
 	}
-
 
 	// ========== Helper methods ==========
 
@@ -627,18 +627,18 @@ class SlicerDisplayServiceImplTest {
 
 		Set<Serie> series = new HashSet<>();
 		Serie serie = Serie.builder()
-				.instances(new HashSet<>())
-				.seriesInstanceUID("1.2.3.4.5.1")
-				.seriesDescription("Test Series")
-				.modality("CT")
-				.build();
+			.instances(new HashSet<>())
+			.seriesInstanceUID("1.2.3.4.5.1")
+			.seriesDescription("Test Series")
+			.modality("CT")
+			.build();
 		series.add(serie);
 
 		Study study = Study.builder()
-				.studyInstanceUID(studyInstanceUID)
-				.studyDescription("Test Study")
-				.series(series)
-				.build();
+			.studyInstanceUID(studyInstanceUID)
+			.studyDescription("Test Study")
+			.series(series)
+			.build();
 
 		Set<Study> studies = new HashSet<>();
 		studies.add(study);
@@ -655,23 +655,23 @@ class SlicerDisplayServiceImplTest {
 		for (String studyUID : studyInstanceUIDs) {
 			Set<Serie> series = new HashSet<>();
 			Serie serie = Serie.builder()
-					.instances(new HashSet<>())
-					.seriesInstanceUID("1.2.3.4.5.1")
-					.seriesDescription("Test Series")
-					.modality("CT")
-					.build();
+				.instances(new HashSet<>())
+				.seriesInstanceUID("1.2.3.4.5.1")
+				.seriesDescription("Test Series")
+				.modality("CT")
+				.build();
 			series.add(serie);
 
 			Study study = Study.builder()
-					.studyInstanceUID(studyUID)
-					.studyDescription("Test Study")
-					.series(series)
-					.build();
+				.studyInstanceUID(studyUID)
+				.studyDescription("Test Study")
+				.series(series)
+				.build();
 			studies.add(study);
 		}
 		patient.setStudies(studies);
 
 		return patient;
 	}
-}
 
+}

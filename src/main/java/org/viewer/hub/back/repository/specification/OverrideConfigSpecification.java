@@ -18,6 +18,7 @@ import org.viewer.hub.front.views.weasis.bundle.override.component.OverrideConfi
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Override config specification: used to look for entries depending on criteria
@@ -81,9 +82,10 @@ public class OverrideConfigSpecification implements Specification<OverrideConfig
 				&& StringUtils.isNotBlank(this.overrideConfigFilter.getPackageVersion())) {
 			predicates.add(criteriaBuilder.or(
 					criteriaBuilder.like(criteriaBuilder.upper(pPackageVersionVersionNumber),
-							LIKE + this.overrideConfigFilter.getPackageVersion().trim().toUpperCase() + LIKE),
-					criteriaBuilder.like(criteriaBuilder.upper(pPackageVersionQualifier),
-							LIKE + this.overrideConfigFilter.getPackageVersion().trim().toUpperCase() + LIKE)));
+							LIKE + this.overrideConfigFilter.getPackageVersion().trim().toUpperCase(Locale.ROOT)
+									+ LIKE),
+					criteriaBuilder.like(criteriaBuilder.upper(pPackageVersionQualifier), LIKE
+							+ this.overrideConfigFilter.getPackageVersion().trim().toUpperCase(Locale.ROOT) + LIKE)));
 		}
 	}
 
@@ -98,7 +100,7 @@ public class OverrideConfigSpecification implements Specification<OverrideConfig
 		if (this.overrideConfigFilter.getLaunchConfig() != null
 				&& StringUtils.isNotBlank(this.overrideConfigFilter.getLaunchConfig())) {
 			predicates.add(criteriaBuilder.or(criteriaBuilder.like(criteriaBuilder.upper(pLaunchConfigName),
-					LIKE + this.overrideConfigFilter.getLaunchConfig().trim().toUpperCase() + LIKE)));
+					LIKE + this.overrideConfigFilter.getLaunchConfig().trim().toUpperCase(Locale.ROOT) + LIKE)));
 		}
 	}
 
@@ -113,7 +115,7 @@ public class OverrideConfigSpecification implements Specification<OverrideConfig
 		if (this.overrideConfigFilter.getGroup() != null
 				&& StringUtils.isNotBlank(this.overrideConfigFilter.getGroup())) {
 			predicates.add(criteriaBuilder.or(criteriaBuilder.like(criteriaBuilder.upper(pTargetName),
-					LIKE + this.overrideConfigFilter.getGroup().trim().toUpperCase() + LIKE)));
+					LIKE + this.overrideConfigFilter.getGroup().trim().toUpperCase(Locale.ROOT) + LIKE)));
 		}
 	}
 

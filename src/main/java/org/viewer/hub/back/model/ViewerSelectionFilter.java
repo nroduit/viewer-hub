@@ -25,12 +25,12 @@ public class ViewerSelectionFilter {
 	@Schema(description = "Modality", name = "modality", type = "String", example = "CT,ES,MR")
 	private String modality;
 
-	@Schema(description = "Name of the archive associated to the viewer selection rule", name = "archive", type = "String",
-			example = "dcm4chee")
+	@Schema(description = "Name of the archive associated to the viewer selection rule", name = "archive",
+			type = "String", example = "dcm4chee")
 	private String archive;
 
-	@Schema(description = "Code of the viewer associated to the rule",
-			name = "viewer", type = "String", example = "WEASIS")
+	@Schema(description = "Code of the viewer associated to the rule", name = "viewer", type = "String",
+			example = "WEASIS")
 	private String viewer;
 
 }

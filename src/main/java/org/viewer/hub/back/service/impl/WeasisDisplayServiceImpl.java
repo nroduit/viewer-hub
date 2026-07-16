@@ -23,7 +23,6 @@ import org.viewer.hub.back.constant.EndPoint;
 import org.viewer.hub.back.constant.ParamName;
 import org.viewer.hub.back.model.manifest.Manifest;
 import org.viewer.hub.back.model.patient.Patient;
-import org.viewer.hub.back.model.searchcriteria.IHESearchCriteria;
 import org.viewer.hub.back.model.searchcriteria.SearchCriteria;
 import org.viewer.hub.back.model.searchcriteria.WeasisArchiveSearchCriteria;
 import org.viewer.hub.back.model.searchcriteria.WeasisIHESearchCriteria;
@@ -54,14 +53,23 @@ public class WeasisDisplayServiceImpl implements WeasisDisplayService {
 	private String viewerHubServerUrl;
 
 	@Autowired
-	public WeasisDisplayServiceImpl(final CacheService cacheService, final WeasisService weasisService, final WeasisConfigurationProperties weasisConfigurationProperties) {
+	public WeasisDisplayServiceImpl(final CacheService cacheService, final WeasisService weasisService,
+			final WeasisConfigurationProperties weasisConfigurationProperties) {
 		this.cacheService = cacheService;
 		this.weasisService = weasisService;
 		this.weasisConfigurationProperties = weasisConfigurationProperties;
 	}
 
 	@Override
-	public String retrieveWeasisLaunchUrl(@Valid SearchCriteria searchCriteria, Map<String, Set<Patient>> patientsByArchive, Authentication authentication) {
+	public String retrieveWeasisLaunchUrl(@Valid SearchCriteria searchCriteria,
+			Map<String, Set<Patient>> patientsByArchive, Authentication authentication) {
+		// Use to by pass the retrieval of the Weasis from the cache and force to rebuild
+		// it
+		boolean skipWeasisManifestCache = (searchCriteria instanceof WeasisIHESearchCriteria weasisIHE)
+				? weasisIHE.isSkipWeasisManifestCache()
+				: ((searchCriteria instanceof WeasisArchiveSearchCriteria weasisArchive)
+						&& weasisArchive.isSkipWeasisManifestCache());
+
 		// Hash parameters to build the key
 		String key = this.cacheService.constructManifestKeyDependingOnSearchParameters(searchCriteria);
 
@@ -72,8 +80,9 @@ public class WeasisDisplayServiceImpl implements WeasisDisplayService {
 
 		// If no build of manifest in progress for this key
 		if (!isBuildInProgress) {
-			// Case no manifest built yet: build the manifest asynchronously
-			if (manifest == null) {
+			// Case no manifest built yet or skip cache requested: build the manifest
+			// asynchronously
+			if (manifest == null || skipWeasisManifestCache) {
 				this.weasisService.buildManifest(key, searchCriteria, patientsByArchive, authentication);
 			}
 			// Case manifest already built and in the cache: reset structured arguments
@@ -126,7 +135,7 @@ public class WeasisDisplayServiceImpl implements WeasisDisplayService {
 	 */
 	private String buildWeasisProtocolCommand(String dicomGetOrArgumentCommand, String weasisConfigCommand) {
 		return "%s%s".formatted(weasisConfigurationProperties.getCommand().getProtocol(), URLEncoder
-                .encode("%s %s".formatted(dicomGetOrArgumentCommand, weasisConfigCommand), StandardCharsets.UTF_8));
+			.encode("%s %s".formatted(dicomGetOrArgumentCommand, weasisConfigCommand), StandardCharsets.UTF_8));
 	}
 
 	/**
@@ -136,9 +145,9 @@ public class WeasisDisplayServiceImpl implements WeasisDisplayService {
 	 * @return weasis argument commands
 	 */
 	private String retrieveArgumentCommands(SearchCriteria searchCriteria) {
-		List<String> args = searchCriteria instanceof IHESearchCriteria
-				? ((WeasisIHESearchCriteria) searchCriteria).getArg()
-				: ((WeasisArchiveSearchCriteria) searchCriteria).getArg();
+		List<String> args = searchCriteria instanceof WeasisIHESearchCriteria weasisIHE ? weasisIHE.getArg()
+				: searchCriteria instanceof WeasisArchiveSearchCriteria weasisArchive ? weasisArchive.getArg()
+						: List.of();
 		return args != null && !args.isEmpty() ? String.join(StringUtil.SPACE, args) : null;
 	}
 
@@ -155,7 +164,8 @@ public class WeasisDisplayServiceImpl implements WeasisDisplayService {
 			.queryParam(ParamName.KEY, key);
 
 		// Weasis dicom get command
-		return "%s \"%s\"".formatted(weasisConfigurationProperties.getCommand().getGet(), uriBuilderRetrieveManifest.toUriString());
+		return "%s \"%s\"".formatted(weasisConfigurationProperties.getCommand().getGet(),
+				uriBuilderRetrieveManifest.toUriString());
 	}
 
 	/**
@@ -172,14 +182,14 @@ public class WeasisDisplayServiceImpl implements WeasisDisplayService {
 		// EndPoint.PREFERENCES_PATH);
 
 		// Pro
-		List<String> props = searchCriteria instanceof IHESearchCriteria
-				? ((WeasisIHESearchCriteria) searchCriteria).getPro()
-				: ((WeasisArchiveSearchCriteria) searchCriteria).getPro();
+		List<String> props = searchCriteria instanceof WeasisIHESearchCriteria weasisIHE ? weasisIHE.getPro()
+				: searchCriteria instanceof WeasisArchiveSearchCriteria weasisArchive ? weasisArchive.getPro()
+						: List.of();
 
 		// Config
-		String config = searchCriteria instanceof IHESearchCriteria
-				? ((WeasisIHESearchCriteria) searchCriteria).getConfig()
-				: ((WeasisArchiveSearchCriteria) searchCriteria).getConfig();
+		String config = searchCriteria instanceof WeasisIHESearchCriteria weasisIHE ? weasisIHE.getConfig()
+				: searchCriteria instanceof WeasisArchiveSearchCriteria weasisArchive ? weasisArchive.getConfig()
+						: null;
 
 		// Add additional params if existing in initial request
 		// Properties
@@ -200,7 +210,8 @@ public class WeasisDisplayServiceImpl implements WeasisDisplayService {
 		}
 
 		// Weasis config command
-		return "%s\"%s\"".formatted(weasisConfigurationProperties.getCommand().getConfig(), uriBuilderLaunchConfig.toUriString());
+		return "%s\"%s\"".formatted(weasisConfigurationProperties.getCommand().getConfig(),
+				uriBuilderLaunchConfig.toUriString());
 	}
 
 }

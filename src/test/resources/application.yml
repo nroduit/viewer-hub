@@ -16,15 +16,41 @@ spring:
 viewer-hub:
   server:
     url: ${BACKEND_URI}
+
 weasis:
   server:
     url: ${BACKEND_URI}
+  command:
+    protocol: weasis
+    context: $dicom:get
+    config: $weasis:config
+    get: $dicom:get
   #  - Weasis package versions
   package:
     version:
       default:
         number: 1.0.0
         qualifier: -TEST
+
+slicer:
+  command:
+    protocol: slicer://
+    context: viewer
+  archives:
+    test:
+      url: http://localhost
+      port: 8080
+      context: /dicomweb
+
+microdicom:
+  command:
+    protocol: microdicom://
+    context: viewer
+  archives:
+    test:
+      url: http://localhost
+      port: 8080
+      context: /dicomweb
 
 #  - Connectors
 connector:

@@ -24,14 +24,17 @@ import java.util.Set;
 public interface WeasisDisplayService {
 
 	/**
-	 * Retrieve url which will launch Weasis with the key of the manifest in the cache.
-	 * If patientsByArchive is null this method will call the connector service to get the list of patients matching the search criteria.
-	 * If patientsByArchive is not null this method will not call the connector service: the list of patients matching the search criteria in parameter will be used to fill the manifest.
+	 * Retrieve url which will launch Weasis with the key of the manifest in the cache. If
+	 * patientsByArchive is null this method will call the connector service to get the
+	 * list of patients matching the search criteria. If patientsByArchive is not null
+	 * this method will not call the connector service: the list of patients matching the
+	 * search criteria in parameter will be used to fill the manifest.
 	 * @param searchCriteria search criteria
 	 * @param patientsByArchive map of patients by archive
 	 * @param authentication Authentication
 	 * @return url which will launch Weasis
 	 */
-	String retrieveWeasisLaunchUrl(SearchCriteria searchCriteria, Map<String, Set<Patient>> patientsByArchive, Authentication authentication);
+	String retrieveWeasisLaunchUrl(SearchCriteria searchCriteria, Map<String, Set<Patient>> patientsByArchive,
+			Authentication authentication);
 
 }

@@ -1,0 +1,80 @@
+spring:
+  application:
+    name: viewer-hub
+  cloud:
+    config:
+      enabled: false
+  liquibase:
+    enabled: false
+
+viewer-hub:
+  server:
+    url: http://localhost:8080
+
+weasis:
+  server:
+    url: http://localhost:8080
+  command:
+    protocol: weasis
+    context: $dicom:get
+    config: $weasis:config
+    get: $dicom:get
+  package:
+    version:
+      default:
+        number: 1.0.0
+        qualifier: -TEST
+
+slicer:
+  command:
+    protocol: slicer://
+    context: viewer
+  archives:
+    test:
+      url: http://localhost
+      port: 8080
+      context: /dicomweb
+
+microdicom:
+  command:
+    protocol: microdicom://
+    context: viewer
+  archives:
+    test:
+      url: http://localhost
+      port: 8080
+      context: /dicomweb
+
+connector:
+  default: test
+  config:
+    test:
+      type: DICOM
+      search-criteria:
+        deactivated:
+      weasis:
+        manifest:
+          transfer-syntax-uid: '*'
+      dicom-connector:
+        dimse:
+          calling-aet: test
+          aet: test
+          host: test
+          port: 00001
+        wado:
+          authentication:
+            type: BASIC
+            oauth2:
+              oidc-id: test
+              server:
+                url: test
+                port:
+                context:
+            basic:
+              login: test
+              password: test
+              server:
+                url: test
+                port:
+                context:
+

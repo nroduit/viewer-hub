@@ -61,10 +61,10 @@ class MicroDicomDisplayServiceImplTest {
 		command.setContext("");
 
 		ConnectorServerProperty archiveProperty = ConnectorServerProperty.builder()
-				.context("PACS")
-				.url("localhost")
-				.port("11112")
-				.build();
+			.context("PACS")
+			.url("localhost")
+			.port("11112")
+			.build();
 
 		archivesConfig = new HashMap<>();
 		archivesConfig.put("test-archive", archiveProperty);
@@ -239,17 +239,16 @@ class MicroDicomDisplayServiceImplTest {
 		assertTrue(result.contains("P001"));
 	}
 
-
 	// ========== Tests with archive without port ==========
 
 	@Test
 	void when_retrieveMicroDicomLaunchUrl_with_archiveWithoutPort_should_returnValidUrl() {
 		// Given
 		ConnectorServerProperty archivePropertyNoPort = ConnectorServerProperty.builder()
-				.context("PACS")
-				.url("localhost")
-				.port(null)
-				.build();
+			.context("PACS")
+			.url("localhost")
+			.port(null)
+			.build();
 
 		archivesConfig.put("test-archive-no-port", archivePropertyNoPort);
 
@@ -321,8 +320,8 @@ class MicroDicomDisplayServiceImplTest {
 		Map<String, Set<Patient>> patientsByArchive = new HashMap<>();
 
 		// When & Then
-		ParameterException exception = assertThrows(ParameterException.class, () ->
-				microDicomDisplayService.retrieveMicroDicomLaunchUrl(searchCriteria, patientsByArchive));
+		ParameterException exception = assertThrows(ParameterException.class,
+				() -> microDicomDisplayService.retrieveMicroDicomLaunchUrl(searchCriteria, patientsByArchive));
 
 		assertTrue(exception.getMessage().contains("Micro Dicom supports only one archive parameter"));
 	}
@@ -343,8 +342,8 @@ class MicroDicomDisplayServiceImplTest {
 		Map<String, Set<Patient>> patientsByArchive = new HashMap<>();
 
 		// When & Then
-		ParameterException exception = assertThrows(ParameterException.class, () ->
-				microDicomDisplayService.retrieveMicroDicomLaunchUrl(searchCriteria, patientsByArchive));
+		ParameterException exception = assertThrows(ParameterException.class,
+				() -> microDicomDisplayService.retrieveMicroDicomLaunchUrl(searchCriteria, patientsByArchive));
 
 		assertTrue(exception.getMessage().contains("MicroDicom supports only one PatientId"));
 	}
@@ -368,8 +367,8 @@ class MicroDicomDisplayServiceImplTest {
 		Map<String, Set<Patient>> patientsByArchive = new HashMap<>();
 
 		// When & Then
-		ParameterException exception = assertThrows(ParameterException.class, () ->
-				microDicomDisplayService.retrieveMicroDicomLaunchUrl(searchCriteria, patientsByArchive));
+		ParameterException exception = assertThrows(ParameterException.class,
+				() -> microDicomDisplayService.retrieveMicroDicomLaunchUrl(searchCriteria, patientsByArchive));
 
 		assertTrue(exception.getMessage().contains("MicroDicom supports only one PatientId"));
 	}
@@ -399,8 +398,8 @@ class MicroDicomDisplayServiceImplTest {
 		when(connectorService.retrieveFirstDefaultOrFirstSpecificConnector(any())).thenReturn("test-archive");
 
 		// When & Then
-		NoContentException exception = assertThrows(NoContentException.class, () ->
-				microDicomDisplayService.retrieveMicroDicomLaunchUrl(searchCriteria, patientsByArchive));
+		NoContentException exception = assertThrows(NoContentException.class,
+				() -> microDicomDisplayService.retrieveMicroDicomLaunchUrl(searchCriteria, patientsByArchive));
 
 		assertTrue(exception.getMessage().contains("Study UID not found"));
 	}
@@ -423,8 +422,8 @@ class MicroDicomDisplayServiceImplTest {
 		when(connectorService.retrieveFirstDefaultOrFirstSpecificConnector(any())).thenReturn("test-archive");
 
 		// When & Then
-		ParameterException exception = assertThrows(ParameterException.class, () ->
-				microDicomDisplayService.retrieveMicroDicomLaunchUrl(searchCriteria, patientsByArchive));
+		ParameterException exception = assertThrows(ParameterException.class,
+				() -> microDicomDisplayService.retrieveMicroDicomLaunchUrl(searchCriteria, patientsByArchive));
 
 		assertTrue(exception.getMessage().contains("No patient found"));
 	}
@@ -447,8 +446,8 @@ class MicroDicomDisplayServiceImplTest {
 		when(connectorService.retrieveFirstDefaultOrFirstSpecificConnector(any())).thenReturn("test-archive");
 
 		// When & Then
-		ParameterException exception = assertThrows(ParameterException.class, () ->
-				microDicomDisplayService.retrieveMicroDicomLaunchUrl(searchCriteria, patientsByArchive));
+		ParameterException exception = assertThrows(ParameterException.class,
+				() -> microDicomDisplayService.retrieveMicroDicomLaunchUrl(searchCriteria, patientsByArchive));
 
 		assertTrue(exception.getMessage().contains("No patient found"));
 	}
@@ -468,8 +467,8 @@ class MicroDicomDisplayServiceImplTest {
 		when(connectorService.retrieveFirstDefaultOrFirstSpecificConnector(any())).thenReturn("test-archive");
 
 		// When & Then
-		ParameterException exception = assertThrows(ParameterException.class, () ->
-				microDicomDisplayService.retrieveMicroDicomLaunchUrl(searchCriteria, null));
+		ParameterException exception = assertThrows(ParameterException.class,
+				() -> microDicomDisplayService.retrieveMicroDicomLaunchUrl(searchCriteria, null));
 
 		assertTrue(exception.getMessage().contains("No patient found"));
 	}
@@ -482,18 +481,18 @@ class MicroDicomDisplayServiceImplTest {
 
 		Set<Serie> series = new HashSet<>();
 		Serie serie = Serie.builder()
-				.instances(new HashSet<>())
-				.seriesInstanceUID("1.2.3.4.5.1")
-				.seriesDescription("Test Series")
-				.modality("CT")
-				.build();
+			.instances(new HashSet<>())
+			.seriesInstanceUID("1.2.3.4.5.1")
+			.seriesDescription("Test Series")
+			.modality("CT")
+			.build();
 		series.add(serie);
 
 		Study study = Study.builder()
-				.studyInstanceUID(studyInstanceUID)
-				.studyDescription("Test Study")
-				.series(series)
-				.build();
+			.studyInstanceUID(studyInstanceUID)
+			.studyDescription("Test Study")
+			.series(series)
+			.build();
 
 		Set<Study> studies = new HashSet<>();
 		studies.add(study);
@@ -501,5 +500,5 @@ class MicroDicomDisplayServiceImplTest {
 
 		return patient;
 	}
-}
 
+}

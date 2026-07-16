@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2022-2025 Weasis Team and other contributors.
+ *  Copyright (c) 2022-2026 Weasis Team and other contributors.
  *
  *  This program and the accompanying materials are made available under the terms of the Eclipse
  *  Public License 2.0 which is available at https://www.eclipse.org/legal/epl-2.0, or the Apache
@@ -71,7 +71,7 @@ class LaunchConfigControllerIntegrationTests {
 	void shouldRetrieveLaunchesByHostUserConfigOrderByTargetsAndFiltered() throws Exception {
 		// Mocked data
 		MultiValueMap<String, String> propertiesMap = new LinkedMultiValueMap<>();
-		propertiesMap.add(PreferredType.EXT_CFG.getCode(), "alternatecdb");
+		propertiesMap.add(PreferredType.CONFIG.getCode(), "alternatecdb");
 		propertiesMap.add("svr", "http://example.org");
 		propertiesMap.add("pro", "weasis.i18n ${svr}/weasis-i18n\n");
 		propertiesMap.add("cfgExt", "${cdbExt}/conf/ext-config${extCfg!}.properties");

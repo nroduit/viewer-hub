@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2022-2025 Weasis Team and other contributors.
+ *  Copyright (c) 2022-2026 Weasis Team and other contributors.
  *
  *  This program and the accompanying materials are made available under the terms of the Eclipse
  *  Public License 2.0 which is available at https://www.eclipse.org/legal/epl-2.0, or the Apache
@@ -48,8 +48,8 @@ public class DbConnectorQueryServiceImpl implements DbConnectorQueryService {
 	@Override
 	public Set<Patient> retrievePatientsFromPatientIdsDbConnector(Set<String> patientIds,
 			@Valid ConnectorProperty connector) {
-		return this.retrieveDbConnectorResults(connector, DbQueryConstant.PARAM_PATIENT_IDS,
-				patientIds, connector.getDbConnector().getQuery().getPatientIdColumn(), DbQueryConstant.IN_PATIENT_ID);
+		return this.retrieveDbConnectorResults(connector, DbQueryConstant.PARAM_PATIENT_IDS, patientIds,
+				connector.getDbConnector().getQuery().getPatientIdColumn(), DbQueryConstant.IN_PATIENT_ID);
 	}
 
 	@Override
@@ -132,7 +132,7 @@ public class DbConnectorQueryServiceImpl implements DbConnectorQueryService {
 			// Studies
 			patients.forEach(patient -> patient.setStudies(dbConnectorResults.stream()
 				.filter(rs -> Objects.equals(rs.getPatientId(), patient.getPatientID()))
-				.map(rsp -> new Study(rsp.getStudyInstanceUid(), rsp.getStudyDescription(), rsp.getStudyDate(),
+				.map(rsp -> new Study(rsp.getStudyInstanceUid(), rsp.getStudyDescription(), rsp.getStudyDateTime(),
 						rsp.getAccessionNumber(), rsp.getStudyId(), rsp.getReferringPhysicianName()))
 				.collect(Collectors.toSet())));
 
@@ -141,7 +141,8 @@ public class DbConnectorQueryServiceImpl implements DbConnectorQueryService {
 				.forEach(study -> study.setSeries(dbConnectorResults.stream()
 					.filter(rs -> Objects.equals(rs.getStudyInstanceUid(), study.getStudyInstanceUID()))
 					.map(rss -> new Serie(rss.getSeriesInstanceUid(), rss.getSeriesDescription(), rss.getSeriesNumber(),
-							rss.getModality(), connector.getWeasis().getManifest().getTransferSyntaxUid(),
+							rss.getModality(), rss.getSeriesDateTime(),
+							connector.getWeasis().getManifest().getTransferSyntaxUid(),
 							connector.getWeasis().getManifest().getCompressionRate()))
 					.collect(Collectors.toSet()))));
 
@@ -150,7 +151,8 @@ public class DbConnectorQueryServiceImpl implements DbConnectorQueryService {
 				.forEach(study -> study.getSeries()
 					.forEach(serie -> serie.setInstances(dbConnectorResults.stream()
 						.filter(rs -> Objects.equals(rs.getSeriesInstanceUid(), serie.getSeriesInstanceUID()))
-						.map(rss -> new Instance(rss.getSopInstanceUid(), rss.getInstanceNumber()))
+						.map(rss -> new Instance(rss.getSopInstanceUid(), rss.getSopClassUid(), rss.getInstanceNumber(),
+								null))
 						.collect(Collectors.toSet())))));
 		}
 

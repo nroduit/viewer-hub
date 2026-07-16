@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2022-2025 Weasis Team and other contributors.
+ *  Copyright (c) 2022-2026 Weasis Team and other contributors.
  *
  *  This program and the accompanying materials are made available under the terms of the Eclipse
  *  Public License 2.0 which is available at https://www.eclipse.org/legal/epl-2.0, or the Apache
@@ -17,14 +17,20 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
-import org.viewer.hub.back.config.properties.*;
+import org.viewer.hub.back.config.properties.ConnectorConfigurationProperties;
+import org.viewer.hub.back.config.properties.EnvironmentOverrideProperties;
+import org.viewer.hub.back.config.properties.MicroDicomConfigurationProperties;
+import org.viewer.hub.back.config.properties.OhifConfigurationProperties;
+import org.viewer.hub.back.config.properties.SlicerConfigurationProperties;
+import org.viewer.hub.back.config.properties.WeasisConfigurationProperties;
+import org.viewer.hub.back.config.properties.WeasisPackageDefaultConfigurationProperties;
 
 @SpringBootApplication
 @EnableAsync
 @EnableConfigurationProperties({ ConnectorConfigurationProperties.class,
 		WeasisPackageDefaultConfigurationProperties.class, EnvironmentOverrideProperties.class,
 		WeasisConfigurationProperties.class, OhifConfigurationProperties.class, SlicerConfigurationProperties.class,
-		MicroDicomConfigurationProperties.class})
+		MicroDicomConfigurationProperties.class })
 @EnableCaching
 @EnableScheduling
 public class ViewerHubApplication {
