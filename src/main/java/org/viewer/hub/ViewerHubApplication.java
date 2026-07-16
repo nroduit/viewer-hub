@@ -17,7 +17,13 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
-import org.viewer.hub.back.config.properties.*;
+import org.viewer.hub.back.config.properties.ConnectorConfigurationProperties;
+import org.viewer.hub.back.config.properties.EnvironmentOverrideProperties;
+import org.viewer.hub.back.config.properties.MicroDicomConfigurationProperties;
+import org.viewer.hub.back.config.properties.OhifConfigurationProperties;
+import org.viewer.hub.back.config.properties.SlicerConfigurationProperties;
+import org.viewer.hub.back.config.properties.WeasisConfigurationProperties;
+import org.viewer.hub.back.config.properties.WeasisPackageDefaultConfigurationProperties;
 
 @SpringBootApplication
 @EnableAsync
