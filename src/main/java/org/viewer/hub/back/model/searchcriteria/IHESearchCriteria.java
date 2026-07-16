@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2022-2025 Weasis Team and other contributors.
+ *  Copyright (c) 2022-2026 Weasis Team and other contributors.
  *
  *  This program and the accompanying materials are made available under the terms of the Eclipse
  *  Public License 2.0 which is available at https://www.eclipse.org/legal/epl-2.0, or the Apache
@@ -30,14 +30,9 @@ import java.util.stream.Stream;
 /**
  * Model which represents the search criteria when launching Weasis with a IHE query
  */
-@JsonTypeInfo(
-		use = JsonTypeInfo.Id.DEDUCTION,
-		defaultImpl= IHESearchCriteria.class
-)
-@JsonSubTypes({
-		@JsonSubTypes.Type(value = WeasisIHESearchCriteria.class),
-		@JsonSubTypes.Type(value = IHESearchCriteria.class)
-})
+@JsonTypeInfo(use = JsonTypeInfo.Id.DEDUCTION, defaultImpl = IHESearchCriteria.class)
+@JsonSubTypes({ @JsonSubTypes.Type(value = WeasisIHESearchCriteria.class),
+		@JsonSubTypes.Type(value = IHESearchCriteria.class) })
 @Getter
 @RequiredIHEParameter
 @ToString
@@ -103,16 +98,16 @@ public class IHESearchCriteria extends SearchCriteria {
 		this.accessionNumber = StringUtil.splitCommaSeparatedValuesToList(accessionNumber);
 	}
 
-
-    /**
-     * Check if only one search criteria is filled with only one value
-     * @return true if only one search criteria is filled and has only one value
-     */
+	/**
+	 * Check if only one search criteria is filled with only one value
+	 * @return true if only one search criteria is filled and has only one value
+	 */
 	public boolean hasOnlyOneSearchCriteriaValue() {
-	    return Stream.of(patientID != null && !patientID.isBlank(),
-	                studyUID != null && studyUID.size() == 1,
-	                accessionNumber != null && accessionNumber.size() == 1)
-            .filter(val -> val) // keep only true values
+		return Stream
+			.of(patientID != null && !patientID.isBlank(), studyUID != null && studyUID.size() == 1,
+					accessionNumber != null && accessionNumber.size() == 1)
+			.filter(val -> val) // keep only true values
 			.count() == 1;
 	}
+
 }

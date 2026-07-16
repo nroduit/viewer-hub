@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2022-2025 Weasis Team and other contributors.
+ *  Copyright (c) 2022-2026 Weasis Team and other contributors.
  *
  *  This program and the accompanying materials are made available under the terms of the Eclipse
  *  Public License 2.0 which is available at https://www.eclipse.org/legal/epl-2.0, or the Apache
@@ -64,15 +64,17 @@ public class SecurityConfiguration {
 						AntPathRequestMatcher.antMatcher(EndPoint.DISPLAY_PATH + EndPoint.WEASIS_PATH),
 						AntPathRequestMatcher
 							.antMatcher(EndPoint.DISPLAY_PATH + EndPoint.IHE_INVOKE_IMAGE_DISPLAY_PATH),
-						AntPathRequestMatcher.antMatcher(EndPoint.GROUP_PATH + EndPoint.ALL_REMAINING_PATH),
+						// AntPathRequestMatcher.antMatcher(EndPoint.GROUP_PATH +
+						// EndPoint.ALL_REMAINING_PATH),
 						AntPathRequestMatcher.antMatcher(EndPoint.LAUNCH_CONFIG_PATH + EndPoint.ALL_REMAINING_PATH),
 						AntPathRequestMatcher.antMatcher(EndPoint.PREFERENCES_PATH + EndPoint.ALL_REMAINING_PATH),
 						AntPathRequestMatcher.antMatcher(EndPoint.MANIFEST_PATH + EndPoint.ALL_REMAINING_PATH),
-						AntPathRequestMatcher.antMatcher(EndPoint.MODULES_PATH + EndPoint.ALL_REMAINING_PATH),
+						// AntPathRequestMatcher.antMatcher(EndPoint.MODULES_PATH +
+						// EndPoint.ALL_REMAINING_PATH),
 						AntPathRequestMatcher.antMatcher(EndPoint.OVERRIDE_CONFIG_PATH + EndPoint.ALL_REMAINING_PATH),
-						AntPathRequestMatcher.antMatcher(EndPoint.PREFERENCES_PATH + EndPoint.ALL_REMAINING_PATH),
 						AntPathRequestMatcher.antMatcher(EndPoint.STATISTIC_PATH + EndPoint.ALL_REMAINING_PATH),
-						AntPathRequestMatcher.antMatcher(EndPoint.TARGET_PATH + EndPoint.ALL_REMAINING_PATH),
+						// AntPathRequestMatcher.antMatcher(EndPoint.TARGET_PATH +
+						// EndPoint.ALL_REMAINING_PATH),
 						// Resources for weasis
 						AntPathRequestMatcher.antMatcher(EndPoint.WEASIS_PATH + EndPoint.ALL_REMAINING_PATH))
 				.permitAll()

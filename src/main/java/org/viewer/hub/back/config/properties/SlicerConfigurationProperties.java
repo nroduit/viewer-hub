@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2022-2025 Weasis Team and other contributors.
+ *  Copyright (c) 2022-2026 Weasis Team and other contributors.
  *
  *  This program and the accompanying materials are made available under the terms of the Eclipse
  *  Public License 2.0 which is available at https://www.eclipse.org/legal/epl-2.0, or the Apache
@@ -27,10 +27,10 @@ import java.util.Map;
 @ConfigurationProperties(prefix = "slicer")
 public class SlicerConfigurationProperties {
 
-    @NotNull
-    private Command command;
+	@NotNull
+	private Command command;
 
-    @NotNull
-    private Map<String, ConnectorServerProperty> archives;
+	@NotNull
+	private Map<String, ConnectorServerProperty> archives;
 
 }

@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2022-2025 Weasis Team and other contributors.
+ *  Copyright (c) 2022-2026 Weasis Team and other contributors.
  *
  *  This program and the accompanying materials are made available under the terms of the Eclipse
  *  Public License 2.0 which is available at https://www.eclipse.org/legal/epl-2.0, or the Apache
@@ -23,17 +23,11 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.viewer.hub.back.constant.ApiVersion;
 import org.viewer.hub.back.constant.EndPoint;
 import org.viewer.hub.back.controller.exception.NotFoundException;
 import org.viewer.hub.back.entity.GroupEntity;
@@ -80,6 +74,12 @@ public class GroupController {
 		this.groupService = groupService;
 	}
 
+	/**
+	 * Associate users to the group in parameter
+	 * @param userGroupName User Group Name
+	 * @param userTargets User Targets to associate to the group in parameter
+	 * @return The response of the call
+	 */
 	@Operation(summary = "Associate users to the group in parameter",
 			description = SpringDocUtil.descriptionCheckParametersAssociation, tags = "Group")
 	@io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(
@@ -92,20 +92,21 @@ public class GroupController {
 							examples = @ExampleObject(value = SpringDocUtil.exObjValRespAssociateUsersToUserGroup))),
 			@ApiResponse(responseCode = "400", description = "Bad request",
 					content = @Content(schema = @Schema(implementation = ErrorMessage.class))) })
-	/**
-	 * Associate users to the group in parameter
-	 * @param userGroupName User Group Name
-	 * @param userTargets User Targets to associate to the group in parameter
-	 * @return The response of the call
-	 */
-	@PostMapping(value = "/users", consumes = { MediaType.APPLICATION_JSON_VALUE },
-			produces = { MediaType.APPLICATION_JSON_VALUE })
+	@PostMapping(value = "/users", consumes = { ApiVersion.V1_APPLICATION_JSON_VALUE },
+			produces = { ApiVersion.V1_APPLICATION_JSON_VALUE })
+	@PreAuthorize("hasAuthority('viewerhub_create')")
 	public ResponseEntity<List<GroupEntity>> associateUsersToUserGroup(
 			@RequestParam(PARAM_GROUP_NAME) @NotBlank String userGroupName,
 			@RequestBody @Valid List<TargetEntity> userTargets) {
 		return this.associateTargetsToTargetGroup(userGroupName, userTargets, TargetType.USER);
 	}
 
+	/**
+	 * Associate hosts to the group in parameter
+	 * @param hostGroupName Host Group Name
+	 * @param hostTargets Host Targets to associate to the group in parameter
+	 * @return The response of the call
+	 */
 	@Operation(summary = "Associate hosts to the group in parameter",
 			description = SpringDocUtil.descriptionCheckParametersAssociation, tags = "Group")
 	@io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(
@@ -118,18 +119,141 @@ public class GroupController {
 							examples = @ExampleObject(value = SpringDocUtil.exObjValRespAssociateHostsToHostGroup))),
 			@ApiResponse(responseCode = "400", description = "Bad request",
 					content = @Content(schema = @Schema(implementation = ErrorMessage.class))) })
-	/**
-	 * Associate hosts to the group in parameter
-	 * @param hostGroupName Host Group Name
-	 * @param hostTargets Host Targets to associate to the group in parameter
-	 * @return The response of the call
-	 */
-	@PostMapping(value = "/hosts", consumes = { MediaType.APPLICATION_JSON_VALUE },
-			produces = { MediaType.APPLICATION_JSON_VALUE })
+	@PostMapping(value = "/hosts", consumes = { ApiVersion.V1_APPLICATION_JSON_VALUE },
+			produces = { ApiVersion.V1_APPLICATION_JSON_VALUE })
+	@PreAuthorize("hasAuthority('viewerhub_create')")
 	public ResponseEntity<List<GroupEntity>> associateHostsToHostGroup(
 			@RequestParam(PARAM_GROUP_NAME) @NotBlank String hostGroupName,
 			@RequestBody @Valid List<TargetEntity> hostTargets) {
 		return this.associateTargetsToTargetGroup(hostGroupName, hostTargets, TargetType.HOST);
+	}
+
+	/**
+	 * Delete members of a user group
+	 * @param groupName Group name
+	 * @param members Members to delete
+	 * @return RESULT_MEMBERS_DELETED, otherwise error message
+	 */
+	@Operation(summary = "Delete members of a user group",
+			description = SpringDocUtil.descriptionCheckParametersAssociation, tags = "Group")
+	@io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(
+			array = @ArraySchema(schema = @Schema(type = "array", implementation = TargetEntity.class)),
+			examples = @ExampleObject(value = SpringDocUtil.exObjValReqBodyUsersToUserGroup)))
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200", description = "Delete has been done",
+					content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
+							examples = @ExampleObject(value = RESULT_MEMBERS_DELETED))),
+			@ApiResponse(responseCode = "400", description = "Bad request",
+					content = @Content(schema = @Schema(implementation = ErrorMessage.class))) })
+	@DeleteMapping(value = "/users", produces = { ApiVersion.V1_APPLICATION_JSON_VALUE })
+	@PreAuthorize("hasAuthority('viewerhub_delete')")
+	public ResponseEntity<String> deleteUsersFromUserGroup(
+			@RequestParam(value = PARAM_GROUP_NAME) @NotBlank String groupName,
+			@RequestBody @Valid List<TargetEntity> members) {
+		return this.deleteMembersFromGroup(groupName, members, TargetType.USER);
+	}
+
+	/**
+	 * Delete members of a host group
+	 * @param groupName Group name
+	 * @param members Members to delete
+	 * @return RESULT_MEMBERS_DELETED, otherwise error message
+	 */
+	@Operation(summary = "Delete members of a host group",
+			description = SpringDocUtil.descriptionCheckParametersAssociation, tags = "Group")
+	@io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(
+			array = @ArraySchema(schema = @Schema(type = "array", implementation = TargetEntity.class)),
+			examples = @ExampleObject(value = SpringDocUtil.exObjValReqBodyHostsToHostGroup)))
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200", description = "Delete has been done",
+					content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
+							examples = @ExampleObject(value = RESULT_MEMBERS_DELETED))),
+			@ApiResponse(responseCode = "400", description = "Bad request",
+					content = @Content(schema = @Schema(implementation = ErrorMessage.class))) })
+	@DeleteMapping(value = "/hosts", produces = { ApiVersion.V1_APPLICATION_JSON_VALUE })
+	@PreAuthorize("hasAuthority('viewerhub_delete')")
+	public ResponseEntity<String> deleteHostsFromHostGroup(
+			@RequestParam(value = PARAM_GROUP_NAME) @NotBlank String groupName,
+			@RequestBody @Valid List<TargetEntity> members) {
+		return this.deleteMembersFromGroup(groupName, members, TargetType.HOST);
+	}
+
+	/**
+	 * Retrieve all the user groups
+	 * @return all the user groups
+	 */
+	@Operation(summary = "Retrieve user groups", description = "Retrieve targets with TargetType = 'USERGROUP'",
+			tags = "Group")
+	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "User groups found",
+			content = @Content(
+					array = @ArraySchema(schema = @Schema(type = "array", implementation = TargetEntity.class)),
+					examples = @ExampleObject(value = SpringDocUtil.exObjValRespTargetsUserGroup))) })
+	@GetMapping(value = "/users", produces = { ApiVersion.V1_APPLICATION_JSON_VALUE })
+	@PreAuthorize("hasAuthority('viewerhub_read')")
+	public ResponseEntity<List<TargetEntity>> retrieveUserGroups() {
+		return this.retrieveGroups(TargetType.USER_GROUP);
+	}
+
+	/**
+	 * Retrieve all the host groups
+	 * @return all the host groups
+	 */
+	@Operation(summary = "Retrieve host groups", description = "Retrieve targets with TargetType = 'HOSTGROUP'",
+			tags = "Group")
+	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Host groups found",
+			content = @Content(
+					array = @ArraySchema(schema = @Schema(type = "array", implementation = TargetEntity.class)),
+					examples = @ExampleObject(value = SpringDocUtil.exObjValRespTargetsHostGroup))) })
+	@GetMapping(value = "/hosts", produces = { ApiVersion.V1_APPLICATION_JSON_VALUE })
+	@PreAuthorize("hasAuthority('viewerhub_read')")
+	public ResponseEntity<List<TargetEntity>> retrieveHostGroups() {
+		return this.retrieveGroups(TargetType.HOST_GROUP);
+	}
+
+	/**
+	 * Retrieve user targets for the group in parameter
+	 * @return all the user groups
+	 */
+	@Operation(summary = "Retrieve members of the user group in parameter",
+			description = SpringDocUtil.descriptionRetrieveUsersFromUserGroup, tags = "Group")
+	@ApiResponses(
+			value = {
+					@ApiResponse(responseCode = "200",
+							description = "User members found for the user group in parameter",
+							content = @Content(
+									array = @ArraySchema(
+											schema = @Schema(type = "array", implementation = TargetEntity.class)),
+									examples = @ExampleObject(value = SpringDocUtil.exObjValRespTargetsUsers))),
+					@ApiResponse(responseCode = "400", description = "Bad request",
+							content = @Content(schema = @Schema(implementation = ErrorMessage.class))) })
+	@GetMapping(value = "/users/{groupName}", produces = { ApiVersion.V1_APPLICATION_JSON_VALUE })
+	@PreAuthorize("hasAuthority('viewerhub_search')")
+	public ResponseEntity<List<TargetEntity>> retrieveUsersFromUserGroup(
+			@PathVariable(value = PARAM_GROUP_NAME) @NotBlank String groupName) {
+		return this.retrieveTargetsFromGroups(groupName, TargetType.USER_GROUP);
+	}
+
+	/**
+	 * Retrieve host targets for the group in parameter
+	 * @return all the host groups
+	 */
+	@Operation(summary = "Retrieve members of the host group in parameter",
+			description = SpringDocUtil.descriptionRetrieveHostsFromHostGroup, tags = "Group")
+	@ApiResponses(
+			value = {
+					@ApiResponse(responseCode = "200",
+							description = "Host members found for the host group in parameter",
+							content = @Content(
+									array = @ArraySchema(
+											schema = @Schema(type = "array", implementation = TargetEntity.class)),
+									examples = @ExampleObject(value = SpringDocUtil.exObjValRespTargetsHosts))),
+					@ApiResponse(responseCode = "400", description = "Bad request",
+							content = @Content(schema = @Schema(implementation = ErrorMessage.class))) })
+	@GetMapping(value = "/hosts/{groupName}", produces = { ApiVersion.V1_APPLICATION_JSON_VALUE })
+	@PreAuthorize("hasAuthority('viewerhub_search')")
+	public ResponseEntity<List<TargetEntity>> retrieveHostsFromHostGroup(
+			@PathVariable(value = PARAM_GROUP_NAME) @NotBlank String groupName) {
+		return this.retrieveTargetsFromGroups(groupName, TargetType.HOST_GROUP);
 	}
 
 	/**
@@ -161,54 +285,6 @@ public class GroupController {
 		return ResponseEntity.ok().body(groupAssociations);
 	}
 
-	@Operation(summary = "Delete members of a user group",
-			description = SpringDocUtil.descriptionCheckParametersAssociation, tags = "Group")
-	@io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(
-			array = @ArraySchema(schema = @Schema(type = "array", implementation = TargetEntity.class)),
-			examples = @ExampleObject(value = SpringDocUtil.exObjValReqBodyUsersToUserGroup)))
-	@ApiResponses(value = {
-			@ApiResponse(responseCode = "200", description = "Delete has been done",
-					content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
-							examples = @ExampleObject(value = RESULT_MEMBERS_DELETED))),
-			@ApiResponse(responseCode = "400", description = "Bad request",
-					content = @Content(schema = @Schema(implementation = ErrorMessage.class))) })
-	/**
-	 * Delete members of a user group
-	 * @param groupName Group name
-	 * @param members Members to delete
-	 * @return RESULT_MEMBERS_DELETED, otherwise error message
-	 */
-	@DeleteMapping(value = "/users", produces = { MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<String> deleteUsersFromUserGroup(
-			@RequestParam(value = PARAM_GROUP_NAME) @NotBlank String groupName,
-			@RequestBody @Valid List<TargetEntity> members) {
-		return this.deleteMembersFromGroup(groupName, members, TargetType.USER);
-	}
-
-	@Operation(summary = "Delete members of a host group",
-			description = SpringDocUtil.descriptionCheckParametersAssociation, tags = "Group")
-	@io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(
-			array = @ArraySchema(schema = @Schema(type = "array", implementation = TargetEntity.class)),
-			examples = @ExampleObject(value = SpringDocUtil.exObjValReqBodyHostsToHostGroup)))
-	@ApiResponses(value = {
-			@ApiResponse(responseCode = "200", description = "Delete has been done",
-					content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
-							examples = @ExampleObject(value = RESULT_MEMBERS_DELETED))),
-			@ApiResponse(responseCode = "400", description = "Bad request",
-					content = @Content(schema = @Schema(implementation = ErrorMessage.class))) })
-	/**
-	 * Delete members of a host group
-	 * @param groupName Group name
-	 * @param members Members to delete
-	 * @return RESULT_MEMBERS_DELETED, otherwise error message
-	 */
-	@DeleteMapping(value = "/hosts", produces = { MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<String> deleteHostsFromHostGroup(
-			@RequestParam(value = PARAM_GROUP_NAME) @NotBlank String groupName,
-			@RequestBody @Valid List<TargetEntity> members) {
-		return this.deleteMembersFromGroup(groupName, members, TargetType.HOST);
-	}
-
 	/**
 	 * Delete members from a group
 	 * @param groupName Group name
@@ -237,36 +313,6 @@ public class GroupController {
 		return ResponseEntity.ok().body(RESULT_MEMBERS_DELETED);
 	}
 
-	@Operation(summary = "Retrieve user groups", description = "Retrieve targets with TargetType = 'USERGROUP'",
-			tags = "Group")
-	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "User groups found",
-			content = @Content(
-					array = @ArraySchema(schema = @Schema(type = "array", implementation = TargetEntity.class)),
-					examples = @ExampleObject(value = SpringDocUtil.exObjValRespTargetsUserGroup))) })
-	/**
-	 * Retrieve all the user groups
-	 * @return all the user groups
-	 */
-	@GetMapping(value = "/users", produces = { MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<List<TargetEntity>> retrieveUserGroups() {
-		return this.retrieveGroups(TargetType.USER_GROUP);
-	}
-
-	@Operation(summary = "Retrieve host groups", description = "Retrieve targets with TargetType = 'HOSTGROUP'",
-			tags = "Group")
-	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Host groups found",
-			content = @Content(
-					array = @ArraySchema(schema = @Schema(type = "array", implementation = TargetEntity.class)),
-					examples = @ExampleObject(value = SpringDocUtil.exObjValRespTargetsHostGroup))) })
-	/**
-	 * Retrieve all the host groups
-	 * @return all the host groups
-	 */
-	@GetMapping(value = "/hosts", produces = { MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<List<TargetEntity>> retrieveHostGroups() {
-		return this.retrieveGroups(TargetType.HOST_GROUP);
-	}
-
 	/**
 	 * Retrieve the groups by the target type in parameter
 	 * @param targetType Target type
@@ -277,50 +323,6 @@ public class GroupController {
 		List<TargetEntity> targetEntities = this.targetService.retrieveTargetsByType(targetType);
 		LOG.info("Retrieved %s targets".formatted(targetType.getDescription()));
 		return ResponseEntity.ok().body(this.targetService.retrieveTargetsByType(targetType));
-	}
-
-	@Operation(summary = "Retrieve members of the user group in parameter",
-			description = SpringDocUtil.descriptionRetrieveUsersFromUserGroup, tags = "Group")
-	@ApiResponses(
-			value = {
-					@ApiResponse(responseCode = "200",
-							description = "User members found for the user group in parameter",
-							content = @Content(
-									array = @ArraySchema(
-											schema = @Schema(type = "array", implementation = TargetEntity.class)),
-									examples = @ExampleObject(value = SpringDocUtil.exObjValRespTargetsUsers))),
-					@ApiResponse(responseCode = "400", description = "Bad request",
-							content = @Content(schema = @Schema(implementation = ErrorMessage.class))) })
-	/**
-	 * Retrieve user targets for the group in parameter
-	 * @return all the user groups
-	 */
-	@GetMapping(value = "/users/{groupName}", produces = { MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<List<TargetEntity>> retrieveUsersFromUserGroup(
-			@PathVariable(value = PARAM_GROUP_NAME) @NotBlank String groupName) {
-		return this.retrieveTargetsFromGroups(groupName, TargetType.USER_GROUP);
-	}
-
-	@Operation(summary = "Retrieve members of the host group in parameter",
-			description = SpringDocUtil.descriptionRetrieveHostsFromHostGroup, tags = "Group")
-	@ApiResponses(
-			value = {
-					@ApiResponse(responseCode = "200",
-							description = "Host members found for the host group in parameter",
-							content = @Content(
-									array = @ArraySchema(
-											schema = @Schema(type = "array", implementation = TargetEntity.class)),
-									examples = @ExampleObject(value = SpringDocUtil.exObjValRespTargetsHosts))),
-					@ApiResponse(responseCode = "400", description = "Bad request",
-							content = @Content(schema = @Schema(implementation = ErrorMessage.class))) })
-	/**
-	 * Retrieve host targets for the group in parameter
-	 * @return all the host groups
-	 */
-	@GetMapping(value = "/hosts/{groupName}", produces = { MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<List<TargetEntity>> retrieveHostsFromHostGroup(
-			@PathVariable(value = PARAM_GROUP_NAME) @NotBlank String groupName) {
-		return this.retrieveTargetsFromGroups(groupName, TargetType.HOST_GROUP);
 	}
 
 	/**

@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2022-2025 Weasis Team and other contributors.
+ *  Copyright (c) 2022-2026 Weasis Team and other contributors.
  *
  *  This program and the accompanying materials are made available under the terms of the Eclipse
  *  Public License 2.0 which is available at https://www.eclipse.org/legal/epl-2.0, or the Apache
@@ -118,7 +118,7 @@ class LaunchPreferenceControllerIntegrationTests {
 
 		// Create Launches
 		LaunchEntity launchUser = LaunchRepositoryTest.buildLaunchEntity(1L, "TargetName", TargetType.USER, 1L,
-				"LaunchConfigName", 1L, "ext-config", PreferredType.EXT_CFG, "extendedConfig");
+				"LaunchConfigName", 1L, "config", PreferredType.CONFIG, "config");
 		LaunchEntity launchHost = LaunchRepositoryTest.buildLaunchEntity(2L, "TargetName", TargetType.HOST, 1L,
 				"LaunchConfigName", 2L, "Property", PreferredType.PROPERTY, "property");
 		LaunchEntity launchHostGroup = LaunchRepositoryTest.buildLaunchEntity(3L, "TargetName", TargetType.HOST_GROUP,
@@ -149,7 +149,7 @@ class LaunchPreferenceControllerIntegrationTests {
 			.andExpect(MockMvcResultMatchers.status().isOk())
 			.andExpect(MockMvcResultMatchers.content()
 				.string(containsString(
-						"<?xml version='1.0' encoding='UTF-8'?><Launches><Launch><Config><Id>1</Id><Name>LaunchConfigName</Name></Config><Preferred><Id>1</Id><Name>ext-config</Name><Type>ext-cfg</Type></Preferred><Target><Id>1</Id><Name>TARGETNAME</Name><Type>USER</Type></Target><Value>extendedConfig</Value></Launch><Launch><Config><Id>1</Id><Name>LaunchConfigName</Name></Config><Preferred><Id>2</Id><Name>Property</Name><Type>pro</Type></Preferred><Target><Id>2</Id><Name>TARGETNAME</Name><Type>HOST</Type></Target><Value>property</Value></Launch><Launch><Config><Id>1</Id><Name>LaunchConfigName</Name></Config><Preferred><Id>3</Id><Name>Argument</Name><Type>arg</Type></Preferred><Target><Id>3</Id><Name>TARGETNAME</Name><Type>HOSTGROUP</Type></Target><Value>argument</Value></Launch></Launches>")));
+						"<?xml version='1.0' encoding='UTF-8'?><Launches><Launch><Config><Id>1</Id><Name>LaunchConfigName</Name></Config><Preferred><Id>1</Id><Name>ext-config</Name><Type>config</Type></Preferred><Target><Id>1</Id><Name>TARGETNAME</Name><Type>USER</Type></Target><Value>extendedConfig</Value></Launch><Launch><Config><Id>1</Id><Name>LaunchConfigName</Name></Config><Preferred><Id>2</Id><Name>Property</Name><Type>pro</Type></Preferred><Target><Id>2</Id><Name>TARGETNAME</Name><Type>HOST</Type></Target><Value>property</Value></Launch><Launch><Config><Id>1</Id><Name>LaunchConfigName</Name></Config><Preferred><Id>3</Id><Name>Argument</Name><Type>arg</Type></Preferred><Target><Id>3</Id><Name>TARGETNAME</Name><Type>HOSTGROUP</Type></Target><Value>argument</Value></Launch></Launches>")));
 
 	}
 
@@ -157,7 +157,7 @@ class LaunchPreferenceControllerIntegrationTests {
 	 * Test specific call to retrieve prefered
 	 * @throws Exception thrown
 	 */
-	//@Test
+	// @Test
 	void shouldRetrieveSpecificPrefered() throws Exception {
 		// Init data
 		List<LaunchEntity> launches = new LinkedList<>();
@@ -221,7 +221,7 @@ class LaunchPreferenceControllerIntegrationTests {
 	 * Should show error message: host not found in db
 	 * @throws Exception thrown
 	 */
-	//@Test
+	// @Test
 	void shouldHaveNoContentCaseHostNotFoundInDb() throws Exception {
 		// Mock
 		Mockito.when(this.targetService.retrieveTargetByNameAndType(Mockito.anyString(), Mockito.any()))
@@ -533,9 +533,9 @@ class LaunchPreferenceControllerIntegrationTests {
 
 		// Init data
 		LaunchEntity launchEntityFirst = LaunchRepositoryTest.buildLaunchEntity(1L, "TargetNameFirst", TargetType.USER,
-				1L, "LaunchConfigNameFirst", 1L, "PreferedNameFirst", PreferredType.EXT_CFG, "LaunchValueFirst");
+				1L, "LaunchConfigNameFirst", 1L, "PreferedNameFirst", PreferredType.CONFIG, "LaunchValueFirst");
 		LaunchEntity launchEntitySecond = LaunchRepositoryTest.buildLaunchEntity(2L, "TargetNameSecond",
-				TargetType.USER, 2L, "LaunchConfigNameSecond", 2L, "PreferedNameSecond", PreferredType.EXT_CFG,
+				TargetType.USER, 2L, "LaunchConfigNameSecond", 2L, "PreferedNameSecond", PreferredType.CONFIG,
 				"LaunchValueSecond");
 
 		// Mock service
@@ -589,7 +589,7 @@ class LaunchPreferenceControllerIntegrationTests {
 					+ "        \"value\":\"LaunchValueSecond\" \n" + "    }\n" + "]"))
 			.andExpect(MockMvcResultMatchers.status().isOk())
 			.andExpect(MockMvcResultMatchers.content()
-				.string("[{\"config\":{\"id\":1,\"name\":\"LaunchConfigNameFirst\"},\"preferred\":{\"id\":1,\"name\":\"PreferedNameFirst\",\"type\":\"ext-cfg\"},\"target\":{\"id\":1,\"name\":\"TARGETNAMEFIRST\",\"type\":\"USER\"},\"selection\":\"LaunchValueFirst\"},{\"config\":{\"id\":2,\"name\":\"LaunchConfigNameSecond\"},\"preferred\":{\"id\":2,\"name\":\"PreferedNameSecond\",\"type\":\"ext-cfg\"},\"target\":{\"id\":2,\"name\":\"TARGETNAMESECOND\",\"type\":\"USER\"},\"selection\":\"LaunchValueSecond\"}]"));
+				.string("[{\"config\":{\"id\":1,\"name\":\"LaunchConfigNameFirst\"},\"preferred\":{\"id\":1,\"name\":\"PreferedNameFirst\",\"type\":\"config\"},\"target\":{\"id\":1,\"name\":\"TARGETNAMEFIRST\",\"type\":\"USER\"},\"selection\":\"LaunchValueFirst\"},{\"config\":{\"id\":2,\"name\":\"LaunchConfigNameSecond\"},\"preferred\":{\"id\":2,\"name\":\"PreferedNameSecond\",\"type\":\"config\"},\"target\":{\"id\":2,\"name\":\"TARGETNAMESECOND\",\"type\":\"USER\"},\"selection\":\"LaunchValueSecond\"}]"));
 
 	}
 

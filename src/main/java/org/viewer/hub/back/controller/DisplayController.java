@@ -13,6 +13,7 @@ package org.viewer.hub.back.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolation;
@@ -30,6 +31,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.view.RedirectView;
+import org.viewer.hub.back.constant.ApiVersion;
 import org.viewer.hub.back.constant.EndPoint;
 import org.viewer.hub.back.controller.exception.ConstraintException;
 import org.viewer.hub.back.model.searchcriteria.ArchiveSearchCriteria;
@@ -55,17 +57,20 @@ public class DisplayController {
 
 	// Services
 	private final DisplayService displayService;
+
 	private final CryptographyService cryptographyService;
+
 	private final Validator validator;
 
 	/**
 	 * Autowired constructor
-	 * @param displayService service which will select the viewer to launch depending on rules
+	 * @param displayService service which will select the viewer to launch depending on
+	 * rules
 	 * @param cryptographyService cryptography service
 	 */
 	@Autowired
-	public DisplayController(final DisplayService displayService,
-			final CryptographyService cryptographyService,  final Validator validator) {
+	public DisplayController(final DisplayService displayService, final CryptographyService cryptographyService,
+			final Validator validator) {
 		this.displayService = displayService;
 		this.cryptographyService = cryptographyService;
 		this.validator = validator;
@@ -78,10 +83,23 @@ public class DisplayController {
 	 */
 	@Operation(summary = "Launch a viewer (Regular)(Not Authenticated)",
 			description = "Launch a viewer depending on search criteria: not authenticated version")
-	@GetMapping
+	@ApiResponse(responseCode = "302", description = "Found: redirect to the selected viewer launch URL")
+	@ApiResponse(responseCode = "400",
+			description = "Bad request: search criteria is null, wrong criteria type, constraint violations, or unrecognized viewer type")
+	@GetMapping(produces = { ApiVersion.V1_APPLICATION_JSON_VALUE })
+	@Deprecated(forRemoval = false)
 	public RedirectView launchViewerWithoutIHEParameters(HttpServletRequest request, Authentication authentication,
-														 @RequestParam MultiValueMap<String,String> params) {
-		return launchViewerByEvaluatingQueryParams(request, authentication, params, ArchiveSearchCriteria.class);
+			@RequestParam MultiValueMap<String, String> params) {
+		try {
+			MultiValueMapUtil.cleanInputParameters(params);
+			return launchViewerByEvaluatingQueryParams(request, authentication, params, ArchiveSearchCriteria.class);
+		}
+		finally {
+			// Reset the authentication in order to force OAuth2 to login
+			// again and get a new fresh access token when using oauth2Login in
+			// SecurityConfiguration
+			SecurityContextHolder.getContext().setAuthentication(null);
+		}
 	}
 
 	/**
@@ -91,11 +109,14 @@ public class DisplayController {
 	 */
 	@Operation(summary = "Launch a viewer (Regular)(Authenticated)",
 			description = "Launch a viewer depending on search criteria: authenticated version")
-	@GetMapping(EndPoint.AUTH_PATH)
-	@PreAuthorize("hasRole('viewer_display')")
+	@ApiResponse(responseCode = "302", description = "Found: redirect to the selected viewer launch URL")
+	@ApiResponse(responseCode = "400",
+			description = "Bad request: search criteria is null, wrong criteria type, constraint violations, or unrecognized viewer type")
+	@GetMapping(value = EndPoint.AUTH_PATH, produces = { ApiVersion.V1_APPLICATION_JSON_VALUE })
+	@PreAuthorize("hasAuthority('viewer_display')")
 	public RedirectView launchAuthViewerWithoutIHEParameters(HttpServletRequest request,
-															 @Parameter(hidden = true, required = true) @NotNull Authentication authentication,
-															 @RequestParam MultiValueMap<String,String> params) {
+			@Parameter(hidden = true, required = true) @NotNull Authentication authentication,
+			@RequestParam MultiValueMap<String, String> params) {
 		try {
 			MultiValueMapUtil.cleanInputParameters(params);
 			return this.launchViewerWithoutIHEParameters(request, authentication, params);
@@ -115,10 +136,23 @@ public class DisplayController {
 	 */
 	@Operation(summary = "Launch a viewer (IHE)(Not authenticated)",
 			description = "Launch a viewer depending on IHE search criteria: not authenticated version")
-	@GetMapping(EndPoint.IHE_INVOKE_IMAGE_DISPLAY_PATH)
+	@ApiResponse(responseCode = "302", description = "Found: redirect to the selected viewer launch URL")
+	@ApiResponse(responseCode = "400",
+			description = "Bad request: search criteria is null, wrong criteria type, constraint violations, or unrecognized viewer type")
+	@GetMapping(value = EndPoint.IHE_INVOKE_IMAGE_DISPLAY_PATH, produces = { ApiVersion.V1_APPLICATION_JSON_VALUE })
+	@Deprecated(forRemoval = false)
 	public RedirectView launchViewerWithIHEParameters(HttpServletRequest request, Authentication authentication,
-													  @RequestParam MultiValueMap<String,String> params) {
-		return launchViewerByEvaluatingQueryParams(request, authentication, params, IHESearchCriteria.class);
+			@RequestParam MultiValueMap<String, String> params) {
+		try {
+			MultiValueMapUtil.cleanInputParameters(params);
+			return launchViewerByEvaluatingQueryParams(request, authentication, params, IHESearchCriteria.class);
+		}
+		finally {
+			// Reset the authentication in order to force OAuth2 to login
+			// again and get a new fresh access token when using oauth2Login in
+			// SecurityConfiguration
+			SecurityContextHolder.getContext().setAuthentication(null);
+		}
 	}
 
 	/**
@@ -128,11 +162,15 @@ public class DisplayController {
 	 */
 	@Operation(summary = "Launch a viewer (IHE)(Authenticated)",
 			description = "Launch a viewer depending on IHE search criteria: authenticated version")
-	@GetMapping(EndPoint.AUTH_IHE_INVOKE_IMAGE_DISPLAY_PATH)
-	@PreAuthorize("hasRole('viewer_display')")
+	@ApiResponse(responseCode = "302", description = "Found: redirect to the selected viewer launch URL")
+	@ApiResponse(responseCode = "400",
+			description = "Bad request: search criteria is null, wrong criteria type, constraint violations, or unrecognized viewer type")
+	@GetMapping(value = EndPoint.AUTH_IHE_INVOKE_IMAGE_DISPLAY_PATH,
+			produces = { ApiVersion.V1_APPLICATION_JSON_VALUE })
+	@PreAuthorize("hasAuthority('viewer_display')")
 	public RedirectView launchAuthViewerWithIHEParameters(HttpServletRequest request,
 			@Parameter(hidden = true, required = true) @NotNull Authentication authentication,
-														  @RequestParam MultiValueMap<String,String> params) {
+			@RequestParam MultiValueMap<String, String> params) {
 		try {
 			MultiValueMapUtil.cleanInputParameters(params);
 			return this.launchViewerWithIHEParameters(request, authentication, params);
@@ -144,9 +182,13 @@ public class DisplayController {
 			SecurityContextHolder.getContext().setAuthentication(null);
 		}
 	}
+
 	@Operation(summary = "Launch a viewer (Post)(IHE)(Not Authenticated)",
 			description = "Launch a viewer depending on IHE search criteria: not authenticated version => search criteria in body")
-	@PostMapping(EndPoint.IHE_INVOKE_IMAGE_DISPLAY_PATH)
+	@ApiResponse(responseCode = "302", description = "Found: redirect to the selected viewer launch URL")
+	@ApiResponse(responseCode = "400",
+			description = "Bad request: IHE search criteria body invalid or unrecognized viewer type")
+	@PostMapping(value = EndPoint.IHE_INVOKE_IMAGE_DISPLAY_PATH, produces = { ApiVersion.V1_APPLICATION_JSON_VALUE })
 	public RedirectView launchViewerWithIHEParameters(HttpServletRequest request,
 			@RequestBody @Valid IHESearchCriteria iheSearchCriteria) {
 		return this.launchViewer(null, iheSearchCriteria);
@@ -154,7 +196,10 @@ public class DisplayController {
 
 	@Operation(summary = "Launch a viewer (Post)(Regular)(Not Authenticated)",
 			description = "Launch a viewer depending on search criteria: not authenticated version => search criteria in body")
-	@PostMapping
+	@ApiResponse(responseCode = "302", description = "Found: redirect to the selected viewer launch URL")
+	@ApiResponse(responseCode = "400",
+			description = "Bad request: archive search criteria body invalid or unrecognized viewer type")
+	@PostMapping(produces = { ApiVersion.V1_APPLICATION_JSON_VALUE })
 	public RedirectView launchViewerWithoutIHEParameters(HttpServletRequest request,
 			@RequestBody @Valid ArchiveSearchCriteria archiveSearchCriteria) {
 		return this.launchViewer(null, archiveSearchCriteria);
@@ -166,7 +211,8 @@ public class DisplayController {
 	 * @param searchCriteriaClassType Class type expected
 	 * @return RedirectView
 	 */
-	private <T extends SearchCriteria> RedirectView launchViewerByEvaluatingQueryParams(HttpServletRequest request, Authentication authentication, MultiValueMap<String, String> params, Class<T> searchCriteriaClassType) {
+	private <T extends SearchCriteria> RedirectView launchViewerByEvaluatingQueryParams(HttpServletRequest request,
+			Authentication authentication, MultiValueMap<String, String> params, Class<T> searchCriteriaClassType) {
 		// Map search criteria to corresponding object and validate inputs
 		SearchCriteria searchCriteria = retrieveSearchCriteriaFromQueryParams(params, searchCriteriaClassType);
 
@@ -197,30 +243,36 @@ public class DisplayController {
 			searchCriteria.setHost(InetUtil.getClientHostFromRequest(request));
 		}
 	}
+
 	/**
 	 * Map search criteria to corresponding object and validate inputs
 	 * @param parameters Parameters to evaluate
 	 * @param classToEvaluate Parent class type expected
 	 * @return SearchCriteria built from parameters
 	 */
-	private SearchCriteria retrieveSearchCriteriaFromQueryParams(MultiValueMap<String, String> parameters, @NotNull Class<?> classToEvaluate) {
+	private SearchCriteria retrieveSearchCriteriaFromQueryParams(MultiValueMap<String, String> parameters,
+			@NotNull Class<?> classToEvaluate) {
 		// let Jackson do its deduction & binding
 		SearchCriteria searchCriteria = SearchCriteria.jacksonDeduction(parameters);
 
 		// Compare with expected parent class
-		if(!classToEvaluate.isInstance(searchCriteria)){
+		if (!classToEvaluate.isInstance(searchCriteria)) {
 			if (searchCriteria == null) {
 				throw new ConstraintException("Search criteria cannot be null.");
 			}
 			else {
-				throw new ConstraintException("Wrong type parameters, deducted class %s instead of %s".formatted(searchCriteria.getClass(), classToEvaluate.getTypeName()));
+				throw new ConstraintException("Wrong type parameters, deducted class %s instead of %s"
+					.formatted(searchCriteria.getClass(), classToEvaluate.getTypeName()));
 			}
 		}
 
 		// Validation of constraints
 		Set<ConstraintViolation<SearchCriteria>> violations = validator.validate(searchCriteria);
 		if (!violations.isEmpty()) {
-			throw new ConstraintViolationException("Validation failed: %s".formatted(violations.stream().map(ConstraintViolation::getMessage).collect(Collectors.joining(","))), violations);
+			throw new ConstraintViolationException(
+					"Validation failed: %s".formatted(
+							violations.stream().map(ConstraintViolation::getMessage).collect(Collectors.joining(","))),
+					violations);
 		}
 		return searchCriteria;
 	}

@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2022-2025 Weasis Team and other contributors.
+ *  Copyright (c) 2022-2026 Weasis Team and other contributors.
  *
  *  This program and the accompanying materials are made available under the terms of the Eclipse
  *  Public License 2.0 which is available at https://www.eclipse.org/legal/epl-2.0, or the Apache
@@ -36,9 +36,11 @@ public interface ConnectorService {
 	LinkedHashSet<ConnectorProperty> retrieveConnectors(LinkedHashSet<String> archives);
 
 	/**
-	 * Retrieve first default or first specific connector depending on archive value in Search Criteria
+	 * Retrieve first default or first specific connector depending on archive value in
+	 * Search Criteria
 	 * @param searchCriteria Search Criteria to evaluate
 	 * @return archive found
 	 */
 	String retrieveFirstDefaultOrFirstSpecificConnector(SearchCriteria searchCriteria);
+
 }

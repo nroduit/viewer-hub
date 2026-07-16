@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2022-2025 Weasis Team and other contributors.
+ *  Copyright (c) 2022-2026 Weasis Team and other contributors.
  *
  *  This program and the accompanying materials are made available under the terms of the Eclipse
  *  Public License 2.0 which is available at https://www.eclipse.org/legal/epl-2.0, or the Apache
@@ -19,6 +19,7 @@ import org.mockito.Mockito;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
@@ -35,7 +36,7 @@ import org.viewer.hub.back.model.searchcriteria.ArchiveSearchCriteria;
 import org.viewer.hub.back.model.searchcriteria.IHESearchCriteria;
 import org.viewer.hub.back.model.searchcriteria.WeasisArchiveSearchCriteria;
 import org.viewer.hub.back.service.CryptographyService;
-import org.viewer.hub.back.service.WeasisDisplayService;
+import org.viewer.hub.back.service.DisplayService;
 
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -48,7 +49,7 @@ class DisplayControllerIntegrationTests {
 	private MockMvc mockMvc;
 
 	@MockBean
-	private WeasisDisplayService displayService;
+	private DisplayService displayService;
 
 	@MockBean
 	private CryptographyService cryptographyService;
@@ -58,6 +59,9 @@ class DisplayControllerIntegrationTests {
 
 	@MockBean
 	private S3ClientConfigurationProperties s3ClientConfigurationProperties;
+
+	@MockBean
+	ClientRegistrationRepository clientRegistrationRepository;
 
 	@BeforeEach
 	public void setUp(WebApplicationContext wac) {
@@ -71,7 +75,7 @@ class DisplayControllerIntegrationTests {
 		weasisSearchCriteria.setUser("test");
 
 		// Mock service
-		Mockito.when(this.displayService.retrieveWeasisLaunchUrl(Mockito.any(), Mockito.any())).thenReturn("launchUrl");
+		Mockito.when(this.displayService.viewerLaunchUrl(Mockito.any(), Mockito.any())).thenReturn("launchUrl");
 
 		// Get and test results
 		this.launchWeasisWithoutIHEParametersGetRequestShouldBeRedirection(weasisSearchCriteria, "extCfg");
@@ -86,7 +90,7 @@ class DisplayControllerIntegrationTests {
 		weasisIHESearchCriteria.setPatientID("patientId");
 
 		// Mock service
-		Mockito.when(this.displayService.retrieveWeasisLaunchUrl(Mockito.any(), Mockito.any())).thenReturn("launchUrl");
+		Mockito.when(this.displayService.viewerLaunchUrl(Mockito.any(), Mockito.any())).thenReturn("launchUrl");
 
 		// Get and test results
 		this.launchWeasisWithIHEParametersGetRequestShouldBeRedirection(weasisIHESearchCriteria, "extCfg");
@@ -100,7 +104,7 @@ class DisplayControllerIntegrationTests {
 		weasisSearchCriteria.setArchive(new LinkedHashSet<>(List.of("archiveNotExisting")));
 
 		// Mock service
-		Mockito.when(this.displayService.retrieveWeasisLaunchUrl(Mockito.any(), Mockito.any())).thenReturn("launchUrl");
+		Mockito.when(this.displayService.viewerLaunchUrl(Mockito.any(), Mockito.any())).thenReturn("launchUrl");
 		Mockito.when(this.connectorConfigurationProperties.containsConnectorId(Mockito.any())).thenReturn(false);
 
 		// Get and test results
@@ -116,7 +120,7 @@ class DisplayControllerIntegrationTests {
 		weasisIHESearchCriteria.setPatientID(null);
 
 		// Mock service
-		Mockito.when(this.displayService.retrieveWeasisLaunchUrl(Mockito.any(), Mockito.any())).thenReturn("launchUrl");
+		Mockito.when(this.displayService.viewerLaunchUrl(Mockito.any(), Mockito.any())).thenReturn("launchUrl");
 		Mockito.when(this.connectorConfigurationProperties.containsConnectorId(Mockito.any())).thenReturn(false);
 
 		// Get and test results
@@ -128,10 +132,10 @@ class DisplayControllerIntegrationTests {
 		// Init data
 		WeasisArchiveSearchCriteria weasisSearchCriteria = new WeasisArchiveSearchCriteria();
 		weasisSearchCriteria.setUser("test");
-		weasisSearchCriteria.setExtCfg("extCfg");
+		weasisSearchCriteria.setConfig("config");
 
 		// Mock service
-		Mockito.when(this.displayService.retrieveWeasisLaunchUrl(Mockito.any(), Mockito.any())).thenReturn("launchUrl");
+		Mockito.when(this.displayService.viewerLaunchUrl(Mockito.any(), Mockito.any())).thenReturn("launchUrl");
 
 		// Post and test results
 		this.launchWeasisWithoutIHEParametersPostRequestShouldBeRedirection(weasisSearchCriteria);
@@ -146,7 +150,7 @@ class DisplayControllerIntegrationTests {
 		weasisIHESearchCriteria.setPatientID("patientId");
 
 		// Mock service
-		Mockito.when(this.displayService.retrieveWeasisLaunchUrl(Mockito.any(), Mockito.any())).thenReturn("launchUrl");
+		Mockito.when(this.displayService.viewerLaunchUrl(Mockito.any(), Mockito.any())).thenReturn("launchUrl");
 
 		// Post and test results
 		this.launchWeasisWithIHEParametersPostRequestShouldBeRedirection(weasisIHESearchCriteria);
@@ -159,7 +163,7 @@ class DisplayControllerIntegrationTests {
 		weasisSearchCriteria.setArchive(new LinkedHashSet<>(List.of("archiveNotExisting")));
 
 		// Mock service
-		Mockito.when(this.displayService.retrieveWeasisLaunchUrl(Mockito.any(), Mockito.any())).thenReturn("launchUrl");
+		Mockito.when(this.displayService.viewerLaunchUrl(Mockito.any(), Mockito.any())).thenReturn("launchUrl");
 		Mockito.when(this.connectorConfigurationProperties.containsConnectorId(Mockito.any())).thenReturn(false);
 
 		// Post and test results
@@ -175,7 +179,7 @@ class DisplayControllerIntegrationTests {
 		weasisIHESearchCriteria.setPatientID(null);
 
 		// Mock service
-		Mockito.when(this.displayService.retrieveWeasisLaunchUrl(Mockito.any(), Mockito.any())).thenReturn("launchUrl");
+		Mockito.when(this.displayService.viewerLaunchUrl(Mockito.any(), Mockito.any())).thenReturn("launchUrl");
 
 		// Post and test results
 		this.launchWeasisWithIHEParametersPostRequestInvalidDataShouldBeBadRequest(weasisIHESearchCriteria);
@@ -193,7 +197,7 @@ class DisplayControllerIntegrationTests {
 
 		// Call controller and check status
 		this.mockMvc
-			.perform(MockMvcRequestBuilders.post(EndPoint.DISPLAY_PATH + EndPoint.WEASIS_PATH)
+			.perform(MockMvcRequestBuilders.post(EndPoint.DISPLAY_PATH)
 				.contentType(MediaType.APPLICATION_JSON_VALUE)
 				.content(weasisSearchCriteriaString))
 			.andExpect(MockMvcResultMatchers.status().isBadRequest());
@@ -218,26 +222,27 @@ class DisplayControllerIntegrationTests {
 	}
 
 	private void launchWeasisWithoutIHEParametersGetRequestInvalidDataShouldBeBadRequest(
-			ArchiveSearchCriteria weasisSearchCriteria, String extCfg) throws Exception {
+			ArchiveSearchCriteria weasisSearchCriteria, String config) throws Exception {
 		// Call controller and check status
 		this.mockMvc
-			.perform(MockMvcRequestBuilders.get(EndPoint.DISPLAY_PATH + EndPoint.WEASIS_PATH)
+			.perform(MockMvcRequestBuilders.get(EndPoint.DISPLAY_PATH)
 				.param(ParamName.USER, weasisSearchCriteria.getUser())
-				.param(ParamName.EXT_CFG, extCfg)
+				.param(ParamName.CONFIG, config)
 				.param(ParamName.ARCHIVE, weasisSearchCriteria.getArchive().stream().findFirst().get()))
 			.andExpect(MockMvcResultMatchers.status().isBadRequest());
 	}
 
 	private void launchWeasisWithIHEParametersGetRequestInvalidDataShouldBeBadRequest(
-			IHESearchCriteria weasisIHESearchCriteria, String extCfg) throws Exception {
+			IHESearchCriteria weasisIHESearchCriteria, String config) throws Exception {
 		// Call controller and check status
-		this.mockMvc
-			.perform(MockMvcRequestBuilders.get(EndPoint.DISPLAY_PATH + EndPoint.IHE_INVOKE_IMAGE_DISPLAY_PATH)
-				.param(ParamName.USER, weasisIHESearchCriteria.getUser())
-				.param(ParamName.EXT_CFG, extCfg)
-				.param(ParamName.REQUEST_TYPE, weasisIHESearchCriteria.getRequestType().getCode())
-				.param(ParamName.PATIENT_ID, weasisIHESearchCriteria.getPatientID()))
-			.andExpect(MockMvcResultMatchers.status().isBadRequest());
+		var requestBuilder = MockMvcRequestBuilders.get(EndPoint.DISPLAY_PATH + EndPoint.IHE_INVOKE_IMAGE_DISPLAY_PATH)
+			.param(ParamName.USER, weasisIHESearchCriteria.getUser())
+			.param(ParamName.CONFIG, config)
+			.param(ParamName.REQUEST_TYPE, weasisIHESearchCriteria.getRequestType().getCode());
+		if (weasisIHESearchCriteria.getPatientID() != null) {
+			requestBuilder = requestBuilder.param(ParamName.PATIENT_ID, weasisIHESearchCriteria.getPatientID());
+		}
+		this.mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isBadRequest());
 	}
 
 	private void launchWeasisWithoutIHEParametersPostRequestShouldBeRedirection(
@@ -248,7 +253,7 @@ class DisplayControllerIntegrationTests {
 
 		// Call controller and check status
 		this.mockMvc
-			.perform(MockMvcRequestBuilders.post(EndPoint.DISPLAY_PATH + EndPoint.WEASIS_PATH)
+			.perform(MockMvcRequestBuilders.post(EndPoint.DISPLAY_PATH)
 				.contentType(MediaType.APPLICATION_JSON_VALUE)
 				.content(weasisSearchCriteriaString))
 			.andExpect(MockMvcResultMatchers.status().is3xxRedirection());
@@ -269,22 +274,22 @@ class DisplayControllerIntegrationTests {
 	}
 
 	private void launchWeasisWithoutIHEParametersGetRequestShouldBeRedirection(
-			ArchiveSearchCriteria weasisSearchCriteria, String extCfg) throws Exception {
+			ArchiveSearchCriteria weasisSearchCriteria, String config) throws Exception {
 		// Call controller and check status
 		this.mockMvc
-			.perform(MockMvcRequestBuilders.get(EndPoint.DISPLAY_PATH + EndPoint.WEASIS_PATH)
+			.perform(MockMvcRequestBuilders.get(EndPoint.DISPLAY_PATH)
 				.param(ParamName.USER, weasisSearchCriteria.getUser())
-				.param(ParamName.EXT_CFG, extCfg))
+				.param(ParamName.CONFIG, config))
 			.andExpect(MockMvcResultMatchers.status().is3xxRedirection());
 	}
 
 	private void launchWeasisWithIHEParametersGetRequestShouldBeRedirection(IHESearchCriteria weasisIHESearchCriteria,
-			String extCfg) throws Exception {
+			String config) throws Exception {
 		// Call controller and check status
 		this.mockMvc
 			.perform(MockMvcRequestBuilders.get(EndPoint.DISPLAY_PATH + EndPoint.IHE_INVOKE_IMAGE_DISPLAY_PATH)
 				.param(ParamName.USER, weasisIHESearchCriteria.getUser())
-				.param(ParamName.EXT_CFG, extCfg)
+				.param(ParamName.CONFIG, config)
 				.param(ParamName.REQUEST_TYPE, weasisIHESearchCriteria.getRequestType().getCode())
 				.param(ParamName.PATIENT_ID, weasisIHESearchCriteria.getPatientID()))
 			.andExpect(MockMvcResultMatchers.status().is3xxRedirection());

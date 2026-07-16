@@ -43,18 +43,20 @@ public class SlicerDisplayServiceImpl implements SlicerDisplayService {
 
 	// Services
 	private final ConnectorService connectorService;
+
 	private final SecurityService securityService;
 
 	@Autowired
 	public SlicerDisplayServiceImpl(final ConnectorService connectorService,
-									final SlicerConfigurationProperties slicerConfigurationProperties, final SecurityService securityService) {
+			final SlicerConfigurationProperties slicerConfigurationProperties, final SecurityService securityService) {
 		this.connectorService = connectorService;
 		this.slicerConfigurationProperties = slicerConfigurationProperties;
 		this.securityService = securityService;
 	}
 
 	@Override
-	public String retrieveSlicerLaunchUrl(SearchCriteria searchCriteria, Map<String, Set<Patient>> patientsByArchive, Authentication authentication) {
+	public String retrieveSlicerLaunchUrl(SearchCriteria searchCriteria, Map<String, Set<Patient>> patientsByArchive,
+			Authentication authentication) {
 		String slicerLaunchUrl;
 
 		// Retrieve first default or specific connector
@@ -63,84 +65,98 @@ public class SlicerDisplayServiceImpl implements SlicerDisplayService {
 		// Check search criteria depending on 3D Slicer limitations
 		checkSearchCriteriaDueToSlicerLimitations(searchCriteria, patientsByArchive, archive);
 
-		if (archive != null && patientsByArchive != null && patientsByArchive.containsKey(archive) && !patientsByArchive.get(archive).isEmpty()) {
+		if (archive != null && patientsByArchive != null && patientsByArchive.containsKey(archive)
+				&& !patientsByArchive.get(archive).isEmpty()) {
 			// Retrieve list of patients containing one StudyUid via viewer-hub connectors
 			Set<Patient> patients = patientsByArchive.get(archive);
 
 			// Protocol + context
 			UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder
-					.fromUriString("%s%s".formatted(slicerConfigurationProperties.getCommand().getProtocol(), slicerConfigurationProperties.getCommand().getContext()));;
+				.fromUriString("%s%s".formatted(slicerConfigurationProperties.getCommand().getProtocol(),
+						slicerConfigurationProperties.getCommand().getContext()));
+			;
 
 			// Study UID
 			String studyUIDFound = patients.stream()
-					.findFirst()
-					.flatMap(p -> p.getStudies().stream().findFirst())
-					.map(Study::getStudyInstanceUID)
-					.orElse(null);
+				.findFirst()
+				.flatMap(p -> p.getStudies().stream().findFirst())
+				.map(Study::getStudyInstanceUID)
+				.orElse(null);
 
 			if (StringUtils.isNotBlank(studyUIDFound)) {
-				uriComponentsBuilder = uriComponentsBuilder.queryParam(ParamName.SLICER_STUDY_INSTANCE_UID, studyUIDFound);
+				uriComponentsBuilder = uriComponentsBuilder.queryParam(ParamName.SLICER_STUDY_INSTANCE_UID,
+						studyUIDFound);
 			}
 			else {
-				throw new NoContentException("Study UID not found for Slicer Launch Url, Search criteria: %s".formatted(searchCriteria));
+				throw new NoContentException(
+						"Study UID not found for Slicer Launch Url, Search criteria: %s".formatted(searchCriteria));
 			}
 
-			// Dicom endpoint of the archive to query (or viewer gateway for authorization header)
-			uriComponentsBuilder = uriComponentsBuilder.queryParam(ParamName.SLICER_DICOM_WEB_ENDPOINT,
-					PathUrlUtil.buildUrlFromServerProperty(this.slicerConfigurationProperties.getArchives().get(archive)));
+			// Dicom endpoint of the archive to query (or viewer gateway for authorization
+			// header)
+			uriComponentsBuilder = uriComponentsBuilder.queryParam(ParamName.SLICER_DICOM_WEB_ENDPOINT, PathUrlUtil
+				.buildUrlFromServerProperty(this.slicerConfigurationProperties.getArchives().get(archive)));
 
-			// If requested is authenticated, add the token in the url in order for Slicer to request the gateway
-			if(authentication != null && authentication.isAuthenticated() && authentication instanceof OAuth2AuthenticationToken){
-				uriComponentsBuilder = fillSlicerOAuth2Token(uriComponentsBuilder, (OAuth2AuthenticationToken) authentication);
+			// If requested is authenticated, add the token in the url in order for Slicer
+			// to request the gateway
+			if (authentication != null && authentication.isAuthenticated()
+					&& authentication instanceof OAuth2AuthenticationToken) {
+				uriComponentsBuilder = fillSlicerOAuth2Token(uriComponentsBuilder,
+						(OAuth2AuthenticationToken) authentication);
 			}
 
 			// Build the url
 			slicerLaunchUrl = uriComponentsBuilder.build().toString();
 		}
 		else {
-			throw new ParameterException("No patient found for determined first archive: %s and search criteria: %s".formatted(archive, searchCriteria));
+			throw new ParameterException("No patient found for determined first archive: %s and search criteria: %s"
+				.formatted(archive, searchCriteria));
 		}
 
 		return slicerLaunchUrl;
 	}
 
 	/**
-	 * Due to 3D Slicer limitations check:
-	 * - only one archive
-	 * - only one study
+	 * Due to 3D Slicer limitations check: - only one archive - only one study
 	 * @param searchCriteria SearchCriteria to evaluate
-	 * @param patientsByArchive Map of patients grouped by archive (archiveId, Set of patients found from this archive)
+	 * @param patientsByArchive Map of patients grouped by archive (archiveId, Set of
+	 * patients found from this archive)
 	 */
-	private void checkSearchCriteriaDueToSlicerLimitations(SearchCriteria searchCriteria, Map<String, Set<Patient>> patientsByArchive, String firstDefaultOrFirstSpecificArchive) {
+	private void checkSearchCriteriaDueToSlicerLimitations(SearchCriteria searchCriteria,
+			Map<String, Set<Patient>> patientsByArchive, String firstDefaultOrFirstSpecificArchive) {
 		// Check request: Slicer supports only one archive
-		if (searchCriteria.getArchive() != null && searchCriteria.getArchive().size() > 1){
-			throw new ParameterException("3D Slicer supports only one archive parameter, Search criteria: %s".formatted(searchCriteria));
+		if (searchCriteria.getArchive() != null && searchCriteria.getArchive().size() > 1) {
+			throw new ParameterException(
+					"3D Slicer supports only one archive parameter, Search criteria: %s".formatted(searchCriteria));
 		}
 
-		// Check request: Slicer supports only one study UID: check has only one value in search criteria
-		if (!(searchCriteria instanceof ArchiveSearchCriteria ?
-				((ArchiveSearchCriteria) searchCriteria).hasOnlyOneSearchCriteriaValue()
-				: ((IHESearchCriteria) searchCriteria).hasOnlyOneSearchCriteriaValue())){
-			throw new ParameterException("3D Slicer supports only one study UID parameter, Search criteria: %s".formatted(searchCriteria));
+		// Check request: Slicer supports only one study UID: check has only one value in
+		// search criteria
+		if (!(searchCriteria instanceof ArchiveSearchCriteria
+				? ((ArchiveSearchCriteria) searchCriteria).hasOnlyOneSearchCriteriaValue()
+				: ((IHESearchCriteria) searchCriteria).hasOnlyOneSearchCriteriaValue())) {
+			throw new ParameterException(
+					"3D Slicer supports only one study UID parameter, Search criteria: %s".formatted(searchCriteria));
 		}
 
 		// Case patient ID is filled: check if it has only one study
-		if (searchCriteria instanceof ArchiveSearchCriteria ?
-				((ArchiveSearchCriteria) searchCriteria).getPatientID().size() == 1
+		if (searchCriteria instanceof ArchiveSearchCriteria
+				? ((ArchiveSearchCriteria) searchCriteria).getPatientID().size() == 1
 				: !((IHESearchCriteria) searchCriteria).getPatientID().isEmpty()) {
 			Set<Patient> patients = patientsByArchive.get(firstDefaultOrFirstSpecificArchive);
 
-			if (patients.isEmpty()){
+			if (patients.isEmpty()) {
 				throw new ParameterException("No studies found, Search criteria: %s".formatted(searchCriteria));
 			}
 			else {
 				// Should have only one patient
 				patients.stream().findFirst().ifPresent(patient -> {
-					if (patient.getStudies().isEmpty()){
+					if (patient.getStudies().isEmpty()) {
 						throw new ParameterException("No studies found, Search criteria: %s".formatted(searchCriteria));
 					}
-					else if (patient.getStudies().size() != 1){
-						throw new ParameterException("3D Slicer only supports to display one study, Search criteria: %s".formatted(searchCriteria));
+					else if (patient.getStudies().size() != 1) {
+						throw new ParameterException("3D Slicer only supports to display one study, Search criteria: %s"
+							.formatted(searchCriteria));
 					}
 				});
 			}
@@ -148,12 +164,15 @@ public class SlicerDisplayServiceImpl implements SlicerDisplayService {
 	}
 
 	/**
-	 * Fill the query param token in order for 3D Slicer to connect to the secured gateway/archive
+	 * Fill the query param token in order for 3D Slicer to connect to the secured
+	 * gateway/archive
 	 * @param authentication Authentication to evaluate
 	 * @return UriComponentsBuilder
 	 */
-	private UriComponentsBuilder fillSlicerOAuth2Token(UriComponentsBuilder uriComponentsBuilder, OAuth2AuthenticationToken authentication) {
-		return uriComponentsBuilder.queryParam(ParamName.SLICER_TOKEN,  securityService.retrieveAccessToken(authentication));
+	private UriComponentsBuilder fillSlicerOAuth2Token(UriComponentsBuilder uriComponentsBuilder,
+			OAuth2AuthenticationToken authentication) {
+		return uriComponentsBuilder.queryParam(ParamName.SLICER_TOKEN,
+				securityService.retrieveAccessToken(authentication));
 	}
 
 }

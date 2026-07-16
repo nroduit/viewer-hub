@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2022-2025 Weasis Team and other contributors.
+ *  Copyright (c) 2022-2026 Weasis Team and other contributors.
  *
  *  This program and the accompanying materials are made available under the terms of the Eclipse
  *  Public License 2.0 which is available at https://www.eclipse.org/legal/epl-2.0, or the Apache
@@ -23,15 +23,11 @@ import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.viewer.hub.back.constant.ApiVersion;
 import org.viewer.hub.back.constant.EndPoint;
 import org.viewer.hub.back.controller.exception.ParameterException;
 import org.viewer.hub.back.entity.TargetEntity;
@@ -84,17 +80,6 @@ public class TargetController {
 		this.groupService = groupService;
 	}
 
-	@Operation(summary = "Create targets", description = SpringDocUtil.descriptionCreateTarget, tags = "Target")
-	@io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(
-			array = @ArraySchema(schema = @Schema(type = "array", implementation = TargetEntity.class)),
-			examples = @ExampleObject(value = SpringDocUtil.exObjValReqBodyTargets)))
-	@ApiResponses(value = {
-			@ApiResponse(responseCode = "200", description = "Creation has been done",
-					content = @Content(
-							array = @ArraySchema(schema = @Schema(type = "array", implementation = TargetEntity.class)),
-							examples = @ExampleObject(value = SpringDocUtil.exObjValRespTargets))),
-			@ApiResponse(responseCode = "400", description = "Bad request",
-					content = @Content(schema = @Schema(implementation = ErrorMessage.class))) })
 	/**
 	 * Create targets: take the json body of the request which corresponds to the list of
 	 * target entities
@@ -115,7 +100,20 @@ public class TargetController {
 	 * enum TargetType (HOST, HOSTGROUP, USER, USERGROUP)
 	 * @return Created targets with theirs created ids
 	 */
-	@PostMapping(consumes = { MediaType.APPLICATION_JSON_VALUE }, produces = { MediaType.APPLICATION_JSON_VALUE })
+	@Operation(summary = "Create targets", description = SpringDocUtil.descriptionCreateTarget, tags = "Target")
+	@io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(
+			array = @ArraySchema(schema = @Schema(type = "array", implementation = TargetEntity.class)),
+			examples = @ExampleObject(value = SpringDocUtil.exObjValReqBodyTargets)))
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200", description = "Creation has been done",
+					content = @Content(
+							array = @ArraySchema(schema = @Schema(type = "array", implementation = TargetEntity.class)),
+							examples = @ExampleObject(value = SpringDocUtil.exObjValRespTargets))),
+			@ApiResponse(responseCode = "400", description = "Bad request",
+					content = @Content(schema = @Schema(implementation = ErrorMessage.class))) })
+	@PostMapping(consumes = { ApiVersion.V1_APPLICATION_JSON_VALUE },
+			produces = { ApiVersion.V1_APPLICATION_JSON_VALUE })
+	@PreAuthorize("hasAuthority('viewerhub_create')")
 	public ResponseEntity<List<TargetEntity>> createTarget(@RequestBody List<@Valid TargetEntity> targets) {
 		LOG.debug("TargetController -> createTarget");
 
@@ -139,13 +137,6 @@ public class TargetController {
 		return response;
 	}
 
-	@Operation(summary = "Delete selected target", description = SpringDocUtil.descriptionDeleteTarget, tags = "Target")
-	@ApiResponses(value = {
-			@ApiResponse(responseCode = "200", description = "Delete has been done",
-					content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
-							examples = @ExampleObject(value = RESULT_GROUP_ASSOCIATION_TARGET_DELETED))),
-			@ApiResponse(responseCode = "400", description = "Bad request",
-					content = @Content(schema = @Schema(implementation = ErrorMessage.class))) })
 	/**
 	 * Delete selected target:
 	 * <p>
@@ -156,7 +147,15 @@ public class TargetController {
 	 * @param targetName target name to delete
 	 * @return RESULT_GROUP_ASSOCIATION_TARGET_DELETED if ok or error message otherwise
 	 */
-	@DeleteMapping(produces = { MediaType.APPLICATION_JSON_VALUE })
+	@Operation(summary = "Delete selected target", description = SpringDocUtil.descriptionDeleteTarget, tags = "Target")
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200", description = "Delete has been done",
+					content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)),
+							examples = @ExampleObject(value = RESULT_GROUP_ASSOCIATION_TARGET_DELETED))),
+			@ApiResponse(responseCode = "400", description = "Bad request",
+					content = @Content(schema = @Schema(implementation = ErrorMessage.class))) })
+	@DeleteMapping(produces = { ApiVersion.V1_APPLICATION_JSON_VALUE })
+	@PreAuthorize("hasAuthority('viewerhub_delete')")
 	public ResponseEntity<String> deleteTarget(@RequestParam(PARAM_TARGET_NAME) String targetName) {
 		LOG.debug("TargetController -> deleteTarget");
 

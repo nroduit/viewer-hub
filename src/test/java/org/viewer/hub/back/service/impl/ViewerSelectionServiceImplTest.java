@@ -53,8 +53,11 @@ class ViewerSelectionServiceImplTest {
 	private ArgumentCaptor<List<ViewerSelectionEntity>> entitiesCaptor;
 
 	private ViewerSelectionEntity defaultRule;
+
 	private ViewerSelectionEntity weasisRule;
+
 	private ViewerSelectionEntity ohifRule;
+
 	private ViewerSelectionEntity slicerRule;
 
 	@BeforeEach
@@ -128,8 +131,7 @@ class ViewerSelectionServiceImplTest {
 		List<ModalityType> modalities = Arrays.asList(ModalityType.CT, ModalityType.MR);
 		Long excludeId = 999L;
 
-		when(viewerSelectionRepository.findByArchiveAndViewer(archive, viewer))
-				.thenReturn(List.of(weasisRule));
+		when(viewerSelectionRepository.findByArchiveAndViewer(archive, viewer)).thenReturn(List.of(weasisRule));
 
 		// When
 		boolean result = viewerSelectionService.checkDuplicate(archive, viewer, modalities, excludeId);
@@ -146,8 +148,7 @@ class ViewerSelectionServiceImplTest {
 		List<ModalityType> modalities = Arrays.asList(ModalityType.CT, ModalityType.MR);
 		Long excludeId = 2L; // Same as weasisRule.getId()
 
-		when(viewerSelectionRepository.findByArchiveAndViewer(archive, viewer))
-				.thenReturn(List.of(weasisRule));
+		when(viewerSelectionRepository.findByArchiveAndViewer(archive, viewer)).thenReturn(List.of(weasisRule));
 
 		// When
 		boolean result = viewerSelectionService.checkDuplicate(archive, viewer, modalities, excludeId);
@@ -161,11 +162,11 @@ class ViewerSelectionServiceImplTest {
 		// Given
 		String archive = "dcm4chee";
 		ViewerType viewer = ViewerType.WEASIS;
-		List<ModalityType> modalities = Arrays.asList(ModalityType.US); // Different modalities
+		List<ModalityType> modalities = Arrays.asList(ModalityType.US); // Different
+																		// modalities
 		Long excludeId = 999L;
 
-		when(viewerSelectionRepository.findByArchiveAndViewer(archive, viewer))
-				.thenReturn(List.of(weasisRule));
+		when(viewerSelectionRepository.findByArchiveAndViewer(archive, viewer)).thenReturn(List.of(weasisRule));
 
 		// When
 		boolean result = viewerSelectionService.checkDuplicate(archive, viewer, modalities, excludeId);
@@ -187,7 +188,7 @@ class ViewerSelectionServiceImplTest {
 		entityWithNullModalities.setModalities(null);
 
 		when(viewerSelectionRepository.findByArchiveAndViewer(archive, viewer))
-				.thenReturn(List.of(entityWithNullModalities));
+			.thenReturn(List.of(entityWithNullModalities));
 
 		// When
 		boolean result = viewerSelectionService.checkDuplicate(archive, viewer, modalities, excludeId);
@@ -225,7 +226,8 @@ class ViewerSelectionServiceImplTest {
 		Map<String, Set<Patient>> patientsByArchive = new HashMap<>();
 
 		// When
-		ViewerType result = viewerSelectionService.retrieveViewerTypeFromViewerSelectionRules(searchCriteria, patientsByArchive);
+		ViewerType result = viewerSelectionService.retrieveViewerTypeFromViewerSelectionRules(searchCriteria,
+				patientsByArchive);
 
 		// Then
 		assertNotNull(result);
@@ -240,7 +242,8 @@ class ViewerSelectionServiceImplTest {
 		Map<String, Set<Patient>> patientsByArchive = new HashMap<>();
 
 		// When
-		ViewerType result = viewerSelectionService.retrieveViewerTypeFromViewerSelectionRules(searchCriteria, patientsByArchive);
+		ViewerType result = viewerSelectionService.retrieveViewerTypeFromViewerSelectionRules(searchCriteria,
+				patientsByArchive);
 
 		// Then
 		assertNotNull(result);
@@ -259,7 +262,8 @@ class ViewerSelectionServiceImplTest {
 		Map<String, Set<Patient>> patientsByArchive = new HashMap<>();
 
 		// When
-		ViewerType result = viewerSelectionService.retrieveViewerTypeFromViewerSelectionRules(searchCriteria, patientsByArchive);
+		ViewerType result = viewerSelectionService.retrieveViewerTypeFromViewerSelectionRules(searchCriteria,
+				patientsByArchive);
 
 		// Then
 		assertNotNull(result);
@@ -274,9 +278,9 @@ class ViewerSelectionServiceImplTest {
 		patientsByArchive.put("dcm4chee", new HashSet<>());
 		patientsByArchive.put("orthanc", new HashSet<>());
 
-
 		// When
-		ViewerType result = viewerSelectionService.retrieveViewerTypeFromViewerSelectionRules(searchCriteria, patientsByArchive);
+		ViewerType result = viewerSelectionService.retrieveViewerTypeFromViewerSelectionRules(searchCriteria,
+				patientsByArchive);
 
 		// Then
 		assertNotNull(result);
@@ -303,7 +307,8 @@ class ViewerSelectionServiceImplTest {
 		Map<String, Set<Patient>> patientsByArchive = new HashMap<>();
 
 		// When
-		ViewerType result = viewerSelectionService.retrieveViewerTypeFromViewerSelectionRules(searchCriteria, patientsByArchive);
+		ViewerType result = viewerSelectionService.retrieveViewerTypeFromViewerSelectionRules(searchCriteria,
+				patientsByArchive);
 
 		// Then
 		assertNotNull(result);
@@ -323,11 +328,11 @@ class ViewerSelectionServiceImplTest {
 		patientsByArchive.put("dcm4chee", patients);
 
 		List<ViewerSelectionEntity> allRules = Arrays.asList(slicerRule, ohifRule, weasisRule, defaultRule);
-		when(viewerSelectionRepository.findAll(Sort.by(Sort.Direction.DESC, "priority")))
-				.thenReturn(allRules);
+		when(viewerSelectionRepository.findAll(Sort.by(Sort.Direction.DESC, "priority"))).thenReturn(allRules);
 
 		// When
-		ViewerType result = viewerSelectionService.retrieveViewerTypeFromViewerSelectionRules(searchCriteria, patientsByArchive);
+		ViewerType result = viewerSelectionService.retrieveViewerTypeFromViewerSelectionRules(searchCriteria,
+				patientsByArchive);
 
 		// Then
 		assertNotNull(result);
@@ -339,7 +344,8 @@ class ViewerSelectionServiceImplTest {
 		// Given
 		ArchiveSearchCriteria searchCriteria = new ArchiveSearchCriteria();
 
-		Patient patient = createPatientWithModality(ModalityType.XA); // Not matching any rule
+		Patient patient = createPatientWithModality(ModalityType.XA); // Not matching any
+																		// rule
 		Set<Patient> patients = new HashSet<>();
 		patients.add(patient);
 
@@ -347,11 +353,11 @@ class ViewerSelectionServiceImplTest {
 		patientsByArchive.put("dcm4chee", patients);
 
 		List<ViewerSelectionEntity> allRules = Arrays.asList(slicerRule, ohifRule, weasisRule, defaultRule);
-		when(viewerSelectionRepository.findAll(Sort.by(Sort.Direction.DESC, "priority")))
-				.thenReturn(allRules);
+		when(viewerSelectionRepository.findAll(Sort.by(Sort.Direction.DESC, "priority"))).thenReturn(allRules);
 
 		// When
-		ViewerType result = viewerSelectionService.retrieveViewerTypeFromViewerSelectionRules(searchCriteria, patientsByArchive);
+		ViewerType result = viewerSelectionService.retrieveViewerTypeFromViewerSelectionRules(searchCriteria,
+				patientsByArchive);
 
 		// Then
 		assertNotNull(result);
@@ -377,12 +383,13 @@ class ViewerSelectionServiceImplTest {
 		Map<String, Set<Patient>> patientsByArchive = new HashMap<>();
 		patientsByArchive.put("any-archive", patients);
 
-		List<ViewerSelectionEntity> allRules = Arrays.asList(allArchiveRule, slicerRule, ohifRule, weasisRule, defaultRule);
-		when(viewerSelectionRepository.findAll(Sort.by(Sort.Direction.DESC, "priority")))
-				.thenReturn(allRules);
+		List<ViewerSelectionEntity> allRules = Arrays.asList(allArchiveRule, slicerRule, ohifRule, weasisRule,
+				defaultRule);
+		when(viewerSelectionRepository.findAll(Sort.by(Sort.Direction.DESC, "priority"))).thenReturn(allRules);
 
 		// When
-		ViewerType result = viewerSelectionService.retrieveViewerTypeFromViewerSelectionRules(searchCriteria, patientsByArchive);
+		ViewerType result = viewerSelectionService.retrieveViewerTypeFromViewerSelectionRules(searchCriteria,
+				patientsByArchive);
 
 		// Then
 		assertNotNull(result);
@@ -417,7 +424,7 @@ class ViewerSelectionServiceImplTest {
 		entityToUpdate.setModalities(modalities);
 
 		when(viewerSelectionRepository.findByArchiveAndViewer("dcm4chee", ViewerType.WEASIS))
-				.thenReturn(List.of(weasisRule)); // Different modalities
+			.thenReturn(List.of(weasisRule)); // Different modalities
 
 		// When
 		boolean result = viewerSelectionService.update(entityToUpdate);
@@ -434,11 +441,13 @@ class ViewerSelectionServiceImplTest {
 		entityToUpdate.setId(100L);
 		entityToUpdate.setArchive("dcm4chee");
 		entityToUpdate.setViewer(ViewerType.WEASIS);
-		List<ModalityType> modalities = Arrays.asList(ModalityType.CT, ModalityType.MR); // Same as weasisRule
+		List<ModalityType> modalities = Arrays.asList(ModalityType.CT, ModalityType.MR); // Same
+																							// as
+																							// weasisRule
 		entityToUpdate.setModalities(modalities);
 
 		when(viewerSelectionRepository.findByArchiveAndViewer("dcm4chee", ViewerType.WEASIS))
-				.thenReturn(List.of(weasisRule));
+			.thenReturn(List.of(weasisRule));
 
 		// When
 		boolean result = viewerSelectionService.update(entityToUpdate);
@@ -459,7 +468,7 @@ class ViewerSelectionServiceImplTest {
 		entityToUpdate.setModalities(modalities);
 
 		when(viewerSelectionRepository.findByArchiveAndViewer("dcm4chee", ViewerType.WEASIS))
-				.thenReturn(List.of(weasisRule));
+			.thenReturn(List.of(weasisRule));
 
 		// When
 		boolean result = viewerSelectionService.update(entityToUpdate);
@@ -480,12 +489,10 @@ class ViewerSelectionServiceImplTest {
 		List<ModalityType> modalities = Arrays.asList(ModalityType.CT);
 		newEntity.setModalities(modalities);
 
-		when(viewerSelectionRepository.findByArchive("orthanc"))
-				.thenReturn(List.of());
+		when(viewerSelectionRepository.findByArchive("orthanc")).thenReturn(List.of());
 
 		List<ViewerSelectionEntity> allEntities = Arrays.asList(defaultRule, weasisRule);
-		when(viewerSelectionRepository.findAll(Sort.by(Sort.Direction.ASC, "priority")))
-				.thenReturn(allEntities);
+		when(viewerSelectionRepository.findAll(Sort.by(Sort.Direction.ASC, "priority"))).thenReturn(allEntities);
 
 		// When
 		boolean result = viewerSelectionService.createViewerSelection(newEntity);
@@ -502,11 +509,12 @@ class ViewerSelectionServiceImplTest {
 		ViewerSelectionEntity newEntity = new ViewerSelectionEntity();
 		newEntity.setArchive("dcm4chee");
 		newEntity.setViewer(ViewerType.WEASIS);
-		List<ModalityType> modalities = Arrays.asList(ModalityType.CT, ModalityType.MR); // Same as weasisRule
+		List<ModalityType> modalities = Arrays.asList(ModalityType.CT, ModalityType.MR); // Same
+																							// as
+																							// weasisRule
 		newEntity.setModalities(modalities);
 
-		when(viewerSelectionRepository.findByArchive("dcm4chee"))
-				.thenReturn(List.of(weasisRule));
+		when(viewerSelectionRepository.findByArchive("dcm4chee")).thenReturn(List.of(weasisRule));
 
 		// When
 		boolean result = viewerSelectionService.createViewerSelection(newEntity);
@@ -524,8 +532,7 @@ class ViewerSelectionServiceImplTest {
 		ViewerSelectionEntity entityToDelete = weasisRule;
 
 		List<ViewerSelectionEntity> remainingEntities = Arrays.asList(defaultRule, ohifRule);
-		when(viewerSelectionRepository.findAll(Sort.by(Sort.Direction.ASC, "priority")))
-				.thenReturn(remainingEntities);
+		when(viewerSelectionRepository.findAll(Sort.by(Sort.Direction.ASC, "priority"))).thenReturn(remainingEntities);
 
 		// When
 		viewerSelectionService.deleteViewerSelection(entityToDelete);
@@ -546,9 +553,9 @@ class ViewerSelectionServiceImplTest {
 	@Test
 	void when_updatePriority_should_reorderAndUpdatePriorities() {
 		// Given
-		List<ViewerSelectionEntity> allEntities = new ArrayList<>(Arrays.asList(defaultRule, weasisRule, ohifRule, slicerRule));
-		when(viewerSelectionRepository.findAll(Sort.by(Sort.Direction.ASC, "priority")))
-				.thenReturn(allEntities);
+		List<ViewerSelectionEntity> allEntities = new ArrayList<>(
+				Arrays.asList(defaultRule, weasisRule, ohifRule, slicerRule));
+		when(viewerSelectionRepository.findAll(Sort.by(Sort.Direction.ASC, "priority"))).thenReturn(allEntities);
 
 		// When - Move weasisRule to position 2
 		viewerSelectionService.updatePriority(weasisRule, 2);
@@ -568,8 +575,7 @@ class ViewerSelectionServiceImplTest {
 	void when_updatePriority_with_valueBeyondListSize_should_placeAtEnd() {
 		// Given
 		List<ViewerSelectionEntity> allEntities = new ArrayList<>(Arrays.asList(defaultRule, weasisRule, ohifRule));
-		when(viewerSelectionRepository.findAll(Sort.by(Sort.Direction.ASC, "priority")))
-				.thenReturn(allEntities);
+		when(viewerSelectionRepository.findAll(Sort.by(Sort.Direction.ASC, "priority"))).thenReturn(allEntities);
 
 		// When - Move weasisRule to position 100 (beyond size)
 		viewerSelectionService.updatePriority(weasisRule, 100);
@@ -590,19 +596,12 @@ class ViewerSelectionServiceImplTest {
 		Patient patient = new Patient();
 		patient.setPatientID("P001");
 
-		Serie serie = Serie.builder()
-				.seriesInstanceUID("1.2.3.4.5")
-				.modality(modalityType.name())
-				.build();
+		Serie serie = Serie.builder().seriesInstanceUID("1.2.3.4.5").modality(modalityType.name()).build();
 
-		Study study = Study.builder()
-				.studyInstanceUID("1.2.3.4")
-				.series(Set.of(serie))
-				.build();
+		Study study = Study.builder().studyInstanceUID("1.2.3.4").series(Set.of(serie)).build();
 
 		patient.setStudies(Set.of(study));
 		return patient;
 	}
+
 }
-
-

@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2022-2025 Weasis Team and other contributors.
+ *  Copyright (c) 2022-2026 Weasis Team and other contributors.
  *
  *  This program and the accompanying materials are made available under the terms of the Eclipse
  *  Public License 2.0 which is available at https://www.eclipse.org/legal/epl-2.0, or the Apache
@@ -12,12 +12,7 @@
 package org.viewer.hub.back.model.patient;
 
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -36,16 +31,14 @@ public class Instance implements Serializable {
 	@JacksonXmlProperty(isAttribute = true, localName = "SOPInstanceUID")
 	private String sopInstanceUID;
 
+	@JacksonXmlProperty(isAttribute = true, localName = "SOPClassUID")
+	private String sopClassUID;
+
 	@JacksonXmlProperty(isAttribute = true, localName = "InstanceNumber")
 	private Integer instanceNumber;
 
 	@JacksonXmlProperty(isAttribute = true, localName = "DirectDownloadFile")
 	// TODO later: not implemented yet
 	private String directDownloadFile;
-
-	public Instance(String sopInstanceUID, Integer instanceNumber) {
-		this.sopInstanceUID = sopInstanceUID;
-		this.instanceNumber = instanceNumber;
-	}
 
 }

@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2022-2025 Weasis Team and other contributors.
+ *  Copyright (c) 2022-2026 Weasis Team and other contributors.
  *
  *  This program and the accompanying materials are made available under the terms of the Eclipse
  *  Public License 2.0 which is available at https://www.eclipse.org/legal/epl-2.0, or the Apache
@@ -35,5 +35,9 @@ public class WeasisIHESearchCriteria extends IHESearchCriteria {
 	@Schema(description = "Argument for the launcher", name = "arg", type = "List<String>",
 			example = "$dicom:close –all")
 	private List<String> arg = new ArrayList<>();
+
+	@Schema(description = "Allow to by pass the use of the current Weasis manifest from the cache and force to rebuild it",
+			name = "skipWeasisManifestCache", type = "boolean", example = "false")
+	private boolean skipWeasisManifestCache;
 
 }

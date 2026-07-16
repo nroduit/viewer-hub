@@ -124,8 +124,7 @@ public class MainLayout extends AppLayout {
 		SideNavItem weasisLink = new SideNavItem("Weasis");
 		// Menu for Weasis: not filtered yet by application
 		menuEntries.forEach(entry -> {
-			if (entry.path().startsWith("/" + AbstractView.WEASIS)
-					&& entry.menuClass() != null
+			if (entry.path().startsWith("/" + AbstractView.WEASIS) && entry.menuClass() != null
 					&& SecurityUtil.isAccessGranted(entry.menuClass())) {
 				if (entry.icon() != null) {
 					weasisLink.addItem(new SideNavItem(entry.title(), entry.path(), new SvgIcon(entry.icon())));
@@ -149,8 +148,7 @@ public class MainLayout extends AppLayout {
 		// Menu for Settings
 		menuEntries.forEach(entry -> {
 			if ((entry.path().startsWith("/" + AbstractView.SETTINGS) || entry.path().equals("/"))
-					&& entry.menuClass() != null
-					&& SecurityUtil.isAccessGranted(entry.menuClass())) {
+					&& entry.menuClass() != null && SecurityUtil.isAccessGranted(entry.menuClass())) {
 				if (entry.icon() != null) {
 					settingsLink.addItem(new SideNavItem(entry.title(), entry.path(), new SvgIcon(entry.icon())));
 				}

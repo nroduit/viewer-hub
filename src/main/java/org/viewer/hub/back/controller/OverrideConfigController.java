@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2022-2025 Weasis Team and other contributors.
+ *  Copyright (c) 2022-2026 Weasis Team and other contributors.
  *
  *  This program and the accompanying materials are made available under the terms of the Eclipse
  *  Public License 2.0 which is available at https://www.eclipse.org/legal/epl-2.0, or the Apache
@@ -20,13 +20,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.viewer.hub.back.constant.ApiVersion;
 import org.viewer.hub.back.constant.EndPoint;
 import org.viewer.hub.back.entity.OverrideConfigEntity;
 import org.viewer.hub.back.entity.PackageVersionEntity;
@@ -76,7 +76,10 @@ public class OverrideConfigController {
 
 	@Operation(summary = "Retrieve the configuration properties",
 			description = "Retrieve the configuration properties in props or json format ")
-	@GetMapping(value = "/properties", produces = { MediaType.TEXT_PLAIN_VALUE, MediaType.APPLICATION_JSON_VALUE })
+	@GetMapping(value = "/properties",
+			produces = { ApiVersion.V1_TEXT_PLAIN_VALUE, ApiVersion.V1_APPLICATION_JSON_VALUE })
+	// @PreAuthorize("hasAuthority('viewerhub_search')")
+	// TODO temporary deactivate security: wait for Weasis to make secured calls
 	public ResponseEntity<byte[]> retrieveConfigurationProperties(@RequestParam @NotNull Long packageVersionId,
 			@RequestParam(required = false) Long launchConfigId, @RequestParam(required = false) Long groupId) {
 		ResponseEntity<byte[]> toReturn = null;

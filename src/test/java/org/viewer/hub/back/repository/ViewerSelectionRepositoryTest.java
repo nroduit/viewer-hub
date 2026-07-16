@@ -81,8 +81,8 @@ class ViewerSelectionRepositoryTest {
 
 		// Test Find by Id
 		assertTrue(foundByIdOpt.isPresent());
-		LOG.info("Entity ViewerSelection found with priority [{}] and id [{}]",
-				foundByIdOpt.get().getPriority(), foundByIdOpt.get().getId());
+		LOG.info("Entity ViewerSelection found with priority [{}] and id [{}]", foundByIdOpt.get().getPriority(),
+				foundByIdOpt.get().getId());
 		assertEquals(entity.getId(), foundByIdOpt.get().getId());
 		assertEquals("dcm4chee", foundByIdOpt.get().getArchive());
 		assertEquals(ViewerType.WEASIS, foundByIdOpt.get().getViewer());
@@ -152,8 +152,8 @@ class ViewerSelectionRepositoryTest {
 		assertNotNull(entityModified);
 		assertEquals(entity.getId(), entityModified.getId());
 		assertEquals(modifiedArchive, entityModified.getArchive());
-		LOG.info("Archive of the entity ViewerSelection with id [{}]: [{}]",
-				entityModified.getId(), entityModified.getArchive());
+		LOG.info("Archive of the entity ViewerSelection with id [{}]: [{}]", entityModified.getId(),
+				entityModified.getArchive());
 	}
 
 	/**
@@ -259,18 +259,19 @@ class ViewerSelectionRepositoryTest {
 		entity3.setViewer(ViewerType.WEASIS);
 
 		// Save the entities
-		LOG.info("Saving entity ViewerSelection with archive [{}] and viewer [{}]",
-				entity1.getArchive(), entity1.getViewer());
+		LOG.info("Saving entity ViewerSelection with archive [{}] and viewer [{}]", entity1.getArchive(),
+				entity1.getViewer());
 		entity1 = this.repository.saveAndFlush(entity1);
-		LOG.info("Saving entity ViewerSelection with archive [{}] and viewer [{}]",
-				entity2.getArchive(), entity2.getViewer());
+		LOG.info("Saving entity ViewerSelection with archive [{}] and viewer [{}]", entity2.getArchive(),
+				entity2.getViewer());
 		entity2 = this.repository.saveAndFlush(entity2);
-		LOG.info("Saving entity ViewerSelection with archive [{}] and viewer [{}]",
-				entity3.getArchive(), entity3.getViewer());
+		LOG.info("Saving entity ViewerSelection with archive [{}] and viewer [{}]", entity3.getArchive(),
+				entity3.getViewer());
 		entity3 = this.repository.saveAndFlush(entity3);
 
 		// Find by archive and viewer
-		List<ViewerSelectionEntity> foundEntities = this.repository.findByArchiveAndViewer("dcm4chee", ViewerType.WEASIS);
+		List<ViewerSelectionEntity> foundEntities = this.repository.findByArchiveAndViewer("dcm4chee",
+				ViewerType.WEASIS);
 
 		// Test find by archive and viewer
 		assertNotNull(foundEntities);
@@ -434,4 +435,3 @@ class ViewerSelectionRepositoryTest {
 	}
 
 }
-

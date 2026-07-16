@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2022-2025 Weasis Team and other contributors.
+ *  Copyright (c) 2022-2026 Weasis Team and other contributors.
  *
  *  This program and the accompanying materials are made available under the terms of the Eclipse
  *  Public License 2.0 which is available at https://www.eclipse.org/legal/epl-2.0, or the Apache
@@ -65,7 +65,8 @@ class CryptographyServiceImplTest {
 		assertThat(archiveSearchCriteria.getAccessionNumber().stream().findFirst().orElse("accessionNumber"))
 			.isNotEqualTo("accessionNumber");
 		assertThat(archiveSearchCriteria.getStudyUID()).hasSize(1);
-		assertThat(archiveSearchCriteria.getStudyUID().stream().findFirst().orElse("studyUID")).isNotEqualTo("studyUID");
+		assertThat(archiveSearchCriteria.getStudyUID().stream().findFirst().orElse("studyUID"))
+			.isNotEqualTo("studyUID");
 		assertThat(archiveSearchCriteria.getSeriesUID()).hasSize(1);
 		assertThat(archiveSearchCriteria.getSeriesUID().stream().findFirst().orElse("seriesUID"))
 			.isNotEqualTo("seriesUID");
@@ -109,8 +110,7 @@ class CryptographyServiceImplTest {
 		assertThat(iheSearchCriteria.getAccessionNumber().stream().findFirst().orElse("accessionNumber"))
 			.isNotEqualTo("accessionNumber");
 		assertThat(iheSearchCriteria.getStudyUID()).hasSize(1);
-		assertThat(iheSearchCriteria.getStudyUID().stream().findFirst().orElse("studyUID"))
-			.isNotEqualTo("studyUID");
+		assertThat(iheSearchCriteria.getStudyUID().stream().findFirst().orElse("studyUID")).isNotEqualTo("studyUID");
 
 		// When
 		this.cryptographyService.decode(iheSearchCriteria);

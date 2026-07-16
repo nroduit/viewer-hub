@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2022-2025 Weasis Team and other contributors.
+ *  Copyright (c) 2022-2026 Weasis Team and other contributors.
  *
  *  This program and the accompanying materials are made available under the terms of the Eclipse
  *  Public License 2.0 which is available at https://www.eclipse.org/legal/epl-2.0, or the Apache
@@ -27,14 +27,9 @@ import java.util.stream.Stream;
 /**
  * Model which represents the search criteria when launching Weasis
  */
-@JsonTypeInfo(
-		use = JsonTypeInfo.Id.DEDUCTION,
-		defaultImpl= ArchiveSearchCriteria.class
-)
-@JsonSubTypes({
-		@JsonSubTypes.Type(value = WeasisArchiveSearchCriteria.class),
-		@JsonSubTypes.Type(value = ArchiveSearchCriteria.class)
-})
+@JsonTypeInfo(use = JsonTypeInfo.Id.DEDUCTION, defaultImpl = ArchiveSearchCriteria.class)
+@JsonSubTypes({ @JsonSubTypes.Type(value = WeasisArchiveSearchCriteria.class),
+		@JsonSubTypes.Type(value = ArchiveSearchCriteria.class) })
 @Getter
 @NotNull
 @ToString
@@ -97,11 +92,10 @@ public class ArchiveSearchCriteria extends SearchCriteria {
 	 */
 	public boolean hasOnlyOneSearchCriteriaValue() {
 		return Stream.of(patientID, studyUID, accessionNumber, seriesUID, objectUID)
-				.allMatch(s -> s.isEmpty() || s.size() == 1)  &&
-				Stream.of(patientID, studyUID, accessionNumber, seriesUID, objectUID)
-				.filter(s -> s.size() == 1)
-				.count() == 1;
+			.allMatch(s -> s.isEmpty() || s.size() == 1)
+				&& Stream.of(patientID, studyUID, accessionNumber, seriesUID, objectUID)
+					.filter(s -> s.size() == 1)
+					.count() == 1;
 	}
-
 
 }

@@ -49,13 +49,14 @@ public class MicroDicomDisplayServiceImpl implements MicroDicomDisplayService {
 
 	@Autowired
 	public MicroDicomDisplayServiceImpl(final ConnectorService connectorService,
-                                        final MicroDicomConfigurationProperties microDicomConfigurationProperties) {
+			final MicroDicomConfigurationProperties microDicomConfigurationProperties) {
 		this.connectorService = connectorService;
 		this.microDicomConfigurationProperties = microDicomConfigurationProperties;
 	}
 
 	@Override
-	public String retrieveMicroDicomLaunchUrl(SearchCriteria searchCriteria, Map<String, Set<Patient>> patientsByArchive) {
+	public String retrieveMicroDicomLaunchUrl(SearchCriteria searchCriteria,
+			Map<String, Set<Patient>> patientsByArchive) {
 		String microDicomLaunchUrl = null;
 
 		// Check search criteria depending on MicroDicom limitations
@@ -68,7 +69,8 @@ public class MicroDicomDisplayServiceImpl implements MicroDicomDisplayService {
 			// Protocol + context
 			UriComponentsBuilder uriComponentsBuilder = buildProtocolAndContext();
 
-			// Query params to fill: MicroDicom limitation: we have to keep ordered query params
+			// Query params to fill: MicroDicom limitation: we have to keep ordered query
+			// params
 			List<Map.Entry<String, String>> queryParams = new LinkedList<>();
 
 			// Pacs Server query params
@@ -78,10 +80,11 @@ public class MicroDicomDisplayServiceImpl implements MicroDicomDisplayService {
 			buildPacsTagValue(searchCriteria, patientsByArchive, archive, queryParams);
 
 			// Build the url: MicroDicom limitation: we have to keep ordered query params
-			microDicomLaunchUrl = "%s?%s".formatted(uriComponentsBuilder.toUriString(), queryParams.stream()
-                    .map(p -> "%s=%s".formatted(URLEncoder.encode(p.getKey(), StandardCharsets.UTF_8),
-							URLEncoder.encode(p.getValue(), StandardCharsets.UTF_8)))
-                    .collect(Collectors.joining("&")));
+			microDicomLaunchUrl = "%s?%s".formatted(uriComponentsBuilder.toUriString(),
+					queryParams.stream()
+						.map(p -> "%s=%s".formatted(URLEncoder.encode(p.getKey(), StandardCharsets.UTF_8),
+								URLEncoder.encode(p.getValue(), StandardCharsets.UTF_8)))
+						.collect(Collectors.joining("&")));
 		}
 
 		return microDicomLaunchUrl;
@@ -90,29 +93,33 @@ public class MicroDicomDisplayServiceImpl implements MicroDicomDisplayService {
 	/**
 	 * Determine query params for pacsTagValue
 	 * @param searchCriteria SearchCriteria to evaluate
-	 * @param patientsByArchive Map of patients grouped by archive (archiveId, Set of patients found from this archive)
+	 * @param patientsByArchive Map of patients grouped by archive (archiveId, Set of
+	 * patients found from this archive)
 	 * @param archive Archive to request
 	 * @param queryParams Params to fill
 	 */
-	private void buildPacsTagValue(SearchCriteria searchCriteria, Map<String, Set<Patient>> patientsByArchive, String archive, List<Map.Entry<String, String>> queryParams) {
+	private void buildPacsTagValue(SearchCriteria searchCriteria, Map<String, Set<Patient>> patientsByArchive,
+			String archive, List<Map.Entry<String, String>> queryParams) {
 		queryParams.add(Map.entry(ParamName.MICRODICOM_PARAM, ParamName.MICRODICOM_PACS_TAG_VALUE));
 
 		// Patient ID
-		if (!(searchCriteria instanceof ArchiveSearchCriteria ?
-				((ArchiveSearchCriteria) searchCriteria).getPatientID()
-				: Set.of(((IHESearchCriteria) searchCriteria).getPatientID())).isEmpty() ) {
+		if (!(searchCriteria instanceof ArchiveSearchCriteria ? ((ArchiveSearchCriteria) searchCriteria).getPatientID()
+				: Set.of(((IHESearchCriteria) searchCriteria).getPatientID()))
+			.isEmpty()) {
 			buildPacsTagValuePatientId(searchCriteria, queryParams);
 		}
 		// Study Uid
-		else if (!(searchCriteria instanceof ArchiveSearchCriteria ?
-				((ArchiveSearchCriteria) searchCriteria).getStudyUID()
-				: ((IHESearchCriteria) searchCriteria).getStudyUID()).isEmpty()) {
+		else if (!(searchCriteria instanceof ArchiveSearchCriteria
+				? ((ArchiveSearchCriteria) searchCriteria).getStudyUID()
+				: ((IHESearchCriteria) searchCriteria).getStudyUID())
+			.isEmpty()) {
 			buildPacsTagValueStudyUid(searchCriteria, queryParams);
 		}
 		// Accession Number
-		else if (!(searchCriteria instanceof ArchiveSearchCriteria ?
-				((ArchiveSearchCriteria) searchCriteria).getAccessionNumber()
-				: ((IHESearchCriteria) searchCriteria).getAccessionNumber()).isEmpty()) {
+		else if (!(searchCriteria instanceof ArchiveSearchCriteria
+				? ((ArchiveSearchCriteria) searchCriteria).getAccessionNumber()
+				: ((IHESearchCriteria) searchCriteria).getAccessionNumber())
+			.isEmpty()) {
 			buildPacsTagValueAccessionNumber(searchCriteria, queryParams);
 		}
 		// Sop Instance Uid or Series Instance Uid: find the study UID associated
@@ -124,32 +131,37 @@ public class MicroDicomDisplayServiceImpl implements MicroDicomDisplayService {
 	/**
 	 * Determine query params for pacsTagValue for the serie/sop instance uid part
 	 * @param searchCriteria SearchCriteria to evaluate
-	 * @param patientsByArchive Map of patients grouped by archive (archiveId, Set of patients found from this archive)
+	 * @param patientsByArchive Map of patients grouped by archive (archiveId, Set of
+	 * patients found from this archive)
 	 * @param archive Archive to request
 	 * @param queryParams Params to fill
 	 */
-	private void buildPacsTagValueSerieUidOrSopInstanceUid(SearchCriteria searchCriteria, Map<String, Set<Patient>> patientsByArchive, String archive, List<Map.Entry<String, String>> queryParams) {
-		if (archive != null && patientsByArchive != null && patientsByArchive.containsKey(archive) && !patientsByArchive.get(archive).isEmpty()) {
+	private void buildPacsTagValueSerieUidOrSopInstanceUid(SearchCriteria searchCriteria,
+			Map<String, Set<Patient>> patientsByArchive, String archive, List<Map.Entry<String, String>> queryParams) {
+		if (archive != null && patientsByArchive != null && patientsByArchive.containsKey(archive)
+				&& !patientsByArchive.get(archive).isEmpty()) {
 			// Retrieve list of patients containing one StudyUid via viewer-hub connectors
 			Set<Patient> patients = patientsByArchive.get(archive);
 
 			// Study UID
 			String studyUIDFound = patients.stream()
-					.findFirst()
-					.flatMap(p -> p.getStudies().stream().findFirst())
-					.map(Study::getStudyInstanceUID)
-					.orElse(null);
+				.findFirst()
+				.flatMap(p -> p.getStudies().stream().findFirst())
+				.map(Study::getStudyInstanceUID)
+				.orElse(null);
 
 			if (StringUtils.isNotBlank(studyUIDFound)) {
 				queryParams.add(Map.entry(ParamName.MICRODICOM_VALUE, String.format("%08X", Tag.StudyInstanceUID)));
 				queryParams.add(Map.entry(ParamName.MICRODICOM_VALUE, studyUIDFound));
 			}
 			else {
-				throw new NoContentException("Study UID not found for MicroDicom Launch Url, Search criteria: %s".formatted(searchCriteria));
+				throw new NoContentException(
+						"Study UID not found for MicroDicom Launch Url, Search criteria: %s".formatted(searchCriteria));
 			}
 		}
 		else {
-			throw new ParameterException("No patient found for determined first archive: %s and search criteria: %s".formatted(archive, searchCriteria));
+			throw new ParameterException("No patient found for determined first archive: %s and search criteria: %s"
+				.formatted(archive, searchCriteria));
 		}
 	}
 
@@ -158,11 +170,19 @@ public class MicroDicomDisplayServiceImpl implements MicroDicomDisplayService {
 	 * @param searchCriteria SearchCriteria to evaluate
 	 * @param queryParams Params to fill
 	 */
-	private static void buildPacsTagValueAccessionNumber(SearchCriteria searchCriteria, List<Map.Entry<String, String>> queryParams) {
+	private static void buildPacsTagValueAccessionNumber(SearchCriteria searchCriteria,
+			List<Map.Entry<String, String>> queryParams) {
 		queryParams.add(Map.entry(ParamName.MICRODICOM_VALUE, String.format("%08X", Tag.AccessionNumber)));
-		queryParams.add(Map.entry(ParamName.MICRODICOM_VALUE, searchCriteria instanceof ArchiveSearchCriteria ?
-				((ArchiveSearchCriteria) searchCriteria).getAccessionNumber().stream().findFirst().orElseThrow(BadRequestException::new)
-				: ((IHESearchCriteria) searchCriteria).getAccessionNumber().stream().findFirst().orElseThrow(BadRequestException::new)));
+		queryParams.add(Map.entry(ParamName.MICRODICOM_VALUE,
+				searchCriteria instanceof ArchiveSearchCriteria
+						? ((ArchiveSearchCriteria) searchCriteria).getAccessionNumber()
+							.stream()
+							.findFirst()
+							.orElseThrow(BadRequestException::new)
+						: ((IHESearchCriteria) searchCriteria).getAccessionNumber()
+							.stream()
+							.findFirst()
+							.orElseThrow(BadRequestException::new)));
 	}
 
 	/**
@@ -170,11 +190,19 @@ public class MicroDicomDisplayServiceImpl implements MicroDicomDisplayService {
 	 * @param searchCriteria SearchCriteria to evaluate
 	 * @param queryParams Params to fill
 	 */
-	private static void buildPacsTagValueStudyUid(SearchCriteria searchCriteria, List<Map.Entry<String, String>> queryParams) {
+	private static void buildPacsTagValueStudyUid(SearchCriteria searchCriteria,
+			List<Map.Entry<String, String>> queryParams) {
 		queryParams.add(Map.entry(ParamName.MICRODICOM_VALUE, String.format("%08X", Tag.StudyInstanceUID)));
-		queryParams.add(Map.entry(ParamName.MICRODICOM_VALUE, searchCriteria instanceof ArchiveSearchCriteria ?
-				((ArchiveSearchCriteria) searchCriteria).getStudyUID().stream().findFirst().orElseThrow(BadRequestException::new)
-				: ((IHESearchCriteria) searchCriteria).getStudyUID().stream().findFirst().orElseThrow(BadRequestException::new)));
+		queryParams.add(Map.entry(ParamName.MICRODICOM_VALUE,
+				searchCriteria instanceof ArchiveSearchCriteria
+						? ((ArchiveSearchCriteria) searchCriteria).getStudyUID()
+							.stream()
+							.findFirst()
+							.orElseThrow(BadRequestException::new)
+						: ((IHESearchCriteria) searchCriteria).getStudyUID()
+							.stream()
+							.findFirst()
+							.orElseThrow(BadRequestException::new)));
 	}
 
 	/**
@@ -182,11 +210,16 @@ public class MicroDicomDisplayServiceImpl implements MicroDicomDisplayService {
 	 * @param searchCriteria SearchCriteria to evaluate
 	 * @param queryParams Params to fill
 	 */
-	private static void buildPacsTagValuePatientId(SearchCriteria searchCriteria, List<Map.Entry<String, String>> queryParams) {
+	private static void buildPacsTagValuePatientId(SearchCriteria searchCriteria,
+			List<Map.Entry<String, String>> queryParams) {
 		queryParams.add(Map.entry(ParamName.MICRODICOM_VALUE, String.format("%08X", Tag.PatientID)));
-		queryParams.add(Map.entry(ParamName.MICRODICOM_VALUE, searchCriteria instanceof ArchiveSearchCriteria ?
-				((ArchiveSearchCriteria) searchCriteria).getPatientID().stream().findFirst().orElseThrow(BadRequestException::new)
-				: ((IHESearchCriteria) searchCriteria).getPatientID()));
+		queryParams.add(Map.entry(ParamName.MICRODICOM_VALUE,
+				searchCriteria instanceof ArchiveSearchCriteria
+						? ((ArchiveSearchCriteria) searchCriteria).getPatientID()
+							.stream()
+							.findFirst()
+							.orElseThrow(BadRequestException::new)
+						: ((IHESearchCriteria) searchCriteria).getPatientID()));
 	}
 
 	/**
@@ -196,11 +229,12 @@ public class MicroDicomDisplayServiceImpl implements MicroDicomDisplayService {
 	 */
 	private void buildPacsServer(String archive, List<Map.Entry<String, String>> queryParams) {
 		queryParams.add(Map.entry(ParamName.MICRODICOM_PARAM, ParamName.MICRODICOM_PACS_SERVER));
-		queryParams.add(Map.entry(ParamName.MICRODICOM_VALUE, "%s:%s%s"
-				.formatted(microDicomConfigurationProperties.getArchives().get(archive).getContext(),
-						microDicomConfigurationProperties.getArchives().get(archive).getUrl(),
-						StringUtils.isNotBlank(microDicomConfigurationProperties.getArchives().get(archive).getPort())
-								? ":%s".formatted(microDicomConfigurationProperties.getArchives().get(archive).getPort()) : "")));
+		queryParams.add(Map.entry(ParamName.MICRODICOM_VALUE, "%s:%s%s".formatted(
+				microDicomConfigurationProperties.getArchives().get(archive).getContext(),
+				microDicomConfigurationProperties.getArchives().get(archive).getUrl(),
+				StringUtils.isNotBlank(microDicomConfigurationProperties.getArchives().get(archive).getPort())
+						? ":%s".formatted(microDicomConfigurationProperties.getArchives().get(archive).getPort())
+						: "")));
 	}
 
 	/**
@@ -208,28 +242,31 @@ public class MicroDicomDisplayServiceImpl implements MicroDicomDisplayService {
 	 * @return UriComponentsBuilder
 	 */
 	private UriComponentsBuilder buildProtocolAndContext() {
-        return UriComponentsBuilder
-                .fromUriString("%s%s".formatted(microDicomConfigurationProperties.getCommand().getProtocol(),
-                        microDicomConfigurationProperties.getCommand().getContext()));
+		return UriComponentsBuilder
+			.fromUriString("%s%s".formatted(microDicomConfigurationProperties.getCommand().getProtocol(),
+					microDicomConfigurationProperties.getCommand().getContext()));
 	}
 
 	/**
-	 * Due to MicroDicom limitations check:
-	 * - only one archive
-	 * - only one PatientId or one Accession Number or one Study UID
+	 * Due to MicroDicom limitations check: - only one archive - only one PatientId or one
+	 * Accession Number or one Study UID
 	 * @param searchCriteria SearchCriteria to evaluate
 	 */
 	private void checkSearchCriteriaDueToMicroDicomLimitations(SearchCriteria searchCriteria) {
 		// Check request: MicroDicom supports only one archive
-		if (searchCriteria.getArchive() != null && searchCriteria.getArchive().size() > 1){
-			throw new ParameterException("Micro Dicom supports only one archive parameter, Search criteria: %s".formatted(searchCriteria));
+		if (searchCriteria.getArchive() != null && searchCriteria.getArchive().size() > 1) {
+			throw new ParameterException(
+					"Micro Dicom supports only one archive parameter, Search criteria: %s".formatted(searchCriteria));
 		}
 
-		// Check request: MicroDicom supports only one PatientId or one Accession Number or one Study UID: check has only one value in search criteria
-		if (!(searchCriteria instanceof ArchiveSearchCriteria ?
-				((ArchiveSearchCriteria) searchCriteria).hasOnlyOneSearchCriteriaValue()
-				: ((IHESearchCriteria) searchCriteria).hasOnlyOneSearchCriteriaValue())){
-			throw new ParameterException("MicroDicom supports only one PatientId or one Accession Number or one Study UID parameter, Search criteria: %s".formatted(searchCriteria));
+		// Check request: MicroDicom supports only one PatientId or one Accession Number
+		// or one Study UID: check has only one value in search criteria
+		if (!(searchCriteria instanceof ArchiveSearchCriteria
+				? ((ArchiveSearchCriteria) searchCriteria).hasOnlyOneSearchCriteriaValue()
+				: ((IHESearchCriteria) searchCriteria).hasOnlyOneSearchCriteriaValue())) {
+			throw new ParameterException(
+					"MicroDicom supports only one PatientId or one Accession Number or one Study UID parameter, Search criteria: %s"
+						.formatted(searchCriteria));
 		}
 	}
 

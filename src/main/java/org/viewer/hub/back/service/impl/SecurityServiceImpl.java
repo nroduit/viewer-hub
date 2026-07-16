@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2022-2025 Weasis Team and other contributors.
+ *  Copyright (c) 2022-2026 Weasis Team and other contributors.
  *
  *  This program and the accompanying materials are made available under the terms of the Eclipse
  *  Public License 2.0 which is available at https://www.eclipse.org/legal/epl-2.0, or the Apache
@@ -83,9 +83,8 @@ public class SecurityServiceImpl implements SecurityService {
 
 	@Override
 	public String retrieveAccessToken(OAuth2AuthenticationToken authentication) {
-		OAuth2AuthorizedClient client = oAuth2AuthorizedClientService.loadAuthorizedClient(
-				authentication.getAuthorizedClientRegistrationId(),
-				authentication.getName());
+		OAuth2AuthorizedClient client = oAuth2AuthorizedClientService
+			.loadAuthorizedClient(authentication.getAuthorizedClientRegistrationId(), authentication.getName());
 		return client.getAccessToken().getTokenValue();
 	}
 
@@ -327,8 +326,10 @@ public class SecurityServiceImpl implements SecurityService {
 	private String retrieveAccessTokenClientCredentials(String clientRegistrationId) {
 		String accessTokenFound = null;
 		if (clientRegistrationId != null) {
-			OAuth2AuthorizedClient authorizedClient = clientCredentialsAuthorizedClientManager.authorize(
-					OAuth2AuthorizeRequest.withClientRegistrationId(clientRegistrationId).principal("viewer-hub").build());
+			OAuth2AuthorizedClient authorizedClient = clientCredentialsAuthorizedClientManager
+				.authorize(OAuth2AuthorizeRequest.withClientRegistrationId(clientRegistrationId)
+					.principal("viewer-hub")
+					.build());
 			accessTokenFound = authorizedClient != null && authorizedClient.getAccessToken() != null
 					? authorizedClient.getAccessToken().getTokenValue() : null;
 		}

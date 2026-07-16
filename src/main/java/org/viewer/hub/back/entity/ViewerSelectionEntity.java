@@ -35,7 +35,7 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = false)
 public class ViewerSelectionEntity {
 
-    @Id
+	@Id
 	@Column(name = "id", nullable = false)
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	@JacksonXmlProperty(localName = "Id")

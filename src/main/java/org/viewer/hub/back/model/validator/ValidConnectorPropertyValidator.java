@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2022-2025 Weasis Team and other contributors.
+ *  Copyright (c) 2022-2026 Weasis Team and other contributors.
  *
  *  This program and the accompanying materials are made available under the terms of the Eclipse
  *  Public License 2.0 which is available at https://www.eclipse.org/legal/epl-2.0, or the Apache
@@ -20,11 +20,7 @@ import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.stereotype.Component;
 import org.viewer.hub.back.enums.ConnectorAuthType;
 import org.viewer.hub.back.enums.ConnectorType;
-import org.viewer.hub.back.model.property.ConnectorAuthenticationProperty;
-import org.viewer.hub.back.model.property.ConnectorProperty;
-import org.viewer.hub.back.model.property.DbConnectorProperty;
-import org.viewer.hub.back.model.property.DicomConnectorProperty;
-import org.viewer.hub.back.model.property.DicomWebConnectorProperty;
+import org.viewer.hub.back.model.property.*;
 
 import java.util.Objects;
 

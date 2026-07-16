@@ -16,13 +16,13 @@ import org.viewer.hub.back.model.searchcriteria.SearchCriteria;
 
 public interface DisplayService {
 
-    /**
-     * Determine which viewer to display based on the provided search criteria and build the launch URL for the selected viewer.
-     *
-     * @param searchCriteria the criteria used determine the viewer to display
-     * @param authentication the authentication information
-     * @return the viewer launch URL
-     */
-    String viewerLaunchUrl(SearchCriteria searchCriteria, Authentication authentication);
+	/**
+	 * Determine which viewer to display based on the provided search criteria and build
+	 * the launch URL for the selected viewer.
+	 * @param searchCriteria the criteria used determine the viewer to display
+	 * @param authentication the authentication information
+	 * @return the viewer launch URL
+	 */
+	String viewerLaunchUrl(SearchCriteria searchCriteria, Authentication authentication);
 
 }

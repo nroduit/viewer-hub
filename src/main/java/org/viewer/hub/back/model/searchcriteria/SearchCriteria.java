@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2022-2025 Weasis Team and other contributors.
+ *  Copyright (c) 2022-2026 Weasis Team and other contributors.
  *
  *  This program and the accompanying materials are made available under the terms of the Eclipse
  *  Public License 2.0 which is available at https://www.eclipse.org/legal/epl-2.0, or the Apache
@@ -11,8 +11,6 @@
 
 package org.viewer.hub.back.model.searchcriteria;
 
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -37,16 +35,12 @@ import java.util.stream.Collectors;
 
 import static org.weasis.core.util.StringUtil.deAccent;
 
-@JsonTypeInfo(
-		use = JsonTypeInfo.Id.DEDUCTION,
-		defaultImpl= WeasisArchiveSearchCriteria.class
-)
-@JsonSubTypes({
-		@JsonSubTypes.Type(value = ArchiveSearchCriteria.class),
-		@JsonSubTypes.Type(value = IHESearchCriteria.class),
-		@JsonSubTypes.Type(value = WeasisIHESearchCriteria.class),
-		@JsonSubTypes.Type(value = WeasisArchiveSearchCriteria.class)
-})
+//@JsonIgnoreProperties("continue")
+//@JsonIgnoreProperties(ignoreUnknown = true)
+//@JsonTypeInfo(use = JsonTypeInfo.Id.DEDUCTION, defaultImpl = WeasisArchiveSearchCriteria.class)
+//@JsonSubTypes({ @JsonSubTypes.Type(value = ArchiveSearchCriteria.class),
+//		@JsonSubTypes.Type(value = IHESearchCriteria.class), @JsonSubTypes.Type(value = WeasisIHESearchCriteria.class),
+//		@JsonSubTypes.Type(value = WeasisArchiveSearchCriteria.class) })
 @Getter
 @ExistingConnector
 @ToString
@@ -75,10 +69,9 @@ public abstract class SearchCriteria implements Serializable {
 	private LinkedHashSet<String> archive = new LinkedHashSet<>();
 
 	@Setter
-	@Schema(description = "Request should be done by using this viewer", name = "viewer",
-			type = "ViewerType", example = "WEASIS")
+	@Schema(description = "Request should be done by using this viewer", name = "viewer", type = "ViewerType",
+			example = "WEASIS")
 	private ViewerType viewer;
-
 
 	// Patient request filters
 	@Setter
@@ -195,16 +188,23 @@ public abstract class SearchCriteria implements Serializable {
 	}
 
 	/**
-	 * Jackson will deduct the object to build based on the criteria received in the request
+	 * Jackson will deduct the object to build based on the criteria received in the
+	 * request
 	 * @param params Request params received
-	 * @return built object can be one of the following: ArchiveSearchCriteria, IHESearchCriteria,
-	 * WeasisIHESearchCriteria, WeasisArchiveSearchCriteria
+	 * @return built object can be one of the following: ArchiveSearchCriteria,
+	 * IHESearchCriteria, WeasisIHESearchCriteria, WeasisArchiveSearchCriteria
 	 */
 	public static SearchCriteria jacksonDeduction(MultiValueMap<String, String> params) {
 		ObjectMapper mapper = new ObjectMapper().findAndRegisterModules()
-				.enable(DeserializationFeature.UNWRAP_SINGLE_VALUE_ARRAYS)
-				.enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY);
-		return mapper.convertValue(params, SearchCriteria.class);
+			.enable(DeserializationFeature.UNWRAP_SINGLE_VALUE_ARRAYS)
+			.enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY);
+		// Use the appropriate intermediate class for deduction based on the presence of
+		// requestType, since the top-level deduction cannot distinguish IHE from Archive
+		// subtypes when child-specific properties (pro/config/arg) are absent.
+		if (params.containsKey("requestType")) {
+			return mapper.convertValue(params, IHESearchCriteria.class);
+		}
+		return mapper.convertValue(params, ArchiveSearchCriteria.class);
 	}
 
 }
