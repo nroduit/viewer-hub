@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2022-2025 Weasis Team and other contributors.
+ *  Copyright (c) 2022-2026 Weasis Team and other contributors.
  *
  *  This program and the accompanying materials are made available under the terms of the Eclipse
  *  Public License 2.0 which is available at https://www.eclipse.org/legal/epl-2.0, or the Apache
@@ -14,12 +14,7 @@ package org.viewer.hub.back.model.property;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.viewer.hub.back.enums.ConnectorType;
 import org.viewer.hub.back.model.validator.ValidConnectorProperty;
 

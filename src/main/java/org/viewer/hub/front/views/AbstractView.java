@@ -35,6 +35,7 @@ public abstract class AbstractView extends Div {
 
 	// Views identifiers
 	public static final String WEASIS = "weasis";
+
 	public static final String SETTINGS = "settings";
 
 	protected VerticalLayout mainLayout;

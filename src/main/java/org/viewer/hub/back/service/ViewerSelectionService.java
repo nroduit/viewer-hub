@@ -38,15 +38,16 @@ public interface ViewerSelectionService {
 
 	/**
 	 * Check for duplicate viewer selection based on provided parameters
-	 * @param archive   the archive identifier
-	 * @param viewer    the viewer type
+	 * @param archive the archive identifier
+	 * @param viewer the viewer type
 	 * @param modalities list of modality types
 	 * @param excludeId id to exclude from the check (useful during updates)
 	 * @return true if a duplicate exists, false otherwise
 	 */
 	boolean checkDuplicate(String archive, ViewerType viewer, List<ModalityType> modalities, Long excludeId);
 
-	/** Retrieve all viewer selection entities sorted by priority
+	/**
+	 * Retrieve all viewer selection entities sorted by priority
 	 * @param prioritySortDirection direction to sort by priority (ASC or DESC)
 	 * @return list of viewer selection entities sorted by priority
 	 */
@@ -58,7 +59,8 @@ public interface ViewerSelectionService {
 	 * @param patientsByArchive Set of patients retrieved gather by archive
 	 * @return the matching ViewerType
 	 */
-	ViewerType retrieveViewerTypeFromViewerSelectionRules(SearchCriteria searchCriteria, Map<String, Set<Patient>> patientsByArchive);
+	ViewerType retrieveViewerTypeFromViewerSelectionRules(SearchCriteria searchCriteria,
+			Map<String, Set<Patient>> patientsByArchive);
 
 	/**
 	 * Count total number of viewer selection entities
@@ -92,4 +94,5 @@ public interface ViewerSelectionService {
 	 * @param value new priority value
 	 */
 	void updatePriority(ViewerSelectionEntity viewerSelectionEntity, int value);
+
 }

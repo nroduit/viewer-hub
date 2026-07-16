@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2022-2025 Weasis Team and other contributors.
+ *  Copyright (c) 2022-2026 Weasis Team and other contributors.
  *
  *  This program and the accompanying materials are made available under the terms of the Eclipse
  *  Public License 2.0 which is available at https://www.eclipse.org/legal/epl-2.0, or the Apache
@@ -18,6 +18,8 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 import org.viewer.hub.back.util.DateTimeUtil;
 
 import java.io.Serial;
@@ -25,14 +27,13 @@ import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Builder
 @AllArgsConstructor
+@NoArgsConstructor
+@EqualsAndHashCode
 public class Study implements Serializable {
 
 	@Serial
@@ -65,25 +66,23 @@ public class Study implements Serializable {
 	@JacksonXmlProperty(isAttribute = true, localName = "ReferringPhysicianName")
 	private String referringPhysicianName;
 
-	public Study() {
-	}
-
-	public Study(String studyInstanceUID, String studyDescription, LocalDate studyDate, LocalTime studyTime,
-			String accessionNumber, String studyID, String referringPhysicianName) {
+	public Study(String studyInstanceUID, String studyDescription, Date studyDate, Date studyTime,
+                 String accessionNumber, String studyID, String referringPhysicianName) {
 		this.studyInstanceUID = studyInstanceUID;
 		this.studyDescription = studyDescription;
-		this.studyDate = studyDate;
-		this.studyTime = studyTime;
+		this.studyDate = studyDate != null ? DateTimeUtil.toLocalDate(studyDate) : null;
+		this.studyTime = studyTime != null ? DateTimeUtil.toLocalTime(studyTime) : null;
 		this.accessionNumber = accessionNumber;
 		this.studyID = studyID;
 		this.referringPhysicianName = referringPhysicianName;
 	}
 
-	public Study(String studyInstanceUID, String studyDescription, LocalDate studyDate, String accessionNumber,
+	public Study(String studyInstanceUID, String studyDescription, LocalDateTime studyDateTime, String accessionNumber,
 			String studyID, String referringPhysicianName) {
 		this.studyInstanceUID = studyInstanceUID;
 		this.studyDescription = studyDescription;
-		this.studyDate = studyDate;
+		this.studyDate = studyDateTime != null ? studyDateTime.toLocalDate() : null;
+		this.studyTime = studyDateTime != null ? studyDateTime.toLocalTime() : null;
 		this.accessionNumber = accessionNumber;
 		this.studyID = studyID;
 		this.referringPhysicianName = referringPhysicianName;
@@ -159,30 +158,6 @@ public class Study implements Serializable {
 	}
 
 	@Override
-	public boolean equals(Object o) {
-		if (this == o) {
-			return true;
-		}
-		if (o == null || this.getClass() != o.getClass()) {
-			return false;
-		}
-		Study study = (Study) o;
-		return Objects.equals(this.series, study.series)
-				&& Objects.equals(this.studyInstanceUID, study.studyInstanceUID)
-				&& Objects.equals(this.studyDescription, study.studyDescription)
-				&& Objects.equals(this.studyDate, study.studyDate) && Objects.equals(this.studyTime, study.studyTime)
-				&& Objects.equals(this.accessionNumber, study.accessionNumber)
-				&& Objects.equals(this.studyID, study.studyID)
-				&& Objects.equals(this.referringPhysicianName, study.referringPhysicianName);
-	}
-
-	@Override
-	public int hashCode() {
-		return Objects.hash(this.series, this.studyInstanceUID, this.studyDescription, this.studyDate, this.studyTime,
-				this.accessionNumber, this.studyID, this.referringPhysicianName);
-	}
-
-	@Override
 	public String toString() {
 		return "Study{" + "series=" + this.series + ", studyInstanceUID='" + this.studyInstanceUID + '\''
 				+ ", studyDescription='" + this.studyDescription + '\'' + ", studyDate=" + this.studyDate
@@ -217,7 +192,7 @@ public class Study implements Serializable {
 			Optional<Serie> optionalSerie = this.series.stream()
 				.filter(s -> Objects.equals(s.getSeriesInstanceUID(), serieToMerge.getSeriesInstanceUID()))
 				.findFirst();
-            optionalSerie.ifPresent(serie -> serie.merge(serieToMerge));
+			optionalSerie.ifPresent(serie -> serie.merge(serieToMerge));
 		});
 	}
 

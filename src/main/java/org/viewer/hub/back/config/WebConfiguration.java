@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2022-2025 Weasis Team and other contributors.
+ *  Copyright (c) 2022-2026 Weasis Team and other contributors.
  *
  *  This program and the accompanying materials are made available under the terms of the Eclipse
  *  Public License 2.0 which is available at https://www.eclipse.org/legal/epl-2.0, or the Apache
@@ -12,6 +12,7 @@
 package org.viewer.hub.back.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.fasterxml.jackson.dataformat.xml.ser.ToXmlGenerator;
 import jakarta.validation.constraints.NotNull;
@@ -32,6 +33,7 @@ import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.resource.PathResourceResolver;
 import org.viewer.hub.back.config.s3.S3ClientConfigurationProperties;
+import org.viewer.hub.back.config.xml.XmlSanitizeSerializer;
 
 import java.io.IOException;
 import java.util.List;
@@ -74,8 +76,15 @@ public class WebConfiguration implements WebMvcConfigurer {
 	public MappingJackson2XmlHttpMessageConverter mappingJackson2XmlHttpMessageConverter(
 			Jackson2ObjectMapperBuilder builder) {
 		ObjectMapper mapper = builder.createXmlMapper(true).build();
+
 		// Set the xml tag to each xml serialization
 		((XmlMapper) mapper).enable(ToXmlGenerator.Feature.WRITE_XML_DECLARATION);
+
+		// Sanitize value for xml
+		SimpleModule module = new SimpleModule();
+		module.addSerializer(String.class, new XmlSanitizeSerializer());
+		mapper.registerModule(module);
+
 		return new MappingJackson2XmlHttpMessageConverter(mapper);
 	}
 

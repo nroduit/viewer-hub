@@ -26,10 +26,12 @@ public interface OhifDisplayService {
 	/**
 	 * Retrieve url which will launch OHIF
 	 * @param searchCriteria Search criteria
-	 * @param patientsByArchive Map of patients grouped by archive (archiveId, Set of patients found from this archive)
+	 * @param patientsByArchive Map of patients grouped by archive (archiveId, Set of
+	 * patients found from this archive)
 	 * @param authentication Authentication of the user
 	 * @return URL which will launch OHIF
 	 */
-	String retrieveOhifLaunchUrl(SearchCriteria searchCriteria, Map<String, Set<Patient>> patientsByArchive, Authentication authentication);
+	String retrieveOhifLaunchUrl(SearchCriteria searchCriteria, Map<String, Set<Patient>> patientsByArchive,
+			Authentication authentication);
 
 }

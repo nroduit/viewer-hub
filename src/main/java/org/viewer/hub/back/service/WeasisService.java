@@ -28,12 +28,13 @@ public interface WeasisService {
 	 * Build manifest and set it in the cache
 	 * @param key Cache key
 	 * @param searchCriteria Criteria to build the manifest
-	 * @param patientsByArchive Map of patients grouped by archive (archiveId, Set of patients found from this archive).
-	 *                          Used to build manifest from already fetched patients.
-	 *                          If null will fetch patients from connectors based on search criteria
+	 * @param patientsByArchive Map of patients grouped by archive (archiveId, Set of
+	 * patients found from this archive). Used to build manifest from already fetched
+	 * patients. If null will fetch patients from connectors based on search criteria
 	 * @param authentication Authentication
 	 */
-	void buildManifest(String key, SearchCriteria searchCriteria, Map<String, Set<Patient>> patientsByArchive, Authentication authentication);
+	void buildManifest(String key, SearchCriteria searchCriteria, Map<String, Set<Patient>> patientsByArchive,
+			Authentication authentication);
 
 	/**
 	 * Retrieve manifest from the cache

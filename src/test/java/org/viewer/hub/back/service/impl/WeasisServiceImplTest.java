@@ -67,7 +67,7 @@ class WeasisServiceImplTest {
 		WeasisArchiveSearchCriteria weasisSearchCriteria = new WeasisArchiveSearchCriteria();
 
 		// Call service
-		this.weasisService.buildManifest("testWithoutIHE", weasisSearchCriteria, null,null);
+		this.weasisService.buildManifest("testWithoutIHE", weasisSearchCriteria, null, null);
 
 		// Test results
 		Mockito.verify(this.cacheServiceMock, Mockito.atLeastOnce())
@@ -82,7 +82,7 @@ class WeasisServiceImplTest {
 		weasisSearchCriteria.setObjectUID(new LinkedHashSet<>(List.of("objectUid")));
 
 		// Call service
-		this.weasisService.buildManifest("testWithoutIHE", weasisSearchCriteria, null,null);
+		this.weasisService.buildManifest("testWithoutIHE", weasisSearchCriteria, null, null);
 
 		// Test results
 		Mockito.verify(this.connectorQueryServiceMock, Mockito.atLeastOnce())
@@ -97,7 +97,7 @@ class WeasisServiceImplTest {
 		weasisSearchCriteria.setSeriesUID(new LinkedHashSet<>(List.of("uid")));
 
 		// Call service
-		this.weasisService.buildManifest("testWithoutIHE", weasisSearchCriteria, null,null);
+		this.weasisService.buildManifest("testWithoutIHE", weasisSearchCriteria, null, null);
 
 		// Test results
 		Mockito.verify(this.connectorQueryServiceMock, Mockito.atLeastOnce())
@@ -112,7 +112,7 @@ class WeasisServiceImplTest {
 		weasisSearchCriteria.setAccessionNumber(new LinkedHashSet<>(List.of("uid")));
 
 		// Call service
-		this.weasisService.buildManifest("testWithoutIHE", weasisSearchCriteria, null,null);
+		this.weasisService.buildManifest("testWithoutIHE", weasisSearchCriteria, null, null);
 
 		// Test results
 		Mockito.verify(this.connectorQueryServiceMock, Mockito.atLeastOnce())
@@ -127,7 +127,7 @@ class WeasisServiceImplTest {
 		weasisSearchCriteria.setStudyUID(new LinkedHashSet<>(List.of("uid")));
 
 		// Call service
-		this.weasisService.buildManifest("testWithoutIHE", weasisSearchCriteria, null,null);
+		this.weasisService.buildManifest("testWithoutIHE", weasisSearchCriteria, null, null);
 
 		// Test results
 		Mockito.verify(this.connectorQueryServiceMock, Mockito.atLeastOnce())
@@ -142,7 +142,7 @@ class WeasisServiceImplTest {
 		weasisSearchCriteria.setPatientID(new LinkedHashSet<>(List.of("uid")));
 
 		// Call service
-		this.weasisService.buildManifest("testWithoutIHE", weasisSearchCriteria, null,null);
+		this.weasisService.buildManifest("testWithoutIHE", weasisSearchCriteria, null, null);
 
 		// Test results
 		Mockito.verify(this.connectorQueryServiceMock, Mockito.atLeastOnce())
@@ -156,7 +156,7 @@ class WeasisServiceImplTest {
 		WeasisIHESearchCriteria weasisIHESearchCriteria = new WeasisIHESearchCriteria();
 
 		// Call service
-		this.weasisService.buildManifest("testWithIHE", weasisIHESearchCriteria, null,null);
+		this.weasisService.buildManifest("testWithIHE", weasisIHESearchCriteria, null, null);
 
 		// Test results
 		Mockito.verify(this.cacheServiceMock, Mockito.atLeastOnce())
@@ -172,7 +172,7 @@ class WeasisServiceImplTest {
 		weasisIHESearchCriteria.setRequestType(IHERequestType.STUDY);
 
 		// Call service
-		this.weasisService.buildManifest("testWithIHE", weasisIHESearchCriteria, null,null);
+		this.weasisService.buildManifest("testWithIHE", weasisIHESearchCriteria, null, null);
 
 		// Test results
 		Mockito.verify(this.connectorQueryServiceMock, Mockito.atLeastOnce())
@@ -188,7 +188,7 @@ class WeasisServiceImplTest {
 		weasisIHESearchCriteria.setRequestType(IHERequestType.STUDY);
 
 		// Call service
-		this.weasisService.buildManifest("testWithIHE", weasisIHESearchCriteria, null,null);
+		this.weasisService.buildManifest("testWithIHE", weasisIHESearchCriteria, null, null);
 
 		// Test results
 		Mockito.verify(this.connectorQueryServiceMock, Mockito.atLeastOnce())
@@ -204,7 +204,7 @@ class WeasisServiceImplTest {
 		weasisIHESearchCriteria.setRequestType(IHERequestType.STUDY);
 
 		// Call service
-		this.weasisService.buildManifest("testWithIHE", weasisIHESearchCriteria, null,null);
+		this.weasisService.buildManifest("testWithIHE", weasisIHESearchCriteria, null, null);
 
 		// Test results
 		Mockito.verify(this.connectorQueryServiceMock, Mockito.never())
@@ -220,7 +220,7 @@ class WeasisServiceImplTest {
 		weasisIHESearchCriteria.setRequestType(IHERequestType.PATIENT);
 
 		// Call service
-		this.weasisService.buildManifest("testWithIHE", weasisIHESearchCriteria, null,null);
+		this.weasisService.buildManifest("testWithIHE", weasisIHESearchCriteria, null, null);
 
 		// Test results
 		Mockito.verify(this.connectorQueryServiceMock, Mockito.atLeastOnce())
@@ -252,9 +252,9 @@ class WeasisServiceImplTest {
 
 		// Test results
 		Mockito.verify(this.cacheServiceMock, Mockito.atLeastOnce())
-				.putManifestIfAbsent(Mockito.anyString(), Mockito.any());
+			.putManifestIfAbsent(Mockito.anyString(), Mockito.any());
 		Mockito.verify(this.securityServiceMock, Mockito.atLeastOnce())
-				.handleManifestAuthentication(Mockito.any(), Mockito.eq(authentication));
+			.handleManifestAuthentication(Mockito.any(), Mockito.eq(authentication));
 	}
 
 	@Test
@@ -271,7 +271,7 @@ class WeasisServiceImplTest {
 
 		// Test results
 		Mockito.verify(this.securityServiceMock, Mockito.atLeastOnce())
-				.handleManifestAuthentication(Mockito.any(), Mockito.eq(authentication));
+			.handleManifestAuthentication(Mockito.any(), Mockito.eq(authentication));
 	}
 
 	// ========== Tests with empty patientsByArchive ==========
@@ -288,8 +288,7 @@ class WeasisServiceImplTest {
 		this.weasisService.buildManifest("testWithEmptyPatients", weasisSearchCriteria, patientsByArchive, null);
 
 		// Test results
-		Mockito.verify(this.connectorServiceMock, Mockito.never())
-				.retrieveConnectorFromId(Mockito.anyString());
+		Mockito.verify(this.connectorServiceMock, Mockito.never()).retrieveConnectorFromId(Mockito.anyString());
 	}
 
 	@Test
@@ -304,8 +303,7 @@ class WeasisServiceImplTest {
 		this.weasisService.buildManifest("testWithNullPatients", weasisSearchCriteria, patientsByArchive, null);
 
 		// Test results
-		Mockito.verify(this.connectorServiceMock, Mockito.never())
-				.retrieveConnectorFromId(Mockito.anyString());
+		Mockito.verify(this.connectorServiceMock, Mockito.never()).retrieveConnectorFromId(Mockito.anyString());
 	}
 
 	// ========== Tests with empty criteria ==========
@@ -322,15 +320,15 @@ class WeasisServiceImplTest {
 
 		// Test results
 		Mockito.verify(this.connectorQueryServiceMock, Mockito.never())
-				.buildFromSopInstanceUids(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+			.buildFromSopInstanceUids(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
 		Mockito.verify(this.connectorQueryServiceMock, Mockito.never())
-				.buildFromSeriesInstanceUids(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+			.buildFromSeriesInstanceUids(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
 		Mockito.verify(this.connectorQueryServiceMock, Mockito.never())
-				.buildFromStudyAccessionNumbers(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+			.buildFromStudyAccessionNumbers(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
 		Mockito.verify(this.connectorQueryServiceMock, Mockito.never())
-				.buildFromStudyInstanceUids(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+			.buildFromStudyInstanceUids(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
 		Mockito.verify(this.connectorQueryServiceMock, Mockito.never())
-				.buildFromPatientIds(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+			.buildFromPatientIds(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
 	}
 
 	@Test
@@ -346,9 +344,9 @@ class WeasisServiceImplTest {
 
 		// Test results
 		Mockito.verify(this.connectorQueryServiceMock, Mockito.never())
-				.buildFromStudyAccessionNumbers(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+			.buildFromStudyAccessionNumbers(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
 		Mockito.verify(this.connectorQueryServiceMock, Mockito.never())
-				.buildFromStudyInstanceUids(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+			.buildFromStudyInstanceUids(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
 	}
 
 	// ========== Tests with multiple criteria ==========
@@ -366,9 +364,9 @@ class WeasisServiceImplTest {
 
 		// Test results
 		Mockito.verify(this.connectorQueryServiceMock, Mockito.atLeastOnce())
-				.buildFromStudyInstanceUids(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+			.buildFromStudyInstanceUids(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
 		Mockito.verify(this.connectorQueryServiceMock, Mockito.atLeastOnce())
-				.buildFromSeriesInstanceUids(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+			.buildFromSeriesInstanceUids(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
 	}
 
 	@Test
@@ -387,15 +385,15 @@ class WeasisServiceImplTest {
 
 		// Test results
 		Mockito.verify(this.connectorQueryServiceMock, Mockito.atLeastOnce())
-				.buildFromPatientIds(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+			.buildFromPatientIds(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
 		Mockito.verify(this.connectorQueryServiceMock, Mockito.atLeastOnce())
-				.buildFromStudyInstanceUids(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+			.buildFromStudyInstanceUids(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
 		Mockito.verify(this.connectorQueryServiceMock, Mockito.atLeastOnce())
-				.buildFromStudyAccessionNumbers(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+			.buildFromStudyAccessionNumbers(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
 		Mockito.verify(this.connectorQueryServiceMock, Mockito.atLeastOnce())
-				.buildFromSeriesInstanceUids(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+			.buildFromSeriesInstanceUids(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
 		Mockito.verify(this.connectorQueryServiceMock, Mockito.atLeastOnce())
-				.buildFromSopInstanceUids(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+			.buildFromSopInstanceUids(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
 	}
 
 	// ========== Tests for finalization ==========
@@ -410,9 +408,9 @@ class WeasisServiceImplTest {
 		// Call service
 		this.weasisService.buildManifest("testFinalization", weasisSearchCriteria, null, null);
 
-		// Test results - should call putManifest (not just putManifestIfAbsent) at the end
-		Mockito.verify(this.cacheServiceMock, Mockito.atLeastOnce())
-				.putManifest(Mockito.anyString(), Mockito.any());
+		// Test results - should call putManifest (not just putManifestIfAbsent) at the
+		// end
+		Mockito.verify(this.cacheServiceMock, Mockito.atLeastOnce()).putManifest(Mockito.anyString(), Mockito.any());
 	}
 
 }

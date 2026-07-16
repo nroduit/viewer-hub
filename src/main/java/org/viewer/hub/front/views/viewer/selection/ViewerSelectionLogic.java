@@ -61,7 +61,6 @@ public class ViewerSelectionLogic {
 		return this.viewerSelectionService.update(viewerSelectionEntity);
 	}
 
-
 	/**
 	 * Check for duplicate rule
 	 * @param archive Archive name
@@ -70,8 +69,8 @@ public class ViewerSelectionLogic {
 	 * @param excludeId Id to exclude from the check (used during update)
 	 * @return true if a duplicate rule exists
 	 */
-	public boolean checkDuplicateRule(String archive, ViewerType viewer,
-									  List<ModalityType> modalities, Long excludeId) {
+	public boolean checkDuplicateRule(String archive, ViewerType viewer, List<ModalityType> modalities,
+			Long excludeId) {
 		return viewerSelectionService.checkDuplicate(archive, viewer, modalities, excludeId);
 	}
 

@@ -26,9 +26,11 @@ public interface MicroDicomDisplayService {
 	/**
 	 * Retrieve url which will launch Micro Dicom
 	 * @param searchCriteria search criteria
-	 * @param patientsByArchive Map of patients grouped by archive (archiveId, Set of patients found from this archive)
+	 * @param patientsByArchive Map of patients grouped by archive (archiveId, Set of
+	 * patients found from this archive)
 	 * @return url which will launch Micro Dicom
 	 */
-	String retrieveMicroDicomLaunchUrl(@Valid SearchCriteria searchCriteria, Map<String, Set<Patient>> patientsByArchive);
+	String retrieveMicroDicomLaunchUrl(@Valid SearchCriteria searchCriteria,
+			Map<String, Set<Patient>> patientsByArchive);
 
 }

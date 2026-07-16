@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2022-2025 Weasis Team and other contributors.
+ *  Copyright (c) 2022-2026 Weasis Team and other contributors.
  *
  *  This program and the accompanying materials are made available under the terms of the Eclipse
  *  Public License 2.0 which is available at https://www.eclipse.org/legal/epl-2.0, or the Apache
@@ -15,13 +15,14 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.viewer.hub.back.constant.ApiVersion;
 import org.viewer.hub.back.constant.EndPoint;
 import org.viewer.hub.back.controller.exception.ParameterException;
 import org.viewer.hub.back.model.WeasisModules;
@@ -52,16 +53,17 @@ public class ModuleController {
 		this.moduleService = moduleService;
 	}
 
-	@Operation(summary = "Returns the list of all Weasis Modules found for a User and a Weasis Profile",
-			description = "Returns the list of all Weasis Modules found for a User and a Weasis Profile",
-			tags = "Weasis Module")
 	/**
 	 * Returns the list of all Weasis Modules found for a User and a Weasis Profile
 	 * @param user User identifier
 	 * @param profile Weasis profile
 	 * @return the list of all Weasis Modules found for a User and a Weasis Profile
 	 */
-	@GetMapping(produces = { MediaType.APPLICATION_XML_VALUE })
+	@Operation(summary = "Returns the list of all Weasis Modules found for a User and a Weasis Profile",
+			description = "Returns the list of all Weasis Modules found for a User and a Weasis Profile",
+			tags = "Weasis Module")
+	@GetMapping(produces = { ApiVersion.V1_APPLICATION_XML_VALUE })
+	@PreAuthorize("hasAuthority('viewerhub_search')")
 	public ResponseEntity<WeasisModules> getWeasisModules(
 			@RequestParam(value = PARAM_USER, required = false) String user,
 			@RequestParam(value = PARAM_PROFILE, required = false) String profile) throws SQLException {

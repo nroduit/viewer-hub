@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2022-2025 Weasis Team and other contributors.
+ *  Copyright (c) 2022-2026 Weasis Team and other contributors.
  *
  *  This program and the accompanying materials are made available under the terms of the Eclipse
  *  Public License 2.0 which is available at https://www.eclipse.org/legal/epl-2.0, or the Apache
@@ -56,32 +56,32 @@ class S3ServiceImplTest {
 	private S3ServiceImpl s3Service;
 
 	@Test
-    @DisplayName("doesS3KeyExists: case key exists")
-    void given_existingKey_when_checkingExistence_then_shouldReturnTrue() {
-        // Given
-        // Mock downloadResource
-        when(this.downloadResource.checkS3KeyExists(anyString())).thenReturn(true);
+	@DisplayName("doesS3KeyExists: case key exists")
+	void given_existingKey_when_checkingExistence_then_shouldReturnTrue() {
+		// Given
+		// Mock downloadResource
+		when(this.downloadResource.checkS3KeyExists(anyString())).thenReturn(true);
 
-        // When
-        boolean toTest = this.s3Service.doesS3KeyExists("existingKey");
+		// When
+		boolean toTest = this.s3Service.doesS3KeyExists("existingKey");
 
-        // Then
-        assertThat(toTest).isTrue();
-    }
+		// Then
+		assertThat(toTest).isTrue();
+	}
 
 	@Test
-    @DisplayName("doesS3KeyExists: case key not existing")
-    void given_notExistingKey_when_checkingExistence_then_shouldReturnFalse() {
-        // Given
-        // Mock downloadResource
-        when(this.downloadResource.checkS3KeyExists(anyString())).thenReturn(false);
+	@DisplayName("doesS3KeyExists: case key not existing")
+	void given_notExistingKey_when_checkingExistence_then_shouldReturnFalse() {
+		// Given
+		// Mock downloadResource
+		when(this.downloadResource.checkS3KeyExists(anyString())).thenReturn(false);
 
-        // When
-        boolean toTest = this.s3Service.doesS3KeyExists("notExistingKey");
+		// When
+		boolean toTest = this.s3Service.doesS3KeyExists("notExistingKey");
 
-        // Then
-        assertThat(toTest).isFalse();
-    }
+		// Then
+		assertThat(toTest).isFalse();
+	}
 
 	@Test
 	@DisplayName("doesS3KeyExists: case key blank")
@@ -94,32 +94,32 @@ class S3ServiceImplTest {
 	}
 
 	@Test
-    @DisplayName("retrieveS3KeysFromPrefix: case keys from prefix exist")
-    void given_existingKeysFromPrefix_when_retrieveS3KeysFromPrefix_then_shouldReturnKeys() {
-        // Given
-        // Mock downloadResource
-        when(this.downloadResource.retrieveS3KeysFromPrefix(anyString())).thenReturn(Set.of("key"));
+	@DisplayName("retrieveS3KeysFromPrefix: case keys from prefix exist")
+	void given_existingKeysFromPrefix_when_retrieveS3KeysFromPrefix_then_shouldReturnKeys() {
+		// Given
+		// Mock downloadResource
+		when(this.downloadResource.retrieveS3KeysFromPrefix(anyString())).thenReturn(Set.of("key"));
 
-        // When
-        Set<String> toTest = this.s3Service.retrieveS3KeysFromPrefix("prefix");
+		// When
+		Set<String> toTest = this.s3Service.retrieveS3KeysFromPrefix("prefix");
 
-        // Then
-        assertThat(toTest).isNotEmpty();
-    }
+		// Then
+		assertThat(toTest).isNotEmpty();
+	}
 
 	@Test
-    @DisplayName("retrieveS3KeysFromPrefix: case keys from prefix not existing")
-    void given_notExistingKeysFromPrefix_when_retrieveS3KeysFromPrefix_then_shouldReturnEmptySet() {
-        // Given
-        // Mock downloadResource
-        when(this.downloadResource.retrieveS3KeysFromPrefix(anyString())).thenReturn(Collections.emptySet());
+	@DisplayName("retrieveS3KeysFromPrefix: case keys from prefix not existing")
+	void given_notExistingKeysFromPrefix_when_retrieveS3KeysFromPrefix_then_shouldReturnEmptySet() {
+		// Given
+		// Mock downloadResource
+		when(this.downloadResource.retrieveS3KeysFromPrefix(anyString())).thenReturn(Collections.emptySet());
 
-        // When
-        Set<String> toTest = this.s3Service.retrieveS3KeysFromPrefix("prefix");
+		// When
+		Set<String> toTest = this.s3Service.retrieveS3KeysFromPrefix("prefix");
 
-        // Then
-        assertThat(toTest).isEmpty();
-    }
+		// Then
+		assertThat(toTest).isEmpty();
+	}
 
 	@Test
 	@DisplayName("retrieveS3KeysFromPrefix: case prefix is blank")
@@ -132,46 +132,46 @@ class S3ServiceImplTest {
 	}
 
 	@Test
-    @DisplayName("retrieveS3Object: case object exist")
-    void given_existingObject_when_retrieveS3Object_then_shouldReturnInputStream() throws IOException {
-        // Given
-        // Mock downloadResource
-        when(this.downloadResource.retrieveS3ObjectInputStream(anyString())).thenReturn(InputStream.nullInputStream());
+	@DisplayName("retrieveS3Object: case object exist")
+	void given_existingObject_when_retrieveS3Object_then_shouldReturnInputStream() throws IOException {
+		// Given
+		// Mock downloadResource
+		when(this.downloadResource.retrieveS3ObjectInputStream(anyString())).thenReturn(InputStream.nullInputStream());
 
-        InputStream toTest = null;
-        try{
-            // When
-            toTest =  this.s3Service.retrieveS3Object("key");
-            // Then
-            assertThat(toTest).isNotNull();
-        }
-        finally{
-            if (toTest != null){
-                toTest.close();
-            }
-        }
-    }
+		InputStream toTest = null;
+		try {
+			// When
+			toTest = this.s3Service.retrieveS3Object("key");
+			// Then
+			assertThat(toTest).isNotNull();
+		}
+		finally {
+			if (toTest != null) {
+				toTest.close();
+			}
+		}
+	}
 
 	@Test
-    @DisplayName("retrieveS3Object: case object not existing")
-    void given_notExistingObject_when_retrieveS3Object_then_shouldReturnNull() throws IOException {
-        // Given
-        // Mock downloadResource
-        when(this.downloadResource.retrieveS3ObjectInputStream(anyString())).thenReturn(null);
+	@DisplayName("retrieveS3Object: case object not existing")
+	void given_notExistingObject_when_retrieveS3Object_then_shouldReturnNull() throws IOException {
+		// Given
+		// Mock downloadResource
+		when(this.downloadResource.retrieveS3ObjectInputStream(anyString())).thenReturn(null);
 
-        InputStream toTest = null;
-        try{
-            // When
-            toTest =  this.s3Service.retrieveS3Object("key");
-            // Then
-            assertThat(toTest).isNull();
-        }
-        finally{
-            if (toTest != null){
-                toTest.close();
-            }
-        }
-    }
+		InputStream toTest = null;
+		try {
+			// When
+			toTest = this.s3Service.retrieveS3Object("key");
+			// Then
+			assertThat(toTest).isNull();
+		}
+		finally {
+			if (toTest != null) {
+				toTest.close();
+			}
+		}
+	}
 
 	@Test
 	@DisplayName("retrieveS3Object: case key blank")
@@ -207,19 +207,20 @@ class S3ServiceImplTest {
 	}
 
 	@Test
-    @DisplayName("uploadObjectInS3: case valid criteria")
-    void given_validCriteria_when_uploadObjectInS3_then_shouldReturnNotNullFuture() {
-        // Given
-        // Mock uploadResource
-        when(this.uploadResource.uploadObject(any(ByteArrayInputStream.class), anyString())).thenReturn(CompletableFuture.completedFuture(PutObjectResponse.builder().build()));
-        ByteArrayInputStream byteArrayInputStreamMock = mock(ByteArrayInputStream.class);
+	@DisplayName("uploadObjectInS3: case valid criteria")
+	void given_validCriteria_when_uploadObjectInS3_then_shouldReturnNotNullFuture() {
+		// Given
+		// Mock uploadResource
+		when(this.uploadResource.uploadObject(any(ByteArrayInputStream.class), anyString()))
+			.thenReturn(CompletableFuture.completedFuture(PutObjectResponse.builder().build()));
+		ByteArrayInputStream byteArrayInputStreamMock = mock(ByteArrayInputStream.class);
 
-        // When
-        CompletableFuture<PutObjectResponse> toTest = this.s3Service.uploadObjectInS3(byteArrayInputStreamMock, "key");
+		// When
+		CompletableFuture<PutObjectResponse> toTest = this.s3Service.uploadObjectInS3(byteArrayInputStreamMock, "key");
 
-        // Then
-        assertThat(toTest).isNotNull();
-    }
+		// Then
+		assertThat(toTest).isNotNull();
+	}
 
 	@Test
 	@DisplayName("copyS3ObjectFromTo: case source key blank")
@@ -242,18 +243,19 @@ class S3ServiceImplTest {
 	}
 
 	@Test
-    @DisplayName("copyS3ObjectFromTo: case valid criteria")
-    void given_validCriteria_when_copyS3ObjectFromTo_then_shouldReturnNotNullFuture() {
-        // Given
-        // Mock uploadResource
-        when(this.uploadResource.copyObjectFromTo(anyString(), anyString())).thenReturn(CompletableFuture.completedFuture(CompletedCopy.builder().response(CopyObjectResponse.builder().build()).build()));
+	@DisplayName("copyS3ObjectFromTo: case valid criteria")
+	void given_validCriteria_when_copyS3ObjectFromTo_then_shouldReturnNotNullFuture() {
+		// Given
+		// Mock uploadResource
+		when(this.uploadResource.copyObjectFromTo(anyString(), anyString())).thenReturn(CompletableFuture
+			.completedFuture(CompletedCopy.builder().response(CopyObjectResponse.builder().build()).build()));
 
-        // When
-        CompletableFuture<CompletedCopy> toTest = this.s3Service.copyS3ObjectFromTo("sourceKey", "destinationKey");
+		// When
+		CompletableFuture<CompletedCopy> toTest = this.s3Service.copyS3ObjectFromTo("sourceKey", "destinationKey");
 
-        // Then
-        assertThat(toTest).isNotNull();
-    }
+		// Then
+		assertThat(toTest).isNotNull();
+	}
 
 	@Test
 	@DisplayName("deleteS3Objects: case prefix blank")

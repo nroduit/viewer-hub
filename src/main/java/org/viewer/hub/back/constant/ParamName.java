@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2022-2025 Weasis Team and other contributors.
+ *  Copyright (c) 2022-2026 Weasis Team and other contributors.
  *
  *  This program and the accompanying materials are made available under the terms of the Eclipse
  *  Public License 2.0 which is available at https://www.eclipse.org/legal/epl-2.0, or the Apache
@@ -44,9 +44,9 @@ public final class ParamName {
 
 	public static final String INCLUDE_FIELD = "includefield";
 
-	public static final String INCLUDE_FIELD_INSTANCE_ATTRIBUTES = "StudyInstanceUID,SeriesInstanceUID,SOPInstanceUID,InstanceNumber";
+	public static final String INCLUDE_FIELD_INSTANCE_ATTRIBUTES = "StudyInstanceUID,SeriesInstanceUID,SOPInstanceUID,SOPClassUID,InstanceNumber";
 
-	public static final String INCLUDE_FIELD_SERIE_ATTRIBUTES = "StudyInstanceUID,SeriesInstanceUID,SeriesDescription,SeriesNumber,Modality";
+	public static final String INCLUDE_FIELD_SERIE_ATTRIBUTES = "StudyInstanceUID,SeriesInstanceUID,SeriesDescription,SeriesNumber,Modality,SeriesDate,SeriesTime";
 
 	public static final String INCLUDE_FIELD_STUDY_ATTRIBUTES = "StudyInstanceUID,StudyDescription,StudyDate,StudyTime,AccessionNumber,StudyID,ReferringPhysicianName,PatientID,PatientName,IssuerOfPatientID,PatientBirthDate,PatientBirthTime,PatientSex";
 

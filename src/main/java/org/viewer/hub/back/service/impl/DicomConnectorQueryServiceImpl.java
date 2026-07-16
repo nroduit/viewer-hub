@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2022-2025 Weasis Team and other contributors.
+ *  Copyright (c) 2022-2026 Weasis Team and other contributors.
  *
  *  This program and the accompanying materials are made available under the terms of the Eclipse
  *  Public License 2.0 which is available at https://www.eclipse.org/legal/epl-2.0, or the Apache
@@ -102,8 +102,7 @@ public class DicomConnectorQueryServiceImpl implements DicomConnectorQueryServic
 	@Override
 	public Set<Patient> retrievePatientsFromPatientIdsDicomConnector(Set<String> patientIds,
 			@Valid ConnectorProperty connector, Authentication authentication) {
-		return this.retrieveDicomConnectorResults(connector, patientIds,
-				SearchCriteriaType.PATIENT_ID, authentication);
+		return this.retrieveDicomConnectorResults(connector, patientIds, SearchCriteriaType.PATIENT_ID, authentication);
 	}
 
 	@Override
@@ -669,11 +668,9 @@ public class DicomConnectorQueryServiceImpl implements DicomConnectorQueryServic
 		// Retrieve studies
 		Set<Study> studies = patientStudiesAttributes.stream()
 			.map(studyFound -> new Study(studyFound.getString(Tag.StudyInstanceUID),
-					studyFound.getString(Tag.StudyDescription),
-					DateTimeUtil.toLocalDate(studyFound.getDate(Tag.StudyDate)),
-					DateTimeUtil.toLocalTime(studyFound.getDate(Tag.StudyTime)),
-					studyFound.getString(Tag.AccessionNumber), studyFound.getString(Tag.StudyID),
-					studyFound.getString(Tag.ReferringPhysicianName)))
+					studyFound.getString(Tag.StudyDescription), studyFound.getDate(Tag.StudyDate),
+					studyFound.getDate(Tag.StudyTime), studyFound.getString(Tag.AccessionNumber),
+					studyFound.getString(Tag.StudyID), studyFound.getString(Tag.ReferringPhysicianName)))
 			.collect(Collectors.toSet());
 
 		Optional<Attributes> optionalPatient = patientStudiesAttributes.stream().findFirst();
@@ -791,8 +788,10 @@ public class DicomConnectorQueryServiceImpl implements DicomConnectorQueryServic
 	 */
 	private Instance buildSopInstanceFromAttribute(Attributes patientStudySerieSopInstanceAttribute) {
 		return new Instance(patientStudySerieSopInstanceAttribute.getString(Tag.SOPInstanceUID),
+				patientStudySerieSopInstanceAttribute.getString(Tag.SOPClassUID),
 				patientStudySerieSopInstanceAttribute.getString(Tag.InstanceNumber) != null
-						? Integer.parseInt(patientStudySerieSopInstanceAttribute.getString(Tag.InstanceNumber)) : null);
+						? Integer.parseInt(patientStudySerieSopInstanceAttribute.getString(Tag.InstanceNumber)) : null,
+				null);
 	}
 
 	/**
@@ -806,7 +805,8 @@ public class DicomConnectorQueryServiceImpl implements DicomConnectorQueryServic
 				patientStudySerieAttribute.getString(Tag.SeriesDescription),
 				patientStudySerieAttribute.getString(Tag.SeriesNumber) != null
 						? Integer.parseInt(patientStudySerieAttribute.getString(Tag.SeriesNumber)) : null,
-				patientStudySerieAttribute.getString(Tag.Modality),
+				patientStudySerieAttribute.getString(Tag.Modality), patientStudySerieAttribute.getDate(Tag.SeriesDate),
+				patientStudySerieAttribute.getDate(Tag.SeriesTime),
 				connector.getWeasis().getManifest().getTransferSyntaxUid(),
 				connector.getWeasis().getManifest().getCompressionRate());
 	}
@@ -819,8 +819,7 @@ public class DicomConnectorQueryServiceImpl implements DicomConnectorQueryServic
 	private static Study buildStudyFromAttribute(Attributes patientStudySerieAttribute) {
 		return new Study(patientStudySerieAttribute.getString(Tag.StudyInstanceUID),
 				patientStudySerieAttribute.getString(Tag.StudyDescription),
-				DateTimeUtil.toLocalDate(patientStudySerieAttribute.getDate(Tag.StudyDate)),
-				DateTimeUtil.toLocalTime(patientStudySerieAttribute.getDate(Tag.StudyTime)),
+				patientStudySerieAttribute.getDate(Tag.StudyDate), patientStudySerieAttribute.getDate(Tag.StudyTime),
 				patientStudySerieAttribute.getString(Tag.AccessionNumber),
 				patientStudySerieAttribute.getString(Tag.StudyID),
 				patientStudySerieAttribute.getString(Tag.ReferringPhysicianName));
@@ -844,6 +843,7 @@ public class DicomConnectorQueryServiceImpl implements DicomConnectorQueryServic
 			// Dicom-web query
 					this.retrieveDicomWebQueryResults(connector.getDicomWebConnector().getWebClientQidoRs(),
 							uriBuilder -> uriBuilder.path(EndPoint.STUDIES_SERIES_PATH)
+								.queryParam(ParamName.INCLUDE_FIELD, ParamName.INCLUDE_FIELD_SERIE_ATTRIBUTES)
 								.build(study.getStudyInstanceUID()),
 							connector.getDicomWebConnector().getQidoRs().getAuthentication(), authentication);
 
@@ -851,7 +851,8 @@ public class DicomConnectorQueryServiceImpl implements DicomConnectorQueryServic
 			study.setSeries(seriesAttributes.stream()
 				.map(s -> new Serie(s.getString(Tag.SeriesInstanceUID), s.getString(Tag.SeriesDescription),
 						s.getString(Tag.SeriesNumber) == null ? null : Integer.parseInt(s.getString(Tag.SeriesNumber)),
-						s.getString(Tag.Modality), connector.getWeasis().getManifest().getTransferSyntaxUid(),
+						s.getString(Tag.Modality), s.getDate(Tag.SeriesDate), s.getDate(Tag.SeriesTime),
+						connector.getWeasis().getManifest().getTransferSyntaxUid(),
 						connector.getWeasis().getManifest().getCompressionRate()))
 				.collect(Collectors.toSet()));
 		});
@@ -884,9 +885,10 @@ public class DicomConnectorQueryServiceImpl implements DicomConnectorQueryServic
 
 			// Retrieve instances from attributes and update serie
 			serie.setInstances(sopInstancesAttributes.stream()
-				.map(s -> new Instance(s.getString(Tag.SOPInstanceUID),
+				.map(s -> new Instance(s.getString(Tag.SOPInstanceUID), s.getString(Tag.SOPClassUID),
 						s.getString(Tag.InstanceNumber) == null ? null
-								: Integer.parseInt(s.getString(Tag.InstanceNumber))))
+								: Integer.parseInt(s.getString(Tag.InstanceNumber)),
+						null))
 				.collect(Collectors.toSet()));
 		}));
 	}
@@ -904,7 +906,8 @@ public class DicomConnectorQueryServiceImpl implements DicomConnectorQueryServic
 				new DicomParam(Tag.StudyInstanceUID, studyInstanceUID),
 				new DicomParam(Tag.SeriesInstanceUID, seriesInstanceUID),
 				// Return Keys
-				CFind.SOPInstanceUID, CFind.InstanceNumber);
+				// TODO: when present in weasis-dicom-tools replace with Cfind attributes
+				CFind.SOPInstanceUID, /* CFind.SOPClassUID */ new DicomParam(Tag.SOPClassUID), CFind.InstanceNumber);
 	}
 
 	/**
@@ -932,7 +935,9 @@ public class DicomConnectorQueryServiceImpl implements DicomConnectorQueryServic
 				// Matching Keys
 				new DicomParam(Tag.StudyInstanceUID, studyInstanceUid),
 				// Return Keys
-				CFind.SeriesInstanceUID, CFind.Modality, CFind.SeriesNumber, CFind.SeriesDescription);
+				// TODO: when present in weasis-dicom-tools replace with Cfind attributes
+				CFind.SeriesInstanceUID, CFind.Modality, /* CFind.SeriesDate */ new DicomParam(Tag.SeriesDate),
+				/* CFind.SeriesTime */ new DicomParam(Tag.SeriesTime), CFind.SeriesNumber, CFind.SeriesDescription);
 	}
 
 	/**
@@ -982,8 +987,10 @@ public class DicomConnectorQueryServiceImpl implements DicomConnectorQueryServic
 				// Return Keys
 				CFind.PatientID, CFind.IssuerOfPatientID, CFind.PatientName, CFind.PatientBirthDate, CFind.PatientSex,
 				CFind.ReferringPhysicianName, CFind.StudyDescription, CFind.StudyDate, CFind.StudyTime,
-				CFind.AccessionNumber, CFind.StudyInstanceUID, CFind.StudyID, CFind.Modality, CFind.SeriesNumber,
-				CFind.SeriesDescription);
+				CFind.AccessionNumber, CFind.StudyInstanceUID, CFind.StudyID, CFind.Modality,
+				// TODO: when present in weasis-dicom-tools replace with Cfind attributes
+				/* CFind.SeriesDate */ new DicomParam(Tag.SeriesDate),
+				/* CFind.SeriesTime */ new DicomParam(Tag.SeriesTime), CFind.SeriesNumber, CFind.SeriesDescription);
 	}
 
 	/**
@@ -998,8 +1005,11 @@ public class DicomConnectorQueryServiceImpl implements DicomConnectorQueryServic
 				// Return Keys
 				CFind.PatientID, CFind.IssuerOfPatientID, CFind.PatientName, CFind.PatientBirthDate, CFind.PatientSex,
 				CFind.ReferringPhysicianName, CFind.StudyDescription, CFind.StudyDate, CFind.StudyTime,
-				CFind.AccessionNumber, CFind.StudyInstanceUID, CFind.StudyID, CFind.SeriesInstanceUID, CFind.Modality, CFind.SeriesNumber,
-				CFind.SeriesDescription, CFind.InstanceNumber);
+				// TODO: when present in weasis-dicom-tools replace with Cfind attributes
+				CFind.AccessionNumber, CFind.StudyInstanceUID, CFind.StudyID, CFind.Modality,
+				/* CFind.SeriesDate */new DicomParam(Tag.SeriesDate),
+				/* CFind.SeriesTime */ new DicomParam(Tag.SeriesTime), CFind.SeriesNumber, CFind.SeriesDescription,
+				/* CFind.SOPClassUID */ new DicomParam(Tag.SOPClassUID), CFind.InstanceNumber);
 	}
 
 }

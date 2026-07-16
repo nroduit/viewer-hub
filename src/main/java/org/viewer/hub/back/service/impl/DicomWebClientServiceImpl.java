@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2022-2025 Weasis Team and other contributors.
+ *  Copyright (c) 2022-2026 Weasis Team and other contributors.
  *
  *  This program and the accompanying materials are made available under the terms of the Eclipse
  *  Public License 2.0 which is available at https://www.eclipse.org/legal/epl-2.0, or the Apache
@@ -93,20 +93,21 @@ public class DicomWebClientServiceImpl implements DicomWebClientService {
 						AuthorizationGrantType.CLIENT_CREDENTIALS.equals(authorizationGrantType)
 								? clientCredentialsAuthorizedClientManager : authorizationCodeAuthorizedClientManager,
 						connectorId)
-				.baseUrl(PathUrlUtil.buildUrlFromServerProperty(connectorDicomWebProperty.getAuthentication().getOauth2().getServer()))
+				.baseUrl(PathUrlUtil
+					.buildUrlFromServerProperty(connectorDicomWebProperty.getAuthentication().getOauth2().getServer()))
 				.exchangeStrategies(strategies)
 				.build();
 		}
 		else {
 			// Basic webClient
 			webClient = this.createBasicWebClientBuilder(connectorDicomWebProperty.getAuthentication().getBasic())
-				.baseUrl(PathUrlUtil.buildUrlFromServerProperty(connectorDicomWebProperty.getAuthentication().getBasic().getServer()))
+				.baseUrl(PathUrlUtil
+					.buildUrlFromServerProperty(connectorDicomWebProperty.getAuthentication().getBasic().getServer()))
 				.exchangeStrategies(strategies)
 				.build();
 		}
 		return webClient;
 	}
-
 
 	/**
 	 * Create Basic WebClient builder.

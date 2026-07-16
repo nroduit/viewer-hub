@@ -27,10 +27,12 @@ public interface SlicerDisplayService {
 	/**
 	 * Retrieve url which will launch 3D Slicer
 	 * @param searchCriteria search criteria
-	 * @param patientsByArchive Map of patients grouped by archive (archiveId, Set of patients found from this archive)
+	 * @param patientsByArchive Map of patients grouped by archive (archiveId, Set of
+	 * patients found from this archive)
 	 * @param authentication Authentication
 	 * @return url which will launch 3D Slicer
 	 */
-	String retrieveSlicerLaunchUrl(@Valid SearchCriteria searchCriteria, Map<String, Set<Patient>> patientsByArchive, Authentication authentication);
+	String retrieveSlicerLaunchUrl(@Valid SearchCriteria searchCriteria, Map<String, Set<Patient>> patientsByArchive,
+			Authentication authentication);
 
 }

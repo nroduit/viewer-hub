@@ -19,8 +19,10 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.viewer.hub.back.config.properties.WeasisConfigurationProperties;
+import org.viewer.hub.back.model.manifest.Manifest;
 import org.viewer.hub.back.model.property.Command;
 import org.viewer.hub.back.model.searchcriteria.WeasisArchiveSearchCriteria;
+import org.viewer.hub.back.model.searchcriteria.WeasisIHESearchCriteria;
 import org.viewer.hub.back.service.CacheService;
 import org.viewer.hub.back.service.WeasisDisplayService;
 import org.viewer.hub.back.service.WeasisService;
@@ -34,14 +36,20 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class WeasisDisplayServiceImplTest {
 
 	private final CacheService cacheServiceMock = Mockito.mock(CacheService.class);
+
 	private final WeasisService manifestServiceMock = Mockito.mock(WeasisService.class);
-	private final WeasisConfigurationProperties weasisConfigurationProperties = Mockito.mock(WeasisConfigurationProperties.class);
+
+	private final WeasisConfigurationProperties weasisConfigurationProperties = Mockito
+		.mock(WeasisConfigurationProperties.class);
+
 	private WeasisDisplayService displayService;
 
 	@BeforeEach
 	void setUp() {
-		Mockito.when(weasisConfigurationProperties.getCommand()).thenReturn(new Command("weasis://", "", "$weasis:config wcfg=", "$dicom:get -w"));
-		this.displayService = new WeasisDisplayServiceImpl(this.cacheServiceMock, this.manifestServiceMock, this.weasisConfigurationProperties);
+		Mockito.when(weasisConfigurationProperties.getCommand())
+			.thenReturn(new Command("weasis://", "", "$weasis:config wcfg=", "$dicom:get -w"));
+		this.displayService = new WeasisDisplayServiceImpl(this.cacheServiceMock, this.manifestServiceMock,
+				this.weasisConfigurationProperties);
 		ReflectionTestUtils.setField(this.displayService, "viewerHubServerUrl", "http://test.com");
 	}
 
@@ -115,6 +123,110 @@ class WeasisDisplayServiceImplTest {
 	}
 
 	@Test
+	void when_retrievingWeasisLaunchUrl_withSkipCacheTrue_andManifestAlreadyInCache_should_callServiceToBuildManifest() {
+		// Init data
+		WeasisArchiveSearchCriteria weasisSearchCriteria = new WeasisArchiveSearchCriteria();
+		weasisSearchCriteria.setSkipWeasisManifestCache(true);
+
+		// Mock
+		Manifest existingManifest = Manifest.builder().buildInProgress(false).build();
+		Mockito.when(this.cacheServiceMock.constructManifestKeyDependingOnSearchParameters(weasisSearchCriteria))
+			.thenReturn("key");
+		Mockito.when(this.cacheServiceMock.getManifest("key")).thenReturn(existingManifest);
+
+		// Call service
+		this.displayService.retrieveWeasisLaunchUrl(weasisSearchCriteria, null, null);
+
+		// Test results: buildManifest should be called even though manifest exists in
+		// cache
+		Mockito.verify(this.manifestServiceMock, Mockito.times(1))
+			.buildManifest(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any());
+	}
+
+	@Test
+	void when_retrievingWeasisLaunchUrl_withSkipCacheFalse_andManifestAlreadyInCache_should_notCallServiceToBuildManifest() {
+		// Init data
+		WeasisArchiveSearchCriteria weasisSearchCriteria = new WeasisArchiveSearchCriteria();
+		weasisSearchCriteria.setSkipWeasisManifestCache(false);
+
+		// Mock
+		Manifest existingManifest = Manifest.builder().buildInProgress(false).build();
+		Mockito.when(this.cacheServiceMock.constructManifestKeyDependingOnSearchParameters(weasisSearchCriteria))
+			.thenReturn("key");
+		Mockito.when(this.cacheServiceMock.getManifest("key")).thenReturn(existingManifest);
+
+		// Call service
+		this.displayService.retrieveWeasisLaunchUrl(weasisSearchCriteria, null, null);
+
+		// Test results: buildManifest should NOT be called, manifest should be reused
+		// from cache
+		Mockito.verify(this.manifestServiceMock, Mockito.never())
+			.buildManifest(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any());
+		Mockito.verify(this.cacheServiceMock, Mockito.times(1)).putManifest(Mockito.anyString(), Mockito.any());
+	}
+
+	@Test
+	void when_retrievingWeasisLaunchUrl_withSkipCacheTrue_andNoManifestInCache_should_callServiceToBuildManifest() {
+		// Init data
+		WeasisArchiveSearchCriteria weasisSearchCriteria = new WeasisArchiveSearchCriteria();
+		weasisSearchCriteria.setSkipWeasisManifestCache(true);
+
+		// Mock
+		Mockito.when(this.cacheServiceMock.constructManifestKeyDependingOnSearchParameters(weasisSearchCriteria))
+			.thenReturn("key");
+		Mockito.when(this.cacheServiceMock.getManifest("key")).thenReturn(null);
+
+		// Call service
+		this.displayService.retrieveWeasisLaunchUrl(weasisSearchCriteria, null, null);
+
+		// Test results: buildManifest should be called
+		Mockito.verify(this.manifestServiceMock, Mockito.times(1))
+			.buildManifest(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any());
+	}
+
+	@Test
+	void when_retrievingWeasisLaunchUrl_withIHESearchCriteria_andSkipCacheTrue_should_callServiceToBuildManifest() {
+		// Init data
+		WeasisIHESearchCriteria weasisIHESearchCriteria = new WeasisIHESearchCriteria();
+		weasisIHESearchCriteria.setSkipWeasisManifestCache(true);
+
+		// Mock
+		Manifest existingManifest = Manifest.builder().buildInProgress(false).build();
+		Mockito.when(this.cacheServiceMock.constructManifestKeyDependingOnSearchParameters(weasisIHESearchCriteria))
+			.thenReturn("key");
+		Mockito.when(this.cacheServiceMock.getManifest("key")).thenReturn(existingManifest);
+
+		// Call service
+		this.displayService.retrieveWeasisLaunchUrl(weasisIHESearchCriteria, null, null);
+
+		// Test results: buildManifest should be called even though manifest exists in
+		// cache
+		Mockito.verify(this.manifestServiceMock, Mockito.times(1))
+			.buildManifest(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any());
+	}
+
+	@Test
+	void when_retrievingWeasisLaunchUrl_withSkipCacheTrue_andBuildInProgress_should_notCallServiceToBuildManifest() {
+		// Init data
+		WeasisArchiveSearchCriteria weasisSearchCriteria = new WeasisArchiveSearchCriteria();
+		weasisSearchCriteria.setSkipWeasisManifestCache(true);
+
+		// Mock: manifest with build already in progress
+		Manifest existingManifest = Manifest.builder().buildInProgress(true).build();
+		Mockito.when(this.cacheServiceMock.constructManifestKeyDependingOnSearchParameters(weasisSearchCriteria))
+			.thenReturn("key");
+		Mockito.when(this.cacheServiceMock.getManifest("key")).thenReturn(existingManifest);
+
+		// Call service
+		this.displayService.retrieveWeasisLaunchUrl(weasisSearchCriteria, null, null);
+
+		// Test results: buildManifest should NOT be called because build is already in
+		// progress
+		Mockito.verify(this.manifestServiceMock, Mockito.never())
+			.buildManifest(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any());
+	}
+
+	@Test
 	void when_retrievingWeasisLaunchUrl_with_argumentCommand_should_buildValidLaunchUrl() {
 		// Init data
 		WeasisArchiveSearchCriteria weasisSearchCriteria = new WeasisArchiveSearchCriteria();
@@ -136,5 +248,5 @@ class WeasisDisplayServiceImplTest {
 				"weasis://%24acquire%3Apatient+-s+H4s+%24weasis%3Aconfig+wcfg%3D%22http%3A%2F%2Ftest.com%2Fweasisconfig%2Fws%2FlaunchConfig%3Fpro%3Dpro%26user%3Duser%26host%3Dhost%26config%3Dconfig%22",
 				launchUrl);
 	}
-}
 
+}

@@ -653,8 +653,10 @@ public class PackageServiceImpl implements PackageService {
 			zis.transferTo(byteArrayOutputStream);
 			try (InputStream inputStream = new ByteArrayInputStream(byteArrayOutputStream.toByteArray())) {
 				// Copy to zip output stream
-				zos.putNextEntry(new ZipEntry(PathUrlUtil.pathWithS3Separator(
-						Paths.get(PathUrlUtil.pathWithS3Separator(outDir.toString())).relativize(filePath).toString())));
+				zos.putNextEntry(new ZipEntry(
+						PathUrlUtil.pathWithS3Separator(Paths.get(PathUrlUtil.pathWithS3Separator(outDir.toString()))
+							.relativize(filePath)
+							.toString())));
 				zos.write(inputStream.readAllBytes());
 				zos.closeEntry();
 			}

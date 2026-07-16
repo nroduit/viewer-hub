@@ -67,10 +67,10 @@ class OhifDisplayServiceImplTest {
 	@BeforeEach
 	void setUp() {
 		serverProperty = ConnectorServerProperty.builder()
-				.url("http://ohif-server.com")
-				.port("8080")
-				.context("/ohif")
-				.build();
+			.url("http://ohif-server.com")
+			.port("8080")
+			.context("/ohif")
+			.build();
 
 		when(ohifConfigurationProperties.getServer()).thenReturn(serverProperty);
 		when(ohifConfigurationProperties.isTokenAuthQueryParam()).thenReturn(false);
@@ -233,7 +233,9 @@ class OhifDisplayServiceImplTest {
 		assertFalse(result.isEmpty());
 		assertTrue(result.contains("StudyInstanceUIDs=1.2.3.4.5"));
 		assertTrue(result.contains("SeriesInstanceUIDs="));
-		assertFalse(result.contains("initialSeriesInstanceUID=")); // Should not be present for multiple series
+		assertFalse(result.contains("initialSeriesInstanceUID=")); // Should not be
+																	// present for
+																	// multiple series
 	}
 
 	// ========== Tests with IHESearchCriteria ==========
@@ -263,8 +265,10 @@ class OhifDisplayServiceImplTest {
 		assertNotNull(result);
 		assertFalse(result.isEmpty());
 		assertTrue(result.contains("StudyInstanceUIDs=1.2.3.4.5"));
-		assertFalse(result.contains("initialSeriesInstanceUID=")); // IHE should not have initial series
-		assertFalse(result.contains("initialSOPInstanceUID=")); // IHE should not have initial SOP
+		assertFalse(result.contains("initialSeriesInstanceUID=")); // IHE should not have
+																	// initial series
+		assertFalse(result.contains("initialSOPInstanceUID=")); // IHE should not have
+																// initial SOP
 	}
 
 	// ========== Tests with server without port ==========
@@ -273,10 +277,10 @@ class OhifDisplayServiceImplTest {
 	void when_retrieveOhifLaunchUrl_with_serverWithoutPort_should_returnValidUrl() {
 		// Given
 		ConnectorServerProperty serverPropertyNoPort = ConnectorServerProperty.builder()
-				.url("http://ohif-server.com")
-				.port(null)
-				.context("/ohif")
-				.build();
+			.url("http://ohif-server.com")
+			.port(null)
+			.context("/ohif")
+			.build();
 
 		when(ohifConfigurationProperties.getServer()).thenReturn(serverPropertyNoPort);
 
@@ -308,10 +312,10 @@ class OhifDisplayServiceImplTest {
 	void when_retrieveOhifLaunchUrl_with_serverWithoutContext_should_returnValidUrl() {
 		// Given
 		ConnectorServerProperty serverPropertyNoContext = ConnectorServerProperty.builder()
-				.url("http://ohif-server.com")
-				.port("8080")
-				.context(null)
-				.build();
+			.url("http://ohif-server.com")
+			.port("8080")
+			.context(null)
+			.build();
 
 		when(ohifConfigurationProperties.getServer()).thenReturn(serverPropertyNoContext);
 
@@ -362,7 +366,8 @@ class OhifDisplayServiceImplTest {
 		when(connectorService.retrieveFirstDefaultOrFirstSpecificConnector(any())).thenReturn("test-archive");
 
 		// When
-		String result = ohifDisplayService.retrieveOhifLaunchUrl(searchCriteria, patientsByArchive, oAuth2Authentication);
+		String result = ohifDisplayService.retrieveOhifLaunchUrl(searchCriteria, patientsByArchive,
+				oAuth2Authentication);
 
 		// Then
 		assertNotNull(result);
@@ -391,7 +396,8 @@ class OhifDisplayServiceImplTest {
 		when(connectorService.retrieveFirstDefaultOrFirstSpecificConnector(any())).thenReturn("test-archive");
 
 		// When
-		String result = ohifDisplayService.retrieveOhifLaunchUrl(searchCriteria, patientsByArchive, oAuth2Authentication);
+		String result = ohifDisplayService.retrieveOhifLaunchUrl(searchCriteria, patientsByArchive,
+				oAuth2Authentication);
 
 		// Then
 		assertNotNull(result);
@@ -441,8 +447,8 @@ class OhifDisplayServiceImplTest {
 		Map<String, Set<Patient>> patientsByArchive = new HashMap<>();
 
 		// When & Then
-		ParameterException exception = assertThrows(ParameterException.class, () ->
-				ohifDisplayService.retrieveOhifLaunchUrl(searchCriteria, patientsByArchive, authentication));
+		ParameterException exception = assertThrows(ParameterException.class,
+				() -> ohifDisplayService.retrieveOhifLaunchUrl(searchCriteria, patientsByArchive, authentication));
 
 		assertTrue(exception.getMessage().contains("Ohif supports only one archive parameter"));
 	}
@@ -460,8 +466,8 @@ class OhifDisplayServiceImplTest {
 		when(connectorService.retrieveFirstDefaultOrFirstSpecificConnector(any())).thenReturn(null);
 
 		// When & Then
-		ParameterException exception = assertThrows(ParameterException.class, () ->
-				ohifDisplayService.retrieveOhifLaunchUrl(searchCriteria, patientsByArchive, authentication));
+		ParameterException exception = assertThrows(ParameterException.class,
+				() -> ohifDisplayService.retrieveOhifLaunchUrl(searchCriteria, patientsByArchive, authentication));
 
 		assertTrue(exception.getMessage().contains("No patient found for determined first archive"));
 	}
@@ -477,8 +483,8 @@ class OhifDisplayServiceImplTest {
 		when(connectorService.retrieveFirstDefaultOrFirstSpecificConnector(any())).thenReturn("test-archive");
 
 		// When & Then
-		ParameterException exception = assertThrows(ParameterException.class, () ->
-				ohifDisplayService.retrieveOhifLaunchUrl(searchCriteria, null, authentication));
+		ParameterException exception = assertThrows(ParameterException.class,
+				() -> ohifDisplayService.retrieveOhifLaunchUrl(searchCriteria, null, authentication));
 
 		assertTrue(exception.getMessage().contains("No patient found for determined first archive"));
 	}
@@ -497,8 +503,8 @@ class OhifDisplayServiceImplTest {
 		when(connectorService.retrieveFirstDefaultOrFirstSpecificConnector(any())).thenReturn("test-archive");
 
 		// When & Then
-		ParameterException exception = assertThrows(ParameterException.class, () ->
-				ohifDisplayService.retrieveOhifLaunchUrl(searchCriteria, patientsByArchive, authentication));
+		ParameterException exception = assertThrows(ParameterException.class,
+				() -> ohifDisplayService.retrieveOhifLaunchUrl(searchCriteria, patientsByArchive, authentication));
 
 		assertTrue(exception.getMessage().contains("No patient found for determined first archive"));
 	}
@@ -517,8 +523,8 @@ class OhifDisplayServiceImplTest {
 		when(connectorService.retrieveFirstDefaultOrFirstSpecificConnector(any())).thenReturn("test-archive");
 
 		// When & Then
-		ParameterException exception = assertThrows(ParameterException.class, () ->
-				ohifDisplayService.retrieveOhifLaunchUrl(searchCriteria, patientsByArchive, authentication));
+		ParameterException exception = assertThrows(ParameterException.class,
+				() -> ohifDisplayService.retrieveOhifLaunchUrl(searchCriteria, patientsByArchive, authentication));
 
 		assertTrue(exception.getMessage().contains("No patient found for determined first archive"));
 	}
@@ -551,7 +557,8 @@ class OhifDisplayServiceImplTest {
 		// Then
 		assertNotNull(result);
 		assertFalse(result.isEmpty());
-		assertFalse(result.contains("StudyInstanceUIDs=")); // Should not have study params
+		assertFalse(result.contains("StudyInstanceUIDs=")); // Should not have study
+															// params
 	}
 
 	@Test
@@ -593,18 +600,18 @@ class OhifDisplayServiceImplTest {
 
 		Set<Serie> series = new HashSet<>();
 		Serie serie = Serie.builder()
-				.instances(new HashSet<>())
-				.seriesInstanceUID("1.2.3.4.5.1")
-				.seriesDescription("Test Series")
-				.modality("CT")
-				.build();
+			.instances(new HashSet<>())
+			.seriesInstanceUID("1.2.3.4.5.1")
+			.seriesDescription("Test Series")
+			.modality("CT")
+			.build();
 		series.add(serie);
 
 		Study study = Study.builder()
-				.studyInstanceUID(studyInstanceUID)
-				.studyDescription("Test Study")
-				.series(series)
-				.build();
+			.studyInstanceUID(studyInstanceUID)
+			.studyDescription("Test Study")
+			.series(series)
+			.build();
 
 		Set<Study> studies = new HashSet<>();
 		studies.add(study);
@@ -613,24 +620,25 @@ class OhifDisplayServiceImplTest {
 		return patient;
 	}
 
-	private Patient createPatientWithStudyAndSeries(String patientId, String studyInstanceUID, String seriesInstanceUID) {
+	private Patient createPatientWithStudyAndSeries(String patientId, String studyInstanceUID,
+			String seriesInstanceUID) {
 		Patient patient = new Patient();
 		patient.setPatientID(patientId);
 
 		Set<Serie> series = new HashSet<>();
 		Serie serie = Serie.builder()
-				.instances(new HashSet<>())
-				.seriesInstanceUID(seriesInstanceUID)
-				.seriesDescription("Test Series")
-				.modality("CT")
-				.build();
+			.instances(new HashSet<>())
+			.seriesInstanceUID(seriesInstanceUID)
+			.seriesDescription("Test Series")
+			.modality("CT")
+			.build();
 		series.add(serie);
 
 		Study study = Study.builder()
-				.studyInstanceUID(studyInstanceUID)
-				.studyDescription("Test Study")
-				.series(series)
-				.build();
+			.studyInstanceUID(studyInstanceUID)
+			.studyDescription("Test Study")
+			.series(series)
+			.build();
 
 		Set<Study> studies = new HashSet<>();
 		studies.add(study);
@@ -639,26 +647,27 @@ class OhifDisplayServiceImplTest {
 		return patient;
 	}
 
-	private Patient createPatientWithStudyAndMultipleSeries(String patientId, String studyInstanceUID, List<String> seriesInstanceUIDs) {
+	private Patient createPatientWithStudyAndMultipleSeries(String patientId, String studyInstanceUID,
+			List<String> seriesInstanceUIDs) {
 		Patient patient = new Patient();
 		patient.setPatientID(patientId);
 
 		Set<Serie> series = new HashSet<>();
 		for (String seriesUID : seriesInstanceUIDs) {
 			Serie serie = Serie.builder()
-					.instances(new HashSet<>())
-					.seriesInstanceUID(seriesUID)
-					.seriesDescription("Test Series")
-					.modality("CT")
-					.build();
+				.instances(new HashSet<>())
+				.seriesInstanceUID(seriesUID)
+				.seriesDescription("Test Series")
+				.modality("CT")
+				.build();
 			series.add(serie);
 		}
 
 		Study study = Study.builder()
-				.studyInstanceUID(studyInstanceUID)
-				.studyDescription("Test Study")
-				.series(series)
-				.build();
+			.studyInstanceUID(studyInstanceUID)
+			.studyDescription("Test Study")
+			.series(series)
+			.build();
 
 		Set<Study> studies = new HashSet<>();
 		studies.add(study);
@@ -666,5 +675,5 @@ class OhifDisplayServiceImplTest {
 
 		return patient;
 	}
-}
 
+}

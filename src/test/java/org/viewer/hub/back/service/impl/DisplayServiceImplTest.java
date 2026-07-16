@@ -67,7 +67,7 @@ class DisplayServiceImplTest {
 
 	@BeforeEach
 	void setUp() {
-		}
+	}
 
 	// ========== Tests for viewerLaunchUrl with ArchiveSearchCriteria ==========
 
@@ -78,9 +78,8 @@ class DisplayServiceImplTest {
 		searchCriteria.setViewer(ViewerType.WEASIS);
 
 		when(viewerSelectionService.retrieveViewerTypeFromViewerSelectionRules(any(), any()))
-				.thenReturn(ViewerType.WEASIS);
-		when(weasisDisplayService.retrieveWeasisLaunchUrl(any(), any(), any()))
-				.thenReturn("weasis://test-url");
+			.thenReturn(ViewerType.WEASIS);
+		when(weasisDisplayService.retrieveWeasisLaunchUrl(any(), any(), any())).thenReturn("weasis://test-url");
 
 		// When
 		String result = displayService.viewerLaunchUrl(searchCriteria, authentication);
@@ -102,11 +101,10 @@ class DisplayServiceImplTest {
 		patientsByArchive.put("archive1", new HashSet<>());
 
 		when(connectorQueryService.retrievePatientsByArchiveWithoutIHESearchCriteria(any(), any()))
-				.thenReturn(patientsByArchive);
+			.thenReturn(patientsByArchive);
 		when(viewerSelectionService.retrieveViewerTypeFromViewerSelectionRules(any(), any()))
-				.thenReturn(ViewerType.OHIF);
-		when(ohifDisplayService.retrieveOhifLaunchUrl(any(), any(), any()))
-				.thenReturn("http://ohif-url");
+			.thenReturn(ViewerType.OHIF);
+		when(ohifDisplayService.retrieveOhifLaunchUrl(any(), any(), any())).thenReturn("http://ohif-url");
 
 		// When
 		String result = displayService.viewerLaunchUrl(searchCriteria, authentication);
@@ -114,7 +112,8 @@ class DisplayServiceImplTest {
 		// Then
 		assertNotNull(result);
 		assertEquals("http://ohif-url", result);
-		verify(connectorQueryService).retrievePatientsByArchiveWithoutIHESearchCriteria(eq(searchCriteria), eq(authentication));
+		verify(connectorQueryService).retrievePatientsByArchiveWithoutIHESearchCriteria(eq(searchCriteria),
+				eq(authentication));
 		verify(ohifDisplayService).retrieveOhifLaunchUrl(eq(searchCriteria), eq(patientsByArchive), eq(authentication));
 	}
 
@@ -128,11 +127,10 @@ class DisplayServiceImplTest {
 		patientsByArchive.put("archive1", new HashSet<>());
 
 		when(connectorQueryService.retrievePatientsByArchiveWithoutIHESearchCriteria(any(), any()))
-				.thenReturn(patientsByArchive);
+			.thenReturn(patientsByArchive);
 		when(viewerSelectionService.retrieveViewerTypeFromViewerSelectionRules(any(), any()))
-				.thenReturn(ViewerType.SLICER);
-		when(slicerDisplayService.retrieveSlicerLaunchUrl(any(), any(), any()))
-				.thenReturn("http://slicer-url");
+			.thenReturn(ViewerType.SLICER);
+		when(slicerDisplayService.retrieveSlicerLaunchUrl(any(), any(), any())).thenReturn("http://slicer-url");
 
 		// When
 		String result = displayService.viewerLaunchUrl(searchCriteria, authentication);
@@ -140,8 +138,10 @@ class DisplayServiceImplTest {
 		// Then
 		assertNotNull(result);
 		assertEquals("http://slicer-url", result);
-		verify(connectorQueryService).retrievePatientsByArchiveWithoutIHESearchCriteria(eq(searchCriteria), eq(authentication));
-		verify(slicerDisplayService).retrieveSlicerLaunchUrl(eq(searchCriteria), eq(patientsByArchive), eq(authentication));
+		verify(connectorQueryService).retrievePatientsByArchiveWithoutIHESearchCriteria(eq(searchCriteria),
+				eq(authentication));
+		verify(slicerDisplayService).retrieveSlicerLaunchUrl(eq(searchCriteria), eq(patientsByArchive),
+				eq(authentication));
 	}
 
 	@Test
@@ -154,11 +154,10 @@ class DisplayServiceImplTest {
 		patientsByArchive.put("archive1", new HashSet<>());
 
 		when(connectorQueryService.retrievePatientsByArchiveWithoutIHESearchCriteria(any(), any()))
-				.thenReturn(patientsByArchive);
+			.thenReturn(patientsByArchive);
 		when(viewerSelectionService.retrieveViewerTypeFromViewerSelectionRules(any(), any()))
-				.thenReturn(ViewerType.MICRODICOM);
-		when(microDicomDisplayService.retrieveMicroDicomLaunchUrl(any(), any()))
-				.thenReturn("microdicom://test-url");
+			.thenReturn(ViewerType.MICRODICOM);
+		when(microDicomDisplayService.retrieveMicroDicomLaunchUrl(any(), any())).thenReturn("microdicom://test-url");
 
 		// When
 		String result = displayService.viewerLaunchUrl(searchCriteria, authentication);
@@ -166,7 +165,8 @@ class DisplayServiceImplTest {
 		// Then
 		assertNotNull(result);
 		assertEquals("microdicom://test-url", result);
-		verify(connectorQueryService).retrievePatientsByArchiveWithoutIHESearchCriteria(eq(searchCriteria), eq(authentication));
+		verify(connectorQueryService).retrievePatientsByArchiveWithoutIHESearchCriteria(eq(searchCriteria),
+				eq(authentication));
 		verify(microDicomDisplayService).retrieveMicroDicomLaunchUrl(eq(searchCriteria), eq(patientsByArchive));
 	}
 
@@ -179,9 +179,8 @@ class DisplayServiceImplTest {
 		searchCriteria.setViewer(ViewerType.WEASIS);
 
 		when(viewerSelectionService.retrieveViewerTypeFromViewerSelectionRules(any(), any()))
-				.thenReturn(ViewerType.WEASIS);
-		when(weasisDisplayService.retrieveWeasisLaunchUrl(any(), any(), any()))
-				.thenReturn("weasis://test-url");
+			.thenReturn(ViewerType.WEASIS);
+		when(weasisDisplayService.retrieveWeasisLaunchUrl(any(), any(), any())).thenReturn("weasis://test-url");
 
 		// When
 		String result = displayService.viewerLaunchUrl(searchCriteria, authentication);
@@ -203,11 +202,10 @@ class DisplayServiceImplTest {
 		patientsByArchive.put("archive1", new HashSet<>());
 
 		when(connectorQueryService.retrievePatientsByArchiveWithIHESearchCriteria(any(), any()))
-				.thenReturn(patientsByArchive);
+			.thenReturn(patientsByArchive);
 		when(viewerSelectionService.retrieveViewerTypeFromViewerSelectionRules(any(), any()))
-				.thenReturn(ViewerType.OHIF);
-		when(ohifDisplayService.retrieveOhifLaunchUrl(any(), any(), any()))
-				.thenReturn("http://ohif-url");
+			.thenReturn(ViewerType.OHIF);
+		when(ohifDisplayService.retrieveOhifLaunchUrl(any(), any(), any())).thenReturn("http://ohif-url");
 
 		// When
 		String result = displayService.viewerLaunchUrl(searchCriteria, authentication);
@@ -215,7 +213,8 @@ class DisplayServiceImplTest {
 		// Then
 		assertNotNull(result);
 		assertEquals("http://ohif-url", result);
-		verify(connectorQueryService).retrievePatientsByArchiveWithIHESearchCriteria(eq(searchCriteria), eq(authentication));
+		verify(connectorQueryService).retrievePatientsByArchiveWithIHESearchCriteria(eq(searchCriteria),
+				eq(authentication));
 		verify(ohifDisplayService).retrieveOhifLaunchUrl(eq(searchCriteria), eq(patientsByArchive), eq(authentication));
 	}
 
@@ -229,11 +228,10 @@ class DisplayServiceImplTest {
 		patientsByArchive.put("archive1", new HashSet<>());
 
 		when(connectorQueryService.retrievePatientsByArchiveWithIHESearchCriteria(any(), any()))
-				.thenReturn(patientsByArchive);
+			.thenReturn(patientsByArchive);
 		when(viewerSelectionService.retrieveViewerTypeFromViewerSelectionRules(any(), any()))
-				.thenReturn(ViewerType.SLICER);
-		when(slicerDisplayService.retrieveSlicerLaunchUrl(any(), any(), any()))
-				.thenReturn("http://slicer-url");
+			.thenReturn(ViewerType.SLICER);
+		when(slicerDisplayService.retrieveSlicerLaunchUrl(any(), any(), any())).thenReturn("http://slicer-url");
 
 		// When
 		String result = displayService.viewerLaunchUrl(searchCriteria, authentication);
@@ -241,8 +239,10 @@ class DisplayServiceImplTest {
 		// Then
 		assertNotNull(result);
 		assertEquals("http://slicer-url", result);
-		verify(connectorQueryService).retrievePatientsByArchiveWithIHESearchCriteria(eq(searchCriteria), eq(authentication));
-		verify(slicerDisplayService).retrieveSlicerLaunchUrl(eq(searchCriteria), eq(patientsByArchive), eq(authentication));
+		verify(connectorQueryService).retrievePatientsByArchiveWithIHESearchCriteria(eq(searchCriteria),
+				eq(authentication));
+		verify(slicerDisplayService).retrieveSlicerLaunchUrl(eq(searchCriteria), eq(patientsByArchive),
+				eq(authentication));
 	}
 
 	@Test
@@ -255,11 +255,10 @@ class DisplayServiceImplTest {
 		patientsByArchive.put("archive1", new HashSet<>());
 
 		when(connectorQueryService.retrievePatientsByArchiveWithIHESearchCriteria(any(), any()))
-				.thenReturn(patientsByArchive);
+			.thenReturn(patientsByArchive);
 		when(viewerSelectionService.retrieveViewerTypeFromViewerSelectionRules(any(), any()))
-				.thenReturn(ViewerType.MICRODICOM);
-		when(microDicomDisplayService.retrieveMicroDicomLaunchUrl(any(), any()))
-				.thenReturn("microdicom://test-url");
+			.thenReturn(ViewerType.MICRODICOM);
+		when(microDicomDisplayService.retrieveMicroDicomLaunchUrl(any(), any())).thenReturn("microdicom://test-url");
 
 		// When
 		String result = displayService.viewerLaunchUrl(searchCriteria, authentication);
@@ -267,7 +266,8 @@ class DisplayServiceImplTest {
 		// Then
 		assertNotNull(result);
 		assertEquals("microdicom://test-url", result);
-		verify(connectorQueryService).retrievePatientsByArchiveWithIHESearchCriteria(eq(searchCriteria), eq(authentication));
+		verify(connectorQueryService).retrievePatientsByArchiveWithIHESearchCriteria(eq(searchCriteria),
+				eq(authentication));
 		verify(microDicomDisplayService).retrieveMicroDicomLaunchUrl(eq(searchCriteria), eq(patientsByArchive));
 	}
 
@@ -285,13 +285,13 @@ class DisplayServiceImplTest {
 		viewerSelectionNull.setViewer(null);
 
 		when(connectorQueryService.retrievePatientsByArchiveWithoutIHESearchCriteria(any(), any()))
-				.thenReturn(patientsByArchive);
+			.thenReturn(patientsByArchive);
 		when(viewerSelectionService.retrieveViewerTypeFromViewerSelectionRules(any(), any()))
-				.thenReturn(viewerSelectionNull.getViewer());
+			.thenReturn(viewerSelectionNull.getViewer());
 
 		// When & Then
-		ParameterException exception = assertThrows(ParameterException.class, () ->
-				displayService.viewerLaunchUrl(searchCriteria, authentication));
+		ParameterException exception = assertThrows(ParameterException.class,
+				() -> displayService.viewerLaunchUrl(searchCriteria, authentication));
 
 		assertEquals("Invalid viewer", exception.getMessage());
 	}
@@ -308,11 +308,10 @@ class DisplayServiceImplTest {
 		patientsByArchive.put("archive1", new HashSet<>());
 
 		when(connectorQueryService.retrievePatientsByArchiveWithoutIHESearchCriteria(any(), any()))
-				.thenReturn(patientsByArchive);
+			.thenReturn(patientsByArchive);
 		when(viewerSelectionService.retrieveViewerTypeFromViewerSelectionRules(any(), any()))
-				.thenReturn(ViewerType.OHIF);
-		when(ohifDisplayService.retrieveOhifLaunchUrl(any(), any(), any()))
-				.thenReturn("http://ohif-url");
+			.thenReturn(ViewerType.OHIF);
+		when(ohifDisplayService.retrieveOhifLaunchUrl(any(), any(), any())).thenReturn("http://ohif-url");
 
 		// When
 		String result = displayService.viewerLaunchUrl(searchCriteria, authentication);
@@ -320,8 +319,10 @@ class DisplayServiceImplTest {
 		// Then
 		assertNotNull(result);
 		assertEquals("http://ohif-url", result);
-		verify(connectorQueryService).retrievePatientsByArchiveWithoutIHESearchCriteria(eq(searchCriteria), eq(authentication));
-		verify(viewerSelectionService).retrieveViewerTypeFromViewerSelectionRules(eq(searchCriteria), eq(patientsByArchive));
+		verify(connectorQueryService).retrievePatientsByArchiveWithoutIHESearchCriteria(eq(searchCriteria),
+				eq(authentication));
+		verify(viewerSelectionService).retrieveViewerTypeFromViewerSelectionRules(eq(searchCriteria),
+				eq(patientsByArchive));
 		verify(ohifDisplayService).retrieveOhifLaunchUrl(eq(searchCriteria), eq(patientsByArchive), eq(authentication));
 	}
 
@@ -336,11 +337,10 @@ class DisplayServiceImplTest {
 		Map<String, Set<Patient>> emptyPatientsByArchive = new HashMap<>();
 
 		when(connectorQueryService.retrievePatientsByArchiveWithoutIHESearchCriteria(any(), any()))
-				.thenReturn(emptyPatientsByArchive);
+			.thenReturn(emptyPatientsByArchive);
 		when(viewerSelectionService.retrieveViewerTypeFromViewerSelectionRules(any(), any()))
-				.thenReturn(ViewerType.OHIF);
-		when(ohifDisplayService.retrieveOhifLaunchUrl(any(), any(), any()))
-				.thenReturn("http://ohif-url");
+			.thenReturn(ViewerType.OHIF);
+		when(ohifDisplayService.retrieveOhifLaunchUrl(any(), any(), any())).thenReturn("http://ohif-url");
 
 		// When
 		String result = displayService.viewerLaunchUrl(searchCriteria, authentication);
@@ -348,7 +348,8 @@ class DisplayServiceImplTest {
 		// Then
 		assertNotNull(result);
 		assertEquals("http://ohif-url", result);
-		verify(ohifDisplayService).retrieveOhifLaunchUrl(eq(searchCriteria), eq(emptyPatientsByArchive), eq(authentication));
+		verify(ohifDisplayService).retrieveOhifLaunchUrl(eq(searchCriteria), eq(emptyPatientsByArchive),
+				eq(authentication));
 	}
 
 	// ========== Tests with null authentication ==========
@@ -362,11 +363,10 @@ class DisplayServiceImplTest {
 		Map<String, Set<Patient>> patientsByArchive = new HashMap<>();
 
 		when(connectorQueryService.retrievePatientsByArchiveWithoutIHESearchCriteria(any(), any()))
-				.thenReturn(patientsByArchive);
+			.thenReturn(patientsByArchive);
 		when(viewerSelectionService.retrieveViewerTypeFromViewerSelectionRules(any(), any()))
-				.thenReturn(ViewerType.OHIF);
-		when(ohifDisplayService.retrieveOhifLaunchUrl(any(), any(), any()))
-				.thenReturn("http://ohif-url");
+			.thenReturn(ViewerType.OHIF);
+		when(ohifDisplayService.retrieveOhifLaunchUrl(any(), any(), any())).thenReturn("http://ohif-url");
 
 		// When
 		String result = displayService.viewerLaunchUrl(searchCriteria, null);
@@ -385,48 +385,56 @@ class DisplayServiceImplTest {
 		// Test WEASIS
 		ArchiveSearchCriteria searchCriteriaWeasis = new ArchiveSearchCriteria();
 		searchCriteriaWeasis.setViewer(ViewerType.WEASIS);
-		when(viewerSelectionService.retrieveViewerTypeFromViewerSelectionRules(any(), any())).thenReturn(ViewerType.WEASIS);
+		when(viewerSelectionService.retrieveViewerTypeFromViewerSelectionRules(any(), any()))
+			.thenReturn(ViewerType.WEASIS);
 		when(weasisDisplayService.retrieveWeasisLaunchUrl(any(), any(), any())).thenReturn("weasis://url");
 		displayService.viewerLaunchUrl(searchCriteriaWeasis, authentication);
 		verify(weasisDisplayService).retrieveWeasisLaunchUrl(any(), any(), any());
 
 		// Reset mocks
-		Mockito.reset(viewerSelectionService, weasisDisplayService, ohifDisplayService, slicerDisplayService, microDicomDisplayService, connectorQueryService);
+		Mockito.reset(viewerSelectionService, weasisDisplayService, ohifDisplayService, slicerDisplayService,
+				microDicomDisplayService, connectorQueryService);
 
 		// Test OHIF
 		ArchiveSearchCriteria searchCriteriaOhif = new ArchiveSearchCriteria();
 		searchCriteriaOhif.setViewer(ViewerType.OHIF);
-		when(connectorQueryService.retrievePatientsByArchiveWithoutIHESearchCriteria(any(), any())).thenReturn(new HashMap<>());
-		when(viewerSelectionService.retrieveViewerTypeFromViewerSelectionRules(any(), any())).thenReturn(ViewerType.OHIF);
+		when(connectorQueryService.retrievePatientsByArchiveWithoutIHESearchCriteria(any(), any()))
+			.thenReturn(new HashMap<>());
+		when(viewerSelectionService.retrieveViewerTypeFromViewerSelectionRules(any(), any()))
+			.thenReturn(ViewerType.OHIF);
 		when(ohifDisplayService.retrieveOhifLaunchUrl(any(), any(), any())).thenReturn("http://ohif");
 		displayService.viewerLaunchUrl(searchCriteriaOhif, authentication);
 		verify(ohifDisplayService).retrieveOhifLaunchUrl(any(), any(), any());
 
 		// Reset mocks
-		Mockito.reset(viewerSelectionService, weasisDisplayService, ohifDisplayService, slicerDisplayService, microDicomDisplayService, connectorQueryService);
+		Mockito.reset(viewerSelectionService, weasisDisplayService, ohifDisplayService, slicerDisplayService,
+				microDicomDisplayService, connectorQueryService);
 
 		// Test SLICER
 		ArchiveSearchCriteria searchCriteriaSlicer = new ArchiveSearchCriteria();
 		searchCriteriaSlicer.setViewer(ViewerType.SLICER);
-		when(connectorQueryService.retrievePatientsByArchiveWithoutIHESearchCriteria(any(), any())).thenReturn(new HashMap<>());
-		when(viewerSelectionService.retrieveViewerTypeFromViewerSelectionRules(any(), any())).thenReturn(ViewerType.SLICER);
+		when(connectorQueryService.retrievePatientsByArchiveWithoutIHESearchCriteria(any(), any()))
+			.thenReturn(new HashMap<>());
+		when(viewerSelectionService.retrieveViewerTypeFromViewerSelectionRules(any(), any()))
+			.thenReturn(ViewerType.SLICER);
 		when(slicerDisplayService.retrieveSlicerLaunchUrl(any(), any(), any())).thenReturn("http://slicer");
 		displayService.viewerLaunchUrl(searchCriteriaSlicer, authentication);
 		verify(slicerDisplayService).retrieveSlicerLaunchUrl(any(), any(), any());
 
 		// Reset mocks
-		Mockito.reset(viewerSelectionService, weasisDisplayService, ohifDisplayService, slicerDisplayService, microDicomDisplayService, connectorQueryService);
+		Mockito.reset(viewerSelectionService, weasisDisplayService, ohifDisplayService, slicerDisplayService,
+				microDicomDisplayService, connectorQueryService);
 
 		// Test MICRODICOM
 		ArchiveSearchCriteria searchCriteriaMicroDicom = new ArchiveSearchCriteria();
 		searchCriteriaMicroDicom.setViewer(ViewerType.MICRODICOM);
-		when(connectorQueryService.retrievePatientsByArchiveWithoutIHESearchCriteria(any(), any())).thenReturn(new HashMap<>());
-		when(viewerSelectionService.retrieveViewerTypeFromViewerSelectionRules(any(), any())).thenReturn(ViewerType.MICRODICOM);
+		when(connectorQueryService.retrievePatientsByArchiveWithoutIHESearchCriteria(any(), any()))
+			.thenReturn(new HashMap<>());
+		when(viewerSelectionService.retrieveViewerTypeFromViewerSelectionRules(any(), any()))
+			.thenReturn(ViewerType.MICRODICOM);
 		when(microDicomDisplayService.retrieveMicroDicomLaunchUrl(any(), any())).thenReturn("microdicom://url");
 		displayService.viewerLaunchUrl(searchCriteriaMicroDicom, authentication);
 		verify(microDicomDisplayService).retrieveMicroDicomLaunchUrl(any(), any());
 	}
+
 }
-
-
-

@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2022-2025 Weasis Team and other contributors.
+ *  Copyright (c) 2022-2026 Weasis Team and other contributors.
  *
  *  This program and the accompanying materials are made available under the terms of the Eclipse
  *  Public License 2.0 which is available at https://www.eclipse.org/legal/epl-2.0, or the Apache
@@ -112,22 +112,23 @@ public class Patient implements Serializable {
 			Optional<Study> optionalStudy = this.studies.stream()
 				.filter(s -> Objects.equals(s.getStudyInstanceUID(), studyAlreadyInPatient.getStudyInstanceUID()))
 				.findFirst();
-            optionalStudy.ifPresent(study -> study.merge(studyAlreadyInPatient));
+			optionalStudy.ifPresent(study -> study.merge(studyAlreadyInPatient));
 		});
 	}
 
 	public static void mergePatients(Set<Patient> patients, Set<Patient> toMerge) {
-        toMerge.forEach(p -> {
-            Patient existing = patients.stream()
-                    .filter(bp -> Objects.equals(bp.getPatientID(), p.getPatientID()))
-                    .findFirst()
-                    .orElse(null);
-            if (existing != null) {
-                existing.merge(p);
-            } else {
-                patients.add(p);
-            }
-        });
+		toMerge.forEach(p -> {
+			Patient existing = patients.stream()
+				.filter(bp -> Objects.equals(bp.getPatientID(), p.getPatientID()))
+				.findFirst()
+				.orElse(null);
+			if (existing != null) {
+				existing.merge(p);
+			}
+			else {
+				patients.add(p);
+			}
+		});
 	}
 
 }

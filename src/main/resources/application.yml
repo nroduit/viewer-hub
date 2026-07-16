@@ -29,14 +29,12 @@ spring:
         access-key: ${S3_ACCESS_KEY}
         secret-key: ${S3_SECRET_KEY}
     config:
-      discovery:
-        enabled: false
+      uri: ${CONFIGSERVER_URI}
       fail-fast: true
       name: ${spring.application.name}
       label: ${ENVIRONMENT}
-      uri: ${CONFIGSERVER_URI}
   config:
-    import: 'configserver:'
+    import: 'optional:configserver:'
   main:
     allow-bean-definition-overriding: true
   datasource:
@@ -69,8 +67,9 @@ spring:
       max-file-size: 100MB
       max-request-size: 100MB
 
-  codec:
-    max-in-memory-size: 10MB
+  http:
+    codecs:
+      max-in-memory-size: 10MB
 
 # - Logs
 logging:
