@@ -55,7 +55,7 @@ public class SecurityConfiguration {
 
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-		http//.cors(cors -> cors.disable())
+		http
 			// Disables cross-site request forgery (CSRF) protection for main route and
 			// login
 			.csrf(csrf -> csrf.ignoringRequestMatchers(AntPathRequestMatcher.antMatcher(EndPoint.ALL_REMAINING_PATH),
