@@ -35,7 +35,11 @@ import org.viewer.hub.back.constant.EndPoint;
 import org.viewer.hub.back.constant.Token;
 import org.viewer.hub.back.security.OpenIdConnectLogoutHandler;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Configuration
@@ -51,7 +55,7 @@ public class SecurityConfiguration {
 
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-		http
+		http//.cors(cors -> cors.disable())
 			// Disables cross-site request forgery (CSRF) protection for main route and
 			// login
 			.csrf(csrf -> csrf.ignoringRequestMatchers(AntPathRequestMatcher.antMatcher(EndPoint.ALL_REMAINING_PATH),
@@ -61,6 +65,7 @@ public class SecurityConfiguration {
 				// (kiosque) + wait for secured client requests
 				.requestMatchers(AntPathRequestMatcher.antMatcher("/actuator/**"),
 						// Controllers
+						AntPathRequestMatcher.antMatcher(EndPoint.DISPLAY_PATH),
 						AntPathRequestMatcher.antMatcher(EndPoint.DISPLAY_PATH + EndPoint.WEASIS_PATH),
 						AntPathRequestMatcher
 							.antMatcher(EndPoint.DISPLAY_PATH + EndPoint.IHE_INVOKE_IMAGE_DISPLAY_PATH),
