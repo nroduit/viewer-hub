@@ -23,7 +23,8 @@ import org.viewer.hub.front.components.MessageBox;
 
 import java.io.Serial;
 
-@CssImport(value = "./styles/notification-theme.css", themeFor = "vaadin-notification-card")
+@CssImport("./styles/notification-theme.css")
+@CssImport("./styles/grid-theme.css")
 public abstract class AbstractView extends Div {
 
 	@Serial

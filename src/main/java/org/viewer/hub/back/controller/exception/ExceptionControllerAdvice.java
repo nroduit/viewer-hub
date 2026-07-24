@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2022-2025 Weasis Team and other contributors.
+ *  Copyright (c) 2022-2026 Weasis Team and other contributors.
  *
  *  This program and the accompanying materials are made available under the terms of the Eclipse
  *  Public License 2.0 which is available at https://www.eclipse.org/legal/epl-2.0, or the Apache
@@ -11,7 +11,6 @@
 
 package org.viewer.hub.back.controller.exception;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -20,6 +19,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import tools.jackson.core.JacksonException;
 
 import java.sql.SQLException;
 
@@ -52,7 +52,7 @@ public class ExceptionControllerAdvice {
 		return ResponseEntity.noContent().build();
 	}
 
-	@ExceptionHandler({ TechnicalException.class, SQLException.class, JsonProcessingException.class })
+	@ExceptionHandler({ TechnicalException.class, SQLException.class, JacksonException.class })
 	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
 	public ResponseEntity<String> technicalIssue(Throwable ex) {
 		LOG.error("Technical issue:{}", ex.getMessage());

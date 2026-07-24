@@ -13,25 +13,16 @@ package org.viewer.hub.front.views.weasis.i18n.component;
 
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.upload.Upload;
-import com.vaadin.flow.component.upload.receivers.MemoryBuffer;
-import lombok.Getter;
-import lombok.Setter;
 
 import java.io.Serial;
 
-@Getter
-@Setter
 public class I18nFileUpload extends Upload {
 
 	@Serial
 	private static final long serialVersionUID = 4685412708026661525L;
 
-	private MemoryBuffer memoryBuffer;
-
 	public I18nFileUpload() {
 		super();
-		this.memoryBuffer = new MemoryBuffer();
-		this.setReceiver(this.memoryBuffer);
 		this.setDropLabel(new Span("Drag and drop your i18n file here (format weasis-i18n-dist-X.X.X-SNAPSHOT.zip)"));
 	}
 

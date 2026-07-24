@@ -1,0 +1,26 @@
+/*
+ *  Copyright (c) 2022-2026 Weasis Team and other contributors.
+ *
+ *  This program and the accompanying materials are made available under the terms of the Eclipse
+ *  Public License 2.0 which is available at https://www.eclipse.org/legal/epl-2.0, or the Apache
+ *  License, Version 2.0 which is available at https://www.apache.org/licenses/LICENSE-2.0.
+ *
+ *  SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
+ *
+ */
+
+/*
+ * Zebra striping for grids that opt in with theme="row-stripes".
+ *
+ * Aura (Vaadin 25) dropped Lumo's built-in "row-stripes" grid variant, so this replicates
+ * Lumo's rule using an Aura-aware contrast colour. It is applied as global light-DOM CSS through
+ * vaadin-grid's exposed ::part(even-row-cell) shadow part - the modern replacement for the
+ * deprecated @CssImport(themeFor = "vaadin-grid") shadow-DOM injection.
+ */
+vaadin-grid[theme~='row-stripes']::part(even-row-cell) {
+  background-image: linear-gradient(
+    color-mix(in srgb, var(--vaadin-text-color) 5%, transparent),
+    color-mix(in srgb, var(--vaadin-text-color) 5%, transparent)
+  );
+  background-repeat: repeat-x;
+}

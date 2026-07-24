@@ -14,20 +14,24 @@ package org.viewer.hub.back.model.patient;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.viewer.hub.back.util.DateTimeUtil;
+import tools.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
+import tools.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.*;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Builder
@@ -39,6 +43,7 @@ public class Study implements Serializable {
 	@Serial
 	private static final long serialVersionUID = 6556153607975946470L;
 
+	@Builder.Default
 	@JacksonXmlElementWrapper(useWrapping = false)
 	@JsonProperty("Series")
 	private Set<Serie> series = new HashSet<>();
@@ -68,6 +73,7 @@ public class Study implements Serializable {
 
 	public Study(String studyInstanceUID, String studyDescription, Date studyDate, Date studyTime,
 			String accessionNumber, String studyID, String referringPhysicianName) {
+		this.series = new HashSet<>();
 		this.studyInstanceUID = studyInstanceUID;
 		this.studyDescription = studyDescription;
 		this.studyDate = studyDate != null ? DateTimeUtil.toLocalDate(studyDate) : null;
@@ -79,6 +85,7 @@ public class Study implements Serializable {
 
 	public Study(String studyInstanceUID, String studyDescription, LocalDateTime studyDateTime, String accessionNumber,
 			String studyID, String referringPhysicianName) {
+		this.series = new HashSet<>();
 		this.studyInstanceUID = studyInstanceUID;
 		this.studyDescription = studyDescription;
 		this.studyDate = studyDateTime != null ? studyDateTime.toLocalDate() : null;

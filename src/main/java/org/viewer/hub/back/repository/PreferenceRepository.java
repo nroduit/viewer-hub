@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2022-2025 Weasis Team and other contributors.
+ *  Copyright (c) 2022-2026 Weasis Team and other contributors.
  *
  *  This program and the accompanying materials are made available under the terms of the Eclipse
  *  Public License 2.0 which is available at https://www.eclipse.org/legal/epl-2.0, or the Apache
@@ -20,7 +20,8 @@ import java.util.List;
 /**
  * Repository for the entity Preference.
  */
-public interface PreferenceRepository extends JpaRepository<PreferenceEntity, Long>, JpaSpecificationExecutor {
+public interface PreferenceRepository
+		extends JpaRepository<PreferenceEntity, Long>, JpaSpecificationExecutor<PreferenceEntity> {
 
 	/**
 	 * Get all the PreferenceEntity with target name in parameter

@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2022-2025 Weasis Team and other contributors.
+ *  Copyright (c) 2022-2026 Weasis Team and other contributors.
  *
  *  This program and the accompanying materials are made available under the terms of the Eclipse
  *  Public License 2.0 which is available at https://www.eclipse.org/legal/epl-2.0, or the Apache
@@ -52,6 +52,7 @@ public class OverrideConfigEntity extends AuditEntity implements Serializable {
 	@Serial
 	private static final long serialVersionUID = 5489704615651135697L;
 
+	@Builder.Default
 	@EmbeddedId
 	@JsonIgnore
 	private OverrideConfigEntityPK overrideConfigEntityPK = new OverrideConfigEntityPK();
@@ -91,7 +92,7 @@ public class OverrideConfigEntity extends AuditEntity implements Serializable {
 			this.weasisPropertyEntities.forEach(p -> {
 				WeasisPropertyEntity defaultWeasisPropertyFound = defaultOverrideConfig.getWeasisPropertyEntities()
 					.stream()
-					.filter((dp) -> Objects.equals(p.getCode(), dp.getCode()))
+					.filter(dp -> Objects.equals(p.getCode(), dp.getCode()))
 					.findFirst()
 					.orElse(null);
 				p.replaceNullByDefault(defaultWeasisPropertyFound);
@@ -105,12 +106,12 @@ public class OverrideConfigEntity extends AuditEntity implements Serializable {
 			List<String> missingCodes = defaultOverrideConfig.getWeasisPropertyEntities()
 				.stream()
 				.map(WeasisPropertyEntity::getCode)
-				.filter((element) -> !codesOfPropertiesToEvaluate.contains(element))
+				.filter(element -> !codesOfPropertiesToEvaluate.contains(element))
 				.toList();
 
 			List<WeasisPropertyEntity> propertiesToAdd = defaultOverrideConfig.getWeasisPropertyEntities()
 				.stream()
-				.filter((p) -> missingCodes.contains(p.getCode()))
+				.filter(p -> missingCodes.contains(p.getCode()))
 				.toList();
 
 			ArrayList<WeasisPropertyEntity> modifiableList = new ArrayList<>(this.weasisPropertyEntities);

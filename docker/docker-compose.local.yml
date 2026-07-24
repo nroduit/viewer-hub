@@ -35,7 +35,8 @@ services:
     image: minio/mc:RELEASE.2024-11-05T11-29-45Z
     container_name: create-s3-bucket
     depends_on:
-      - minio-storage
+      minio-storage:
+        condition: service_healthy
     volumes:
       - ./readwrite-policy.json:/tmp/readwrite-policy.json
     entrypoint: >

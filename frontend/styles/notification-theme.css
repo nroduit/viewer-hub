@@ -1,9 +1,0 @@
-/* theme-for="vaadin-notification-card" */
-
-[part="overlay"] {
-	padding: 0px;
-}
-
-[part="content"] {
-	display: block;
-}

@@ -1,4 +1,15 @@
-.override-view {
+/*
+ *  Copyright (c) 2022-2026 Weasis Team and other contributors.
+ *
+ *  This program and the accompanying materials are made available under the terms of the Eclipse
+ *  Public License 2.0 which is available at https://www.eclipse.org/legal/epl-2.0, or the Apache
+ *  License, Version 2.0 which is available at https://www.apache.org/licenses/LICENSE-2.0.
+ *
+ *  SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
+ *
+ */
+
+.association-view {
   padding: 2px;
   box-sizing: border-box;
   display: block;
@@ -14,57 +25,57 @@
   --cv-stripe-width: 1.5px;
   --cv-stripe-gap: 9px;
   --cv-stripe-color: hsl(var(--cv-blue) / 0.2);
-  --cv-layout-border-color: var(--lumo-contrast-40pct);
+  --cv-layout-border-color: color-mix(in srgb, var(--vaadin-text-color) 40%, transparent);
   --cv-checkerboard-color1: hsl(0 0% 0% / 0.05);
   --cv-checkerboard-color2: hsl(0 0% 100% / 0.05);
   --cv-checkerboard-size: 16px;
 }
 
-.override-view[dragging] {
+.association-view[dragging] {
   --cv-checkerboard-color1: hsl(var(--cv-blue) / 0.2);
   --cv-checkerboard-color2: hsl(var(--cv-blue) / 0.1);
   --cv-layout-border-color: var(--cv-dropzone-border-color);
 }
 
-.override-view .preview-container {
+.association-view .preview-container {
   display: contents;
 }
 
 /* The root layout is not necessarily inside a flex box so width/height needs to be used */
-.override-view .preview-container > .layout[style*='align-self: stretch'] {
+.association-view .preview-container > .layout[style*='align-self: stretch'] {
   width: 100%;
 }
-.override-view .preview-container > .layout[style*='flex-grow: 1'] {
+.association-view .preview-container > .layout[style*='flex-grow: 1'] {
   height: 100%;
 }
 
 /* Apply some default gap and padding to layouts that don't have inline styles for them while dragging. */
-.override-view[dragging] .layout:not([style*='gap:']) {
+.association-view[dragging] .layout:not([style*='gap:']) {
   gap: 8px;
 }
 
-.override-view[dragging] .layout:not([style*='padding:'], [empty]) {
+.association-view[dragging] .layout:not([style*='padding:'], [empty]) {
   padding: 8px;
 }
 
-.override-view .cover-overlay {
+.association-view .cover-overlay {
   position: absolute;
   border-radius: 1px;
 }
 
-.override-view:not([starting-drag]) .cover-overlay.editable-hovering {
+.association-view:not([starting-drag]) .cover-overlay.editable-hovering {
   outline: 2px solid hsl(var(--cv-blue) / 1);
   outline-offset: -1px;
 }
 
-.override-view:not([starting-drag]) .cover-overlay.editable-editing {
+.association-view:not([starting-drag]) .cover-overlay.editable-editing {
   outline: 1px solid hsl(var(--cv-blue) / 1);
   outline-offset: -1px;
-  box-shadow: inset 0 0 0 2px var(--lumo-base-color);
+  box-shadow: inset 0 0 0 2px var(--vaadin-background-color);
 }
 
-.override-view .overlays,
-.override-view .drop-zones {
+.association-view .overlays,
+.association-view .drop-zones {
   position: absolute;
   top: 0;
   left: 0;
@@ -73,11 +84,11 @@
   z-index: 1;
 }
 
-.override-view:not([dragging]) .drop-zones {
+.association-view:not([dragging]) .drop-zones {
   pointer-events: none;
 }
 
-.override-view .drop-zone {
+.association-view .drop-zone {
   position: absolute;
   box-sizing: border-box;
   border-radius: 1px;
@@ -85,13 +96,13 @@
   min-width: 10px;
 }
 
-.override-view[dragging] .drop-zone:not([empty-layout]) {
+.association-view[dragging] .drop-zone:not([empty-layout]) {
   outline: 1px dashed var(--cv-dropzone-border-color);
   outline-offset: -2px;
   background-color: var(--cv-dropzone-bg-color);
 }
 
-.override-view .drop-zone[remaining-space] {
+.association-view .drop-zone[remaining-space] {
   background: repeating-linear-gradient(
     -45deg,
     var(--cv-stripe-color),
@@ -101,18 +112,18 @@
   );
 }
 
-.override-view[dragging] .drop-zone[drag-over] {
+.association-view[dragging] .drop-zone[drag-over] {
   background: var(--cv-droptarget-bg-color);
   outline: 1px solid var(--cv-droptarget-border-color);
   outline-offset: -1px;
-  box-shadow: inset 0 0 0 2px var(--lumo-base-color);
+  box-shadow: inset 0 0 0 2px var(--vaadin-background-color);
 }
 
 .drop-zone[empty-layout] {
   z-index: -1;
 }
 
-.override-view:not([readonly]) .layout[empty],
+.association-view:not([readonly]) .layout[empty],
 vaadin-form-layout[empty] {
   border-radius: 1px;
   background: repeating-conic-gradient(var(--cv-checkerboard-color1) 0% 25%, var(--cv-checkerboard-color2) 0% 50%) 50% /
@@ -121,43 +132,43 @@ vaadin-form-layout[empty] {
   outline: 1px dashed var(--cv-layout-border-color);
   outline-offset: -2px;
 }
-.override-view[dragging]:not([readonly]) vaadin-form-layout[empty] {
+.association-view[dragging]:not([readonly]) vaadin-form-layout[empty] {
   background: transparent;
 }
 
-.override-view .layout[empty]::before {
+.association-view .layout[empty]::before {
   content: '';
   display: block;
   min-width: 64px;
   min-height: 32px;
 }
 
-.override-view[readonly] .drop-zones,
-.override-view[readonly] .overlays {
+.association-view[readonly] .drop-zones,
+.association-view[readonly] .overlays {
   display: none;
 }
 
-.override-view[inline-editing] .drop-zones,
-.override-view[inline-editing] .overlays {
+.association-view[inline-editing] .drop-zones,
+.association-view[inline-editing] .overlays {
   display: none;
 }
-.override-view .content-wrapper[contenteditable='true'] {
+.association-view .content-wrapper[contenteditable='true'] {
   display: inline-block;
   overflow: hidden;
   width: 100%;
 }
 
-.override-view[dragging] vaadin-form-layout {
+.association-view[dragging] vaadin-form-layout {
   padding: 8px;
 }
-.override-view vaadin-form-layout[empty]::before {
+.association-view vaadin-form-layout[empty]::before {
   content: '';
   display: block;
   min-width: 64px;
   min-height: 32px;
 }
 
-.override-view[dragging] vaadin-form-layout:not([empty])::after {
+.association-view[dragging] vaadin-form-layout:not([empty])::after {
   content: '';
   display: block;
   min-width: 64px;

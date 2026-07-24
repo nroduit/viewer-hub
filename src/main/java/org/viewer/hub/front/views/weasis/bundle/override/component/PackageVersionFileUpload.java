@@ -13,25 +13,16 @@ package org.viewer.hub.front.views.weasis.bundle.override.component;
 
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.upload.Upload;
-import com.vaadin.flow.component.upload.receivers.MemoryBuffer;
-import lombok.Getter;
-import lombok.Setter;
 
 import java.io.Serial;
 
-@Getter
-@Setter
 public class PackageVersionFileUpload extends Upload {
 
 	@Serial
 	private static final long serialVersionUID = -6171977483444538014L;
 
-	private MemoryBuffer memoryBuffer;
-
 	public PackageVersionFileUpload() {
 		super();
-		this.memoryBuffer = new MemoryBuffer();
-		this.setReceiver(this.memoryBuffer);
 		this.setDropLabel(new Span("Drag and drop your package version here..."));
 	}
 

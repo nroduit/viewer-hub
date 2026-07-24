@@ -11,10 +11,6 @@
 
 package org.viewer.hub.back.config;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.fasterxml.jackson.dataformat.xml.XmlMapper;
-import com.fasterxml.jackson.dataformat.xml.ser.ToXmlGenerator;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,15 +21,17 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
-import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
-import org.springframework.http.converter.xml.MappingJackson2XmlHttpMessageConverter;
+import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter;
+import org.springframework.http.converter.xml.JacksonXmlHttpMessageConverter;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.resource.PathResourceResolver;
 import org.viewer.hub.back.config.s3.S3ClientConfigurationProperties;
 import org.viewer.hub.back.config.xml.XmlSanitizeSerializer;
+import tools.jackson.databind.module.SimpleModule;
+import tools.jackson.dataformat.xml.XmlMapper;
+import tools.jackson.dataformat.xml.XmlWriteFeature;
 
 import java.io.IOException;
 import java.util.List;
@@ -61,31 +59,29 @@ public class WebConfiguration implements WebMvcConfigurer {
 
 	@Override
 	public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
-		converters.add(this.mappingJackson2XmlHttpMessageConverter(new Jackson2ObjectMapperBuilder()));
+		converters.add(this.jacksonXmlHttpMessageConverter());
 		converters.add(new StringHttpMessageConverter());
 		converters.add(new ByteArrayHttpMessageConverter());
-		converters.add(new MappingJackson2HttpMessageConverter());
+		converters.add(new JacksonJsonHttpMessageConverter());
 	}
 
 	/**
 	 * Setup of the xml jackson mapper
-	 * @param builder Builder
 	 * @return Converter built
 	 */
 	@Bean
-	public MappingJackson2XmlHttpMessageConverter mappingJackson2XmlHttpMessageConverter(
-			Jackson2ObjectMapperBuilder builder) {
-		ObjectMapper mapper = builder.createXmlMapper(true).build();
-
-		// Set the xml tag to each xml serialization
-		((XmlMapper) mapper).enable(ToXmlGenerator.Feature.WRITE_XML_DECLARATION);
-
+	public JacksonXmlHttpMessageConverter jacksonXmlHttpMessageConverter() {
 		// Sanitize value for xml
 		SimpleModule module = new SimpleModule();
 		module.addSerializer(String.class, new XmlSanitizeSerializer());
-		mapper.registerModule(module);
 
-		return new MappingJackson2XmlHttpMessageConverter(mapper);
+		// Set the xml tag to each xml serialization
+		XmlMapper mapper = XmlMapper.builder()
+			.enable(XmlWriteFeature.WRITE_XML_DECLARATION)
+			.addModule(module)
+			.build();
+
+		return new JacksonXmlHttpMessageConverter(mapper);
 	}
 
 	@Override

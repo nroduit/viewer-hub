@@ -8,6 +8,12 @@ services:
     container_name: technical-stack_eureka
     ports:
       - "8761:8761"
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8761/" ]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
   config-server:
     #    image:  springcloud/configserver:latest
@@ -16,7 +22,8 @@ services:
     environment:
       SPRING_PROFILES_ACTIVE: native
     depends_on:
-      - eureka
+      eureka:
+        condition: service_healthy
     volumes:
       - ./config-server:/config
     ports:

@@ -14,9 +14,14 @@ package org.viewer.hub.back.model.patient;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+import tools.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
+import tools.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -41,6 +46,7 @@ public class Patient implements Serializable {
 	@Serial
 	private static final long serialVersionUID = 7845868523287527235L;
 
+	@Builder.Default
 	@JacksonXmlElementWrapper(useWrapping = false)
 	@JsonProperty("Study")
 	private Set<Study> studies = new HashSet<>();
@@ -69,6 +75,7 @@ public class Patient implements Serializable {
 	}
 
 	public Patient(String patientID, String patientName, LocalDate patientBirthDate, DicomPatientSex patientSex) {
+		this.studies = new HashSet<>();
 		this.patientID = patientID;
 		this.patientName = patientName;
 		this.patientBirthDate = patientBirthDate;
@@ -77,6 +84,7 @@ public class Patient implements Serializable {
 
 	public Patient(String patientID, String patientName, String issuerOfPatientID, LocalDate patientBirthDate,
 			LocalTime patientBirthTime, DicomPatientSex patientSex) {
+		this.studies = new HashSet<>();
 		this.patientID = patientID;
 		this.patientName = patientName;
 		this.issuerOfPatientID = issuerOfPatientID;

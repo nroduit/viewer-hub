@@ -33,7 +33,18 @@ import org.viewer.hub.back.enums.ConnectorAuthType;
 import org.viewer.hub.back.enums.ConnectorType;
 import org.viewer.hub.back.model.patient.DicomPatientSex;
 import org.viewer.hub.back.model.patient.Patient;
-import org.viewer.hub.back.model.property.*;
+import org.viewer.hub.back.model.property.ConnectorAuthenticationProperty;
+import org.viewer.hub.back.model.property.ConnectorDicomWebProperty;
+import org.viewer.hub.back.model.property.ConnectorProperty;
+import org.viewer.hub.back.model.property.ConnectorWadoProperty;
+import org.viewer.hub.back.model.property.DbConnectorProperty;
+import org.viewer.hub.back.model.property.DbConnectorQueryProperty;
+import org.viewer.hub.back.model.property.DicomConnectorDimseProperty;
+import org.viewer.hub.back.model.property.DicomConnectorProperty;
+import org.viewer.hub.back.model.property.DicomWebConnectorProperty;
+import org.viewer.hub.back.model.property.SearchCriteriaProperty;
+import org.viewer.hub.back.model.property.WeasisConnectorProperty;
+import org.viewer.hub.back.model.property.WeasisManifestConnectorProperty;
 import org.viewer.hub.back.model.searchcriteria.ArchiveSearchCriteria;
 import org.viewer.hub.back.service.DicomConnectorQueryService;
 import org.viewer.hub.back.service.DicomWebClientService;
@@ -153,7 +164,7 @@ class DicomConnectorQueryServiceImplTest {
 		Attributes attributes = new Attributes();
 		attributes.setValue(Tag.PatientID, VR.LO, "patientId");
 		attributes.setValue(Tag.PatientSex, VR.CS, "O");
-		dicomState.getDicomRSP().add(attributes);
+		dicomState.addDicomRSP(attributes);
 		this.cFindMock.when(() -> CFind.process(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.eq(0),
 				Mockito.any(), Mockito.any(DicomParam[].class)))
 			.thenReturn(dicomState);

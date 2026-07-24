@@ -1,17 +1,17 @@
-<!--
-/*The shared-styles.html is used instead of shared-styles.css so that*/
-/*-- the styles are also used for browsers that do not support CSS Custom Properties*/
-/*-- (mainly to support IE11)*/
-/*-- for more information see: https://cdn.vaadin.com/vaadin-lumo-styles/1.3.1/demo/compatibility.html*/
--->
-<!--
-/*Remember to import custom-style, which is included in the Polymer package*/
--->
-/*<link rel="import" href="../bower_components/polymer/lib/elements/custom-style.html">*/
-/*<custom-style>*/
-/*<style>*/
+/*
+ *  Copyright (c) 2022-2026 Weasis Team and other contributors.
+ *
+ *  This program and the accompanying materials are made available under the terms of the Eclipse
+ *  Public License 2.0 which is available at https://www.eclipse.org/legal/epl-2.0, or the Apache
+ *  License, Version 2.0 which is available at https://www.apache.org/licenses/LICENSE-2.0.
+ *
+ *  SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
+ *
+ */
+
+/* Shared application styles (Aura theme). */
 html {
-  font-size: var(--lumo-font-size-s);
+  font-size: 0.875rem;
 }
 
 /* Stack login-screen vertically on narrow screen */
@@ -34,13 +34,13 @@ label[disabled] {
   flex-direction: row;
 
   /* Used by the menu and form overlays */
-  --overlay-box-shadow: 0 0 3px 2px var(--lumo-contrast-10pct);
+  --overlay-box-shadow: 0 0 3px 2px color-mix(in srgb, var(--vaadin-text-color) 10%, transparent);
 }
 
 .menu-bar {
   flex-direction: column;
   flex-shrink: 0;
-  background: var(--lumo-base-color);
+  background: var(--vaadin-background-color);
   box-shadow: var(--overlay-box-shadow);
 }
 
@@ -99,7 +99,7 @@ label[disabled] {
     height: calc(100% - var(--top-bar-height));
     z-index: 100;
     box-shadow: var(--overlay-box-shadow);
-    background: var(--lumo-base-color);
+    background: var(--vaadin-background-color);
   }
 
   .menu-bar .show-tabs {

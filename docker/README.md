@@ -9,7 +9,7 @@ This stack includes the following services:
 - **dcm4chee**: A PACS server that enables storing and retrieving medical images.
 - **viewer-hub**: A web application that manages the resources required by the different versions of Weasis.
 - **minio**: An object storage server compatible with Amazon S3 APIs. It is used to store resources required by the different versions of Weasis.
-- **redis**: A cache server used to store the manifest of the resources required by the different versions of Weasis.
+- **valkey**: A Redis-compatible cache server used to store the manifest of the resources required by the different versions of Weasis.
 - **postgres**: A database server used by viewer-hub and dcm4chee.
 - **keycloak**: An open-source identity and access management server used to authenticate users.
 - **config-server**: A server that provides the configuration for the different services.

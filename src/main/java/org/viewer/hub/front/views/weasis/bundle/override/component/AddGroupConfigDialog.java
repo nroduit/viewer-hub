@@ -12,6 +12,7 @@
 package org.viewer.hub.front.views.weasis.bundle.override.component;
 
 import com.vaadin.flow.component.Key;
+import com.vaadin.flow.component.ModalityMode;
 import com.vaadin.flow.component.Shortcuts;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
@@ -60,7 +61,7 @@ public class AddGroupConfigDialog extends Dialog {
 		this.setHeight("15%");
 		this.setCloseOnEsc(false);
 		this.setCloseOnOutsideClick(false);
-		this.setModal(true);
+		this.setModality(ModalityMode.STRICT);
 
 		// --- Inputs ---
 		this.binder = new Binder<>(OverrideConfigEntity.class);

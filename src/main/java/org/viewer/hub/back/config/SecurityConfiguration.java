@@ -13,8 +13,8 @@ package org.viewer.hub.back.config;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.actuate.autoconfigure.security.servlet.EndpointRequest;
 import org.springframework.boot.actuate.context.ShutdownEndpoint;
+import org.springframework.boot.security.autoconfigure.actuate.web.servlet.EndpointRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -30,7 +30,7 @@ import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
 import org.viewer.hub.back.constant.EndPoint;
 import org.viewer.hub.back.constant.Token;
 import org.viewer.hub.back.security.OpenIdConnectLogoutHandler;
@@ -58,30 +58,30 @@ public class SecurityConfiguration {
 		http
 			// Disables cross-site request forgery (CSRF) protection for main route and
 			// login
-			.csrf(csrf -> csrf.ignoringRequestMatchers(AntPathRequestMatcher.antMatcher(EndPoint.ALL_REMAINING_PATH),
-					AntPathRequestMatcher.antMatcher(LOGIN_URL)))
+			.csrf(csrf -> csrf.ignoringRequestMatchers(PathPatternRequestMatcher.withDefaults().matcher(EndPoint.ALL_REMAINING_PATH),
+					PathPatternRequestMatcher.withDefaults().matcher(LOGIN_URL)))
 			.authorizeHttpRequests(authorize -> authorize
 				// TODO: currently no security on these endpoints: find a way for Weasis
 				// (kiosque) + wait for secured client requests
-				.requestMatchers(AntPathRequestMatcher.antMatcher("/actuator/**"),
+				.requestMatchers(PathPatternRequestMatcher.withDefaults().matcher("/actuator/**"),
 						// Controllers
-						AntPathRequestMatcher.antMatcher(EndPoint.DISPLAY_PATH),
-						AntPathRequestMatcher.antMatcher(EndPoint.DISPLAY_PATH + EndPoint.WEASIS_PATH),
-						AntPathRequestMatcher
-							.antMatcher(EndPoint.DISPLAY_PATH + EndPoint.IHE_INVOKE_IMAGE_DISPLAY_PATH),
-						// AntPathRequestMatcher.antMatcher(EndPoint.GROUP_PATH +
+						PathPatternRequestMatcher.withDefaults().matcher(EndPoint.DISPLAY_PATH),
+						PathPatternRequestMatcher.withDefaults().matcher(EndPoint.DISPLAY_PATH + EndPoint.WEASIS_PATH),
+						PathPatternRequestMatcher.withDefaults()
+							.matcher(EndPoint.DISPLAY_PATH + EndPoint.IHE_INVOKE_IMAGE_DISPLAY_PATH),
+						// PathPatternRequestMatcher.withDefaults().matcher(EndPoint.GROUP_PATH +
 						// EndPoint.ALL_REMAINING_PATH),
-						AntPathRequestMatcher.antMatcher(EndPoint.LAUNCH_CONFIG_PATH + EndPoint.ALL_REMAINING_PATH),
-						AntPathRequestMatcher.antMatcher(EndPoint.PREFERENCES_PATH + EndPoint.ALL_REMAINING_PATH),
-						AntPathRequestMatcher.antMatcher(EndPoint.MANIFEST_PATH + EndPoint.ALL_REMAINING_PATH),
-						// AntPathRequestMatcher.antMatcher(EndPoint.MODULES_PATH +
+						PathPatternRequestMatcher.withDefaults().matcher(EndPoint.LAUNCH_CONFIG_PATH + EndPoint.ALL_REMAINING_PATH),
+						PathPatternRequestMatcher.withDefaults().matcher(EndPoint.PREFERENCES_PATH + EndPoint.ALL_REMAINING_PATH),
+						PathPatternRequestMatcher.withDefaults().matcher(EndPoint.MANIFEST_PATH + EndPoint.ALL_REMAINING_PATH),
+						// PathPatternRequestMatcher.withDefaults().matcher(EndPoint.MODULES_PATH +
 						// EndPoint.ALL_REMAINING_PATH),
-						AntPathRequestMatcher.antMatcher(EndPoint.OVERRIDE_CONFIG_PATH + EndPoint.ALL_REMAINING_PATH),
-						AntPathRequestMatcher.antMatcher(EndPoint.STATISTIC_PATH + EndPoint.ALL_REMAINING_PATH),
-						// AntPathRequestMatcher.antMatcher(EndPoint.TARGET_PATH +
+						PathPatternRequestMatcher.withDefaults().matcher(EndPoint.OVERRIDE_CONFIG_PATH + EndPoint.ALL_REMAINING_PATH),
+						PathPatternRequestMatcher.withDefaults().matcher(EndPoint.STATISTIC_PATH + EndPoint.ALL_REMAINING_PATH),
+						// PathPatternRequestMatcher.withDefaults().matcher(EndPoint.TARGET_PATH +
 						// EndPoint.ALL_REMAINING_PATH),
 						// Resources for weasis
-						AntPathRequestMatcher.antMatcher(EndPoint.WEASIS_PATH + EndPoint.ALL_REMAINING_PATH))
+						PathPatternRequestMatcher.withDefaults().matcher(EndPoint.WEASIS_PATH + EndPoint.ALL_REMAINING_PATH))
 				.permitAll()
 				.requestMatchers(EndpointRequest.to(ShutdownEndpoint.class))
 				.denyAll()
