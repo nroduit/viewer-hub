@@ -91,6 +91,9 @@ public class MainLayout extends AppLayout implements AfterNavigationObserver {
 		Header header = new Header(appName);
 
 		Scroller scroller = new Scroller(createNavigation());
+		// Restrict the drawer scroller to vertical scrolling only: the default (BOTH) shows an
+		// unnecessary horizontal scrollbar when the navigation content slightly overflows in width.
+		scroller.setScrollDirection(Scroller.ScrollDirection.VERTICAL);
 
 		addToDrawer(header, scroller, createFooter());
 	}
@@ -174,6 +177,12 @@ public class MainLayout extends AppLayout implements AfterNavigationObserver {
 
 		VerticalLayout themeLayout = new VerticalLayout(/* createIconSwagger(), */ new ToggleButtonTheme(),
 				logoutButton);
+		// Compact footer: remove the default VerticalLayout padding/margin so it does not
+		// consume extra height and push the navigation Scroller into showing a scrollbar.
+		themeLayout.setPadding(false);
+		themeLayout.setSpacing(true);
+		themeLayout.setMargin(false);
+		themeLayout.setWidthFull();
 		themeLayout.getElement().getStyle().set("align-items", "center");
 		layout.add(themeLayout);
 

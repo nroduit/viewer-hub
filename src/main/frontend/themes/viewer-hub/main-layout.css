@@ -11,6 +11,15 @@
 
 vaadin-scroller[slot="drawer"] {
   padding: 0.5rem;
+  /* Prevent a horizontal scrollbar in the drawer: only vertical scrolling is wanted. */
+  overflow-x: hidden;
+  box-sizing: border-box;
+}
+
+/* Keep the navigation content within the drawer width so nothing overflows horizontally. */
+vaadin-scroller[slot="drawer"] vaadin-side-nav {
+  box-sizing: border-box;
+  max-width: 100%;
 }
 
 vaadin-side-nav-item vaadin-icon {

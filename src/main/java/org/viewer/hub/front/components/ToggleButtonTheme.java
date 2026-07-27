@@ -33,6 +33,12 @@ public class ToggleButtonTheme extends HorizontalLayout {
 	private static final String LIGHT = "light";
 
 	public ToggleButtonTheme() {
+		// Keep the theme switch compact so it does not add extra vertical space in the drawer footer.
+		setPadding(false);
+		setMargin(false);
+		setSpacing(true);
+		setDefaultVerticalComponentAlignment(Alignment.CENTER);
+
 		Icon moonIcon = new Icon(VaadinIcon.MOON_O);
 		Icon sunIcon = new Icon(VaadinIcon.SUN_O);
 		this.toggleButton = new ToggleButton();
