@@ -13,8 +13,7 @@ spring:
     version: '@project.version@'
   profiles:
     # Profiles available to switch between: dicom / dicom web or with or without gateway: connectors-dicom-gtw, connectors-dicom-no-gtw, connectors-dicomweb-gtw
-#    active: oidc, connectors-dicom-no-gtw, environment-override, package, cryptography, ohif, weasis, slicer, microdicom
-    active: oidc, connectors-dicom-gtw, environment-override, package, cryptography, ohif, weasis, slicer, microdicom
+    active: oidc, connectors-dicom-no-gtw, environment-override, package, cryptography, ohif, weasis, slicer, microdicom
   cloud:
     aws:
       # Region
