@@ -682,7 +682,7 @@
     "clientAuthenticatorType" : "client-secret",
     "secret" : "peLDyVHEpxTQ1A4GZZzQGK5xsPetlTrV",
     "redirectUris" : [ "*" ],
-    "webOrigins" : [ "http://localhost:3000" ],
+    "webOrigins" : [ "*" ],
     "notBefore" : 0,
     "bearerOnly" : false,
     "consentRequired" : false,
