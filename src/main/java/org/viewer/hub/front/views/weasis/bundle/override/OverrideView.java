@@ -120,9 +120,6 @@ public class OverrideView extends AbstractView {
 	private void uploadPackageVersionListener() {
 		PackageVersionFileUpload packageVersionFileUpload = this.packageVersionUpload.getPackageVersionFileUpload();
 		UI ui = UI.getCurrent();
-		// Add listener to force refresh when for example the tab of the browser change,
-		// it reloads the view
-		ui.getPage().executeJs("window.addEventListener('visibilitychange', function() {location.reload(); });");
 
 		// Manage the upload of the package version to add
 		packageVersionFileUpload.setUploadHandler(UploadHandler.inMemory((metadata, data) -> {
