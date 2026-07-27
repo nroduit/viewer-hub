@@ -696,6 +696,8 @@
                         </executions>
                         <configuration>
                             <pnpmEnable>true</pnpmEnable>
+                            <!-- Keep using the legacy root "frontend" folder (Vaadin 24.5+ defaults to src/main/frontend) -->
+                            <frontendDirectory>${project.basedir}/frontend</frontendDirectory>
                         </configuration>
                     </plugin>
                     <plugin>
