@@ -11,11 +11,10 @@
 
 package org.viewer.hub.back.config.xml;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.ser.std.StdSerializer;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.databind.SerializationContext;
+import tools.jackson.databind.ser.std.StdSerializer;
 
-import java.io.IOException;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -29,7 +28,7 @@ public class XmlSanitizeSerializer extends StdSerializer<String> {
 	}
 
 	@Override
-	public void serialize(String value, JsonGenerator gen, SerializerProvider provider) throws IOException {
+	public void serialize(String value, JsonGenerator gen, SerializationContext ctxt) {
 		gen.writeString(Objects.isNull(value) ? null : sanitizeForXml(value));
 	}
 

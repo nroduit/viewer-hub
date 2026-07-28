@@ -1,8 +1,8 @@
 {
   "Plugins" : [
-    "/usr/local/share/orthanc/plugins/libOrthancAuthorization.so",
-    "/usr/local/share/orthanc/plugins/libModalityWorklists.so",
-    "/usr/local/share/orthanc/plugins/libOrthancDicomWeb.so"
+    "/usr/share/orthanc/plugins-available/libOrthancAuthorization.so",
+    "/usr/share/orthanc/plugins-available/libModalityWorklists.so",
+    "/usr/share/orthanc/plugins-available/libOrthancDicomWeb.so"
   ],
 
   "HttpPort" : 8042,

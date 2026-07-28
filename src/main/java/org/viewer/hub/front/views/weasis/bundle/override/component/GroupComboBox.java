@@ -110,7 +110,7 @@ public class GroupComboBox extends HorizontalLayout {
 			icon = new Icon(VaadinIcon.QUESTION);
 			icon.setColor("grey");
 		}
-		icon.getStyle().set("padding", "var(--lumo-space-wide-xs");
+		icon.getStyle().set("padding", "0.1875rem 0.375rem");
 		return icon;
 	}
 

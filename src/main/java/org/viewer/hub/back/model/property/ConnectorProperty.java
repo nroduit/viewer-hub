@@ -14,7 +14,12 @@ package org.viewer.hub.back.model.property;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.viewer.hub.back.enums.ConnectorType;
 import org.viewer.hub.back.model.validator.ValidConnectorProperty;
 

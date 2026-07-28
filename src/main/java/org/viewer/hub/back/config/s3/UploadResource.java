@@ -1,6 +1,6 @@
 
 /*
- *  Copyright (c) 2022-2025 Weasis Team and other contributors.
+ *  Copyright (c) 2022-2026 Weasis Team and other contributors.
  *
  *  This program and the accompanying materials are made available under the terms of the Eclipse
  *  Public License 2.0 which is available at https://www.eclipse.org/legal/epl-2.0, or the Apache
@@ -26,7 +26,6 @@ import software.amazon.awssdk.transfer.s3.model.CompletedCopy;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executors;
 
 /**
  * Class used to upload in S3
@@ -70,10 +69,10 @@ public class UploadResource {
 	public CompletableFuture<PutObjectResponse> uploadObject(ByteArrayInputStream inputStream, String key) {
 		try (inputStream) {
 			// Push object in S3
+			byte[] content = inputStream.readAllBytes();
 			return this.s3AsyncClient.putObject(
 					PutObjectRequest.builder().bucket(this.s3config.getBucket()).key(key).build(),
-					AsyncRequestBody.fromInputStream(inputStream, (long) inputStream.available(),
-							Executors.newSingleThreadExecutor()));
+					AsyncRequestBody.fromBytes(content));
 		}
 		catch (IOException e) {
 			throw new TechnicalException("Issue when uploading object in S3:%s".formatted(e.getMessage()));

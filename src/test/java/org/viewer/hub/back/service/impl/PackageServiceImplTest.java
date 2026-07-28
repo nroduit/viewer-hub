@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2022-2025 Weasis Team and other contributors.
+ *  Copyright (c) 2022-2026 Weasis Team and other contributors.
  *
  *  This program and the accompanying materials are made available under the terms of the Eclipse
  *  Public License 2.0 which is available at https://www.eclipse.org/legal/epl-2.0, or the Apache
@@ -11,8 +11,6 @@
 
 package org.viewer.hub.back.service.impl;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import jakarta.validation.constraints.NotNull;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -36,6 +34,9 @@ import org.viewer.hub.back.service.OverrideConfigService;
 import org.viewer.hub.back.service.S3Service;
 import org.viewer.hub.back.service.TargetService;
 import org.viewer.hub.back.util.PackageUtil;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.PropertyNamingStrategies;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -231,8 +232,12 @@ class PackageServiceImplTest {
 				"resources/packages/weasis/mapping-minimal-version.json");
 		Mockito.when(this.s3Service.retrieveS3KeysFromPrefix(any()))
 			.thenReturn(Set.of("resources/packages/weasis/package/4.1.0-QUALIFIER/test"));
+		// Fresh stream per call: the refresh now reads the <version>/current build pointer in
+		// addition to the mapping-minimal-version.json, so a single (soon-closed) stream would be
+		// consumed twice.
 		Mockito.when(this.s3Service.retrieveS3Object(any()))
-			.thenReturn(new FileInputStream(ResourceUtils.getFile("classpath:weasis/mapping-minimal-version.json")));
+			.thenAnswer(invocation -> new FileInputStream(
+					ResourceUtils.getFile("classpath:weasis/mapping-minimal-version.json")));
 		Mockito.when(this.overrideConfigService.existOverrideConfigWithVersionConfigTarget(any(), any(), any()))
 			.thenReturn(true);
 
@@ -454,8 +459,9 @@ class PackageServiceImplTest {
 			// === Version Compatibility ===
 
 			// Serialize the object into JSON string
-			String jsonContentMinimalReleaseVersions = objectMapper
-				.setPropertyNamingStrategy(PropertyNamingStrategies.KEBAB_CASE)
+			String jsonContentMinimalReleaseVersions = JsonMapper.builder()
+				.propertyNamingStrategy(PropertyNamingStrategies.KEBAB_CASE)
+				.build()
 				.writeValueAsString(minimalReleaseVersions);
 
 			// Create a zip entry for the JSON file
@@ -475,9 +481,10 @@ class PackageServiceImplTest {
 
 	private InputStream buildInputStreamPreviousVersionsCompatibility(
 			List<MinimalReleaseVersion> minimalReleaseVersions) throws IOException {
-		ObjectMapper objectMapper = new ObjectMapper();
-		String jsonString = objectMapper.setPropertyNamingStrategy(PropertyNamingStrategies.KEBAB_CASE)
-			.writeValueAsString(minimalReleaseVersions);
+		ObjectMapper objectMapper = JsonMapper.builder()
+			.propertyNamingStrategy(PropertyNamingStrategies.KEBAB_CASE)
+			.build();
+		String jsonString = objectMapper.writeValueAsString(minimalReleaseVersions);
 
 		// Create an InputStream from the JSON string
 		return new ByteArrayInputStream(jsonString.getBytes());

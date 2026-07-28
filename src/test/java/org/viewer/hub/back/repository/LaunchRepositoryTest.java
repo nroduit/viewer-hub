@@ -14,20 +14,27 @@ package org.viewer.hub.back.repository;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.viewer.hub.back.config.properties.MicroDicomConfigurationProperties;
 import org.viewer.hub.back.config.properties.SlicerConfigurationProperties;
 import org.viewer.hub.back.config.properties.WeasisConfigurationProperties;
-import org.viewer.hub.back.entity.*;
+import org.viewer.hub.back.entity.LaunchConfigEntity;
+import org.viewer.hub.back.entity.LaunchEntity;
+import org.viewer.hub.back.entity.LaunchEntityPK;
+import org.viewer.hub.back.entity.LaunchPreferredEntity;
+import org.viewer.hub.back.entity.TargetEntity;
 import org.viewer.hub.back.enums.PreferredType;
 import org.viewer.hub.back.enums.TargetType;
 
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DataJpaTest
 @Slf4j
@@ -45,16 +52,16 @@ public class LaunchRepositoryTest {
 	@Autowired
 	private LaunchConfigRepository launchConfigRepository;
 
-	@MockBean
+	@MockitoBean
 	private ClientRegistrationRepository clientRegistrationRepository;
 
-	@MockBean
+	@MockitoBean
 	private WeasisConfigurationProperties weasisConfigurationProperties;
 
-	@MockBean
+	@MockitoBean
 	private SlicerConfigurationProperties slicerConfigurationProperties;
 
-	@MockBean
+	@MockitoBean
 	private MicroDicomConfigurationProperties microDicomConfigurationProperties;
 
 	/**

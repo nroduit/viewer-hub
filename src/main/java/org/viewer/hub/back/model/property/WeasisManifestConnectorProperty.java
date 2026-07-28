@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2022-2025 Weasis Team and other contributors.
+ *  Copyright (c) 2022-2026 Weasis Team and other contributors.
  *
  *  This program and the accompanying materials are made available under the terms of the Eclipse
  *  Public License 2.0 which is available at https://www.eclipse.org/legal/epl-2.0, or the Apache
@@ -50,6 +50,7 @@ public class WeasisManifestConnectorProperty {
 	private Set<@Pattern(
 			regexp = "0x[0-9A-F][0-9A-F][0-9A-F][0-9A-F][0-9A-F][0-9A-F][0-9A-F][0-9A-F]") String> overrideDicomTags;
 
+	@Builder.Default
 	@Schema(description = "Http tags")
 	private Map<String, String> httpTags = new HashMap<>();
 

@@ -21,7 +21,7 @@ import java.util.Objects;
 /**
  * Grid which represents the Launch/LaunchConfig/LaunchPrefered
  */
-@CssImport(value = "./styles/launch-grid.css", themeFor = "vaadin-grid")
+@CssImport("./styles/launch-grid.css")
 public class LaunchGrid extends Grid<LaunchEntity> {
 
 	private static final long serialVersionUID = -7613310574871406994L;
@@ -94,7 +94,7 @@ public class LaunchGrid extends Grid<LaunchEntity> {
 	 * @param launchesDuplicate Duplicate launches to compare
 	 */
 	public void applyDuplicateRowStyle(Collection<LaunchEntity> launchesDuplicate) {
-		this.setClassNameGenerator(launchEntity -> {
+		this.setPartNameGenerator(launchEntity -> {
 			if (launchesDuplicate.stream()
 				.anyMatch(l -> Objects.equals(l.getAssociatedConfig(), launchEntity.getAssociatedConfig())
 						&& Objects.equals(l.getAssociatedPreferred(), launchEntity.getAssociatedPreferred()))) {

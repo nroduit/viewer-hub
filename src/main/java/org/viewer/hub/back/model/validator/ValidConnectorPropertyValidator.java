@@ -20,7 +20,11 @@ import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.stereotype.Component;
 import org.viewer.hub.back.enums.ConnectorAuthType;
 import org.viewer.hub.back.enums.ConnectorType;
-import org.viewer.hub.back.model.property.*;
+import org.viewer.hub.back.model.property.ConnectorAuthenticationProperty;
+import org.viewer.hub.back.model.property.ConnectorProperty;
+import org.viewer.hub.back.model.property.DbConnectorProperty;
+import org.viewer.hub.back.model.property.DicomConnectorProperty;
+import org.viewer.hub.back.model.property.DicomWebConnectorProperty;
 
 import java.util.Objects;
 

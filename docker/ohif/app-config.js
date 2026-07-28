@@ -44,10 +44,18 @@ window.config = {
       configuration: {
         friendlyName: 'dcm4chee-local',
         name: 'dcm4chee-local',
-        wadoUriRoot: 'http://localhost:8088/DCM4CHEE-LOCAL/wado',
-        qidoRoot: 'http://localhost:8088/DCM4CHEE-LOCAL/rs',
-        wadoRoot: 'http://localhost:8088/DCM4CHEE-LOCAL/rs',
-        stowRoot: 'http://localhost:8088/DCM4CHEE-LOCAL/rs',
+
+        // -- With gateway --
+        // wadoUriRoot: 'http://localhost:8088/DCM4CHEE-LOCAL/wado',
+        // qidoRoot: 'http://localhost:8088/DCM4CHEE-LOCAL/rs',
+        // wadoRoot: 'http://localhost:8088/DCM4CHEE-LOCAL/rs',
+        // stowRoot: 'http://localhost:8088/DCM4CHEE-LOCAL/rs',
+        // -- Without gateway --
+        wadoUriRoot: 'http://localhost:8080/dcm4chee-arc/aets/DCM4CHEE/wado',
+        qidoRoot: 'http://localhost:8080/dcm4chee-arc/aets/DCM4CHEE/rs',
+        wadoRoot: 'http://localhost:8080/dcm4chee-arc/aets/DCM4CHEE/rs',
+        stowRoot: 'http://localhost:8080/dcm4chee-arc/aets/DCM4CHEE/rs',
+
         qidoSupportsIncludeField: true,
         supportsReject: true,
         imageRendering: 'wadors',

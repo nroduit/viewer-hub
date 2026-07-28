@@ -159,7 +159,7 @@ public class WeasisDisplayServiceImpl implements WeasisDisplayService {
 	private String retrieveDicomGetManifestCommand(String key) {
 		// Url to retrieve the manifest corresponding to the key
 		UriComponentsBuilder uriBuilderRetrieveManifest = UriComponentsBuilder
-			.fromHttpUrl("%s%s".formatted(this.viewerHubServerUrl, EndPoint.MANIFEST_PATH))
+			.fromUriString("%s%s".formatted(this.viewerHubServerUrl, EndPoint.MANIFEST_PATH))
 			// Manifest key
 			.queryParam(ParamName.KEY, key);
 
@@ -175,7 +175,7 @@ public class WeasisDisplayServiceImpl implements WeasisDisplayService {
 	 */
 	private String retrieveWeasisConfigCommand(SearchCriteria searchCriteria) {
 		UriComponentsBuilder uriBuilderLaunchConfig = UriComponentsBuilder
-			.fromHttpUrl("%s%s".formatted(this.viewerHubServerUrl, EndPoint.LAUNCH_CONFIG_PATH));
+			.fromUriString("%s%s".formatted(this.viewerHubServerUrl, EndPoint.LAUNCH_CONFIG_PATH));
 		// Preference Url
 		// TODO: not necessary ? already handle in launch config endpoint ?
 		// .queryParam("pro", "weasis.pref.url+" + viewerHubServerUrl +

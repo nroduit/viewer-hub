@@ -11,21 +11,21 @@
 
 package org.viewer.hub.back.model;
 
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import com.fasterxml.jackson.annotation.JsonRootName;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import org.viewer.hub.back.entity.LaunchEntity;
+import tools.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
+import tools.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 
 import java.util.List;
 
 @Setter
 @Getter
-@JacksonXmlRootElement(localName = "Launches")
+@JsonRootName("Launches")
 @EqualsAndHashCode
 @AllArgsConstructor
 public class Launches {

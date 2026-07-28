@@ -29,20 +29,29 @@ import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.annotation.Secured;
 import org.vaadin.lineawesome.LineAwesomeIconUrl;
 import org.viewer.hub.back.entity.LaunchEntity;
 import org.viewer.hub.back.entity.TargetEntity;
 import org.viewer.hub.back.enums.TargetType;
-import org.viewer.hub.back.model.*;
+import org.viewer.hub.back.model.AssociationModel;
+import org.viewer.hub.back.model.Message;
+import org.viewer.hub.back.model.MessageFormat;
+import org.viewer.hub.back.model.MessageLevel;
+import org.viewer.hub.back.model.MessageType;
 import org.viewer.hub.front.views.AbstractView;
 import org.viewer.hub.front.views.weasis.association.component.AssociationAddUserDialog;
 import org.viewer.hub.front.views.weasis.association.component.AssociationGrid;
 import org.viewer.hub.front.views.weasis.association.component.LaunchGrid;
 
-import java.util.*;
+import java.io.Serial;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 
 /**
  * View managing associations
@@ -53,7 +62,8 @@ import java.util.*;
 @Secured({ "ROLE_admin" })
 public class AssociationView extends AbstractView {
 
-	private static final long serialVersionUID = 5648280472926050104L;
+	@Serial
+    private static final long serialVersionUID = 5648280472926050104L;
 
 	public static final String ROUTE = "/association";
 
@@ -188,7 +198,7 @@ public class AssociationView extends AbstractView {
 	private ItemFilter<TargetEntity> belongToMemberOfItemFilter(AssociationModel associationModel) {
 		return (item, filter) ->
 		// Autocomplete depending on the input of the user
-		(filter.length() <= 0 || StringUtils.containsIgnoreCase(item.getName(), filter.trim())) &&
+		(filter.isEmpty() || Strings.CI.contains(item.getName(), filter.trim())) &&
 		// Filter by target type of the row
 				(Objects.equals(TargetType.USER, associationModel.getTarget().getType())
 						&& Objects.equals(TargetType.USER_GROUP, item.getType())

@@ -1,0 +1,40 @@
+/*
+ *  Copyright (c) 2022-2026 Weasis Team and other contributors.
+ *
+ *  This program and the accompanying materials are made available under the terms of the Eclipse
+ *  Public License 2.0 which is available at https://www.eclipse.org/legal/epl-2.0, or the Apache
+ *  License, Version 2.0 which is available at https://www.apache.org/licenses/LICENSE-2.0.
+ *
+ *  SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
+ *
+ */
+
+vaadin-scroller[slot="drawer"] {
+  padding: 0.5rem;
+  /* Prevent a horizontal scrollbar in the drawer: only vertical scrolling is wanted. */
+  overflow-x: hidden;
+  box-sizing: border-box;
+}
+
+/* Keep the navigation content within the drawer width so nothing overflows horizontally. */
+vaadin-scroller[slot="drawer"] vaadin-side-nav {
+  box-sizing: border-box;
+  max-width: 100%;
+}
+
+vaadin-side-nav-item vaadin-icon {
+  padding: 0;
+}
+
+[slot="drawer"]:is(header, footer) {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  min-height: 3rem;
+  box-sizing: border-box;
+}
+
+[slot="drawer"]:is(header, footer):is(:empty) {
+  display: none;
+}

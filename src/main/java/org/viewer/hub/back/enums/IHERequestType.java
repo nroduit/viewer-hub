@@ -24,12 +24,10 @@ public enum IHERequestType {
 		this.code = code;
 	}
 
-	// @JsonValue
 	public String getCode() {
 		return this.code;
 	}
 
-	// @JsonCreator
 	public static IHERequestType fromCode(String code) {
 		if (code != null) {
 			return Arrays.stream(IHERequestType.values())

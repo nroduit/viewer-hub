@@ -25,35 +25,43 @@
     <!-- Properties -->
     <properties>
         <revision>0.10.0</revision>
-        <java-version>21</java-version>
-        <jdk-version>21</jdk-version>
+        <java-version>25</java-version>
+        <jdk-version>25</jdk-version>
         <enforcer.jdk-version>[${jdk-version},)</enforcer.jdk-version>
-        <enforcer.maven-version>[3.6.3,)</enforcer.maven-version>
+        <enforcer.maven-version>[3.9.0,)</enforcer.maven-version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-        <springboot.version>3.5.16</springboot.version>
-        <spring-security-oauth2.version>2.5.2.RELEASE</spring-security-oauth2.version>
-        <springcloud.version>4.3.0</springcloud.version>
-        <spring-security-test.version>6.2.2</spring-security-test.version>
-        <postgresql.version>42.7.2</postgresql.version>
-        <ojdbc.version>23.3.0.23.09</ojdbc.version>
-        <vaadin.version>24.9.12</vaadin.version>
-        <weasis-dicom-tools.version>5.32.0</weasis-dicom-tools.version>
-        <maven.artifact.version>3.8.6</maven.artifact.version>
-        <node.version>v23.6.0</node.version>
-        <lombok.version>1.18.30</lombok.version>
-        <maven-compiler-plugin.version>3.12.1</maven-compiler-plugin.version>
-        <spring-boot-maven-plugin.version>3.2.3</spring-boot-maven-plugin.version>
-        <jacoco-maven-plugin.version>0.8.11</jacoco-maven-plugin.version>
-        <jakarta-json.version>2.0.1</jakarta-json.version>
-        <springdoc-openapi-starter-webmvc-ui.version>2.8.15</springdoc-openapi-starter-webmvc-ui.version>
-        <liquibase.version>4.31.0</liquibase.version>
-        <jackson.version>2.19.0</jackson.version>
+        <springboot.version>4.1.0</springboot.version>
+        <springcloud.version>2025.1.2</springcloud.version>
+        <io.awspring.cloud.version>4.0.2</io.awspring.cloud.version>
+        <vaadin.version>25.2.1</vaadin.version>
+
+        <liquibase.version>4.33.0</liquibase.version>
+        <postgresql.version>42.7.7</postgresql.version>
+        <ojdbc.version>23.9.0.25.07</ojdbc.version>
         <h2.version>2.3.232</h2.version>
-        <awssdk.version>2.30.36</awssdk.version>
-        <io.awspring.cloud.version>3.4.0</io.awspring.cloud.version>
-        <spring-security.version>6.5.11</spring-security.version>
+        <weasis-dicom-tools.version>5.34.3.1</weasis-dicom-tools.version>
+        <maven.artifact.version>3.9.11</maven.artifact.version>
+        <vaadin.node.version>v24.11.0</vaadin.node.version>
+        <awssdk.version>2.35.6</awssdk.version>
+        <lombok.version>1.18.42</lombok.version>
+        <maven-compiler-plugin.version>3.15.0</maven-compiler-plugin.version>
+        <spring-boot-maven-plugin.version>${springboot.version}</spring-boot-maven-plugin.version>
+        <jacoco-maven-plugin.version>0.8.15</jacoco-maven-plugin.version>
+        <jakarta-json.version>2.0.1</jakarta-json.version>
+        <springdoc-openapi-starter-webmvc-ui.version>2.8.13</springdoc-openapi-starter-webmvc-ui.version>
+
+        <!-- SonarCloud -->
+        <sonar.organization>nroduit-github</sonar.organization>
+        <sonar.projectKey>nroduit_viewer-hub</sonar.projectKey>
+        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
+        <sonar.language>java</sonar.language>
+        <sonar.java.source>${java-version}</sonar.java.source>
+        <sonar.test.exclusions>src/test/**/*,src/integration-test/**/*</sonar.test.exclusions>
+        <!-- The Vaadin frontend is excluded from JaCoCo (see the production profile); mirror that
+             exclusion here so SonarCloud does not count its lines as 0%-covered in the denominator. -->
+        <sonar.coverage.exclusions>**/org/viewer/hub/front/**/*,**/weasis/**/*</sonar.coverage.exclusions>
     </properties>
 
     <repositories>
@@ -81,15 +89,25 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${springboot.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>${springcloud.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
                 <groupId>com.vaadin</groupId>
                 <artifactId>vaadin-bom</artifactId>
                 <version>${vaadin.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-starter-parent</artifactId>
             </dependency>
             <dependency>
                 <groupId>io.awspring.cloud</groupId>
@@ -98,13 +116,9 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
-            <dependency>
-                <groupId>org.springframework.security</groupId>
-                <artifactId>spring-security-test</artifactId>
-                <version>${spring-security.version}</version>
-            </dependency>
         </dependencies>
     </dependencyManagement>
+
     <!-- Dependencies -->
     <dependencies>
 
@@ -114,38 +128,32 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
-            <version>${springboot.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
-            <version>${springboot.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-oauth2-client</artifactId>
-            <version>${springboot.version}</version>
+            <artifactId>spring-boot-starter-security-oauth2-client</artifactId>
         </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
-            <version>${springboot.version}</version>
+            <artifactId>spring-boot-starter-security-oauth2-resource-server</artifactId>
         </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
-            <version>${springboot.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-configuration-processor</artifactId>
             <optional>true</optional>
-            <version>${springboot.version}</version>
         </dependency>
 
         <!-- ============== -->
@@ -154,7 +162,6 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-webflux</artifactId>
-            <version>${springboot.version}</version>
         </dependency>
 
         <!-- ============ -->
@@ -163,25 +170,21 @@
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-context</artifactId>
-            <version>${springcloud.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-commons</artifactId>
-            <version>${springcloud.version}</version>
         </dependency>
 
         <!--   Config server -->
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-config</artifactId>
-            <version>${springcloud.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
-            <version>${springcloud.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>com.google.code.gson</groupId>
@@ -196,7 +199,12 @@
         <dependency>
             <groupId>org.liquibase</groupId>
             <artifactId>liquibase-core</artifactId>
-            <version>${liquibase.version}</version>
+        </dependency>
+        <!-- Spring Boot 4 moved the Liquibase auto-configuration into this module:
+             without it the changelogs are never applied at startup -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-liquibase</artifactId>
         </dependency>
 
         <!-- =========== -->
@@ -205,7 +213,6 @@
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>${postgresql.version}</version>
         </dependency>
 
         <!-- =========== -->
@@ -223,44 +230,22 @@
         <dependency>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
             <groupId>org.springframework.boot</groupId>
-            <version>${springboot.version}</version>
         </dependency>
 
-        <!-- =========== -->
-        <!-- Jackson Xml -->
-        <!-- =========== -->
+        <!-- ======== -->
+        <!-- Jackson  -->
+        <!-- ======== -->
         <dependency>
-            <groupId>com.fasterxml.jackson.dataformat</groupId>
-            <artifactId>jackson-dataformat-xml</artifactId>
-            <version>${jackson.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.module</groupId>
-            <artifactId>jackson-module-parameter-names</artifactId>
-            <version>${jackson.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
+            <groupId>tools.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>${jackson.version}</version>
         </dependency>
-        <!-- ================== -->
-        <!-- Jackson Properties -->
-        <!-- ================== -->
         <dependency>
-            <groupId>com.fasterxml.jackson.dataformat</groupId>
+            <groupId>tools.jackson.dataformat</groupId>
+            <artifactId>jackson-dataformat-xml</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>tools.jackson.dataformat</groupId>
             <artifactId>jackson-dataformat-properties</artifactId>
-            <version>${jackson.version}</version>
-        </dependency>
-
-        <!-- =================== -->
-        <!-- Apache HttpClient 5 -->
-        <!-- =================== -->
-        <!-- Force version >= 5.2 to ensure TlsSocketStrategy is available (required by Spring Boot 3.5+) -->
-        <dependency>
-            <groupId>org.apache.httpcomponents.client5</groupId>
-            <artifactId>httpclient5</artifactId>
-            <version>5.4.4</version>
         </dependency>
 
         <!-- ==== -->
@@ -272,8 +257,26 @@
             <version>${jakarta-json.version}</version>
         </dependency>
 
+        <!-- ==== -->
+        <!-- Xml -->
+        <!-- ==== -->
+        <dependency>
+            <groupId>jakarta.xml.bind</groupId>
+            <artifactId>jakarta.xml.bind-api</artifactId>
+        </dependency>
+
+
+        <!-- =====-->
+        <!-- JAXB -->
+        <!-- =====-->
+        <dependency>
+            <groupId>org.glassfish.jaxb</groupId>
+            <artifactId>jaxb-runtime</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+
         <!-- ==================================-->
-        <!-- Amazon Sdk 2 => Spring cloud aws 3-->
+        <!-- Amazon Sdk 2 => Spring cloud aws -->
         <!-- ==================================-->
         <dependency>
             <groupId>software.amazon.awssdk</groupId>
@@ -299,7 +302,7 @@
         <dependency>
             <groupId>software.amazon.awssdk.crt</groupId>
             <artifactId>aws-crt</artifactId>
-            <version>0.28.9</version>
+            <version>0.40.0</version>
         </dependency>
 
         <!-- =========== -->
@@ -308,13 +311,13 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>${lombok.version}</version>
+            <optional>true</optional>
         </dependency>
 
         <dependency>
             <groupId>net.logstash.logback</groupId>
             <artifactId>logstash-logback-encoder</artifactId>
-            <version>7.4</version>
+            <version>8.1</version>
         </dependency>
 
         <!-- =========== -->
@@ -324,7 +327,6 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-spring-boot-starter</artifactId>
-            <version>${vaadin.version}</version>
         </dependency>
 
         <!-- Vaadin -->
@@ -332,7 +334,6 @@
             <groupId>com.vaadin</groupId>
             <!-- Replace artifactId with vaadin-core to use only free components -->
             <artifactId>vaadin</artifactId>
-            <version>${vaadin.version}</version>
             <exclusions>
                 <!-- Webjars are only needed when running in Vaadin 13 compatibility mode -->
                 <exclusion>
@@ -362,6 +363,15 @@
             </exclusions>
         </dependency>
 
+        <!-- Vaadin dev-mode server (Vaadin 25: no longer transitive). Needed to run
+             in development mode, e.g. from the IDE without -Dvaadin.productionMode=true.
+             Optional so it is not propagated transitively; production mode ignores it. -->
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-dev</artifactId>
+            <optional>true</optional>
+        </dependency>
+
         <!-- Vaadin - Grid pagination -->
         <dependency>
             <groupId>org.vaadin.klaudeta</groupId>
@@ -379,7 +389,7 @@
         <dependency>
             <artifactId>togglebutton</artifactId>
             <groupId>com.vaadin.componentfactory</groupId>
-            <version>3.0.0</version>
+            <version>4.2.0</version>
         </dependency>
 
         <!-- Vaadin - Icons Line Awesome -->
@@ -395,7 +405,6 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-freemarker</artifactId>
-            <version>${springboot.version}</version>
         </dependency>
 
         <!-- =========== -->
@@ -404,13 +413,11 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-cache</artifactId>
-            <version>${springboot.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-redis</artifactId>
-            <version>${springboot.version}</version>
         </dependency>
 
         <!-- ============================ -->
@@ -465,7 +472,6 @@
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-test</artifactId>
-            <version>${spring-security.version}</version>
             <scope>test</scope>
         </dependency>
 
@@ -484,19 +490,27 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
-            <version>${springboot.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <!-- Spring Boot 4 split the test slices into separate modules -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-webmvc-test</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>io.awspring.cloud</groupId>
             <artifactId>spring-cloud-aws-test</artifactId>
-            <version>${io.awspring.cloud.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
-            <artifactId>mockito-inline</artifactId>
-            <version>5.2.0</version>
+            <artifactId>mockito-core</artifactId>
             <scope>test</scope>
         </dependency>
 
@@ -511,7 +525,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.13.0</version>
+                    <version>${maven-compiler-plugin.version}</version>
                     <configuration>
                         <release>${java-version}</release>
                     </configuration>
@@ -519,27 +533,27 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-install-plugin</artifactId>
-                    <version>3.1.3</version>
+                    <version>3.1.4</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-clean-plugin</artifactId>
-                    <version>3.4.0</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-surefire-plugin</artifactId>
-                    <version>3.5.2</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-enforcer-plugin</artifactId>
                     <version>3.5.0</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>3.5.6</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-enforcer-plugin</artifactId>
+                    <version>3.6.3</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-resources-plugin</artifactId>
-                    <version>3.3.1</version>
+                    <version>3.5.0</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -549,17 +563,17 @@
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>build-helper-maven-plugin</artifactId>
-                    <version>3.6.0</version>
+                    <version>3.6.1</version>
                 </plugin>
                 <plugin>
                     <groupId>com.diffplug.spotless</groupId>
                     <artifactId>spotless-maven-plugin</artifactId>
-                    <version>2.43.0</version>
+                    <version>3.8.0</version>
                 </plugin>
                 <plugin>
                     <groupId>org.jacoco</groupId>
                     <artifactId>jacoco-maven-plugin</artifactId>
-                    <version>0.8.12</version>
+                    <version>${jacoco-maven-plugin.version}</version>
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -570,17 +584,39 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>${maven-compiler-plugin.version}</version>
                 <configuration>
-                    <source>${java.version}</source>
-                    <target>${java.version}</target>
+                    <release>${java-version}</release>
                     <compilerArgs>
                         <arg>-parameters</arg>
                     </compilerArgs>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>${lombok.version}</version>
+                        </path>
+                    </annotationProcessorPaths>
                 </configuration>
             </plugin>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <version>${spring-boot-maven-plugin.version}</version>
+                <configuration>
+                    <!-- Layered jar for the Docker image's layer extraction -->
+                    <layers>
+                        <enabled>true</enabled>
+                    </layers>
+                </configuration>
+                <!-- The project imports the spring-boot-dependencies BOM instead of using the
+                     spring-boot-starter-parent, so the repackage goal must be bound explicitly to
+                     produce the executable (fat) jar consumed by the Docker image. -->
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -724,6 +760,41 @@
                         <filtering>true</filtering>
                     </testResource>
                 </testResources>
+            </build>
+        </profile>
+
+        <!-- Profile: coverage — wires the JaCoCo agent and report for CI (SonarCloud).
+             The Vaadin frontend and vendored weasis code are excluded from the report. -->
+        <profile>
+            <id>coverage</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.jacoco</groupId>
+                        <artifactId>jacoco-maven-plugin</artifactId>
+                        <version>${jacoco-maven-plugin.version}</version>
+                        <configuration>
+                            <excludes>
+                                <exclude>**/weasis/**/*</exclude>
+                                <exclude>**/org/viewer/hub/front/**/*</exclude>
+                            </excludes>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>prepare-agent</id>
+                                <goals>
+                                    <goal>prepare-agent</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>report</id>
+                                <goals>
+                                    <goal>report</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
             </build>
         </profile>
     </profiles>

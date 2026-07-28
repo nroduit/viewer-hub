@@ -11,7 +11,6 @@
 package org.viewer.hub.front.views.weasis.bundle.override.component;
 
 import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.grid.HeaderRow;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
@@ -72,7 +71,7 @@ public class PackageOverrideGrid extends Grid<OverrideConfigEntity> {
 		this.setHeightFull();
 
 		// Themes of the grid
-		this.addThemeVariants(GridVariant.LUMO_NO_BORDER, GridVariant.LUMO_ROW_STRIPES);
+		this.getElement().setAttribute("theme", "no-border row-stripes");
 
 		// Build columns
 		// Package version

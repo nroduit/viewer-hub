@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2022-2025 Weasis Team and other contributors.
+ *  Copyright (c) 2022-2026 Weasis Team and other contributors.
  *
  *  This program and the accompanying materials are made available under the terms of the Eclipse
  *  Public License 2.0 which is available at https://www.eclipse.org/legal/epl-2.0, or the Apache
@@ -13,14 +13,12 @@ package org.viewer.hub.front.authentication;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.theme.lumo.Lumo;
 import org.viewer.hub.back.util.SecurityUtil;
 
 /**
@@ -35,6 +33,12 @@ public class NotAuthorizedScreen extends FlexLayout {
 
 	// Theme
 	private final String THEME_COLOR_KEY = "theme-variant";
+
+	// Aura selects light/dark via the CSS color-scheme property (light-dark()), not the Lumo
+	// "theme" attribute.
+	private static final String DARK = "dark";
+
+	private static final String LIGHT = "light";
 
 	public NotAuthorizedScreen() {
 		this.buildUI();
@@ -51,10 +55,11 @@ public class NotAuthorizedScreen extends FlexLayout {
 		UI.getCurrent()
 			.getPage()
 			.executeJs("return localStorage.getItem($0)", this.THEME_COLOR_KEY)
-			.then(String.class, string -> {
-				final String themeColor = string;
-				if ((string != null) && (string.equals(Lumo.DARK) || string.equals(Lumo.LIGHT))) {
-					UI.getCurrent().getElement().setAttribute("theme", themeColor);
+			.then(String.class, themeColor -> {
+				if (DARK.equals(themeColor) || LIGHT.equals(themeColor)) {
+					UI.getCurrent()
+						.getPage()
+						.executeJs("document.documentElement.style.colorScheme = $0", themeColor);
 					UI.getCurrent()
 						.getPage()
 						.executeJs("localStorage.setItem($0, $1)", this.THEME_COLOR_KEY, themeColor);
@@ -82,8 +87,8 @@ public class NotAuthorizedScreen extends FlexLayout {
 		// logout button
 		Button logoutButton = new Button("Logout", VaadinIcon.SIGN_OUT.create());
 		logoutButton.addClickListener(event -> SecurityUtil.signOut());
-		logoutButton.addThemeVariants(ButtonVariant.LUMO_ERROR);
-		logoutButton.addThemeVariants(ButtonVariant.LUMO_LARGE);
+		logoutButton.getElement().getThemeList().add("error");
+		logoutButton.getElement().getThemeList().add("large");
 		notAuthorizedLayout.add(logoutButton);
 
 		return notAuthorizedLayout;

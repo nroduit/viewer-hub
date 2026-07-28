@@ -1,6 +1,6 @@
 
 /*
- *  Copyright (c) 2022-2025 Weasis Team and other contributors.
+ *  Copyright (c) 2022-2026 Weasis Team and other contributors.
  *
  *  This program and the accompanying materials are made available under the terms of the Eclipse
  *  Public License 2.0 which is available at https://www.eclipse.org/legal/epl-2.0, or the Apache
@@ -15,7 +15,6 @@ package org.viewer.hub.front.components;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.dependency.Uses;
@@ -58,7 +57,7 @@ public class Menu extends FlexLayout {
 			}
 		});
 		showMenu.setClassName("menu-button");
-		showMenu.addThemeVariants(ButtonVariant.LUMO_SMALL);
+		showMenu.getElement().getThemeList().add("small");
 		showMenu.setIcon(new Icon(VaadinIcon.MENU));
 		this.add(showMenu);
 
@@ -81,7 +80,7 @@ public class Menu extends FlexLayout {
 		Button logoutButton = new Button("Logout", VaadinIcon.SIGN_OUT.create());
 		logoutButton.addClickListener(event -> SecurityUtil.signOut());
 
-		logoutButton.addThemeVariants(ButtonVariant.LUMO_ERROR);
+		logoutButton.getElement().getThemeList().add("error");
 		this.add(logoutButton);
 
 		this.setFlexDirection(FlexDirection.COLUMN);
@@ -97,7 +96,7 @@ public class Menu extends FlexLayout {
 		Tab tab = new Tab();
 		RouterLink routerLink = new RouterLink(viewClass);
 		routerLink.setClassName("menu-link");
-		icon.getStyle().set("box-sizing", "border-box").set("margin-inline-end", "var(--lumo-space-s)");
+		icon.getStyle().set("box-sizing", "border-box").set("margin-inline-end", "0.5rem");
 		routerLink.add(icon, new Span(caption));
 		tab.add(routerLink);
 		this.tabs.add(tab);

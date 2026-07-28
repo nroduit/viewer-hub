@@ -11,8 +11,8 @@
 
 package org.viewer.hub.front.views.weasis.i18n;
 
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.grid.contextmenu.GridContextMenu;
 import com.vaadin.flow.component.grid.contextmenu.GridMenuItem;
 import com.vaadin.flow.component.icon.Icon;
@@ -22,6 +22,7 @@ import com.vaadin.flow.dom.DomEventListener;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.streams.UploadHandler;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +38,7 @@ import org.viewer.hub.front.views.weasis.i18n.component.I18nFileUpload;
 import org.viewer.hub.front.views.weasis.i18n.component.I18nGrid;
 import org.viewer.hub.front.views.weasis.i18n.component.I18nUpload;
 
+import java.io.ByteArrayInputStream;
 import java.io.Serial;
 import java.util.Set;
 
@@ -102,13 +104,13 @@ public class I18nView extends AbstractView {
 	 */
 	private void uploadI18nVersionListener() {
 		I18nFileUpload i18nFileUpload = this.i18nUpload.getI18nFileUpload();
+		UI ui = UI.getCurrent();
 		// Manage the upload of the i18n version to add
-		i18nFileUpload.addSucceededListener(event -> {
-			if (event.getFileName() != null && event.getFileName().contains(I18N_PATTERN_NAME)) {
-				this.i18nLogic.handleUploadI18n(i18nFileUpload.getMemoryBuffer().getInputStream(), event.getFileName());
+		i18nFileUpload.setUploadHandler(UploadHandler.inMemory((metadata, data) -> {
+			if (metadata.fileName() != null && metadata.fileName().contains(I18N_PATTERN_NAME)) {
+				ui.access(() -> this.i18nLogic.handleUploadI18n(new ByteArrayInputStream(data), metadata.fileName()));
 			}
-
-		});
+		}));
 	}
 
 	/**
@@ -128,7 +130,7 @@ public class I18nView extends AbstractView {
 		this.refreshGridButton = new Button("Refresh", new Icon(VaadinIcon.REFRESH));
 		this.refreshGridButton.addClickListener(buttonClickEvent -> this.i18nDataProvider.refreshAll());
 		this.refreshGridButton.setMinWidth("50%");
-		this.refreshGridButton.addThemeVariants(ButtonVariant.MATERIAL_CONTAINED);
+		this.refreshGridButton.getElement().getThemeList().add("primary");
 	}
 
 	/**

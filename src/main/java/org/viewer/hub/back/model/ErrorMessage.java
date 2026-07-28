@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2022-2025 Weasis Team and other contributors.
+ *  Copyright (c) 2022-2026 Weasis Team and other contributors.
  *
  *  This program and the accompanying materials are made available under the terms of the Eclipse
  *  Public License 2.0 which is available at https://www.eclipse.org/legal/epl-2.0, or the Apache
@@ -11,11 +11,11 @@
 
 package org.viewer.hub.back.model;
 
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import com.fasterxml.jackson.annotation.JsonRootName;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.Objects;
 
-@JacksonXmlRootElement(localName = "Error")
+@JsonRootName("Error")
 public class ErrorMessage {
 
 	@Schema(description = "Error message", example = "Wrong parameters")

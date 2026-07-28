@@ -16,7 +16,6 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
@@ -32,12 +31,13 @@ import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.sidenav.SideNav;
 import com.vaadin.flow.component.sidenav.SideNavItem;
+import com.vaadin.flow.router.AfterNavigationEvent;
+import com.vaadin.flow.router.AfterNavigationObserver;
 import com.vaadin.flow.router.Layout;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.server.menu.MenuConfiguration;
 import com.vaadin.flow.server.menu.MenuEntry;
 import com.vaadin.flow.spring.annotation.UIScope;
-import com.vaadin.flow.theme.lumo.LumoUtility;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.vaadin.lineawesome.LineAwesomeIcon;
 import org.viewer.hub.back.constant.EndPoint;
@@ -50,15 +50,13 @@ import java.util.List;
 /** The main layout. Contains the navigation menu. */
 @NpmPackage(value = "@polymer/iron-icons", version = "3.0.1")
 @JsModule("@polymer/iron-icons/iron-icons.js")
-@JsModule("@vaadin/vaadin-lumo-styles/badge.js")
 @CssImport(value = "./styles/shared-styles.css")
-@CssImport(value = "./styles/empty.css", include = "lumo-badge")
 @Uses(Icon.class)
 @Uses(ToggleButton.class)
 @Layout
 @AnonymousAllowed
 @UIScope
-public class MainLayout extends AppLayout {
+public class MainLayout extends AppLayout implements AfterNavigationObserver {
 
 	private H1 viewTitle;
 
@@ -79,7 +77,7 @@ public class MainLayout extends AppLayout {
 		toggle.setAriaLabel("Menu toggle");
 
 		viewTitle = new H1();
-		viewTitle.addClassNames(LumoUtility.FontSize.LARGE, LumoUtility.Margin.NONE);
+		viewTitle.addClassNames("text-lg", "m-0");
 
 		addToNavbar(true, toggle, viewTitle);
 	}
@@ -89,10 +87,13 @@ public class MainLayout extends AppLayout {
 	 */
 	private void addDrawerContent() {
 		Span appName = new Span("Viewer-Hub");
-		appName.addClassNames(LumoUtility.FontWeight.SEMIBOLD, LumoUtility.FontSize.LARGE);
+		appName.addClassNames("font-semibold", "text-lg");
 		Header header = new Header(appName);
 
 		Scroller scroller = new Scroller(createNavigation());
+		// Restrict the drawer scroller to vertical scrolling only: the default (BOTH) shows an
+		// unnecessary horizontal scrollbar when the navigation content slightly overflows in width.
+		scroller.setScrollDirection(Scroller.ScrollDirection.VERTICAL);
 
 		addToDrawer(header, scroller, createFooter());
 	}
@@ -124,7 +125,8 @@ public class MainLayout extends AppLayout {
 		SideNavItem weasisLink = new SideNavItem("Weasis");
 		// Menu for Weasis: not filtered yet by application
 		menuEntries.forEach(entry -> {
-			if (entry.path().startsWith("/" + AbstractView.WEASIS) && entry.menuClass() != null
+			if (entry.path().startsWith("/" + AbstractView.WEASIS)
+					&& entry.menuClass() != null
 					&& SecurityUtil.isAccessGranted(entry.menuClass())) {
 				if (entry.icon() != null) {
 					weasisLink.addItem(new SideNavItem(entry.title(), entry.path(), new SvgIcon(entry.icon())));
@@ -148,7 +150,8 @@ public class MainLayout extends AppLayout {
 		// Menu for Settings
 		menuEntries.forEach(entry -> {
 			if ((entry.path().startsWith("/" + AbstractView.SETTINGS) || entry.path().equals("/"))
-					&& entry.menuClass() != null && SecurityUtil.isAccessGranted(entry.menuClass())) {
+					&& entry.menuClass() != null
+					&& SecurityUtil.isAccessGranted(entry.menuClass())) {
 				if (entry.icon() != null) {
 					settingsLink.addItem(new SideNavItem(entry.title(), entry.path(), new SvgIcon(entry.icon())));
 				}
@@ -170,10 +173,16 @@ public class MainLayout extends AppLayout {
 		Button logoutButton = new Button("Logout", LineAwesomeIcon.SIGN_OUT_ALT_SOLID.create());
 		logoutButton.addClickListener(event -> SecurityUtil.signOut());
 		logoutButton.setSizeFull();
-		logoutButton.addThemeVariants(ButtonVariant.MATERIAL_CONTAINED);
+		logoutButton.getElement().getThemeList().add("primary");
 
 		VerticalLayout themeLayout = new VerticalLayout(/* createIconSwagger(), */ new ToggleButtonTheme(),
 				logoutButton);
+		// Compact footer: remove the default VerticalLayout padding/margin so it does not
+		// consume extra height and push the navigation Scroller into showing a scrollbar.
+		themeLayout.setPadding(false);
+		themeLayout.setSpacing(true);
+		themeLayout.setMargin(false);
+		themeLayout.setWidthFull();
 		themeLayout.getElement().getStyle().set("align-items", "center");
 		layout.add(themeLayout);
 
@@ -200,8 +209,7 @@ public class MainLayout extends AppLayout {
 	}
 
 	@Override
-	protected void afterNavigation() {
-		super.afterNavigation();
+	public void afterNavigation(AfterNavigationEvent event) {
 		viewTitle.setText(getCurrentPageTitle());
 	}
 

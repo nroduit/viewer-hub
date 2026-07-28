@@ -13,7 +13,6 @@ package org.viewer.hub.front.views.weasis.bundle.override;
 
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.grid.contextmenu.GridContextMenu;
 import com.vaadin.flow.component.grid.contextmenu.GridMenuItem;
 import com.vaadin.flow.component.icon.Icon;
@@ -25,6 +24,7 @@ import com.vaadin.flow.dom.DomEventListener;
 import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.streams.UploadHandler;
 import com.vaadin.flow.spring.annotation.UIScope;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -39,7 +39,12 @@ import org.viewer.hub.back.model.MessageFormat;
 import org.viewer.hub.back.model.MessageLevel;
 import org.viewer.hub.back.model.MessageType;
 import org.viewer.hub.front.views.AbstractView;
-import org.viewer.hub.front.views.weasis.bundle.override.component.*;
+import org.viewer.hub.front.views.weasis.bundle.override.component.AddGroupConfigDialog;
+import org.viewer.hub.front.views.weasis.bundle.override.component.GroupComboBox;
+import org.viewer.hub.front.views.weasis.bundle.override.component.OverrideConfigGridItemDetail;
+import org.viewer.hub.front.views.weasis.bundle.override.component.PackageOverrideGrid;
+import org.viewer.hub.front.views.weasis.bundle.override.component.PackageVersionFileUpload;
+import org.viewer.hub.front.views.weasis.bundle.override.component.PackageVersionUpload;
 
 import java.io.Serial;
 import java.util.List;
@@ -114,18 +119,14 @@ public class OverrideView extends AbstractView {
 	 */
 	private void uploadPackageVersionListener() {
 		PackageVersionFileUpload packageVersionFileUpload = this.packageVersionUpload.getPackageVersionFileUpload();
-		// Add listener to force refresh when for example the tab of the browser change,
-		// it reloads the view
-		UI.getCurrent()
-			.getPage()
-			.executeJs("window.addEventListener('visibilitychange', function() {location.reload(); });");
+		UI ui = UI.getCurrent();
 
 		// Manage the upload of the package version to add
-		packageVersionFileUpload.addSucceededListener(event -> {
-			if (event.getFileName() != null) {
-				this.overrideLogic.handleUploadWeasisNative(packageVersionFileUpload);
+		packageVersionFileUpload.setUploadHandler(UploadHandler.inMemory((metadata, data) -> {
+			if (metadata.fileName() != null) {
+				ui.access(() -> this.overrideLogic.handleUploadWeasisNative(data));
 			}
-		});
+		}));
 	}
 
 	/**
@@ -182,13 +183,13 @@ public class OverrideView extends AbstractView {
 		this.refreshGridButton = new Button("Refresh", new Icon(VaadinIcon.REFRESH));
 		this.refreshGridButton.addClickListener(buttonClickEvent -> this.overrideDataProvider.refreshAll());
 		this.refreshGridButton.setMinWidth("50%");
-		this.refreshGridButton.addThemeVariants(ButtonVariant.MATERIAL_CONTAINED);
+		this.refreshGridButton.getElement().getThemeList().add("primary");
 
 		// Create new group config
 		this.createNewGroupConfigButton = new Button("Create new group config", new Icon(VaadinIcon.PLUS));
 		this.createNewGroupConfigButton.addClickListener(buttonClickEvent -> this.addNewGroupConfigListener());
 		this.createNewGroupConfigButton.setMinWidth("50%");
-		this.createNewGroupConfigButton.addThemeVariants(ButtonVariant.MATERIAL_CONTAINED);
+		this.createNewGroupConfigButton.getElement().getThemeList().add("primary");
 	}
 
 	private ValueProvider<OverrideConfigEntity, GroupComboBox> createComboBoxGroupValueProvider() {

@@ -15,10 +15,16 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 import org.viewer.hub.back.util.DateTimeUtil;
+import tools.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
+import tools.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -43,6 +49,7 @@ public class Serie implements Serializable {
 	@Serial
 	private static final long serialVersionUID = -3455369892278940902L;
 
+	@Builder.Default
 	@JacksonXmlElementWrapper(useWrapping = false)
 	@JsonProperty("Instance")
 	private Set<Instance> instances = new HashSet<>();
@@ -80,6 +87,7 @@ public class Serie implements Serializable {
 
 	public Serie(String seriesInstanceUID, String seriesDescription, Integer seriesNumber, String modality,
 			LocalDateTime seriesDateTime, String wadoTransferSyntaxUID, Integer wadoCompressionRate) {
+		this.instances = new HashSet<>();
 		this.seriesInstanceUID = seriesInstanceUID;
 		this.seriesDescription = seriesDescription;
 		this.seriesNumber = seriesNumber;
@@ -92,6 +100,7 @@ public class Serie implements Serializable {
 
 	public Serie(String seriesInstanceUID, String seriesDescription, Integer seriesNumber, String modality,
 			Date seriesDate, Date seriesTime, String wadoTransferSyntaxUID, Integer wadoCompressionRate) {
+		this.instances = new HashSet<>();
 		this.seriesInstanceUID = seriesInstanceUID;
 		this.seriesDescription = seriesDescription;
 		this.seriesNumber = seriesNumber;

@@ -1,3 +1,14 @@
+/*
+ *  Copyright (c) 2022-2026 Weasis Team and other contributors.
+ *
+ *  This program and the accompanying materials are made available under the terms of the Eclipse
+ *  Public License 2.0 which is available at https://www.eclipse.org/legal/epl-2.0, or the Apache
+ *  License, Version 2.0 which is available at https://www.apache.org/licenses/LICENSE-2.0.
+ *
+ *  SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
+ *
+ */
+
 .help-view {
   padding: 2px;
   box-sizing: border-box;
@@ -14,7 +25,7 @@
   --cv-stripe-width: 1.5px;
   --cv-stripe-gap: 9px;
   --cv-stripe-color: hsl(var(--cv-blue) / 0.2);
-  --cv-layout-border-color: var(--lumo-contrast-40pct);
+  --cv-layout-border-color: color-mix(in srgb, var(--vaadin-text-color) 40%, transparent);
   --cv-checkerboard-color1: hsl(0 0% 0% / 0.05);
   --cv-checkerboard-color2: hsl(0 0% 100% / 0.05);
   --cv-checkerboard-size: 16px;
@@ -60,7 +71,7 @@
 .help-view:not([starting-drag]) .cover-overlay.editable-editing {
   outline: 1px solid hsl(var(--cv-blue) / 1);
   outline-offset: -1px;
-  box-shadow: inset 0 0 0 2px var(--lumo-base-color);
+  box-shadow: inset 0 0 0 2px var(--vaadin-background-color);
 }
 
 .help-view .overlays,
@@ -105,7 +116,7 @@
   background: var(--cv-droptarget-bg-color);
   outline: 1px solid var(--cv-droptarget-border-color);
   outline-offset: -1px;
-  box-shadow: inset 0 0 0 2px var(--lumo-base-color);
+  box-shadow: inset 0 0 0 2px var(--vaadin-background-color);
 }
 
 .drop-zone[empty-layout] {
