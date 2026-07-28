@@ -18,9 +18,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
-import org.springframework.http.converter.ByteArrayHttpMessageConverter;
-import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.http.converter.StringHttpMessageConverter;
+import org.springframework.http.converter.HttpMessageConverters;
 import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter;
 import org.springframework.http.converter.xml.JacksonXmlHttpMessageConverter;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
@@ -28,13 +26,12 @@ import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.resource.PathResourceResolver;
 import org.viewer.hub.back.config.s3.S3ClientConfigurationProperties;
-import org.viewer.hub.back.config.xml.XmlSanitizeSerializer;
-import tools.jackson.databind.module.SimpleModule;
+import tools.jackson.databind.cfg.EnumFeature;
+import tools.jackson.databind.json.JsonMapper;
 import tools.jackson.dataformat.xml.XmlMapper;
 import tools.jackson.dataformat.xml.XmlWriteFeature;
 
 import java.io.IOException;
-import java.util.List;
 
 /**
  * Configuration for the Spring MVC part, serialization/deserialization Jackson, resources
@@ -58,29 +55,45 @@ public class WebConfiguration implements WebMvcConfigurer {
 	}
 
 	@Override
-	public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
-		converters.add(this.jacksonXmlHttpMessageConverter());
-		converters.add(new StringHttpMessageConverter());
-		converters.add(new ByteArrayHttpMessageConverter());
-		converters.add(new JacksonJsonHttpMessageConverter());
+	public void configureMessageConverters(HttpMessageConverters.ServerBuilder builder) {
+		// The builder is pre-populated with the default converters (String, byte[], JSON, ...);
+		// override the XML one (to keep the XML declaration) and the JSON one (to keep the
+		// Jackson 2 enum-by-name behaviour that clients and launch URLs rely on).
+		builder.withXmlConverter(this.jacksonXmlHttpMessageConverter())
+			.withJsonConverter(this.jacksonJsonHttpMessageConverter());
 	}
 
 	/**
-	 * Setup of the xml jackson mapper
+	 * Setup of the json jackson mapper (Jackson 3 / tools.jackson).
+	 * <p>
+	 * Jackson 3 reads/writes enums using {@code toString()} by default; disabling the enum
+	 * {@code *_USING_TO_STRING} features restores the Jackson 2 behaviour of using {@code name()},
+	 * so values such as {@code ViewerType} "WEASIS" keep (de)serializing correctly. Other Jackson 3
+	 * defaults (ISO-8601 dates, discovered modules) are left untouched.
+	 * @return Converter built
+	 */
+	@Bean
+	public JacksonJsonHttpMessageConverter jacksonJsonHttpMessageConverter() {
+		JsonMapper mapper = JsonMapper.builder()
+			.findAndAddModules()
+			.disable(EnumFeature.READ_ENUMS_USING_TO_STRING, EnumFeature.WRITE_ENUMS_USING_TO_STRING)
+			.build();
+		return new JacksonJsonHttpMessageConverter(mapper);
+	}
+
+	/**
+	 * Setup of the xml jackson mapper (Jackson 3 / tools.jackson)
 	 * @return Converter built
 	 */
 	@Bean
 	public JacksonXmlHttpMessageConverter jacksonXmlHttpMessageConverter() {
-		// Sanitize value for xml
-		SimpleModule module = new SimpleModule();
-		module.addSerializer(String.class, new XmlSanitizeSerializer());
-
-		// Set the xml tag to each xml serialization
+		// configureForJackson2() keeps the Jackson 2 serialization defaults (enum-as-name,
+		// dates-as-timestamps, no xsi:nil for null values, ...) so the manifest XML is unchanged.
+		// enable(WRITE_XML_DECLARATION) adds the xml declaration tag to each xml serialization.
 		XmlMapper mapper = XmlMapper.builder()
+			.configureForJackson2()
 			.enable(XmlWriteFeature.WRITE_XML_DECLARATION)
-			.addModule(module)
 			.build();
-
 		return new JacksonXmlHttpMessageConverter(mapper);
 	}
 

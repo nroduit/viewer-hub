@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2022-2025 Weasis Team and other contributors.
+ *  Copyright (c) 2022-2026 Weasis Team and other contributors.
  *
  *  This program and the accompanying materials are made available under the terms of the Eclipse
  *  Public License 2.0 which is available at https://www.eclipse.org/legal/epl-2.0, or the Apache
@@ -11,13 +11,13 @@
 
 package org.viewer.hub.back.util;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import org.junit.jupiter.api.Test;
 import org.viewer.hub.back.entity.OverrideConfigEntity;
 import org.viewer.hub.back.entity.WeasisPropertyEntity;
 import org.viewer.hub.back.entity.serializer.WeasisPropertyEntitySerializer;
 import org.viewer.hub.back.enums.WeasisPropertyCategory;
 import org.viewer.hub.back.enums.WeasisPropertyJavaType;
+import tools.jackson.core.JacksonException;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -53,7 +53,7 @@ class JacksonUtilTest {
 
 	// TODO W-34: to improve
 	@Test
-	void testDeserializeOverrideConfigEntityPropertiesFromInputStream() throws JsonProcessingException {
+	void testDeserializeOverrideConfigEntityPropertiesFromInputStream() throws JacksonException {
 
 		String test = "weasis.code=valueCode\nweasis.name=valueName";
 

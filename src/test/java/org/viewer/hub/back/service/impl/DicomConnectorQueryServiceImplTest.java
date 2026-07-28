@@ -11,7 +11,6 @@
 
 package org.viewer.hub.back.service.impl;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.extern.slf4j.Slf4j;
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
@@ -52,6 +51,7 @@ import org.weasis.dicom.op.CFind;
 import org.weasis.dicom.param.DicomParam;
 import org.weasis.dicom.param.DicomState;
 import reactor.core.publisher.Mono;
+import tools.jackson.core.JacksonException;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -212,7 +212,7 @@ class DicomConnectorQueryServiceImplTest {
 
 	@Test
 	void when_buildingFromStudyAccessionNumber_withDicomWebConnector_with_validData_should_addCorrectValuesInManifest()
-			throws JsonProcessingException {
+			throws JacksonException {
 		// Init data
 		Set<String> studyAccessionNumbers = new HashSet<>();
 		studyAccessionNumbers.add("studyAccessionNumber");
