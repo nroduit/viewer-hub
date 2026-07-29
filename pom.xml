@@ -40,7 +40,12 @@
         <liquibase.version>4.33.0</liquibase.version>
         <postgresql.version>42.7.7</postgresql.version>
         <ojdbc.version>23.26.3.0.0</ojdbc.version>
-        <h2.version>2.4.240</h2.version>
+        <!-- Pinned: H2 2.4.240 breaks CHECK constraints on enum columns (the ones Hibernate
+             generates for @Enumerated(STRING)). The constraint's IN-list keeps a reference to the
+             connection that created it, so once that connection closes every INSERT fails with
+             "The database has been closed [90098-240]". Breaks @DataJpaTest slices.
+             See https://github.com/h2database/h2database/issues/4320 — unpin once a fix ships. -->
+        <h2.version>2.3.232</h2.version>
         <weasis-dicom-tools.version>5.34.3.2</weasis-dicom-tools.version>
         <maven.artifact.version>3.9.16</maven.artifact.version>
         <vaadin.node.version>v24.11.0</vaadin.node.version>
@@ -732,8 +737,6 @@
                         </executions>
                         <configuration>
                             <pnpmEnable>true</pnpmEnable>
-                            <!-- Keep using the legacy root "frontend" folder (Vaadin 24.5+ defaults to src/main/frontend) -->
-                            <frontendDirectory>${project.basedir}/frontend</frontendDirectory>
                         </configuration>
                     </plugin>
                     <plugin>

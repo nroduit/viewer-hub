@@ -24,6 +24,12 @@ updates:
       maven:
         patterns:
           - "*"
+    ignore:
+      # H2 2.4.240 breaks CHECK constraints on enum columns and fails every @DataJpaTest.
+      # See https://github.com/h2database/h2database/issues/4320 and the pin in pom.xml.
+      # Remove this entry once a fixed release (> 2.4.240) is out.
+      - dependency-name: "com.h2database:h2"
+        versions: [ "2.4.240" ]
 
   # Base image of the published Docker image (built by docker-publish.yml).
   - package-ecosystem: docker
