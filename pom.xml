@@ -34,23 +34,23 @@
 
         <springboot.version>4.1.0</springboot.version>
         <springcloud.version>2025.1.2</springcloud.version>
-        <io.awspring.cloud.version>4.0.2</io.awspring.cloud.version>
-        <vaadin.version>25.2.1</vaadin.version>
+        <io.awspring.cloud.version>4.1.0</io.awspring.cloud.version>
+        <vaadin.version>25.2.4</vaadin.version>
 
         <liquibase.version>4.33.0</liquibase.version>
         <postgresql.version>42.7.7</postgresql.version>
-        <ojdbc.version>23.9.0.25.07</ojdbc.version>
-        <h2.version>2.3.232</h2.version>
-        <weasis-dicom-tools.version>5.34.3.1</weasis-dicom-tools.version>
-        <maven.artifact.version>3.9.11</maven.artifact.version>
+        <ojdbc.version>23.26.3.0.0</ojdbc.version>
+        <h2.version>2.4.240</h2.version>
+        <weasis-dicom-tools.version>5.34.3.2</weasis-dicom-tools.version>
+        <maven.artifact.version>3.9.16</maven.artifact.version>
         <vaadin.node.version>v24.11.0</vaadin.node.version>
-        <awssdk.version>2.35.6</awssdk.version>
-        <lombok.version>1.18.42</lombok.version>
+        <awssdk.version>2.49.5</awssdk.version>
+        <lombok.version>1.18.46</lombok.version>
         <maven-compiler-plugin.version>3.15.0</maven-compiler-plugin.version>
         <spring-boot-maven-plugin.version>${springboot.version}</spring-boot-maven-plugin.version>
         <jacoco-maven-plugin.version>0.8.15</jacoco-maven-plugin.version>
         <jakarta-json.version>2.0.1</jakarta-json.version>
-        <springdoc-openapi-starter-webmvc-ui.version>2.8.13</springdoc-openapi-starter-webmvc-ui.version>
+        <springdoc-openapi-starter-webmvc-ui.version>3.0.3</springdoc-openapi-starter-webmvc-ui.version>
 
         <!-- SonarCloud -->
         <sonar.organization>nroduit-github</sonar.organization>
@@ -302,7 +302,7 @@
         <dependency>
             <groupId>software.amazon.awssdk.crt</groupId>
             <artifactId>aws-crt</artifactId>
-            <version>0.40.0</version>
+            <version>0.48.2</version>
         </dependency>
 
         <!-- =========== -->
@@ -317,7 +317,7 @@
         <dependency>
             <groupId>net.logstash.logback</groupId>
             <artifactId>logstash-logback-encoder</artifactId>
-            <version>8.1</version>
+            <version>9.0</version>
         </dependency>
 
         <!-- =========== -->
@@ -376,7 +376,7 @@
         <dependency>
             <groupId>org.vaadin.klaudeta</groupId>
             <artifactId>grid-pagination</artifactId>
-            <version>4.0.0</version>
+            <version>4.0.1</version>
         </dependency>
 
         <!-- Vaadin - Data provider Spring Data -->
@@ -568,7 +568,7 @@
                 <plugin>
                     <groupId>com.diffplug.spotless</groupId>
                     <artifactId>spotless-maven-plugin</artifactId>
-                    <version>3.8.0</version>
+                    <version>3.9.0</version>
                 </plugin>
                 <plugin>
                     <groupId>org.jacoco</groupId>
