@@ -3,7 +3,7 @@
 # docker build -t nroduit/viewer-hub:latest -f Dockerfile .
 
 # Based on build image containing maven and jdk
-FROM maven:3.9-eclipse-temurin-25-noble AS builder
+FROM maven:3-eclipse-temurin-26-noble AS builder
 WORKDIR /app
 
 # Build the Spring Boot application with layers. viewer-hub excludes the OpenCV native
