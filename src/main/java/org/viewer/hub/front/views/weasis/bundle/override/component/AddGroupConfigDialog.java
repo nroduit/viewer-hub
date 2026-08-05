@@ -19,6 +19,7 @@ import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.data.binder.Binder;
 import lombok.Getter;
 import lombok.Setter;
@@ -58,7 +59,6 @@ public class AddGroupConfigDialog extends Dialog {
 	public AddGroupConfigDialog() {
 
 		this.setWidth("30%");
-		this.setHeight("15%");
 		this.setCloseOnEsc(false);
 		this.setCloseOnOutsideClick(false);
 		this.setModality(ModalityMode.STRICT);
@@ -101,6 +101,7 @@ public class AddGroupConfigDialog extends Dialog {
 		inputLayout.addAndExpand(this.packageVersionComboBox, this.launchConfigComboBox, this.groupComboBox);
 		inputLayout.setWidthFull();
 		inputLayout.setSpacing(true);
+		inputLayout.getStyle().set("gap", "1rem");
 		inputLayout.setAlignItems(FlexComponent.Alignment.CENTER);
 
 		// --- Buttons ---
@@ -118,10 +119,18 @@ public class AddGroupConfigDialog extends Dialog {
 		buttonLayout.addAndExpand(this.createButton, cancelButton);
 		buttonLayout.setWidthFull();
 		buttonLayout.setSpacing(true);
+		buttonLayout.getStyle().set("gap", "0.75rem");
 		buttonLayout.setAlignItems(FlexComponent.Alignment.CENTER);
 
+		// Main layout wrapping inputs and buttons, sized to fit its content
+		VerticalLayout mainLayout = new VerticalLayout(inputLayout, buttonLayout);
+		mainLayout.setPadding(false);
+		mainLayout.setSpacing(true);
+		mainLayout.getStyle().set("gap", "1.25rem");
+		mainLayout.setWidthFull();
+
 		// -- Add components ---
-		this.add(inputLayout, buttonLayout);
+		this.add(mainLayout);
 	}
 
 }

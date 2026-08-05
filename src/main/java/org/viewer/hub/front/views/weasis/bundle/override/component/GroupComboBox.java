@@ -11,8 +11,6 @@
 
 package org.viewer.hub.front.views.weasis.bundle.override.component;
 
-import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeLabel;
@@ -36,15 +34,15 @@ public class GroupComboBox extends HorizontalLayout {
 
 	private ComboBox<TargetEntity> comboBox;
 
-	private Button iconButton;
-
 	public GroupComboBox() {
 		buildComponents(null);
 	}
 
 	public GroupComboBox(Set<TargetEntity> groups, TargetEntity selectedGroup) {
-		this.getStyle().set("display", "inline-block");
+		this.getStyle().set("display", "inline-flex").set("align-items", "center");
 		this.setWidthFull();
+		this.setSpacing(false);
+		this.setPadding(false);
 
 		buildComponents(selectedGroup);
 
@@ -56,7 +54,9 @@ public class GroupComboBox extends HorizontalLayout {
 	}
 
 	/**
-	 * Build comboBox and icon button
+	 * Build comboBox with the group icon displayed as a prefix inside the input field, so
+	 * it stays naturally aligned with the input regardless of the presence of a label
+	 * above it
 	 * @param selectedGroup If a group is already selected
 	 */
 	private void buildComponents(TargetEntity selectedGroup) {
@@ -66,24 +66,21 @@ public class GroupComboBox extends HorizontalLayout {
 		this.comboBox.setItemLabelGenerator(TargetEntity::getName);
 
 		// Renderer
-		this.comboBox.setRenderer(new ComponentRenderer<Component, TargetEntity>(item -> {
+		this.comboBox.setRenderer(new ComponentRenderer<>(item -> {
 			Div div = new Div();
 			NativeLabel l = new NativeLabel(item.getName());
 			div.add(retrieveGroupIcon(item), l);
 			return div;
 		}));
 
-		// Build icon button
-		this.iconButton = selectedGroup != null ? new Button(retrieveGroupIcon(selectedGroup))
-				: new Button(new Icon(VaadinIcon.QUESTION));
+		// Prefix icon displayed inside the ComboBox input field
+		this.comboBox.setPrefixComponent(
+				selectedGroup != null ? retrieveGroupIcon(selectedGroup) : new Icon(VaadinIcon.QUESTION));
 
 		// Listener
-		this.comboBox.addValueChangeListener(event -> {
-			this.iconButton.setIcon(retrieveGroupIcon(event.getValue()));
-			this.iconButton.setText("");
-		});
+		this.comboBox.addValueChangeListener(event -> this.comboBox.setPrefixComponent(
+				event.getValue() != null ? retrieveGroupIcon(event.getValue()) : new Icon(VaadinIcon.QUESTION)));
 
-		this.add(iconButton);
 		this.add(comboBox);
 	}
 
@@ -110,15 +107,13 @@ public class GroupComboBox extends HorizontalLayout {
 			icon = new Icon(VaadinIcon.QUESTION);
 			icon.setColor("grey");
 		}
-		icon.getStyle().set("padding", "0.1875rem 0.375rem");
+		icon.setSize("1.4em");
 		return icon;
 	}
 
 	public void setLabel(String label) {
 		if (StringUtils.isNotBlank(label)) {
 			comboBox.setLabel(label);
-			iconButton.getStyle().set("margin-top", "12%");
-			iconButton.getStyle().set("margin-right", "-3%");
 		}
 	}
 

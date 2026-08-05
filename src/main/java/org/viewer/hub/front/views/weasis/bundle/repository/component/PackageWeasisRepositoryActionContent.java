@@ -30,11 +30,25 @@ public class PackageWeasisRepositoryActionContent extends HorizontalLayout {
 
 	public static final String TOOLTIP_DOWNLOAD_VERSION = "Download this version";
 
+	// Harmonized size for the action icons (delete / download)
+	public static final String ACTION_ICON_SIZE = "1.25em";
+
 	// View
 	private final WeasisRepositoryView weasisRepositoryView;
 
 	public PackageWeasisRepositoryActionContent(WeasisRepositoryView weasisRepositoryView) {
 		this.weasisRepositoryView = weasisRepositoryView;
+	}
+
+	/**
+	 * Build an icon for the action buttons with a harmonized size
+	 * @param vaadinIcon Icon to build
+	 * @return Icon built
+	 */
+	private static Icon createActionIcon(VaadinIcon vaadinIcon) {
+		Icon icon = new Icon(vaadinIcon);
+		icon.setSize(ACTION_ICON_SIZE);
+		return icon;
 	}
 
 	/**
@@ -46,8 +60,8 @@ public class PackageWeasisRepositoryActionContent extends HorizontalLayout {
 			if (weasisAssetModel.isAlreadyInstalled()) {
 				// Button Delete
 				Button buttonRemove = new Button();
-				buttonRemove.getElement().setAttribute("theme", "icon-button primary error");
-				buttonRemove.setIcon(new Icon(VaadinIcon.TRASH));
+				buttonRemove.getElement().setAttribute("theme", "icon-button error");
+				buttonRemove.setIcon(createActionIcon(VaadinIcon.TRASH));
 				this.weasisRepositoryView.addActionButtonRemoveClickListener(buttonRemove, weasisAssetModel);
 				UIUtil.setTooltip(buttonRemove, TOOLTIP_REMOVE_VERSION);
 				this.add(buttonRemove);
@@ -55,8 +69,8 @@ public class PackageWeasisRepositoryActionContent extends HorizontalLayout {
 			else {
 				// Button download
 				Button buttonDownload = new Button();
-				buttonDownload.getElement().setAttribute("theme", "icon-button primary tertiary");
-				buttonDownload.setIcon(new Icon(VaadinIcon.DOWNLOAD));
+				buttonDownload.getElement().setAttribute("theme", "icon-button primary");
+				buttonDownload.setIcon(createActionIcon(VaadinIcon.DOWNLOAD));
 				this.weasisRepositoryView.addActionButtonImportClickListener(buttonDownload, weasisAssetModel);
 				UIUtil.setTooltip(buttonDownload, TOOLTIP_DOWNLOAD_VERSION);
 				this.add(buttonDownload);

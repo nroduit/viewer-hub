@@ -13,6 +13,7 @@ package org.viewer.hub.front.views.weasis.bundle.override;
 
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.grid.contextmenu.GridContextMenu;
 import com.vaadin.flow.component.grid.contextmenu.GridMenuItem;
 import com.vaadin.flow.component.icon.Icon;
@@ -75,6 +76,8 @@ public class OverrideView extends AbstractView {
 	private Button refreshGridButton;
 
 	private Button createNewGroupConfigButton;
+
+	private Button deleteMappingMinimalVersionButton;
 
 	private PackageOverrideGrid packageOverrideGrid;
 
@@ -182,14 +185,18 @@ public class OverrideView extends AbstractView {
 		// Refresh button
 		this.refreshGridButton = new Button("Refresh", new Icon(VaadinIcon.REFRESH));
 		this.refreshGridButton.addClickListener(buttonClickEvent -> this.overrideDataProvider.refreshAll());
-		this.refreshGridButton.setMinWidth("50%");
 		this.refreshGridButton.getElement().getThemeList().add("primary");
 
 		// Create new group config
 		this.createNewGroupConfigButton = new Button("Create new group config", new Icon(VaadinIcon.PLUS));
 		this.createNewGroupConfigButton.addClickListener(buttonClickEvent -> this.addNewGroupConfigListener());
-		this.createNewGroupConfigButton.setMinWidth("50%");
 		this.createNewGroupConfigButton.getElement().getThemeList().add("primary");
+
+		// Delete mapping-minimal-version.json file stored in S3
+		this.deleteMappingMinimalVersionButton = new Button("Delete compatibility file", new Icon(VaadinIcon.TRASH));
+		this.deleteMappingMinimalVersionButton
+			.addClickListener(buttonClickEvent -> this.deleteMappingMinimalVersionListener());
+		this.deleteMappingMinimalVersionButton.getElement().getThemeList().add("error primary");
 	}
 
 	private ValueProvider<OverrideConfigEntity, GroupComboBox> createComboBoxGroupValueProvider() {
@@ -365,29 +372,68 @@ public class OverrideView extends AbstractView {
 	}
 
 	/**
+	 * Display a warning confirmation popup and delete the mapping-minimal-version.json
+	 * file stored in S3 if confirmed
+	 */
+	private void deleteMappingMinimalVersionListener() {
+		ConfirmDialog confirmDialog = new ConfirmDialog();
+		confirmDialog.setHeader("Delete compatibility file");
+		confirmDialog.setText("Are you sure you want to delete the file mapping-minimal-version.json stored in S3? "
+				+ "This action is irreversible and may impact the version resolution of Weasis packages.");
+
+		confirmDialog.setCancelable(true);
+		confirmDialog.setCancelText("Cancel");
+
+		confirmDialog.setConfirmText("Delete");
+		confirmDialog.setConfirmButtonTheme("error primary");
+		confirmDialog.addConfirmListener(event -> {
+			try {
+				this.overrideLogic.deleteMappingMinimalVersionFile();
+				this.displayMessage(
+						new Message(MessageLevel.INFO, MessageFormat.TEXT,
+								"File mapping-minimal-version.json has been deleted"),
+						MessageType.NOTIFICATION_MESSAGE);
+			}
+			catch (Exception e) {
+				this.displayMessage(
+						new Message(MessageLevel.ERROR, MessageFormat.TEXT,
+								"Issue when deleting file mapping-minimal-version.json"),
+						MessageType.NOTIFICATION_MESSAGE);
+			}
+		});
+
+		confirmDialog.open();
+	}
+
+	/**
 	 * Add components in the view
 	 */
 	private void addComponentsView() {
+		this.getStyle().set("display", "flex");
+		this.getStyle().set("flex-direction", "column");
 
-		// Upload
+		this.packageVersionUpload.getStyle().set("flex-shrink", "0");
 		this.add(this.packageVersionUpload);
-		// Grid
+
+		this.packageOverrideGrid.getStyle().set("flex-grow", "1");
+		this.packageOverrideGrid.getStyle().set("min-height", "0");
 		this.add(this.packageOverrideGrid);
+
+		// Buttons: fixed to their natural height, never shrunk, pinned to the bottom,
+		// sharing equally the full width of the grid above
+		HorizontalLayout buttonLayout = new HorizontalLayout(this.refreshGridButton, this.createNewGroupConfigButton,
+				this.deleteMappingMinimalVersionButton);
+		buttonLayout.getStyle().set("flex-shrink", "0");
+		buttonLayout.getStyle().set("margin-top", "8px");
+		buttonLayout.setWidthFull();
+		buttonLayout.setSpacing(true);
+		buttonLayout.setFlexGrow(1, this.refreshGridButton, this.createNewGroupConfigButton,
+				this.deleteMappingMinimalVersionButton);
+		this.add(buttonLayout);
 
 		this.setSizeFull();
 		this.setWidthFull();
-
-		// Buttons
-		HorizontalLayout buttonLayout = new HorizontalLayout(this.refreshGridButton, this.createNewGroupConfigButton);
-		buttonLayout.setWidthFull();
-		this.add(buttonLayout);
 	}
-
-	// @Override
-	// protected void onAttach(AttachEvent attachEvent) {
-	// super.onAttach(attachEvent);
-	// ui = attachEvent.getUI();
-	// }
 
 	// TODO: refresh not working
 	public void clearUploadedFileAndRefresh() {

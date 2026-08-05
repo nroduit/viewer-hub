@@ -232,8 +232,10 @@ class PackageServiceImplTest {
 				"resources/packages/weasis/mapping-minimal-version.json");
 		Mockito.when(this.s3Service.retrieveS3KeysFromPrefix(any()))
 			.thenReturn(Set.of("resources/packages/weasis/package/4.1.0-QUALIFIER/test"));
-		// Fresh stream per call: the refresh now reads the <version>/current build pointer in
-		// addition to the mapping-minimal-version.json, so a single (soon-closed) stream would be
+		// Fresh stream per call: the refresh now reads the <version>/current build
+		// pointer in
+		// addition to the mapping-minimal-version.json, so a single (soon-closed) stream
+		// would be
 		// consumed twice.
 		Mockito.when(this.s3Service.retrieveS3Object(any()))
 			.thenAnswer(invocation -> new FileInputStream(
@@ -433,6 +435,42 @@ class PackageServiceImplTest {
 
 			// Test service
 			assertThat(this.packageService.isImportCoherent(fileData)).isTrue();
+		}
+	}
+
+	@Test
+	void when_compatibilityFileHasVersionGreaterThanVersionToUpload_shouldReturnFalse() throws IOException {
+		ReflectionTestUtils.setField(this.packageService, "viewerHubResourcesPackagesWeasisMappingMinimalVersionPath",
+				"test");
+
+		// OverrideConfigEntity: version being uploaded is 4.5.2-MGR
+		OverrideConfigEntity overrideConfigEntity = new OverrideConfigEntity();
+		WeasisPropertyEntity weasisPropertyEntity = new WeasisPropertyEntity();
+		weasisPropertyEntity.setCode("weasis.version");
+		weasisPropertyEntity.setValue("4.5.2-MGR");
+		overrideConfigEntity.setWeasisPropertyEntities(List.of(weasisPropertyEntity));
+
+		// MinimalReleaseVersions: contains a version (4.6.0) greater than the version to
+		// upload
+		MinimalReleaseVersion minimalReleaseVersionBase = new MinimalReleaseVersion();
+		minimalReleaseVersionBase.setReleaseVersion("4.5.2");
+		minimalReleaseVersionBase.setMinimalVersion("4.5.0");
+		MinimalReleaseVersion minimalReleaseVersionGreater = new MinimalReleaseVersion();
+		minimalReleaseVersionGreater.setReleaseVersion("4.6.0");
+		minimalReleaseVersionGreater.setMinimalVersion("4.6.0");
+		List<MinimalReleaseVersion> minimalReleaseVersions = List.of(minimalReleaseVersionBase,
+				minimalReleaseVersionGreater);
+
+		// Built inputStream
+		try (InputStream fileData = buildFileData(overrideConfigEntity, minimalReleaseVersions)) {
+
+			// Mock: version not already installed on server
+			Mockito.when(this.packageVersionRepository.findByVersionNumberAndQualifier(Mockito.any(), Mockito.any()))
+				.thenReturn(null);
+
+			// Test service: should be incoherent as a version in the compatibility
+			// file (4.6.0) is greater than the version being uploaded (4.5.2-MGR)
+			assertThat(this.packageService.isImportCoherent(fileData)).isFalse();
 		}
 	}
 

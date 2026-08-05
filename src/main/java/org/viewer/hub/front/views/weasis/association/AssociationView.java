@@ -63,7 +63,7 @@ import java.util.Set;
 public class AssociationView extends AbstractView {
 
 	@Serial
-    private static final long serialVersionUID = 5648280472926050104L;
+	private static final long serialVersionUID = 5648280472926050104L;
 
 	public static final String ROUTE = "/association";
 

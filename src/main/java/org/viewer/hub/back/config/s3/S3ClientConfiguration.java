@@ -59,10 +59,14 @@ public class S3ClientConfiguration {
 			.credentialsProvider(StaticCredentialsProvider
 				.create(AwsBasicCredentials.create(this.s3ClientConfigurationProperties.getAccessKeyId(),
 						this.s3ClientConfigurationProperties.getSecretAccessKey())))
-			// WHEN_SUPPORTED (instead of WHEN_REQUIRED): the SDK computes a checksum on every upload
-			// and validates it on every download, so a truncated/corrupted transfer is detected
-			// instead of silently stored or served. Note: this adds x-amz-checksum-* handling on the
-			// wire - verify against the target MinIO/S3 version; revert to WHEN_REQUIRED if the store
+			// WHEN_SUPPORTED (instead of WHEN_REQUIRED): the SDK computes a checksum on
+			// every upload
+			// and validates it on every download, so a truncated/corrupted transfer is
+			// detected
+			// instead of silently stored or served. Note: this adds x-amz-checksum-*
+			// handling on the
+			// wire - verify against the target MinIO/S3 version; revert to WHEN_REQUIRED
+			// if the store
 			// rejects the checksum headers.
 			.requestChecksumCalculation(RequestChecksumCalculation.WHEN_SUPPORTED)
 			.responseChecksumValidation(ResponseChecksumValidation.WHEN_SUPPORTED)

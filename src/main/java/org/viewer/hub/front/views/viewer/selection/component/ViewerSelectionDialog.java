@@ -43,16 +43,19 @@ import java.util.Set;
 public class ViewerSelectionDialog extends Dialog {
 
 	@Getter
-    private Button createButton;
+	private Button createButton;
+
 	@Getter
 	private Button cancelButton;
 
 	private MultiSelectComboBox<ModalityType> modalityField;
+
 	private Select<String> archiveField;
+
 	private Select<ViewerType> viewerField;
 
-    @Getter
-    Binder<ViewerSelectionEntity> binder;
+	@Getter
+	Binder<ViewerSelectionEntity> binder;
 
 	private final ViewerSelectionLogic viewerSelectionLogic;
 
@@ -60,8 +63,7 @@ public class ViewerSelectionDialog extends Dialog {
 	 * Constructor
 	 */
 	public ViewerSelectionDialog(final ViewerSelectionLogic viewerSelectionLogic,
-								 final ViewerSelectionView viewerSelectionView,
-								 final ArrayList<String> archives) {
+			final ViewerSelectionView viewerSelectionView, final ArrayList<String> archives) {
 		this.viewerSelectionLogic = viewerSelectionLogic;
 
 		// Dialog properties
@@ -112,16 +114,16 @@ public class ViewerSelectionDialog extends Dialog {
 
 		// --- Binders ---
 		this.binder.forField(modalityField)
-				.withValidator(modalities -> modalities != null && !modalities.isEmpty(),
-						"At least one modality must be selected")
-				.bind(entity -> entity.getModalities() != null ? new HashSet<>(entity.getModalities()) : Set.of(),
-						(entity, value) -> entity.setModalities(new ArrayList<>(value)));
+			.withValidator(modalities -> modalities != null && !modalities.isEmpty(),
+					"At least one modality must be selected")
+			.bind(entity -> entity.getModalities() != null ? new HashSet<>(entity.getModalities()) : Set.of(),
+					(entity, value) -> entity.setModalities(new ArrayList<>(value)));
 		this.binder.forField(archiveField)
-				.withValidator(Objects::nonNull, "Archive is mandatory")
-				.bind(ViewerSelectionEntity::getArchive, ViewerSelectionEntity::setArchive);
+			.withValidator(Objects::nonNull, "Archive is mandatory")
+			.bind(ViewerSelectionEntity::getArchive, ViewerSelectionEntity::setArchive);
 		this.binder.forField(viewerField)
-				.withValidator(Objects::nonNull, "Viewer is mandatory")
-				.bind(ViewerSelectionEntity::getViewer, ViewerSelectionEntity::setViewer);
+			.withValidator(Objects::nonNull, "Viewer is mandatory")
+			.bind(ViewerSelectionEntity::getViewer, ViewerSelectionEntity::setViewer);
 
 		// --- Buttons ---
 		// Create button

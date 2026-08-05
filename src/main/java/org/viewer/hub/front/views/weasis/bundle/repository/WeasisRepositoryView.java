@@ -79,7 +79,7 @@ public class WeasisRepositoryView extends AbstractView {
 		// Refresh button
 		this.refreshGridButton = new Button("Refresh", new Icon(VaadinIcon.REFRESH));
 		this.refreshGridButton.addClickListener(buttonClickEvent -> this.weasisAssetDataProvider.refreshAll());
-		this.refreshGridButton.setSizeFull();
+		this.refreshGridButton.setWidthFull();
 
 		this.refreshGridButton.getElement().getThemeList().add("primary");
 	}
@@ -88,12 +88,19 @@ public class WeasisRepositoryView extends AbstractView {
 	 * Add components in the view
 	 */
 	private void addComponentsView() {
-		// Grid
+		this.getStyle().set("display", "flex");
+		this.getStyle().set("flex-direction", "column");
+
+		// Grid: grow to take all remaining space (min-height 0 allows it to
+		// shrink below its content size instead of overflowing the flex container)
+		this.packageWeasisRepositoryGrid.getStyle().set("flex-grow", "1");
+		this.packageWeasisRepositoryGrid.getStyle().set("min-height", "0");
 		this.add(this.packageWeasisRepositoryGrid);
 
-		// Buttons
+		// Buttons: fixed to their natural height, never shrunk, pinned to the bottom
 		HorizontalLayout buttonLayout = new HorizontalLayout(this.refreshGridButton);
-		buttonLayout.getStyle().set("margin-top", "70px");
+		buttonLayout.getStyle().set("flex-shrink", "0");
+		buttonLayout.getStyle().set("margin-top", "8px");
 		buttonLayout.setWidthFull();
 		this.add(buttonLayout);
 
