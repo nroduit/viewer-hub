@@ -475,9 +475,10 @@ public class PackageServiceImpl implements PackageService {
 		// Check if a packageVersionEntity is already present in the database
 		if (StringUtils.isNotBlank(versionToImport)) {
 			isImportCoherentVersionNotAlreadyInstalledOnServer = versionToImport.contains(StringUtil.HYPHEN)
-					? packageVersionRepository.findByVersionNumberAndQualifier(
-							versionToImport.split(StringUtil.HYPHEN)[0],
-							"%s%s".formatted(StringUtil.HYPHEN, versionToImport.split(StringUtil.HYPHEN)[1])) == null
+					? packageVersionRepository
+						.findByVersionNumberAndQualifier(versionToImport.split(StringUtil.HYPHEN)[0],
+								"%s%s".formatted(StringUtil.HYPHEN, versionToImport.split(StringUtil.HYPHEN)[1]))
+						.isEmpty()
 					: packageVersionRepository.findByVersionNumber(versionToImport) == null;
 		}
 
@@ -1073,7 +1074,8 @@ public class PackageServiceImpl implements PackageService {
 	private void loadS3ConfigurationPropertiesInDb(Set<String> availableWeasisPackageVersions) {
 		// Retrieve default launch_config and target
 		LaunchConfigEntity defaultLaunchConfig = this.launchConfigRepository
-			.findByNameIgnoreCase(LaunchConfigType.DEFAULT.getCode());
+			.findOptionalByNameIgnoreCase(LaunchConfigType.DEFAULT.getCode())
+			.orElse(null);
 		TargetEntity defaultTarget = this.targetService.retrieveTargetByName(TargetType.DEFAULT.getCode());
 		// Loop on folder paths
 		availableWeasisPackageVersions.forEach(availableVersion -> {
@@ -1254,7 +1256,8 @@ public class PackageServiceImpl implements PackageService {
 
 		// Retrieve the launch config associated to the parsing of the file name
 		if (launchConfigName != null) {
-			launchConfigFound = this.launchConfigRepository.findByNameIgnoreCase(launchConfigName);
+			launchConfigFound = this.launchConfigRepository.findOptionalByNameIgnoreCase(launchConfigName)
+				.orElse(null);
 		}
 		return launchConfigFound;
 	}
@@ -1610,7 +1613,7 @@ public class PackageServiceImpl implements PackageService {
 				: null;
 		String versionNumber = version.contains(StringUtil.HYPHEN)
 				? version.substring(0, version.indexOf(StringUtil.HYPHEN)) : version;
-		return this.packageVersionRepository.findByVersionNumberAndQualifier(versionNumber, qualifier);
+		return this.packageVersionRepository.findByVersionNumberAndQualifier(versionNumber, qualifier).orElse(null);
 	}
 
 }
