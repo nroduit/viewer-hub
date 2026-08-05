@@ -52,6 +52,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -312,7 +313,7 @@ class PackageServiceImplTest {
 
 			// Mock: version already installed on server
 			Mockito.when(this.packageVersionRepository.findByVersionNumberAndQualifier(Mockito.any(), Mockito.any()))
-				.thenReturn(new PackageVersionEntity());
+				.thenReturn(Optional.of(new PackageVersionEntity()));
 
 			// Test service
 			assertThat(this.packageService.isImportCoherent(fileData)).isFalse();
@@ -339,7 +340,7 @@ class PackageServiceImplTest {
 
 			// Mock: version already installed on server
 			Mockito.when(this.packageVersionRepository.findByVersionNumberAndQualifier(Mockito.any(), Mockito.any()))
-				.thenReturn(null);
+				.thenReturn(Optional.empty());
 
 			// Test service
 			assertThat(this.packageService.isImportCoherent(fileData)).isFalse();
@@ -373,7 +374,7 @@ class PackageServiceImplTest {
 
 			// Mock: version not already installed on server
 			Mockito.when(this.packageVersionRepository.findByVersionNumberAndQualifier(Mockito.any(), Mockito.any()))
-				.thenReturn(null);
+				.thenReturn(Optional.empty());
 			// Mock: retrieve previous versions
 			List<MinimalReleaseVersion> list = new ArrayList<>();
 			MinimalReleaseVersion minimalReleaseVersion362 = new MinimalReleaseVersion();
@@ -423,7 +424,7 @@ class PackageServiceImplTest {
 
 			// Mock: version not already installed on server
 			Mockito.when(this.packageVersionRepository.findByVersionNumberAndQualifier(Mockito.any(), Mockito.any()))
-				.thenReturn(null);
+				.thenReturn(Optional.empty());
 			// Mock: retrieve previous versions
 			List<MinimalReleaseVersion> list = new ArrayList<>();
 			list.add(minimalReleaseVersion362);
@@ -466,7 +467,7 @@ class PackageServiceImplTest {
 
 			// Mock: version not already installed on server
 			Mockito.when(this.packageVersionRepository.findByVersionNumberAndQualifier(Mockito.any(), Mockito.any()))
-				.thenReturn(null);
+				.thenReturn(Optional.empty());
 
 			// Test service: should be incoherent as a version in the compatibility
 			// file (4.6.0) is greater than the version being uploaded (4.5.2-MGR)

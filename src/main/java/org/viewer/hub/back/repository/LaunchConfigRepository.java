@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2022-2025 Weasis Team and other contributors.
+ *  Copyright (c) 2022-2026 Weasis Team and other contributors.
  *
  *  This program and the accompanying materials are made available under the terms of the Eclipse
  *  Public License 2.0 which is available at https://www.eclipse.org/legal/epl-2.0, or the Apache
@@ -15,6 +15,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.viewer.hub.back.entity.LaunchConfigEntity;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Repository for the entity Launch Config.
@@ -34,6 +35,13 @@ public interface LaunchConfigRepository extends JpaRepository<LaunchConfigEntity
 	 * @return config entity found
 	 */
 	LaunchConfigEntity findByNameIgnoreCase(String configName);
+
+	/**
+	 * Find config entity by name ignoring case: return an optional
+	 * @param configName config Name
+	 * @return optional config entity found
+	 */
+	Optional<LaunchConfigEntity> findOptionalByNameIgnoreCase(String configName);
 
 	/**
 	 * Check if the LaunchConfig corresponding to the name in parameter exists
