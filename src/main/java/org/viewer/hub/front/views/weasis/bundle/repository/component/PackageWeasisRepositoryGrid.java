@@ -68,7 +68,6 @@ public class PackageWeasisRepositoryGrid extends Grid<WeasisAssetModel> {
 
 		// Set size for the grid
 		this.setWidthFull();
-		this.setHeightFull();
 
 		// Themes of the grid
 		this.getElement().setAttribute("theme", "no-border row-stripes");
@@ -116,13 +115,6 @@ public class PackageWeasisRepositoryGrid extends Grid<WeasisAssetModel> {
 		// Filters
 		HeaderRow filterRow = this.appendHeaderRow();
 		this.weasisAssetFilter = new WeasisAssetFilter();
-
-		// Set size for the grid
-		this.setWidthFull();
-		this.setHeightFull();
-
-		// Themes of the grid
-		this.getElement().setAttribute("theme", "no-border row-stripes");
 
 		// Artifact name filter
 		this.createArtifactNameFilter(artifactNameColumn, filterRow);
@@ -269,14 +261,14 @@ public class PackageWeasisRepositoryGrid extends Grid<WeasisAssetModel> {
 	private Icon createStatusIcon(boolean isAlreadyInstalled) {
 		Icon icon;
 		if (isAlreadyInstalled) {
-			icon = VaadinIcon.CHECK.create();
-			icon.getElement().getThemeList().add("badge success");
+			icon = VaadinIcon.CHECK_CIRCLE.create();
+			icon.setColor("#679436");
 		}
 		else {
-			icon = VaadinIcon.CLOSE_SMALL.create();
-			icon.getElement().getThemeList().add("badge error");
+			icon = VaadinIcon.CLOSE_CIRCLE.create();
+			icon.setColor("#D7572B");
 		}
-		icon.getStyle().set("padding", "0.25rem");
+		icon.setSize("1.5em");
 		return icon;
 	}
 

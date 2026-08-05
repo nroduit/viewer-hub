@@ -58,7 +58,8 @@ public class SecurityConfiguration {
 		http
 			// Disables cross-site request forgery (CSRF) protection for main route and
 			// login
-			.csrf(csrf -> csrf.ignoringRequestMatchers(PathPatternRequestMatcher.withDefaults().matcher(EndPoint.ALL_REMAINING_PATH),
+			.csrf(csrf -> csrf.ignoringRequestMatchers(
+					PathPatternRequestMatcher.withDefaults().matcher(EndPoint.ALL_REMAINING_PATH),
 					PathPatternRequestMatcher.withDefaults().matcher(LOGIN_URL)))
 			.authorizeHttpRequests(authorize -> authorize
 				// TODO: currently no security on these endpoints: find a way for Weasis
@@ -69,19 +70,28 @@ public class SecurityConfiguration {
 						PathPatternRequestMatcher.withDefaults().matcher(EndPoint.DISPLAY_PATH + EndPoint.WEASIS_PATH),
 						PathPatternRequestMatcher.withDefaults()
 							.matcher(EndPoint.DISPLAY_PATH + EndPoint.IHE_INVOKE_IMAGE_DISPLAY_PATH),
-						// PathPatternRequestMatcher.withDefaults().matcher(EndPoint.GROUP_PATH +
+						// PathPatternRequestMatcher.withDefaults().matcher(EndPoint.GROUP_PATH
+						// +
 						// EndPoint.ALL_REMAINING_PATH),
-						PathPatternRequestMatcher.withDefaults().matcher(EndPoint.LAUNCH_CONFIG_PATH + EndPoint.ALL_REMAINING_PATH),
-						PathPatternRequestMatcher.withDefaults().matcher(EndPoint.PREFERENCES_PATH + EndPoint.ALL_REMAINING_PATH),
-						PathPatternRequestMatcher.withDefaults().matcher(EndPoint.MANIFEST_PATH + EndPoint.ALL_REMAINING_PATH),
-						// PathPatternRequestMatcher.withDefaults().matcher(EndPoint.MODULES_PATH +
+						PathPatternRequestMatcher.withDefaults()
+							.matcher(EndPoint.LAUNCH_CONFIG_PATH + EndPoint.ALL_REMAINING_PATH),
+						PathPatternRequestMatcher.withDefaults()
+							.matcher(EndPoint.PREFERENCES_PATH + EndPoint.ALL_REMAINING_PATH),
+						PathPatternRequestMatcher.withDefaults()
+							.matcher(EndPoint.MANIFEST_PATH + EndPoint.ALL_REMAINING_PATH),
+						// PathPatternRequestMatcher.withDefaults().matcher(EndPoint.MODULES_PATH
+						// +
 						// EndPoint.ALL_REMAINING_PATH),
-						PathPatternRequestMatcher.withDefaults().matcher(EndPoint.OVERRIDE_CONFIG_PATH + EndPoint.ALL_REMAINING_PATH),
-						PathPatternRequestMatcher.withDefaults().matcher(EndPoint.STATISTIC_PATH + EndPoint.ALL_REMAINING_PATH),
-						// PathPatternRequestMatcher.withDefaults().matcher(EndPoint.TARGET_PATH +
+						PathPatternRequestMatcher.withDefaults()
+							.matcher(EndPoint.OVERRIDE_CONFIG_PATH + EndPoint.ALL_REMAINING_PATH),
+						PathPatternRequestMatcher.withDefaults()
+							.matcher(EndPoint.STATISTIC_PATH + EndPoint.ALL_REMAINING_PATH),
+						// PathPatternRequestMatcher.withDefaults().matcher(EndPoint.TARGET_PATH
+						// +
 						// EndPoint.ALL_REMAINING_PATH),
 						// Resources for weasis
-						PathPatternRequestMatcher.withDefaults().matcher(EndPoint.WEASIS_PATH + EndPoint.ALL_REMAINING_PATH))
+						PathPatternRequestMatcher.withDefaults()
+							.matcher(EndPoint.WEASIS_PATH + EndPoint.ALL_REMAINING_PATH))
 				.permitAll()
 				.requestMatchers(EndpointRequest.to(ShutdownEndpoint.class))
 				.denyAll()

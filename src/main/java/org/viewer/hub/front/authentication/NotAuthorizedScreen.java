@@ -34,7 +34,8 @@ public class NotAuthorizedScreen extends FlexLayout {
 	// Theme
 	private final String THEME_COLOR_KEY = "theme-variant";
 
-	// Aura selects light/dark via the CSS color-scheme property (light-dark()), not the Lumo
+	// Aura selects light/dark via the CSS color-scheme property (light-dark()), not the
+	// Lumo
 	// "theme" attribute.
 	private static final String DARK = "dark";
 
@@ -57,9 +58,7 @@ public class NotAuthorizedScreen extends FlexLayout {
 			.executeJs("return localStorage.getItem($0)", this.THEME_COLOR_KEY)
 			.then(String.class, themeColor -> {
 				if (DARK.equals(themeColor) || LIGHT.equals(themeColor)) {
-					UI.getCurrent()
-						.getPage()
-						.executeJs("document.documentElement.style.colorScheme = $0", themeColor);
+					UI.getCurrent().getPage().executeJs("document.documentElement.style.colorScheme = $0", themeColor);
 					UI.getCurrent()
 						.getPage()
 						.executeJs("localStorage.setItem($0, $1)", this.THEME_COLOR_KEY, themeColor);

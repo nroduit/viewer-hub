@@ -56,8 +56,10 @@ public class WebConfiguration implements WebMvcConfigurer {
 
 	@Override
 	public void configureMessageConverters(HttpMessageConverters.ServerBuilder builder) {
-		// The builder is pre-populated with the default converters (String, byte[], JSON, ...);
-		// override the XML one (to keep the XML declaration) and the JSON one (to keep the
+		// The builder is pre-populated with the default converters (String, byte[], JSON,
+		// ...);
+		// override the XML one (to keep the XML declaration) and the JSON one (to keep
+		// the
 		// Jackson 2 enum-by-name behaviour that clients and launch URLs rely on).
 		builder.withXmlConverter(this.jacksonXmlHttpMessageConverter())
 			.withJsonConverter(this.jacksonJsonHttpMessageConverter());
@@ -66,10 +68,11 @@ public class WebConfiguration implements WebMvcConfigurer {
 	/**
 	 * Setup of the json jackson mapper (Jackson 3 / tools.jackson).
 	 * <p>
-	 * Jackson 3 reads/writes enums using {@code toString()} by default; disabling the enum
-	 * {@code *_USING_TO_STRING} features restores the Jackson 2 behaviour of using {@code name()},
-	 * so values such as {@code ViewerType} "WEASIS" keep (de)serializing correctly. Other Jackson 3
-	 * defaults (ISO-8601 dates, discovered modules) are left untouched.
+	 * Jackson 3 reads/writes enums using {@code toString()} by default; disabling the
+	 * enum {@code *_USING_TO_STRING} features restores the Jackson 2 behaviour of using
+	 * {@code name()}, so values such as {@code ViewerType} "WEASIS" keep (de)serializing
+	 * correctly. Other Jackson 3 defaults (ISO-8601 dates, discovered modules) are left
+	 * untouched.
 	 * @return Converter built
 	 */
 	@Bean
@@ -87,9 +90,12 @@ public class WebConfiguration implements WebMvcConfigurer {
 	 */
 	@Bean
 	public JacksonXmlHttpMessageConverter jacksonXmlHttpMessageConverter() {
-		// configureForJackson2() keeps the Jackson 2 serialization defaults (enum-as-name,
-		// dates-as-timestamps, no xsi:nil for null values, ...) so the manifest XML is unchanged.
-		// enable(WRITE_XML_DECLARATION) adds the xml declaration tag to each xml serialization.
+		// configureForJackson2() keeps the Jackson 2 serialization defaults
+		// (enum-as-name,
+		// dates-as-timestamps, no xsi:nil for null values, ...) so the manifest XML is
+		// unchanged.
+		// enable(WRITE_XML_DECLARATION) adds the xml declaration tag to each xml
+		// serialization.
 		XmlMapper mapper = XmlMapper.builder()
 			.configureForJackson2()
 			.enable(XmlWriteFeature.WRITE_XML_DECLARATION)

@@ -28,15 +28,28 @@ import org.springframework.stereotype.Service;
 import org.viewer.hub.back.config.properties.EnvironmentOverrideProperties;
 import org.viewer.hub.back.constant.PropertiesFileName;
 import org.viewer.hub.back.controller.exception.TechnicalException;
-import org.viewer.hub.back.entity.*;
+import org.viewer.hub.back.entity.LaunchConfigEntity;
+import org.viewer.hub.back.entity.OverrideConfigEntity;
+import org.viewer.hub.back.entity.OverrideConfigEntityPK;
+import org.viewer.hub.back.entity.PackageVersionEntity;
+import org.viewer.hub.back.entity.TargetEntity;
+import org.viewer.hub.back.entity.WeasisPropertyEntity;
 import org.viewer.hub.back.enums.LaunchConfigType;
 import org.viewer.hub.back.enums.TargetType;
 import org.viewer.hub.back.enums.WeasisProperties;
 import org.viewer.hub.back.model.version.MinimalReleaseVersion;
 import org.viewer.hub.back.repository.LaunchConfigRepository;
 import org.viewer.hub.back.repository.PackageVersionRepository;
-import org.viewer.hub.back.service.*;
-import org.viewer.hub.back.util.*;
+import org.viewer.hub.back.service.CacheService;
+import org.viewer.hub.back.service.OverrideConfigService;
+import org.viewer.hub.back.service.PackageService;
+import org.viewer.hub.back.service.S3Service;
+import org.viewer.hub.back.service.TargetService;
+import org.viewer.hub.back.util.JacksonUtil;
+import org.viewer.hub.back.util.PackageUtil;
+import org.viewer.hub.back.util.PathUrlUtil;
+import org.viewer.hub.back.util.StringUtil;
+import org.viewer.hub.back.util.VersionUtil;
 import org.viewer.hub.front.views.weasis.bundle.override.component.RefreshPackageGridEvent;
 import software.amazon.awssdk.services.s3.model.DeleteObjectsResponse;
 import software.amazon.awssdk.services.s3.model.PutObjectResponse;
@@ -49,7 +62,16 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -57,7 +79,12 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
-import static org.viewer.hub.back.constant.PropertiesFileName.*;
+import static org.viewer.hub.back.constant.PropertiesFileName.BIN_DIST_WEASIS_PATH;
+import static org.viewer.hub.back.constant.PropertiesFileName.BIN_DIST_WEASIS_RESOURCES_PATH;
+import static org.viewer.hub.back.constant.PropertiesFileName.CONF_FOLDER_NAME;
+import static org.viewer.hub.back.constant.PropertiesFileName.EXT_CONFIG_PROPERTIES_FILENAME;
+import static org.viewer.hub.back.constant.PropertiesFileName.RESOURCES_ZIP_FILE_NAME;
+import static org.viewer.hub.back.constant.PropertiesFileName.VERSION_COMPATIBILITY_FILE_NAME;
 
 @Service
 @Slf4j
@@ -293,7 +320,8 @@ public class PackageServiceImpl implements PackageService {
 		isImportCoherent = isImportCoherentVersionNotAlreadyInstalledOnServer(versionToImport);
 
 		// Incoherent version compatibility file
-		isImportCoherent = isImportCoherent && isImportCoherentVersionCompatibilityFileCoherent(fileData);
+		isImportCoherent = isImportCoherent
+				&& isImportCoherentVersionCompatibilityFileCoherent(fileData, versionToImport);
 
 		return isImportCoherent;
 	}
@@ -302,13 +330,19 @@ public class PackageServiceImpl implements PackageService {
 	 * If the compatibility file has to be imported, check if the version compatibility is
 	 * coherent
 	 * @param fileData File to check
+	 * @param versionToImport Version currently being uploaded
 	 * @return true if the version compatibility is coherent
 	 */
-	private boolean isImportCoherentVersionCompatibilityFileCoherent(InputStream fileData) {
+	private boolean isImportCoherentVersionCompatibilityFileCoherent(InputStream fileData, String versionToImport) {
 		boolean isImportCoherentVersionCompatibilityFileCoherent;
 
 		// Retrieve the version compatibility file in the zip import
 		List<MinimalReleaseVersion> minimalReleaseVersionsFromImport = retrieveMinimalVersionsFromImport(fileData);
+
+		// Check that no version declared in the compatibility file is greater than the
+		// version currently being uploaded
+		isImportCoherentVersionCompatibilityFileCoherent = isImportCoherentVersionCompatibilityNoVersionGreaterThanVersionToImport(
+				versionToImport, minimalReleaseVersionsFromImport);
 
 		// if (shouldReplaceMappingMinimalVersion(mappingMinimalVersionFilePath)){
 		if (shouldReplaceMappingMinimalVersion(null, minimalReleaseVersionsFromImport)) {
@@ -316,8 +350,8 @@ public class PackageServiceImpl implements PackageService {
 			// Check that if there is a version with 4 digits, the base version with 3
 			// digits is declared
 			assert minimalReleaseVersionsFromImport != null;
-			isImportCoherentVersionCompatibilityFileCoherent = isImportCoherentVersionCompatibilityBaseVersion(
-					minimalReleaseVersionsFromImport);
+			isImportCoherentVersionCompatibilityFileCoherent = isImportCoherentVersionCompatibilityFileCoherent
+					&& isImportCoherentVersionCompatibilityBaseVersion(minimalReleaseVersionsFromImport);
 
 			// Case it is a replacement of the file
 			if (this.doesMappingMinimalVersionFileExists()) {
@@ -327,11 +361,40 @@ public class PackageServiceImpl implements PackageService {
 						&& isImportCoherentVersionCompatibilityPreviousVersionsExist(minimalReleaseVersionsFromImport);
 			}
 		}
-		else {
-			isImportCoherentVersionCompatibilityFileCoherent = true;
-		}
 
 		return isImportCoherentVersionCompatibilityFileCoherent;
+	}
+
+	/**
+	 * Check that no version declared in the version compatibility file to import is
+	 * greater than the version currently being uploaded
+	 * @param versionToImport Version currently being uploaded
+	 * @param minimalReleaseVersionsFromImport MinimalReleaseVersions from the import
+	 * @return true if no version declared in the compatibility file is greater than the
+	 * version being uploaded
+	 */
+	private boolean isImportCoherentVersionCompatibilityNoVersionGreaterThanVersionToImport(String versionToImport,
+			List<MinimalReleaseVersion> minimalReleaseVersionsFromImport) {
+		if (StringUtils.isBlank(versionToImport) || minimalReleaseVersionsFromImport == null) {
+			return true;
+		}
+
+		// Remove the qualifier (ex: -MGR) from the version to import in order to only
+		// compare the numeric part of the version
+		String versionToImportWithoutQualifier = versionToImport.contains(StringUtil.HYPHEN)
+				? versionToImport.split(StringUtil.HYPHEN)[0] : versionToImport;
+		ComparableVersion versionToImportComparable = new ComparableVersion(versionToImportWithoutQualifier);
+
+		return minimalReleaseVersionsFromImport.stream()
+			.filter(Objects::nonNull)
+			.map(MinimalReleaseVersion::getReleaseVersion)
+			.filter(Objects::nonNull)
+			// A release version with 4 digits (hotfix) is considered part of its 3
+			// digits base version family for the comparison
+			.map(releaseVersion -> VersionUtil.countDigitsGroups(releaseVersion) == 4
+					? VersionUtil.extract3GroupsDigitsOf4GroupsDigitsVersion(releaseVersion) : releaseVersion)
+			.noneMatch(
+					releaseVersion -> new ComparableVersion(releaseVersion).compareTo(versionToImportComparable) > 0);
 	}
 
 	/**
@@ -841,6 +904,11 @@ public class PackageServiceImpl implements PackageService {
 	 */
 	private boolean doesMappingMinimalVersionFileExists() {
 		return this.s3Service.doesS3KeyExists(this.viewerHubResourcesPackagesWeasisMappingMinimalVersionPath);
+	}
+
+	@Override
+	public void deleteMappingMinimalVersionFile() {
+		this.s3Service.deleteS3Objects(this.viewerHubResourcesPackagesWeasisMappingMinimalVersionPath);
 	}
 
 	/**

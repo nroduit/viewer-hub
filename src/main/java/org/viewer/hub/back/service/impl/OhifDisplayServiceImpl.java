@@ -32,6 +32,7 @@ import org.viewer.hub.back.service.SecurityService;
 import org.viewer.hub.back.util.StringUtil;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 @Service
@@ -173,16 +174,22 @@ public class OhifDisplayServiceImpl implements OhifDisplayService {
 			Set<String> seriesUIDs = ((ArchiveSearchCriteria) searchCriteria).getSeriesUID();
 			// Priority is given to the serie uid (vs the sop instance uid)
 			if (seriesUIDs.size() == 1) {
-				uriComponentsBuilder = uriComponentsBuilder.queryParam(ParamName.OHIF_INITIAL_SERIES_INSTANCE_UID,
-						seriesUIDs.stream().findFirst().get());
+				Optional<String> seriesUID = seriesUIDs.stream().findFirst();
+				if (seriesUID.isPresent()) {
+					uriComponentsBuilder = uriComponentsBuilder.queryParam(ParamName.OHIF_INITIAL_SERIES_INSTANCE_UID,
+							seriesUID.get());
+				}
 			}
 			else {
 				// If available set Ohif initialSopInstanceUID: only if search criteria
 				// has only one SopInstanceUID requested
 				Set<String> sopInstanceUIDs = ((ArchiveSearchCriteria) searchCriteria).getObjectUID();
 				if (sopInstanceUIDs.size() == 1) {
-					uriComponentsBuilder = uriComponentsBuilder.queryParam(ParamName.OHIF_INITIAL_SOP_INSTANCE_UID,
-							sopInstanceUIDs.stream().findFirst().get());
+					Optional<String> sopInstanceUID = sopInstanceUIDs.stream().findFirst();
+					if (sopInstanceUID.isPresent()) {
+						uriComponentsBuilder = uriComponentsBuilder.queryParam(ParamName.OHIF_INITIAL_SOP_INSTANCE_UID,
+								sopInstanceUID.get());
+					}
 				}
 			}
 		}

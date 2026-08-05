@@ -13,6 +13,7 @@ package org.viewer.hub.back.entity;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.AttributeOverrides;
@@ -34,6 +35,7 @@ import java.util.Objects;
  */
 @Entity
 @Table(name = "launch")
+@JsonPropertyOrder({ "config", "preferred", "target", "selection" })
 public class LaunchEntity implements Serializable {
 
 	@Serial

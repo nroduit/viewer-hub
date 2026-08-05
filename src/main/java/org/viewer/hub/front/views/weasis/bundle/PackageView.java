@@ -12,7 +12,6 @@
 package org.viewer.hub.front.views.weasis.bundle;
 
 import com.vaadin.flow.component.Composite;
-import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -53,7 +52,7 @@ public class PackageView extends Composite<VerticalLayout> {
 		this.weasisRepositoryView = weasisRepositoryView;
 
 		VerticalLayout packageLayout = getContent();
-		packageLayout.setHeight(91, Unit.PERCENTAGE);
+		packageLayout.setSizeFull();
 
 		Tab installedTab = new Tab(LineAwesomeIcon.SERVER_SOLID.create(), new Span("Installed"));
 		Tab availableTab = new Tab(LineAwesomeIcon.DOWNLOAD_SOLID.create(), new Span("Available"));
@@ -78,6 +77,7 @@ public class PackageView extends Composite<VerticalLayout> {
 		content.setSizeFull();
 
 		packageLayout.add(tabs, content);
+		packageLayout.expand(content);
 	}
 
 }

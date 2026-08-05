@@ -68,7 +68,6 @@ public class PackageOverrideGrid extends Grid<OverrideConfigEntity> {
 
 		// Set size for the grid
 		this.setWidthFull();
-		this.setHeightFull();
 
 		// Themes of the grid
 		this.getElement().setAttribute("theme", "no-border row-stripes");

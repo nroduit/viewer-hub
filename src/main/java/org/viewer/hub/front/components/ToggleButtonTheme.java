@@ -26,14 +26,16 @@ public class ToggleButtonTheme extends HorizontalLayout {
 
 	private final String THEME_COLOR_KEY = "theme-variant";
 
-	// Aura selects light/dark via the CSS color-scheme property (light-dark()), not the Lumo
+	// Aura selects light/dark via the CSS color-scheme property (light-dark()), not the
+	// Lumo
 	// "theme" attribute. These are the stored and applied color-scheme values.
 	private static final String DARK = "dark";
 
 	private static final String LIGHT = "light";
 
 	public ToggleButtonTheme() {
-		// Keep the theme switch compact so it does not add extra vertical space in the drawer footer.
+		// Keep the theme switch compact so it does not add extra vertical space in the
+		// drawer footer.
 		setPadding(false);
 		setMargin(false);
 		setSpacing(true);

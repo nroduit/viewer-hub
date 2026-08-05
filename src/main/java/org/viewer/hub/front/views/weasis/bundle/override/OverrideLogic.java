@@ -202,4 +202,11 @@ public class OverrideLogic {
 		return this.overrideConfigService.modifyTarget(overrideConfigEntity, targetEntity);
 	}
 
+	/**
+	 * Delete the mapping-minimal-version.json file stored in S3
+	 */
+	public void deleteMappingMinimalVersionFile() {
+		this.packageService.deleteMappingMinimalVersionFile();
+	}
+
 }
