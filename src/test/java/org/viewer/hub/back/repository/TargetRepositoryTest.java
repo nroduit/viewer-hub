@@ -34,7 +34,6 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DataJpaTest
@@ -308,10 +307,11 @@ class TargetRepositoryTest {
 		assertEquals(entityHost.getType(), entity.getType());
 
 		// Retrieve entity: case wrong parameters: wrong type
-		entity = this.repository.findByNameIgnoreCaseAndType("HOST", TargetType.USER);
+		Optional<TargetEntity> optionalEntity = this.repository.findOptionalByNameIgnoreCaseAndType("HOST",
+				TargetType.USER);
 
 		// Test result
-		assertNull(entity);
+		assertTrue(optionalEntity.isEmpty());
 	}
 
 	/**

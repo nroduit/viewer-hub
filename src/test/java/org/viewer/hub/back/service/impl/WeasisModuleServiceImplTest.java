@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2022-2025 Weasis Team and other contributors.
+ *  Copyright (c) 2022-2026 Weasis Team and other contributors.
  *
  *  This program and the accompanying materials are made available under the terms of the Eclipse
  *  Public License 2.0 which is available at https://www.eclipse.org/legal/epl-2.0, or the Apache
@@ -32,6 +32,7 @@ import org.viewer.hub.back.service.ModuleService;
 import java.sql.SQLException;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -73,13 +74,14 @@ class WeasisModuleServiceImplTest {
 		// Module
 		Mockito.when(this.moduleRepositoryMock.findAll()).thenReturn(Collections.singletonList(moduleEntity));
 		// Profile
-		Mockito.when(this.profileRepositoryMock.findByName(Mockito.anyString())).thenReturn(profile);
+		Mockito.when(this.profileRepositoryMock.findOptionalByName(Mockito.anyString()))
+			.thenReturn(Optional.of(profile));
 		// Preference
 		Mockito.when(this.preferenceRepositoryMock.findAll(Mockito.any(Specification.class)))
 			.thenReturn(Collections.singletonList(preferenceEntity));
 		// Target
-		Mockito.when(this.targetRepositoryMock.findByNameIgnoreCase(Mockito.any(String.class)))
-			.thenReturn(targetEntity);
+		Mockito.when(this.targetRepositoryMock.findOptionalByNameIgnoreCase(Mockito.any(String.class)))
+			.thenReturn(Optional.of(targetEntity));
 
 		// Create service
 		this.moduleService = new ModuleServiceImpl(this.preferenceRepositoryMock, this.moduleRepositoryMock,
@@ -97,9 +99,9 @@ class WeasisModuleServiceImplTest {
 		// Test results
 		assertEquals(1, weasisModules.size());
 		Mockito.verify(this.preferenceRepositoryMock, Mockito.times(1)).findAll(Mockito.any(Specification.class));
-		Mockito.verify(this.profileRepositoryMock, Mockito.times(1)).findByName(Mockito.anyString());
+		Mockito.verify(this.profileRepositoryMock, Mockito.times(1)).findOptionalByName(Mockito.anyString());
 		Mockito.verify(this.moduleRepositoryMock, Mockito.times(1)).findAll();
-		Mockito.verify(this.targetRepositoryMock, Mockito.times(1)).findByNameIgnoreCase(Mockito.anyString());
+		Mockito.verify(this.targetRepositoryMock, Mockito.times(1)).findOptionalByNameIgnoreCase(Mockito.anyString());
 		assertEquals(Long.valueOf(1), weasisModules.get(0).getId());
 		assertEquals("ModuleEntity Name", weasisModules.get(0).getName());
 	}
