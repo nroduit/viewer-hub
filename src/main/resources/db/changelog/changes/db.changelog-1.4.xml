@@ -43,4 +43,21 @@
         </addColumn>
     </changeSet>
 
+    <!-- Build stamp of the package folder the properties of an override config have been extracted
+         from. The id of a package version does not change when the version is re-uploaded (only its
+         build_id does), so this column is what allows to detect that the properties stored in db
+         come from a previous build and have to be extracted again from
+         <version>/<build_id>/conf. Nullable: configurations loaded before this change and group
+         configurations created from the front have no build stamp. -->
+    <changeSet author="viewer-hub" id="1.4-3">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="override_config" columnName="build_id"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="override_config">
+            <column name="build_id" type="VARCHAR(255)"/>
+        </addColumn>
+    </changeSet>
+
 </databaseChangeLog>

@@ -32,7 +32,10 @@ import org.viewer.hub.back.service.OverrideConfigService;
 import org.viewer.hub.back.util.PageUtil;
 import org.viewer.hub.front.views.weasis.bundle.override.component.OverrideConfigFilter;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -94,12 +97,78 @@ public class OverrideConfigServiceImpl implements OverrideConfigService {
 	}
 
 	@Override
+	public boolean existOverrideConfigWithVersionConfigTargetAndBuildId(PackageVersionEntity packageVersion,
+			LaunchConfigEntity launchConfig, TargetEntity target, String buildId) {
+		if (packageVersion == null || packageVersion.getId() == null || launchConfig == null
+				|| launchConfig.getId() == null || target == null || target.getId() == null) {
+			return false;
+		}
+		// Null safe comparison: a legacy configuration and a legacy version both have a
+		// null build id and are therefore considered up-to-date
+		return this.overrideConfigRepository
+			.findOptionalByPackageVersionIdAndLaunchConfigIdAndTargetId(packageVersion.getId(), launchConfig.getId(),
+					target.getId())
+			.filter(overrideConfig -> Objects.equals(overrideConfig.getBuildId(), buildId))
+			.isPresent();
+	}
+
+	@Override
+	@Transactional
 	public void saveAll(Set<OverrideConfigEntity> overrideConfigEntities) {
-		// Fill the link between the property and the overrideConfig parent before saving
-		overrideConfigEntities.forEach(o -> o.getWeasisPropertyEntities().forEach(p -> p.setOverrideConfigEntity(o)));
+		if (overrideConfigEntities == null) {
+			return;
+		}
+
+		// Upsert: an OverrideConfigEntity already in db is updated with the properties in
+		// parameter (case of a version re-uploaded with a new build id: the primary key
+		// package version/launch config/target does not change) instead of being inserted
+		// a second time
+		Set<OverrideConfigEntity> entitiesToSave = overrideConfigEntities.stream()
+			.filter(Objects::nonNull)
+			.map(this::refreshExistingOrPrepareNew)
+			.collect(Collectors.toCollection(LinkedHashSet::new));
 
 		// Save
-		this.overrideConfigRepository.saveAll(overrideConfigEntities);
+		this.overrideConfigRepository.saveAll(entitiesToSave);
+	}
+
+	/**
+	 * If the OverrideConfigEntity in parameter is already in db, replace the properties of
+	 * the entity found by the ones in parameter (orphan removal deletes the properties of
+	 * the previous build), otherwise prepare the new entity to be inserted.
+	 * @param overrideConfig OverrideConfigEntity built from the configuration files
+	 * @return the entity to save
+	 */
+	private OverrideConfigEntity refreshExistingOrPrepareNew(OverrideConfigEntity overrideConfig) {
+		OverrideConfigEntity existing = overrideConfig.getPackageVersion() != null
+				&& overrideConfig.getPackageVersion().getId() != null && overrideConfig.getLaunchConfig() != null
+				&& overrideConfig.getLaunchConfig().getId() != null && overrideConfig.getTarget() != null
+				&& overrideConfig.getTarget().getId() != null
+						? this.overrideConfigRepository
+							.findOptionalByPackageVersionIdAndLaunchConfigIdAndTargetId(
+									overrideConfig.getPackageVersion().getId(), overrideConfig.getLaunchConfig().getId(),
+									overrideConfig.getTarget().getId())
+							.orElse(null)
+						: null;
+
+		// Nothing to merge when the entity is not in db yet or when it is already the
+		// managed instance (in that case its properties are the ones to keep)
+		if (existing == null || existing == overrideConfig) {
+			// Fill the link between the property and the overrideConfig parent before
+			// saving
+			overrideConfig.getWeasisPropertyEntities().forEach(p -> p.setOverrideConfigEntity(overrideConfig));
+			return overrideConfig;
+		}
+
+		// Update in place the entity already managed: the properties of the previous
+		// build are removed (orphan removal) and replaced by the new ones
+		existing.setBuildId(overrideConfig.getBuildId());
+		List<WeasisPropertyEntity> propertiesToSet = new ArrayList<>(overrideConfig.getWeasisPropertyEntities());
+		propertiesToSet.forEach(p -> p.setOverrideConfigEntity(existing));
+		existing.getWeasisPropertyEntities().clear();
+		existing.getWeasisPropertyEntities().addAll(propertiesToSet);
+
+		return existing;
 	}
 
 	@Override
@@ -230,6 +299,8 @@ public class OverrideConfigServiceImpl implements OverrideConfigService {
 		overrideConfigEntityModified.setLaunchConfig(overrideConfigEntity.getLaunchConfig());
 		overrideConfigEntityModified.setPackageVersion(overrideConfigEntity.getPackageVersion());
 		overrideConfigEntityModified.setTarget(targetEntity);
+		// Keep the build the properties have been extracted from
+		overrideConfigEntityModified.setBuildId(overrideConfigEntity.getBuildId());
 		OverrideConfigEntityPK overrideConfigEntityPK = new OverrideConfigEntityPK();
 		overrideConfigEntityPK.setPackageVersionId(overrideConfigEntity.getPackageVersion().getId());
 		overrideConfigEntityPK.setLaunchConfigId(overrideConfigEntity.getLaunchConfig().getId());

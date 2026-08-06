@@ -14,6 +14,7 @@ package org.viewer.hub.back.service.impl;
 import jakarta.validation.constraints.NotNull;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -23,9 +24,13 @@ import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.util.ResourceUtils;
 import org.viewer.hub.back.config.properties.EnvironmentOverrideProperties;
 import org.viewer.hub.back.constant.PropertiesFileName;
+import org.viewer.hub.back.entity.LaunchConfigEntity;
 import org.viewer.hub.back.entity.OverrideConfigEntity;
 import org.viewer.hub.back.entity.PackageVersionEntity;
+import org.viewer.hub.back.entity.TargetEntity;
 import org.viewer.hub.back.entity.WeasisPropertyEntity;
+import org.viewer.hub.back.enums.LaunchConfigType;
+import org.viewer.hub.back.enums.TargetType;
 import org.viewer.hub.back.model.version.MinimalReleaseVersion;
 import org.viewer.hub.back.repository.LaunchConfigRepository;
 import org.viewer.hub.back.repository.PackageVersionRepository;
@@ -45,6 +50,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -54,6 +60,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -241,7 +248,13 @@ class PackageServiceImplTest {
 		Mockito.when(this.s3Service.retrieveS3Object(any()))
 			.thenAnswer(invocation -> new FileInputStream(
 					ResourceUtils.getFile("classpath:weasis/mapping-minimal-version.json")));
-		Mockito.when(this.overrideConfigService.existOverrideConfigWithVersionConfigTarget(any(), any(), any()))
+		// Package version present in db: the configuration properties are already
+		// loaded for the build currently published
+		Mockito.when(this.packageVersionRepository.findByVersionNumberAndQualifier(any(), any()))
+			.thenReturn(Optional.of(new PackageVersionEntity()));
+		Mockito
+			.when(this.overrideConfigService.existOverrideConfigWithVersionConfigTargetAndBuildId(any(), any(), any(),
+					any()))
 			.thenReturn(true);
 
 		// Call method
@@ -252,6 +265,190 @@ class PackageServiceImplTest {
 		Mockito.verify(this.overrideConfigService, Mockito.atLeastOnce()).saveAll(anySet());
 		Mockito.verify(this.cacheService, Mockito.atLeastOnce()).removeAllPackageVersion();
 		Mockito.verify(this.cacheService, Mockito.atLeast(1)).putPackageVersion(any(), any());
+	}
+
+	@Test
+	void when_refreshingVersionAlreadyInDbUploadedWithNewBuildId_should_reloadPropertiesFromNewBuildFolder()
+			throws FileNotFoundException {
+		// Init data
+		String version = "4.1.0-MGR";
+		String previousBuildId = "previous-build-id";
+		String newBuildId = "new-build-id";
+		String packagePath = "resources/packages/weasis/package";
+		String mappingMinimalVersionPath = "resources/packages/weasis/mapping-minimal-version.json";
+		String currentBuildPointerKey = "%s/%s/%s".formatted(packagePath, version, PackageUtil.CURRENT_BUILD_POINTER_FILE);
+		// Configuration files of the new build: <version>/<buildId>/conf
+		String newBuildConfigFolderKey = "%s/%s/%s/conf".formatted(packagePath, version, newBuildId);
+		String newBuildDefaultConfigKey = "%s/%s".formatted(newBuildConfigFolderKey,
+				PropertiesFileName.CONFIG_PROPERTIES_FILENAME);
+
+		ReflectionTestUtils.setField(this.packageService, "viewerHubResourcesPackagesWeasisPackagePath", packagePath);
+		ReflectionTestUtils.setField(this.packageService, "viewerHubResourcesPackagesWeasisMappingMinimalVersionPath",
+				mappingMinimalVersionPath);
+
+		// Version already in db: its properties have been loaded from the previous build
+		PackageVersionEntity packageVersionInDb = new PackageVersionEntity();
+		packageVersionInDb.setId(1L);
+		packageVersionInDb.setVersionNumber("4.1.0");
+		packageVersionInDb.setQualifier("-MGR");
+		packageVersionInDb.setBuildId(previousBuildId);
+
+		LaunchConfigEntity defaultLaunchConfig = new LaunchConfigEntity();
+		defaultLaunchConfig.setId(2L);
+		defaultLaunchConfig.setName(LaunchConfigType.DEFAULT.getCode());
+		TargetEntity defaultTarget = new TargetEntity();
+		defaultTarget.setId(3L);
+		defaultTarget.setName(TargetType.DEFAULT.getCode());
+		defaultTarget.setType(TargetType.DEFAULT);
+
+		// Mock
+		Mockito.when(this.packageVersionRepository.findAll()).thenReturn(List.of(packageVersionInDb));
+		Mockito.when(this.packageVersionRepository.findByVersionNumberAndQualifier("4.1.0", "-MGR"))
+			.thenReturn(Optional.of(packageVersionInDb));
+		Mockito.when(this.launchConfigRepository.findOptionalByNameIgnoreCase(LaunchConfigType.DEFAULT.getCode()))
+			.thenReturn(Optional.of(defaultLaunchConfig));
+		Mockito.when(this.targetService.retrieveTargetByName(TargetType.DEFAULT.getCode())).thenReturn(defaultTarget);
+
+		Mockito.when(this.s3Service.doesS3KeyExists(any())).thenReturn(true);
+		Mockito.when(this.s3Service.retrieveS3KeysFromPrefix(any())).thenAnswer(invocation -> {
+			String prefix = invocation.getArgument(0);
+			// Listing of the available versions / listing of the config folder
+			return Objects.equals(prefix, packagePath) ? Set.of("%s/%s/file".formatted(packagePath, version))
+					: Set.of(newBuildDefaultConfigKey);
+		});
+		// Fresh stream per call: <version>/current pointer, mapping-minimal-version.json
+		// and configuration files are all read from S3
+		Mockito.when(this.s3Service.retrieveS3Object(any())).thenAnswer(invocation -> {
+			String key = invocation.getArgument(0);
+			if (Objects.equals(key, currentBuildPointerKey)) {
+				return new ByteArrayInputStream(newBuildId.getBytes(StandardCharsets.UTF_8));
+			}
+			if (Objects.equals(key, mappingMinimalVersionPath)) {
+				return new FileInputStream(ResourceUtils.getFile("classpath:weasis/mapping-minimal-version.json"));
+			}
+			return new ByteArrayInputStream("weasis.name=Weasis new build".getBytes(StandardCharsets.UTF_8));
+		});
+		// The configuration in db has been generated from the previous build
+		Mockito
+			.when(this.overrideConfigService.existOverrideConfigWithVersionConfigTargetAndBuildId(any(), any(), any(),
+					any()))
+			.thenReturn(false);
+
+		// Call method
+		this.packageService.refreshAvailablePackageVersion();
+
+		// Test results: the version in db is pinned on the new build
+		assertThat(packageVersionInDb.getBuildId()).isEqualTo(newBuildId);
+
+		// The existence check takes the new build id into account
+		Mockito.verify(this.overrideConfigService, Mockito.atLeastOnce())
+			.existOverrideConfigWithVersionConfigTargetAndBuildId(Mockito.eq(packageVersionInDb),
+					Mockito.eq(defaultLaunchConfig), Mockito.eq(defaultTarget), Mockito.eq(newBuildId));
+
+		// The properties are extracted again from the folder of the new build and saved
+		@SuppressWarnings("unchecked")
+		ArgumentCaptor<Set<OverrideConfigEntity>> captor = ArgumentCaptor.forClass(Set.class);
+		Mockito.verify(this.overrideConfigService, Mockito.atLeastOnce()).saveAll(captor.capture());
+		Set<OverrideConfigEntity> savedOverrideConfigs = captor.getValue();
+
+		assertThat(savedOverrideConfigs.size()).isEqualTo(1);
+		OverrideConfigEntity savedOverrideConfig = savedOverrideConfigs.iterator().next();
+		assertThat(savedOverrideConfig.getBuildId()).isEqualTo(newBuildId);
+		assertThat(savedOverrideConfig.getPackageVersion()).isEqualTo(packageVersionInDb);
+		assertThat(savedOverrideConfig.getLaunchConfig()).isEqualTo(defaultLaunchConfig);
+		assertThat(savedOverrideConfig.getTarget()).isEqualTo(defaultTarget);
+		assertThat(savedOverrideConfig.getWeasisPropertyEntities().size()).isEqualTo(1);
+		assertThat(savedOverrideConfig.getWeasisPropertyEntities().get(0).getCode()).isEqualTo("weasis.name");
+		assertThat(savedOverrideConfig.getWeasisPropertyEntities().get(0).getValue()).isEqualTo("Weasis new build");
+	}
+
+	@NotNull
+	private OverrideConfigEntity buildOverrideConfigToDelete(String buildId, String launchConfigName,
+			TargetType targetType) {
+		PackageVersionEntity packageVersionEntity = new PackageVersionEntity();
+		packageVersionEntity.setId(1L);
+		packageVersionEntity.setVersionNumber("4.5.0");
+		packageVersionEntity.setQualifier("-TEST");
+		packageVersionEntity.setBuildId(buildId);
+		LaunchConfigEntity launchConfigEntity = new LaunchConfigEntity();
+		launchConfigEntity.setId(2L);
+		launchConfigEntity.setName(launchConfigName);
+		TargetEntity targetEntity = new TargetEntity();
+		targetEntity.setId(3L);
+		targetEntity.setType(targetType);
+
+		OverrideConfigEntity overrideConfigEntity = new OverrideConfigEntity();
+		overrideConfigEntity.setPackageVersion(packageVersionEntity);
+		overrideConfigEntity.setLaunchConfig(launchConfigEntity);
+		overrideConfigEntity.setTarget(targetEntity);
+		return overrideConfigEntity;
+	}
+
+	@Test
+	void when_deletingConfigOfVersionWithBuildId_should_deleteConfigFileInBuildStampedFolder() {
+		// Init data: delete the config 3d of a version published with a build id
+		ReflectionTestUtils.setField(this.packageService, "viewerHubResourcesPackagesWeasisPackagePath",
+				"resources/packages/weasis/package");
+		OverrideConfigEntity overrideConfigEntity = this.buildOverrideConfigToDelete("build-42", "3d",
+				TargetType.DEFAULT);
+
+		// Mock
+		Mockito.when(this.s3Service.deleteS3Objects(any())).thenReturn(CompletableFuture.completedFuture(null));
+
+		// Call method
+		this.packageService.deleteResourcePackageVersion(overrideConfigEntity);
+
+		// Test results: the config file is deleted in the folder of the build currently
+		// published
+		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
+		Mockito.verify(this.s3Service, Mockito.times(1)).deleteS3Objects(captor.capture());
+		assertThat(captor.getValue())
+			.isEqualTo("resources/packages/weasis/package/4.5.0-TEST/build-42/conf/3d.json");
+	}
+
+	@Test
+	void when_deletingConfigOfLegacyVersionWithoutBuildId_should_deleteConfigFileAtTopLevel() {
+		// Init data: legacy version, its files are still at the top level of the version
+		// folder
+		ReflectionTestUtils.setField(this.packageService, "viewerHubResourcesPackagesWeasisPackagePath",
+				"resources/packages/weasis/package");
+		OverrideConfigEntity overrideConfigEntity = this.buildOverrideConfigToDelete(null, "3d", TargetType.DEFAULT);
+
+		// Mock
+		Mockito.when(this.s3Service.deleteS3Objects(any())).thenReturn(CompletableFuture.completedFuture(null));
+
+		// Call method
+		this.packageService.deleteResourcePackageVersion(overrideConfigEntity);
+
+		// Test results
+		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
+		Mockito.verify(this.s3Service, Mockito.times(1)).deleteS3Objects(captor.capture());
+		assertThat(captor.getValue()).isEqualTo("resources/packages/weasis/package/4.5.0-TEST/conf/3d.json");
+	}
+
+	@Test
+	void when_deletingDefaultConfigOfVersion_should_deleteWholeVersionFolder() {
+		// Init data: default launch config + default target: the whole version folder is
+		// deleted, with all its builds and its current pointer
+		ReflectionTestUtils.setField(this.packageService, "viewerHubResourcesPackagesWeasisPackagePath",
+				"resources/packages/weasis/package");
+		OverrideConfigEntity overrideConfigEntity = this.buildOverrideConfigToDelete("build-42",
+				LaunchConfigType.DEFAULT.getCode(), TargetType.DEFAULT);
+
+		// Mock
+		Mockito.when(this.s3Service.deleteS3Objects(any())).thenReturn(CompletableFuture.completedFuture(null));
+
+		// Call method
+		this.packageService.deleteResourcePackageVersion(overrideConfigEntity);
+
+		// Test results
+		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
+		Mockito.verify(this.s3Service, Mockito.times(1)).deleteS3Objects(captor.capture());
+		assertThat(captor.getValue()).isEqualTo("resources/packages/weasis/package/4.5.0-TEST");
+		Mockito.verify(this.overrideConfigService, Mockito.times(1))
+			.deleteAllOverrideConfigEntitiesByPackageVersion(overrideConfigEntity.getPackageVersion());
+		Mockito.verify(this.packageVersionRepository, Mockito.times(1))
+			.delete(overrideConfigEntity.getPackageVersion());
 	}
 
 	@Test
