@@ -104,6 +104,13 @@ viewer-hub:
         path: '${viewer-hub.resources-packages.path}/weasis/i18n'
       mapping-minimal-version:
         path: '${viewer-hub.resources-packages.path}/weasis/mapping-minimal-version.json'
+    # - Cleanup of obsolete immutable build-stamped sub-directories (<version>/<buildId>).
+    #   A re-uploaded version publishes a new build id; the previous build is kept during the
+    #   grace period (measured from the last publish) so clients pinned to it can finish
+    #   downloading, then removed by the scheduled BuildRetentionService.
+    build-retention:
+      enabled: true
+      grace-period: PT24H
 
 server:
 # Enable response compression: currently not working
