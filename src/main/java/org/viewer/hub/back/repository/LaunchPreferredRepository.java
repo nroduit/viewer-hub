@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2022-2025 Weasis Team and other contributors.
+ *  Copyright (c) 2022-2026 Weasis Team and other contributors.
  *
  *  This program and the accompanying materials are made available under the terms of the Eclipse
  *  Public License 2.0 which is available at https://www.eclipse.org/legal/epl-2.0, or the Apache
@@ -15,6 +15,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.viewer.hub.back.entity.LaunchPreferredEntity;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Repository for the entity Launch Preferred.
@@ -27,6 +28,13 @@ public interface LaunchPreferredRepository extends JpaRepository<LaunchPreferred
 	 * @return preferred entity found
 	 */
 	LaunchPreferredEntity findByName(String preferredName);
+
+	/**
+	 * Find preferred entity by name: return an optional
+	 * @param preferredName preferred Name
+	 * @return optional preferred entity found
+	 */
+	Optional<LaunchPreferredEntity> findOptionalByName(String preferredName);
 
 	/**
 	 * Find preferred entity by type

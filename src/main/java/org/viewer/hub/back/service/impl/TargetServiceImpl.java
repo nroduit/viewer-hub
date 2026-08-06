@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2022-2025 Weasis Team and other contributors.
+ *  Copyright (c) 2022-2026 Weasis Team and other contributors.
  *
  *  This program and the accompanying materials are made available under the terms of the Eclipse
  *  Public License 2.0 which is available at https://www.eclipse.org/legal/epl-2.0, or the Apache
@@ -58,13 +58,13 @@ public class TargetServiceImpl implements TargetService {
 	@Override
 	public TargetEntity retrieveTargetByNameAndType(String targetName, TargetType targetType) {
 		// Retrieve the DB
-		return this.targetRepository.findByNameIgnoreCaseAndType(targetName, targetType);
+		return this.targetRepository.findOptionalByNameIgnoreCaseAndType(targetName, targetType).orElse(null);
 	}
 
 	@Override
 	public TargetEntity retrieveTargetByName(String targetName) {
 		// Retrieve the target
-		return this.targetRepository.findByNameIgnoreCase(targetName);
+		return this.targetRepository.findOptionalByNameIgnoreCase(targetName).orElse(null);
 	}
 
 	@Override
@@ -91,11 +91,12 @@ public class TargetServiceImpl implements TargetService {
 
 	@Override
 	public boolean containsAGroup(@Valid List<TargetEntity> targets) {
-		return targets.stream()
-			.anyMatch(t -> Objects.equals(TargetType.HOST_GROUP,
-					this.targetRepository.findByNameIgnoreCase(t.getName()).getType())
-					|| Objects.equals(TargetType.USER_GROUP,
-							this.targetRepository.findByNameIgnoreCase(t.getName()).getType()));
+		return targets.stream().anyMatch(t -> {
+			TargetType type = this.targetRepository.findOptionalByNameIgnoreCase(t.getName())
+				.map(TargetEntity::getType)
+				.orElse(null);
+			return Objects.equals(TargetType.HOST_GROUP, type) || Objects.equals(TargetType.USER_GROUP, type);
+		});
 	}
 
 	@Override

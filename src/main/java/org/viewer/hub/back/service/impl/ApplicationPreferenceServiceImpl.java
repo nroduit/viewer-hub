@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2022-2025 Weasis Team and other contributors.
+ *  Copyright (c) 2022-2026 Weasis Team and other contributors.
  *
  *  This program and the accompanying materials are made available under the terms of the Eclipse
  *  Public License 2.0 which is available at https://www.eclipse.org/legal/epl-2.0, or the Apache
@@ -79,8 +79,8 @@ public class ApplicationPreferenceServiceImpl implements ApplicationPreferenceSe
 
 		// Check if we have a profile and module entities
 		if (this.moduleRepository.existsByName(moduleName) && this.profileRepository.existsByName(profileName)) {
-			Long profileId = this.profileRepository.findByName(profileName).getId();
-			Long moduleId = this.moduleRepository.findByName(moduleName).getId();
+			Long profileId = this.profileRepository.findOptionalByName(profileName).map(ProfileEntity::getId).orElse(null);
+			Long moduleId = this.moduleRepository.findOptionalByName(moduleName).map(ModuleEntity::getId).orElse(null);
 
 			// Save a new preference in DB
 			this.preferenceRepository.save(this.buildNewApplicationPreference(user, profileId, moduleId, preferences));
@@ -204,11 +204,11 @@ public class ApplicationPreferenceServiceImpl implements ApplicationPreferenceSe
 	private PreferenceEntity retrievePreferenceByUserModuleProfileNames(String user, String moduleName,
 			String profileName) {
 		// Get the module corresponding to the name requested
-		ModuleEntity module = this.moduleRepository.findByName(moduleName);
+		ModuleEntity module = this.moduleRepository.findOptionalByName(moduleName).orElse(null);
 		// Get the profile corresponding to the name requested
-		ProfileEntity profile = this.profileRepository.findByName(profileName);
+		ProfileEntity profile = this.profileRepository.findOptionalByName(profileName).orElse(null);
 		// Get the target corresponding to the name requested
-		TargetEntity target = this.targetRepository.findByNameIgnoreCase(user);
+		TargetEntity target = this.targetRepository.findOptionalByNameIgnoreCase(user).orElse(null);
 
 		Optional<PreferenceEntity> oPreference = Optional.empty();
 

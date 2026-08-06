@@ -44,6 +44,13 @@ public interface LaunchConfigRepository extends JpaRepository<LaunchConfigEntity
 	Optional<LaunchConfigEntity> findOptionalByNameIgnoreCase(String configName);
 
 	/**
+	 * Find config entity by name: return an optional
+	 * @param configName config Name
+	 * @return optional config entity found
+	 */
+	Optional<LaunchConfigEntity> findOptionalByName(String configName);
+
+	/**
 	 * Check if the LaunchConfig corresponding to the name in parameter exists
 	 * @param name name to look for
 	 * @return true if the launch config with the given name exists

@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2022-2025 Weasis Team and other contributors.
+ *  Copyright (c) 2022-2026 Weasis Team and other contributors.
  *
  *  This program and the accompanying materials are made available under the terms of the Eclipse
  *  Public License 2.0 which is available at https://www.eclipse.org/legal/epl-2.0, or the Apache
@@ -19,6 +19,7 @@ import org.viewer.hub.back.entity.OverrideConfigEntityPK;
 import org.viewer.hub.back.entity.PackageVersionEntity;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Repository for the entity OverrideConfig.
@@ -48,6 +49,16 @@ public interface OverrideConfigRepository extends JpaRepository<OverrideConfigEn
 			Long targetId);
 
 	/**
+	 * Find by Package Version Id, Launch ConfigId And Target Id: return an optional
+	 * @param packageVersionId package version Id
+	 * @param launchConfigId launch Config Id
+	 * @param targetId target Id
+	 * @return optional overrideConfigEntity found
+	 */
+	Optional<OverrideConfigEntity> findOptionalByPackageVersionIdAndLaunchConfigIdAndTargetId(Long packageVersionId,
+			Long launchConfigId, Long targetId);
+
+	/**
 	 * Find by Package Version Id, Launch ConfigId And Target name
 	 * @param packageVersionId package version Id
 	 * @param launchConfigId launch Config Id
@@ -55,6 +66,16 @@ public interface OverrideConfigRepository extends JpaRepository<OverrideConfigEn
 	 * @return overrideConfigEntity found
 	 */
 	OverrideConfigEntity findByPackageVersionIdAndLaunchConfigIdAndTargetName(Long packageVersionId,
+			Long launchConfigId, String targetName);
+
+	/**
+	 * Find by Package Version Id, Launch ConfigId And Target name: return an optional
+	 * @param packageVersionId package version Id
+	 * @param launchConfigId launch Config Id
+	 * @param targetName target Name
+	 * @return optional overrideConfigEntity found
+	 */
+	Optional<OverrideConfigEntity> findOptionalByPackageVersionIdAndLaunchConfigIdAndTargetName(Long packageVersionId,
 			Long launchConfigId, String targetName);
 
 	/**

@@ -126,7 +126,8 @@ public class WeasisRepositoryServiceImpl implements WeasisRepositoryService {
 		if (StringUtils.isNotBlank(weasisAssetModel.getVersion())) {
 			// Retrieve default target and launchConfig
 			LaunchConfigEntity defaultLaunchConfig = this.launchConfigRepository
-				.findByNameIgnoreCase(LaunchConfigType.DEFAULT.getCode());
+				.findOptionalByNameIgnoreCase(LaunchConfigType.DEFAULT.getCode())
+				.orElse(null);
 			TargetEntity defaultTarget = this.targetService.retrieveTargetByNameAndType(TargetType.DEFAULT.getCode(),
 					TargetType.DEFAULT);
 			// Remove the package version resources

@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2022-2025 Weasis Team and other contributors.
+ *  Copyright (c) 2022-2026 Weasis Team and other contributors.
  *
  *  This program and the accompanying materials are made available under the terms of the Eclipse
  *  Public License 2.0 which is available at https://www.eclipse.org/legal/epl-2.0, or the Apache
@@ -169,7 +169,8 @@ public class LaunchPreferenceServiceImpl implements LaunchPreferenceService {
 	private void determineConfigurationPropertiesUrl(String user, String host, String config,
 			MultiValueMap<String, String> launchProperties, PackageVersionEntity packageVersionToUse) {
 		// Get the config corresponding to the name requested
-		LaunchConfigEntity launchConfigEntity = this.launchConfigRepository.findByNameIgnoreCase(config);
+		LaunchConfigEntity launchConfigEntity = this.launchConfigRepository.findOptionalByNameIgnoreCase(config)
+			.orElse(null);
 
 		// Retrieve the groups of the host/user and sort them by priority
 		List<TargetEntity> targetsToLookFor = new ArrayList<>(this.retrieveTargetsToLookFor(host, user)
@@ -227,7 +228,8 @@ public class LaunchPreferenceServiceImpl implements LaunchPreferenceService {
 
 	private void fillFreeMarkerPropertiesDefaultLaunchConfig(MultiValueMap<String, String> launchProperties) {
 		LaunchConfigEntity defaultLaunchConfigEntity = this.launchConfigRepository
-			.findByNameIgnoreCase(LaunchConfigType.DEFAULT.getCode());
+			.findOptionalByNameIgnoreCase(LaunchConfigType.DEFAULT.getCode())
+			.orElse(null);
 		if (defaultLaunchConfigEntity != null) {
 			launchProperties.add(PackageUtil.FREEMARKER_PROPERTIES_LAUNCH_CONFIG_ID,
 					defaultLaunchConfigEntity.getId().toString());
@@ -245,7 +247,8 @@ public class LaunchPreferenceServiceImpl implements LaunchPreferenceService {
 	}
 
 	private TargetEntity retrieveDefaultTarget() {
-		TargetEntity defaultTargetEntity = this.targetRepository.findByNameIgnoreCase(TargetType.DEFAULT.getCode());
+		TargetEntity defaultTargetEntity = this.targetRepository.findOptionalByNameIgnoreCase(TargetType.DEFAULT.getCode())
+			.orElse(null);
 		if (defaultTargetEntity == null) {
 			throw new TechnicalException("Default target not configured in database");
 		}
@@ -266,7 +269,8 @@ public class LaunchPreferenceServiceImpl implements LaunchPreferenceService {
 		List<TargetEntity> targetsToLookFor = this.retrieveTargetsToLookFor(host, user);
 
 		// Get the config corresponding to the name requested
-		LaunchConfigEntity launchConfigEntity = this.launchConfigRepository.findByName(configName);
+		LaunchConfigEntity launchConfigEntity = this.launchConfigRepository.findOptionalByName(configName)
+			.orElse(null);
 
 		// Get the prefered corresponding to the type requested: null = all, preferedType
 		// requested otherwise
@@ -457,7 +461,8 @@ public class LaunchPreferenceServiceImpl implements LaunchPreferenceService {
 	 * @param targetsToLookFor List of targets to fill
 	 */
 	private void fillTargetsToLookFor(String targetName, TargetType targetType, List<TargetEntity> targetsToLookFor) {
-		TargetEntity target = this.targetRepository.findByNameIgnoreCaseAndType(targetName, targetType);
+		TargetEntity target = this.targetRepository.findOptionalByNameIgnoreCaseAndType(targetName, targetType)
+			.orElse(null);
 		// If target exist in database
 		if (target != null) {
 			// Add the target to look for
@@ -603,7 +608,7 @@ public class LaunchPreferenceServiceImpl implements LaunchPreferenceService {
 		boolean hasLaunchWithTargetName = false;
 
 		// retrieve the target
-		TargetEntity targetFound = this.targetRepository.findByNameIgnoreCase(targetName);
+		TargetEntity targetFound = this.targetRepository.findOptionalByNameIgnoreCase(targetName).orElse(null);
 
 		// Check if target is associated to a launch
 		if (targetFound != null) {
@@ -627,7 +632,8 @@ public class LaunchPreferenceServiceImpl implements LaunchPreferenceService {
 		// Check launch config not associated to a launch entity
 		else {
 			// retrieve the launch config
-			LaunchConfigEntity launchConfigFound = this.launchConfigRepository.findByName(launchConfigName);
+			LaunchConfigEntity launchConfigFound = this.launchConfigRepository.findOptionalByName(launchConfigName)
+				.orElse(null);
 
 			// Check if launch config is associated to a launch
 			if (this.launchRepository.existsByLaunchEntityPKLaunchConfigId(launchConfigFound.getId())) {
@@ -643,7 +649,8 @@ public class LaunchPreferenceServiceImpl implements LaunchPreferenceService {
 		LOG.debug("deleteLaunchConfig");
 
 		// Retrieve the launch config
-		LaunchConfigEntity launchConfig = this.launchConfigRepository.findByName(launchConfigName);
+		LaunchConfigEntity launchConfig = this.launchConfigRepository.findOptionalByName(launchConfigName)
+			.orElse(null);
 
 		// Delete launch config
 		this.launchConfigRepository.delete(launchConfig);
@@ -663,7 +670,9 @@ public class LaunchPreferenceServiceImpl implements LaunchPreferenceService {
 		// Check launch prefered not associated to a launch entity
 		else {
 			// retrieve the launch prefered
-			LaunchPreferredEntity launchPreferedFound = this.launchPreferredRepository.findByName(launchPreferedName);
+			LaunchPreferredEntity launchPreferedFound = this.launchPreferredRepository
+				.findOptionalByName(launchPreferedName)
+				.orElse(null);
 
 			// Check if launch prefered is associated to a launch
 			if (this.launchRepository.existsByLaunchEntityPKLaunchPreferredId(launchPreferedFound.getId())) {
@@ -679,7 +688,8 @@ public class LaunchPreferenceServiceImpl implements LaunchPreferenceService {
 		LOG.debug("deleteLaunchPrefered");
 
 		// Retrieve the launch prefered
-		LaunchPreferredEntity launchPrefered = this.launchPreferredRepository.findByName(launchPreferedName);
+		LaunchPreferredEntity launchPrefered = this.launchPreferredRepository.findOptionalByName(launchPreferedName)
+			.orElse(null);
 
 		// Delete launch Prefered
 		this.launchPreferredRepository.delete(launchPrefered);
@@ -691,7 +701,8 @@ public class LaunchPreferenceServiceImpl implements LaunchPreferenceService {
 		// Get the config corresponding to the name requested or if launch config name is
 		// null retrieve all the launch configs
 		List<LaunchConfigEntity> launchConfigEntities = launchConfigName == null ? this.launchConfigRepository.findAll()
-				: Collections.singletonList(this.launchConfigRepository.findByName(launchConfigName));
+				: Collections
+					.singletonList(this.launchConfigRepository.findOptionalByName(launchConfigName).orElse(null));
 
 		// Get all the Launch Prefered
 		List<LaunchPreferredEntity> launchPreferedEntities = this.launchPreferredRepository.findAll();
@@ -760,11 +771,13 @@ public class LaunchPreferenceServiceImpl implements LaunchPreferenceService {
 	private LaunchEntity retrieveLaunchByTargetConfigPreferedNames(String targetName, String configName,
 			String preferedName) {
 		// Get the target corresponding to the name requested
-		TargetEntity targetEntity = this.targetRepository.findByNameIgnoreCase(targetName);
+		TargetEntity targetEntity = this.targetRepository.findOptionalByNameIgnoreCase(targetName).orElse(null);
 		// Get the config corresponding to the name requested
-		LaunchConfigEntity launchConfigEntity = this.launchConfigRepository.findByName(configName);
+		LaunchConfigEntity launchConfigEntity = this.launchConfigRepository.findOptionalByName(configName)
+			.orElse(null);
 		// Get the prefered corresponding to the name requested
-		LaunchPreferredEntity launchPreferedEntity = this.launchPreferredRepository.findByName(preferedName);
+		LaunchPreferredEntity launchPreferedEntity = this.launchPreferredRepository.findOptionalByName(preferedName)
+			.orElse(null);
 
 		// Create the specification to query the launch table
 		Specification<LaunchEntity> launchSpecification = new LaunchByTargetConfigPreferredSpecification(

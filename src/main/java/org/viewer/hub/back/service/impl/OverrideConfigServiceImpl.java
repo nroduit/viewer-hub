@@ -18,7 +18,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.viewer.hub.back.entity.*;
+import org.viewer.hub.back.entity.LaunchConfigEntity;
+import org.viewer.hub.back.entity.OverrideConfigEntity;
+import org.viewer.hub.back.entity.OverrideConfigEntityPK;
+import org.viewer.hub.back.entity.PackageVersionEntity;
+import org.viewer.hub.back.entity.TargetEntity;
+import org.viewer.hub.back.entity.WeasisPropertyEntity;
 import org.viewer.hub.back.enums.TargetType;
 import org.viewer.hub.back.repository.OverrideConfigRepository;
 import org.viewer.hub.back.repository.TargetRepository;
@@ -68,14 +73,17 @@ public class OverrideConfigServiceImpl implements OverrideConfigService {
 
 	@Override
 	public OverrideConfigEntity retrieveProperties(Long packageVersionId, Long launchConfigId, Long groupId) {
-		return this.overrideConfigRepository.findByPackageVersionIdAndLaunchConfigIdAndTargetId(packageVersionId,
-				launchConfigId, groupId);
+		return this.overrideConfigRepository
+			.findOptionalByPackageVersionIdAndLaunchConfigIdAndTargetId(packageVersionId, launchConfigId, groupId)
+			.orElse(null);
 	}
 
 	@Override
 	public OverrideConfigEntity retrieveDefaultGroupProperties(Long packageVersionId, Long launchConfigId) {
-		return this.overrideConfigRepository.findByPackageVersionIdAndLaunchConfigIdAndTargetName(packageVersionId,
-				launchConfigId, TargetType.DEFAULT.getCode());
+		return this.overrideConfigRepository
+			.findOptionalByPackageVersionIdAndLaunchConfigIdAndTargetName(packageVersionId, launchConfigId,
+					TargetType.DEFAULT.getCode())
+			.orElse(null);
 	}
 
 	@Override
