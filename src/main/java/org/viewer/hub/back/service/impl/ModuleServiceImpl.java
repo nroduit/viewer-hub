@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2022-2025 Weasis Team and other contributors.
+ *  Copyright (c) 2022-2026 Weasis Team and other contributors.
  *
  *  This program and the accompanying materials are made available under the terms of the Eclipse
  *  Public License 2.0 which is available at https://www.eclipse.org/legal/epl-2.0, or the Apache
@@ -78,10 +78,10 @@ public class ModuleServiceImpl implements ModuleService, Serializable {
 			.collect(Collectors.toList());
 
 		// Get the profile corresponding to the name requested
-		ProfileEntity profile = this.profileRepository.findByName(profileName);
+		ProfileEntity profile = this.profileRepository.findOptionalByName(profileName).orElse(null);
 
 		// Get the target corresponding to the name requested
-		TargetEntity target = this.targetRepository.findByNameIgnoreCase(user);
+		TargetEntity target = this.targetRepository.findOptionalByNameIgnoreCase(user).orElse(null);
 
 		// Create the specification to query the preference table
 		Specification<PreferenceEntity> preferenceSpecification = new PreferenceByUserProfileModuleSpecification(

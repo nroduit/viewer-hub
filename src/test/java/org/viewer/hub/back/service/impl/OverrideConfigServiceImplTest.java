@@ -32,10 +32,14 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class OverrideConfigServiceImplTest {
@@ -101,7 +105,7 @@ class OverrideConfigServiceImplTest {
 
 		// Tests results
 		Mockito.verify(this.overrideConfigRepositoryMock, times(1))
-			.findByPackageVersionIdAndLaunchConfigIdAndTargetId(anyLong(), anyLong(), anyLong());
+			.findOptionalByPackageVersionIdAndLaunchConfigIdAndTargetId(anyLong(), anyLong(), anyLong());
 	}
 
 	@Test
@@ -111,7 +115,7 @@ class OverrideConfigServiceImplTest {
 
 		// Tests results
 		Mockito.verify(this.overrideConfigRepositoryMock, times(1))
-			.findByPackageVersionIdAndLaunchConfigIdAndTargetName(anyLong(), anyLong(),
+			.findOptionalByPackageVersionIdAndLaunchConfigIdAndTargetName(anyLong(), anyLong(),
 					Mockito.eq(TargetType.DEFAULT.getCode()));
 	}
 

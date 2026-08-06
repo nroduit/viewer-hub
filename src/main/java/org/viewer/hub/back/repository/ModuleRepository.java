@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2022-2025 Weasis Team and other contributors.
+ *  Copyright (c) 2022-2026 Weasis Team and other contributors.
  *
  *  This program and the accompanying materials are made available under the terms of the Eclipse
  *  Public License 2.0 which is available at https://www.eclipse.org/legal/epl-2.0, or the Apache
@@ -15,6 +15,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.viewer.hub.back.entity.ModuleEntity;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Repository for the entity Module.
@@ -48,6 +49,13 @@ public interface ModuleRepository extends JpaRepository<ModuleEntity, Long> {
 	 * @return the module found
 	 */
 	ModuleEntity findByName(String moduleName);
+
+	/**
+	 * Retrieve the module corresponding to the name in parameter: return an optional
+	 * @param moduleName module name
+	 * @return optional module found
+	 */
+	Optional<ModuleEntity> findOptionalByName(String moduleName);
 
 	/**
 	 * Check if the module corresponding to the name in parameter exists

@@ -23,21 +23,45 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.viewer.hub.back.controller.exception.ConstraintException;
 import org.viewer.hub.back.controller.exception.ParameterException;
-import org.viewer.hub.back.entity.*;
+import org.viewer.hub.back.entity.GroupEntity;
+import org.viewer.hub.back.entity.GroupEntityPK;
+import org.viewer.hub.back.entity.LaunchConfigEntity;
+import org.viewer.hub.back.entity.LaunchEntity;
+import org.viewer.hub.back.entity.LaunchEntityPK;
+import org.viewer.hub.back.entity.LaunchPreferredEntity;
+import org.viewer.hub.back.entity.PackageVersionEntity;
+import org.viewer.hub.back.entity.TargetEntity;
 import org.viewer.hub.back.enums.PreferredType;
 import org.viewer.hub.back.enums.TargetType;
-import org.viewer.hub.back.repository.*;
+import org.viewer.hub.back.repository.GroupRepositoryTest;
+import org.viewer.hub.back.repository.LaunchConfigRepository;
+import org.viewer.hub.back.repository.LaunchPreferredRepository;
+import org.viewer.hub.back.repository.LaunchRepository;
+import org.viewer.hub.back.repository.LaunchRepositoryTest;
+import org.viewer.hub.back.repository.TargetRepository;
 import org.viewer.hub.back.service.GroupService;
 import org.viewer.hub.back.service.LaunchPreferenceService;
 import org.viewer.hub.back.service.OverrideConfigService;
 import org.viewer.hub.back.service.PackageService;
 import org.viewer.hub.back.util.PackageUtil;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -88,22 +112,25 @@ class LaunchPreferenceServiceImplTest {
 		// Define the behaviour of the mocks
 
 		// TargetRepository
-		when(this.targetRepositoryMock.findByNameIgnoreCase(anyString())).thenReturn(targetEntity);
-		when(this.targetRepositoryMock.findByNameIgnoreCaseAndType(anyString(), any(TargetType.class)))
-			.thenReturn(targetEntity);
+		when(this.targetRepositoryMock.findOptionalByNameIgnoreCase(anyString()))
+			.thenReturn(Optional.of(targetEntity));
+		when(this.targetRepositoryMock.findOptionalByNameIgnoreCaseAndType(anyString(), any(TargetType.class)))
+			.thenReturn(Optional.of(targetEntity));
 		when(this.targetRepositoryMock.existsByNameIgnoreCase(anyString())).thenReturn(false);
 		when(this.targetRepositoryMock.save(any(TargetEntity.class))).thenReturn(targetEntity);
 		when(this.targetRepositoryMock.findById(Mockito.anyLong())).thenReturn(Optional.of(targetEntity));
 
 		// LaunchConfigRepository
-		when(this.launchConfigRepositoryMock.findByName(anyString())).thenReturn(launchConfigEntity);
+		when(this.launchConfigRepositoryMock.findOptionalByName(anyString()))
+			.thenReturn(Optional.of(launchConfigEntity));
 		when(this.launchConfigRepositoryMock.findAll()).thenReturn(Collections.singletonList(launchConfigEntity));
 		when(this.launchConfigRepositoryMock.findById(Mockito.anyLong())).thenReturn(Optional.of(launchConfigEntity));
 		when(this.launchConfigRepositoryMock.saveAll(Mockito.anyCollection()))
 			.thenReturn(Collections.singletonList(launchConfigEntity));
 
 		// LaunchPreferedRepository
-		when(this.launchPreferedRepositoryMock.findByName(anyString())).thenReturn(launchPreferedEntity);
+		when(this.launchPreferedRepositoryMock.findOptionalByName(anyString()))
+			.thenReturn(Optional.of(launchPreferedEntity));
 		when(this.launchPreferedRepositoryMock.findAll()).thenReturn(Collections.singletonList(launchPreferedEntity));
 		when(this.launchPreferedRepositoryMock.findById(Mockito.anyLong()))
 			.thenReturn(Optional.of(launchPreferedEntity));
@@ -195,7 +222,8 @@ class LaunchPreferenceServiceImplTest {
 		// Mock
 		when(this.packageServiceMock.retrieveAvailablePackageVersionToUse(anyString(), anyString()))
 			.thenReturn(packageVersionEntity);
-		when(this.launchConfigRepositoryMock.findByNameIgnoreCase(anyString())).thenReturn(launchConfigEntity);
+		when(this.launchConfigRepositoryMock.findOptionalByNameIgnoreCase(anyString()))
+			.thenReturn(Optional.of(launchConfigEntity));
 
 		// Call service
 		MultiValueMap<String, String> map = this.launchPreferenceService.buildLaunchConfiguration(launchPropertiesMap,
@@ -233,9 +261,12 @@ class LaunchPreferenceServiceImplTest {
 		// Mock
 		when(this.packageServiceMock.retrieveAvailablePackageVersionToUse(anyString(), anyString()))
 			.thenReturn(packageVersionEntity);
-		when(this.launchConfigRepositoryMock.findByNameIgnoreCase(eq("default"))).thenReturn(defaultLaunchConfigEntity);
-		when(this.launchConfigRepositoryMock.findByNameIgnoreCase(eq("config"))).thenReturn(launchConfigEntity);
-		when(this.targetRepositoryMock.findByNameIgnoreCase(eq("default"))).thenReturn(defaultTargetEntity);
+		when(this.launchConfigRepositoryMock.findOptionalByNameIgnoreCase(eq("default")))
+			.thenReturn(Optional.of(defaultLaunchConfigEntity));
+		when(this.launchConfigRepositoryMock.findOptionalByNameIgnoreCase(eq("config")))
+			.thenReturn(Optional.of(launchConfigEntity));
+		when(this.targetRepositoryMock.findOptionalByNameIgnoreCase(eq("default")))
+			.thenReturn(Optional.of(defaultTargetEntity));
 
 		// Call service
 		MultiValueMap<String, String> map = this.launchPreferenceService.buildLaunchConfiguration(launchPropertiesMap,
@@ -275,9 +306,12 @@ class LaunchPreferenceServiceImplTest {
 		// Mock
 		when(this.packageServiceMock.retrieveAvailablePackageVersionToUse(anyString(), anyString()))
 			.thenReturn(packageVersionEntity);
-		when(this.launchConfigRepositoryMock.findByNameIgnoreCase(eq("default"))).thenReturn(defaultLaunchConfigEntity);
-		when(this.launchConfigRepositoryMock.findByNameIgnoreCase(eq("config"))).thenReturn(launchConfigEntity);
-		when(this.targetRepositoryMock.findByNameIgnoreCase(eq("default"))).thenReturn(defaultTargetEntity);
+		when(this.launchConfigRepositoryMock.findOptionalByNameIgnoreCase(eq("default")))
+			.thenReturn(Optional.of(defaultLaunchConfigEntity));
+		when(this.launchConfigRepositoryMock.findOptionalByNameIgnoreCase(eq("config")))
+			.thenReturn(Optional.of(launchConfigEntity));
+		when(this.targetRepositoryMock.findOptionalByNameIgnoreCase(eq("default")))
+			.thenReturn(Optional.of(defaultTargetEntity));
 
 		// Call service
 		MultiValueMap<String, String> map = this.launchPreferenceService.buildLaunchConfiguration(launchPropertiesMap,
@@ -322,11 +356,14 @@ class LaunchPreferenceServiceImplTest {
 		// Mock
 		when(this.packageServiceMock.retrieveAvailablePackageVersionToUse(anyString(), anyString()))
 			.thenReturn(packageVersionEntity);
-		when(this.launchConfigRepositoryMock.findByNameIgnoreCase(eq("default"))).thenReturn(defaultLaunchConfigEntity);
-		when(this.launchConfigRepositoryMock.findByNameIgnoreCase(eq("config"))).thenReturn(launchConfigEntity);
-		when(this.targetRepositoryMock.findByNameIgnoreCase(eq("default"))).thenReturn(defaultTargetEntity);
-		when(this.targetRepositoryMock.findByNameIgnoreCaseAndType(eq("user"), eq(TargetType.USER)))
-			.thenReturn(targetEntity);
+		when(this.launchConfigRepositoryMock.findOptionalByNameIgnoreCase(eq("default")))
+			.thenReturn(Optional.of(defaultLaunchConfigEntity));
+		when(this.launchConfigRepositoryMock.findOptionalByNameIgnoreCase(eq("config")))
+			.thenReturn(Optional.of(launchConfigEntity));
+		when(this.targetRepositoryMock.findOptionalByNameIgnoreCase(eq("default")))
+			.thenReturn(Optional.of(defaultTargetEntity));
+		when(this.targetRepositoryMock.findOptionalByNameIgnoreCaseAndType(eq("user"), eq(TargetType.USER)))
+			.thenReturn(Optional.of(targetEntity));
 		when(this.overrideConfigServiceMock.existOverrideConfigWithVersionConfigTarget(any(), any(), any()))
 			.thenReturn(true);
 
@@ -944,7 +981,7 @@ class LaunchPreferenceServiceImplTest {
 		// Test result
 		assertNotNull(launchEntities);
 		assertEquals(1, launchEntities.size());
-		Mockito.verify(this.launchConfigRepositoryMock, Mockito.times(1)).findByName(anyString());
+		Mockito.verify(this.launchConfigRepositoryMock, Mockito.times(1)).findOptionalByName(anyString());
 		Mockito.verify(this.launchPreferedRepositoryMock, Mockito.times(1)).findAll();
 		Mockito.verify(this.launchRepositoryMock, Mockito.times(1)).findAll(any(Specification.class));
 	}

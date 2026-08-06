@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2022-2025 Weasis Team and other contributors.
+ *  Copyright (c) 2022-2026 Weasis Team and other contributors.
  *
  *  This program and the accompanying materials are made available under the terms of the Eclipse
  *  Public License 2.0 which is available at https://www.eclipse.org/legal/epl-2.0, or the Apache
@@ -46,6 +46,14 @@ public interface TargetRepository extends JpaRepository<TargetEntity, Long> {
 	 * @return optional Target entity found
 	 */
 	Optional<TargetEntity> findOptionalByNameIgnoreCase(String targetName);
+
+	/**
+	 * Find target entity by name and type: return an optional
+	 * @param targetName target Name
+	 * @param targetType target Type
+	 * @return optional target entity found
+	 */
+	Optional<TargetEntity> findOptionalByNameIgnoreCaseAndType(String targetName, TargetType targetType);
 
 	/**
 	 * Find target entity by name

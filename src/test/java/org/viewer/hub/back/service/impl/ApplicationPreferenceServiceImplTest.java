@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2022-2025 Weasis Team and other contributors.
+ *  Copyright (c) 2022-2026 Weasis Team and other contributors.
  *
  *  This program and the accompanying materials are made available under the terms of the Eclipse
  *  Public License 2.0 which is available at https://www.eclipse.org/legal/epl-2.0, or the Apache
@@ -73,10 +73,12 @@ class ApplicationPreferenceServiceImplTest {
 		// Mock repositories
 		// Module
 		Mockito.when(this.moduleRepositoryMock.existsByName(Mockito.anyString())).thenReturn(true);
-		Mockito.when(this.moduleRepositoryMock.findByName(Mockito.anyString())).thenReturn(moduleEntity);
+		Mockito.when(this.moduleRepositoryMock.findOptionalByName(Mockito.anyString()))
+			.thenReturn(Optional.of(moduleEntity));
 		Mockito.when(this.moduleRepositoryMock.findById(Mockito.anyLong())).thenReturn(Optional.of(moduleEntity));
 		// Profile
-		Mockito.when(this.profileRepositoryMock.findByName(Mockito.anyString())).thenReturn(profile);
+		Mockito.when(this.profileRepositoryMock.findOptionalByName(Mockito.anyString()))
+			.thenReturn(Optional.of(profile));
 		Mockito.when(this.profileRepositoryMock.existsByName(Mockito.anyString())).thenReturn(true);
 		Mockito.when(this.profileRepositoryMock.findById(Mockito.anyLong())).thenReturn(Optional.of(profile));
 		// Preference
@@ -89,7 +91,6 @@ class ApplicationPreferenceServiceImplTest {
 		// Target
 		Mockito.when(this.targetRepositoryMock.findOptionalByNameIgnoreCase(Mockito.anyString()))
 			.thenReturn(Optional.of(targetEntity));
-		Mockito.when(this.targetRepositoryMock.findByNameIgnoreCase(Mockito.anyString())).thenReturn(targetEntity);
 
 		// Build the mocked target service
 		this.applicationPreferenceService = new ApplicationPreferenceServiceImpl(this.preferenceRepositoryMock,
@@ -110,8 +111,8 @@ class ApplicationPreferenceServiceImplTest {
 		// Test results
 		Mockito.verify(this.moduleRepositoryMock, Mockito.times(1)).existsByName(Mockito.anyString());
 		Mockito.verify(this.profileRepositoryMock, Mockito.times(1)).existsByName(Mockito.anyString());
-		Mockito.verify(this.profileRepositoryMock, Mockito.times(1)).findByName(Mockito.anyString());
-		Mockito.verify(this.moduleRepositoryMock, Mockito.times(1)).findByName(Mockito.anyString());
+		Mockito.verify(this.profileRepositoryMock, Mockito.times(1)).findOptionalByName(Mockito.anyString());
+		Mockito.verify(this.moduleRepositoryMock, Mockito.times(1)).findOptionalByName(Mockito.anyString());
 		Mockito.verify(this.preferenceRepositoryMock, Mockito.times(1)).save(Mockito.any());
 	}
 

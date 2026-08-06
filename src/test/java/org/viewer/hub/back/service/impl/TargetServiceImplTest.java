@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2022-2025 Weasis Team and other contributors.
+ *  Copyright (c) 2022-2026 Weasis Team and other contributors.
  *
  *  This program and the accompanying materials are made available under the terms of the Eclipse
  *  Public License 2.0 which is available at https://www.eclipse.org/legal/epl-2.0, or the Apache
@@ -31,6 +31,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -67,19 +68,20 @@ class TargetServiceImplTest {
 			.thenReturn(Collections.singletonList(targetUser));
 		Mockito.when(this.targetRepositoryMock.findByType(Mockito.eq(TargetType.HOST)))
 			.thenReturn(Collections.singletonList(targetHost));
-		Mockito.when(this.targetRepositoryMock.findByNameIgnoreCase(Mockito.anyString())).thenReturn(targetHostGroup);
+		Mockito.when(this.targetRepositoryMock.findOptionalByNameIgnoreCase(Mockito.anyString()))
+			.thenReturn(Optional.of(targetHostGroup));
 		Mockito.when(this.targetRepositoryMock.saveAll(Mockito.anyCollection()))
 			.thenReturn(List.of(GroupRepositoryTest.buildTarget(true, 1L, "Test target", TargetType.HOST)));
 		Mockito.when(this.targetRepositoryMock.findAllById(Mockito.anyList()))
 			.thenReturn(Collections.singletonList(targetUser));
 		Mockito
-			.when(this.targetRepositoryMock.findByNameIgnoreCaseAndType(Mockito.anyString(),
+			.when(this.targetRepositoryMock.findOptionalByNameIgnoreCaseAndType(Mockito.anyString(),
 					Mockito.eq(TargetType.USER)))
-			.thenReturn(targetUser);
+			.thenReturn(Optional.of(targetUser));
 		Mockito
-			.when(this.targetRepositoryMock.findByNameIgnoreCaseAndType(Mockito.anyString(),
+			.when(this.targetRepositoryMock.findOptionalByNameIgnoreCaseAndType(Mockito.anyString(),
 					Mockito.eq(TargetType.HOST)))
-			.thenReturn(targetHost);
+			.thenReturn(Optional.of(targetHost));
 		Mockito.when(this.targetRepositoryMock.findAll()).thenReturn(Collections.singletonList(targetHost));
 		Mockito.when(this.targetRepositoryMock.existsByNameIgnoreCase(Mockito.anyString())).thenReturn(true);
 		Mockito.when(this.targetRepositoryMock.findByNameContainingIgnoreCase(Mockito.anyString()))
@@ -129,7 +131,7 @@ class TargetServiceImplTest {
 		// Test results
 		assertNotNull(user);
 		Mockito.verify(this.targetRepositoryMock, Mockito.times(1))
-			.findByNameIgnoreCaseAndType(Mockito.anyString(), Mockito.any(TargetType.class));
+			.findOptionalByNameIgnoreCaseAndType(Mockito.anyString(), Mockito.any(TargetType.class));
 		assertEquals("TARGETUSER", user.getName());
 	}
 
@@ -144,7 +146,7 @@ class TargetServiceImplTest {
 		// Test results
 		assertNotNull(host);
 		Mockito.verify(this.targetRepositoryMock, Mockito.times(1))
-			.findByNameIgnoreCaseAndType(Mockito.anyString(), Mockito.any(TargetType.class));
+			.findOptionalByNameIgnoreCaseAndType(Mockito.anyString(), Mockito.any(TargetType.class));
 		assertEquals("TARGETHOST", host.getName());
 	}
 
@@ -158,7 +160,7 @@ class TargetServiceImplTest {
 
 		// Test results
 		assertNotNull(host);
-		Mockito.verify(this.targetRepositoryMock, Mockito.times(1)).findByNameIgnoreCase(Mockito.anyString());
+		Mockito.verify(this.targetRepositoryMock, Mockito.times(1)).findOptionalByNameIgnoreCase(Mockito.anyString());
 		assertEquals("TARGETHOSTGROUP", host.getName());
 	}
 
@@ -214,7 +216,7 @@ class TargetServiceImplTest {
 		boolean toTest = this.targetService.containsAGroup(Collections.singletonList(targetHostGroup));
 
 		// Test call
-		Mockito.verify(this.targetRepositoryMock, Mockito.times(1)).findByNameIgnoreCase(Mockito.anyString());
+		Mockito.verify(this.targetRepositoryMock, Mockito.times(1)).findOptionalByNameIgnoreCase(Mockito.anyString());
 		assertTrue(toTest);
 	}
 
@@ -313,7 +315,8 @@ class TargetServiceImplTest {
 			.when(this.targetRepositoryMock.existsByNameIgnoreCaseAndType(Mockito.anyString(),
 					Mockito.eq(TargetType.HOST_GROUP)))
 			.thenReturn(true);
-		Mockito.when(this.targetRepositoryMock.findByNameIgnoreCase(Mockito.anyString())).thenReturn(targetHost);
+		Mockito.when(this.targetRepositoryMock.findOptionalByNameIgnoreCase(Mockito.anyString()))
+			.thenReturn(Optional.of(targetHost));
 		Mockito
 			.when(this.targetRepositoryMock.existsByNameIgnoreCaseAndType(Mockito.anyString(),
 					Mockito.eq(TargetType.HOST)))
@@ -345,7 +348,8 @@ class TargetServiceImplTest {
 			.when(this.targetRepositoryMock.existsByNameIgnoreCaseAndType(Mockito.anyString(),
 					Mockito.eq(TargetType.HOST_GROUP)))
 			.thenReturn(true);
-		Mockito.when(this.targetRepositoryMock.findByNameIgnoreCase(Mockito.anyString())).thenReturn(targetHost);
+		Mockito.when(this.targetRepositoryMock.findOptionalByNameIgnoreCase(Mockito.anyString()))
+			.thenReturn(Optional.of(targetHost));
 		Mockito
 			.when(this.targetRepositoryMock.existsByNameIgnoreCaseAndType(Mockito.anyString(),
 					Mockito.eq(TargetType.HOST)))

@@ -11,6 +11,7 @@
 
 package org.viewer.hub.back.repository;
 
+import org.jspecify.annotations.Nullable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.viewer.hub.back.entity.ViewerSelectionEntity;
 import org.viewer.hub.back.enums.ViewerType;
@@ -28,7 +29,7 @@ public interface ViewerSelectionRepository extends JpaRepository<ViewerSelection
 	 * @param archive archive to look for
 	 * @return list of viewer selections
 	 */
-	List<ViewerSelectionEntity> findByArchive(String archive);
+	List<ViewerSelectionEntity> findByArchive(@Nullable String archive);
 
 	/**
 	 * Find all viewer selections by archive and viewer
