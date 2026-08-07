@@ -35,16 +35,17 @@ import java.util.regex.Pattern;
  * Garbage-collects obsolete build-stamped sub-directories.
  * <p>
  * Each package/i18n version is stored under immutable {@code <version>/<buildId>/...}
- * sub-directories and the active build is recorded in the {@code <version>/current} pointer. When a
- * version is re-uploaded, a new build id is published and the previous build becomes obsolete but is
- * kept so that clients pinned to it (their launch config still points at that build id) can finish
- * downloading. This service deletes those obsolete builds once a transition/grace period has elapsed
- * since the last publish.
+ * sub-directories and the active build is recorded in the {@code <version>/current}
+ * pointer. When a version is re-uploaded, a new build id is published and the previous
+ * build becomes obsolete but is kept so that clients pinned to it (their launch config
+ * still points at that build id) can finish downloading. This service deletes those
+ * obsolete builds once a transition/grace period has elapsed since the last publish.
  * <p>
- * The grace period is measured from the {@code current} pointer's last-modified instant (i.e. the
- * moment of the last pointer flip): every non-current build was superseded no later than that flip,
- * so once the flip itself is older than the grace period all obsolete builds are safe to remove -
- * regardless of when their individual files were written.
+ * The grace period is measured from the {@code current} pointer's last-modified instant
+ * (i.e. the moment of the last pointer flip): every non-current build was superseded no
+ * later than that flip, so once the flip itself is older than the grace period all
+ * obsolete builds are safe to remove - regardless of when their individual files were
+ * written.
  */
 @Service
 @Slf4j
@@ -75,8 +76,8 @@ public class BuildRetentionService {
 	}
 
 	/**
-	 * Every 24h (after a 1h initial delay to avoid running during startup): remove obsolete builds
-	 * of every package and i18n version.
+	 * Every 24h (after a 1h initial delay to avoid running during startup): remove
+	 * obsolete builds of every package and i18n version.
 	 */
 	@Scheduled(fixedRate = 24L * 60 * 60 * 1000, initialDelay = 60L * 60 * 1000)
 	public void cleanObsoleteBuilds() {
@@ -99,7 +100,8 @@ public class BuildRetentionService {
 		Instant now = Instant.now();
 		Map<String, Instant> objects = this.s3Service.retrieveS3ObjectsLastModifiedFromPrefix(basePath);
 
-		// Group objects per version: last-modified of the <version>/current pointer, and the set of
+		// Group objects per version: last-modified of the <version>/current pointer, and
+		// the set of
 		// build ids (immediate UUID sub-directories) present for the version.
 		Map<String, Instant> pointerLastModifiedByVersion = new HashMap<>();
 		Map<String, Set<String>> buildIdsByVersion = new HashMap<>();
@@ -113,7 +115,8 @@ public class BuildRetentionService {
 			String relative = key.substring(prefixLength);
 			int firstSeparator = relative.indexOf('/');
 			if (firstSeparator < 0) {
-				// Object directly under the base path (not inside a version folder): ignore
+				// Object directly under the base path (not inside a version folder):
+				// ignore
 				continue;
 			}
 			String version = relative.substring(0, firstSeparator);
@@ -125,7 +128,8 @@ public class BuildRetentionService {
 				int secondSeparator = rest.indexOf('/');
 				if (secondSeparator > 0) {
 					String candidateBuildId = rest.substring(0, secondSeparator);
-					// Only UUID sub-directories are considered builds: this leaves legacy top-level
+					// Only UUID sub-directories are considered builds: this leaves legacy
+					// top-level
 					// content (bundle/, conf/, resources/, resources.zip, ...) untouched.
 					if (BUILD_ID_PATTERN.matcher(candidateBuildId).matches()) {
 						buildIdsByVersion.computeIfAbsent(version, v -> new HashSet<>()).add(candidateBuildId);
@@ -134,9 +138,8 @@ public class BuildRetentionService {
 			}
 		}
 
-		buildIdsByVersion
-			.forEach((version, buildIds) -> this.cleanObsoleteBuildsForVersion(basePath, version, buildIds,
-					pointerLastModifiedByVersion.get(version), now));
+		buildIdsByVersion.forEach((version, buildIds) -> this.cleanObsoleteBuildsForVersion(basePath, version, buildIds,
+				pointerLastModifiedByVersion.get(version), now));
 	}
 
 	/**
@@ -144,18 +147,22 @@ public class BuildRetentionService {
 	 * @param basePath Base S3 path
 	 * @param version Version folder name
 	 * @param buildIds Build ids present for the version
-	 * @param pointerLastModified Last-modified of the &lt;version&gt;/current pointer (may be null)
+	 * @param pointerLastModified Last-modified of the &lt;version&gt;/current pointer
+	 * (may be null)
 	 * @param now Current instant
 	 */
 	private void cleanObsoleteBuildsForVersion(String basePath, String version, Set<String> buildIds,
 			Instant pointerLastModified, Instant now) {
 		if (pointerLastModified == null) {
-			// No current pointer: do not risk deleting a build without knowing which one is active
+			// No current pointer: do not risk deleting a build without knowing which one
+			// is active
 			LOG.warn("Skipping build retention for {}/{}: no current pointer found", basePath, version);
 			return;
 		}
-		// Transition window: keep every build until the last publish (pointer flip) is older than
-		// the grace period, so clients pinned to the just-superseded build can finish downloading.
+		// Transition window: keep every build until the last publish (pointer flip) is
+		// older than
+		// the grace period, so clients pinned to the just-superseded build can finish
+		// downloading.
 		if (Duration.between(pointerLastModified, now).compareTo(this.gracePeriod) < 0) {
 			LOG.debug("Skipping build retention for {}/{}: last publish is within the grace period", basePath, version);
 			return;
@@ -171,7 +178,8 @@ public class BuildRetentionService {
 			}
 			String obsoleteBuildPrefix = "%s/%s/%s/".formatted(basePath, version, buildId);
 			LOG.info("Build retention: deleting obsolete build {}", obsoleteBuildPrefix);
-			// Wait for the deletion so an error is surfaced and the cleanup stays sequential
+			// Wait for the deletion so an error is surfaced and the cleanup stays
+			// sequential
 			this.s3Service.deleteS3Objects(obsoleteBuildPrefix).join();
 		}
 	}

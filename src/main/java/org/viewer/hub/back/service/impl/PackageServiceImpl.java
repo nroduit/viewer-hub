@@ -178,20 +178,28 @@ public class PackageServiceImpl implements PackageService {
 		try (fileData) {
 			if (versionToUpload != null && !versionToUpload.isBlank()) {
 				// Each upload lands in its own immutable build-stamped sub-directory
-				// (<version>/<buildId>/...) so a re-uploaded (e.g. SNAPSHOT) version never
+				// (<version>/<buildId>/...) so a re-uploaded (e.g. SNAPSHOT) version
+				// never
 				// overwrites files a client may currently be downloading.
 				String buildId = UUID.randomUUID().toString();
 				Path outDir = Paths.get(this.viewerHubResourcesPackagesWeasisPackagePath)
 					.resolve(versionToUpload)
 					.resolve(buildId);
 
-				// Upload version package in S3, then - strictly after every file is durably
-				// written - zip the resources folder, replace the mapping-minimal-version.json
-				// if a more recent one is provided, flip the <version>/current pointer to this
-				// build, and only then refresh the cache/db and the grid. Chaining the stages
-				// (instead of racing two independent allOf callbacks on the same futures list)
-				// guarantees the version never becomes visible/launchable until all of its files
-				// - including the generated resources.zip - are present in S3, so a client can
+				// Upload version package in S3, then - strictly after every file is
+				// durably
+				// written - zip the resources folder, replace the
+				// mapping-minimal-version.json
+				// if a more recent one is provided, flip the <version>/current pointer to
+				// this
+				// build, and only then refresh the cache/db and the grid. Chaining the
+				// stages
+				// (instead of racing two independent allOf callbacks on the same futures
+				// list)
+				// guarantees the version never becomes visible/launchable until all of
+				// its files
+				// - including the generated resources.zip - are present in S3, so a
+				// client can
 				// never fetch a half-written package folder.
 
 				// 1. Upload version package files in S3
@@ -204,9 +212,11 @@ public class PackageServiceImpl implements PackageService {
 						resetInputStream(fileData);
 						return this.zipResourcesFolderToRootPackageFolder(fileData, outDir);
 					})
-					// 3. Replace mapping-minimal-version.json if a more recent one was imported
+					// 3. Replace mapping-minimal-version.json if a more recent one was
+					// imported
 					.thenCompose(unused -> this.compareReplaceMappingMinimalVersion(outDir))
-					// 4. Atomic publish: flip the <version>/current pointer to this build id
+					// 4. Atomic publish: flip the <version>/current pointer to this build
+					// id
 					.thenCompose(unused -> this.writeCurrentBuildPointer(versionToUpload, buildId))
 					// 5. Everything is durably in S3: refresh cache/db and the front grid
 					.whenComplete((result, throwable) -> {
@@ -1060,14 +1070,16 @@ public class PackageServiceImpl implements PackageService {
 			if (version == null) {
 				continue;
 			}
-			// Split version folder name into version number / qualifier (qualifier keeps its
+			// Split version folder name into version number / qualifier (qualifier keeps
+			// its
 			// leading hyphen, ex: 4.9.0-QUALIFIER -> 4.9.0 + "-QUALIFIER")
 			String versionNumber = version.contains(StringUtil.HYPHEN)
 					? version.substring(0, version.indexOf(StringUtil.HYPHEN)) : version;
 			String qualifier = version.contains(StringUtil.HYPHEN)
 					? version.substring(version.indexOf(StringUtil.HYPHEN)) : null;
 
-			// Active build id for this version (null for a legacy version without pointer)
+			// Active build id for this version (null for a legacy version without
+			// pointer)
 			String buildId = this.readCurrentBuildPointer(version);
 
 			PackageVersionEntity existing = existingVersionsInDb.stream()
@@ -1088,7 +1100,8 @@ public class PackageServiceImpl implements PackageService {
 				entitiesToSave.add(packageVersionEntity);
 			}
 			else if (buildId != null && !Objects.equals(existing.getBuildId(), buildId)) {
-				// Existing version re-uploaded with a new build: update the pinned build id
+				// Existing version re-uploaded with a new build: update the pinned build
+				// id
 				existing.setBuildId(buildId);
 				entitiesToSave.add(existing);
 			}
@@ -1341,8 +1354,7 @@ public class PackageServiceImpl implements PackageService {
 
 		// Retrieve the launch config associated to the parsing of the file name
 		if (launchConfigName != null) {
-			launchConfigFound = this.launchConfigRepository.findOptionalByNameIgnoreCase(launchConfigName)
-				.orElse(null);
+			launchConfigFound = this.launchConfigRepository.findOptionalByNameIgnoreCase(launchConfigName).orElse(null);
 		}
 		return launchConfigFound;
 	}
@@ -1708,8 +1720,8 @@ public class PackageServiceImpl implements PackageService {
 	}
 
 	/**
-	 * Write the &lt;version&gt;/current pointer object with the given build id (the atomic publish
-	 * marker for a package version).
+	 * Write the &lt;version&gt;/current pointer object with the given build id (the
+	 * atomic publish marker for a package version).
 	 * @param version Version folder name
 	 * @param buildId Build id to publish
 	 * @return CompletableFuture of the pointer upload

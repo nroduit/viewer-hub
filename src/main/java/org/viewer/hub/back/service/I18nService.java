@@ -58,11 +58,11 @@ public interface I18nService {
 	void handleI18nVersionToUpload(InputStream fileData, String fileName);
 
 	/**
-	 * Retrieve the active build id (immutable S3 sub-directory) of the given i18n version, used to
-	 * pin the weasis.i18n launch URL to a single immutable snapshot.
+	 * Retrieve the active build id (immutable S3 sub-directory) of the given i18n
+	 * version, used to pin the weasis.i18n launch URL to a single immutable snapshot.
 	 * @param i18nVersion i18n version string (ex: 4.0.0 or 4.0.0-QUALIFIER)
-	 * @return the active build id, or null for a legacy version stored at the top level (no build
-	 * stamp)
+	 * @return the active build id, or null for a legacy version stored at the top level
+	 * (no build stamp)
 	 */
 	String retrieveI18nBuildId(String i18nVersion);
 

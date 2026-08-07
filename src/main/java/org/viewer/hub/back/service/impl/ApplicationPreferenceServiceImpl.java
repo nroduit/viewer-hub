@@ -79,7 +79,9 @@ public class ApplicationPreferenceServiceImpl implements ApplicationPreferenceSe
 
 		// Check if we have a profile and module entities
 		if (this.moduleRepository.existsByName(moduleName) && this.profileRepository.existsByName(profileName)) {
-			Long profileId = this.profileRepository.findOptionalByName(profileName).map(ProfileEntity::getId).orElse(null);
+			Long profileId = this.profileRepository.findOptionalByName(profileName)
+				.map(ProfileEntity::getId)
+				.orElse(null);
 			Long moduleId = this.moduleRepository.findOptionalByName(moduleName).map(ModuleEntity::getId).orElse(null);
 
 			// Save a new preference in DB

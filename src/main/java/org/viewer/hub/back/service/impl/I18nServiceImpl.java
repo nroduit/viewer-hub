@@ -86,12 +86,14 @@ public class I18nServiceImpl implements I18nService {
 	@Override
 	public void handleI18nVersionToUpload(InputStream fileData, String fileName) {
 		try (fileData) {
-			// Version folder derived from the file name (ex: weasis-i18n-dist-4.0.0-SNAPSHOT.zip ->
+			// Version folder derived from the file name (ex:
+			// weasis-i18n-dist-4.0.0-SNAPSHOT.zip ->
 			// 4.0.0-SNAPSHOT)
 			String version = fileName.substring(I18N_PATTERN_NAME.length(), fileName.indexOf(ZIP_EXTENSION));
 
 			// Each upload lands in its own immutable build-stamped sub-directory
-			// (<version>/<buildId>/...) so a re-uploaded (e.g. SNAPSHOT) version never overwrites
+			// (<version>/<buildId>/...) so a re-uploaded (e.g. SNAPSHOT) version never
+			// overwrites
 			// files a client may currently be downloading.
 			String buildId = UUID.randomUUID().toString();
 			Path outDir = Paths.get(this.viewerHubResourcesPackagesWeasisI18nPath).resolve(version).resolve(buildId);
@@ -101,8 +103,10 @@ public class I18nServiceImpl implements I18nService {
 					outDir);
 
 			CompletableFuture.allOf(completableFutures.toArray(new CompletableFuture[0]))
-				// Atomic publish: only once every file of the build is durably written, flip the
-				// <version>/current pointer to this build id, then refresh the DB catalog. The new
+				// Atomic publish: only once every file of the build is durably written,
+				// flip the
+				// <version>/current pointer to this build id, then refresh the DB
+				// catalog. The new
 				// build is therefore never visible/served until it is complete.
 				.thenCompose(unused -> this.writeCurrentBuildPointer(version, buildId))
 				.whenComplete((result, throwable) -> {
@@ -143,8 +147,8 @@ public class I18nServiceImpl implements I18nService {
 	}
 
 	/**
-	 * Write the &lt;version&gt;/current pointer object with the given build id (the atomic publish
-	 * marker for an i18n version).
+	 * Write the &lt;version&gt;/current pointer object with the given build id (the
+	 * atomic publish marker for an i18n version).
 	 * @param version Version folder name
 	 * @param buildId Build id to publish
 	 * @return CompletableFuture of the pointer upload
@@ -316,9 +320,10 @@ public class I18nServiceImpl implements I18nService {
 	}
 
 	/**
-	 * Synchronise the i18n table with the versions available in S3: add missing versions and, for
-	 * every version, (re)set its build_id from the &lt;version&gt;/current pointer so a re-uploaded
-	 * (e.g. SNAPSHOT) version and a catalog rebuilt from S3 both converge on the active build.
+	 * Synchronise the i18n table with the versions available in S3: add missing versions
+	 * and, for every version, (re)set its build_id from the &lt;version&gt;/current
+	 * pointer so a re-uploaded (e.g. SNAPSHOT) version and a catalog rebuilt from S3 both
+	 * converge on the active build.
 	 * @param availableWeasisI18nVersions versions to evaluate
 	 */
 	private void refreshI18nVersionsInDb(Set<String> availableWeasisI18nVersions) {
@@ -330,14 +335,16 @@ public class I18nServiceImpl implements I18nService {
 			if (version == null) {
 				continue;
 			}
-			// Split version folder name into version number / qualifier (qualifier keeps its
+			// Split version folder name into version number / qualifier (qualifier keeps
+			// its
 			// leading hyphen, ex: 4.0.0-SNAPSHOT -> 4.0.0 + "-SNAPSHOT")
 			String versionNumber = version.contains(StringUtil.HYPHEN)
 					? version.substring(0, version.indexOf(StringUtil.HYPHEN)) : version;
 			String qualifier = version.contains(StringUtil.HYPHEN)
 					? version.substring(version.indexOf(StringUtil.HYPHEN)) : null;
 
-			// Active build id for this version (null for a legacy version without pointer)
+			// Active build id for this version (null for a legacy version without
+			// pointer)
 			String buildId = this.readCurrentBuildPointer(version);
 
 			I18nEntity existing = existingVersionsInDb.stream()
@@ -356,7 +363,8 @@ public class I18nServiceImpl implements I18nService {
 				entitiesToSave.add(i18nEntity);
 			}
 			else if (buildId != null && !Objects.equals(existing.getBuildId(), buildId)) {
-				// Existing version re-uploaded with a new build: update the pinned build id
+				// Existing version re-uploaded with a new build: update the pinned build
+				// id
 				existing.setBuildId(buildId);
 				entitiesToSave.add(existing);
 			}

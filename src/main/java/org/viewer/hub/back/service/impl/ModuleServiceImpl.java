@@ -85,7 +85,7 @@ public class ModuleServiceImpl implements ModuleService, Serializable {
 
 		// Create the specification to query the preference table
 		Specification<PreferenceEntity> preferenceSpecification = new PreferenceByUserProfileModuleSpecification(
-				target.getId(), profile.getId(), modulesIds);
+				target != null ? target.getId() : null, profile != null ? profile.getId() : null, modulesIds);
 
 		// Apply the specification to retrieve results
 		List<PreferenceEntity> preferences = this.preferenceRepository

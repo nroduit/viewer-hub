@@ -276,7 +276,8 @@ class PackageServiceImplTest {
 		String newBuildId = "new-build-id";
 		String packagePath = "resources/packages/weasis/package";
 		String mappingMinimalVersionPath = "resources/packages/weasis/mapping-minimal-version.json";
-		String currentBuildPointerKey = "%s/%s/%s".formatted(packagePath, version, PackageUtil.CURRENT_BUILD_POINTER_FILE);
+		String currentBuildPointerKey = "%s/%s/%s".formatted(packagePath, version,
+				PackageUtil.CURRENT_BUILD_POINTER_FILE);
 		// Configuration files of the new build: <version>/<buildId>/conf
 		String newBuildConfigFolderKey = "%s/%s/%s/conf".formatted(packagePath, version, newBuildId);
 		String newBuildDefaultConfigKey = "%s/%s".formatted(newBuildConfigFolderKey,
@@ -402,8 +403,7 @@ class PackageServiceImplTest {
 		// published
 		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
 		Mockito.verify(this.s3Service, Mockito.times(1)).deleteS3Objects(captor.capture());
-		assertThat(captor.getValue())
-			.isEqualTo("resources/packages/weasis/package/4.5.0-TEST/build-42/conf/3d.json");
+		assertThat(captor.getValue()).isEqualTo("resources/packages/weasis/package/4.5.0-TEST/build-42/conf/3d.json");
 	}
 
 	@Test

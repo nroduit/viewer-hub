@@ -205,8 +205,10 @@ public class LaunchPreferenceServiceImpl implements LaunchPreferenceService {
 		launchProperties.add(PackageUtil.PROPERTIES_PACKAGE_VERSION_NAME,
 				packageVersion.getVersionNumber() + packageVersion.getQualifier());
 
-		// I18n. When the i18n version is build-stamped, pin the weasis.i18n URL to the immutable
-		// <i18nVersion>/<buildId> sub-directory so the session downloads a single coherent
+		// I18n. When the i18n version is build-stamped, pin the weasis.i18n URL to the
+		// immutable
+		// <i18nVersion>/<buildId> sub-directory so the session downloads a single
+		// coherent
 		// snapshot; fall back to the legacy top-level URL (no build stamp) otherwise.
 		String i18nVersion = packageVersion.getI18nVersion();
 		String i18nSegment = i18nVersion;
@@ -261,7 +263,8 @@ public class LaunchPreferenceServiceImpl implements LaunchPreferenceService {
 	}
 
 	private TargetEntity retrieveDefaultTarget() {
-		TargetEntity defaultTargetEntity = this.targetRepository.findOptionalByNameIgnoreCase(TargetType.DEFAULT.getCode())
+		TargetEntity defaultTargetEntity = this.targetRepository
+			.findOptionalByNameIgnoreCase(TargetType.DEFAULT.getCode())
 			.orElse(null);
 		if (defaultTargetEntity == null) {
 			throw new TechnicalException("Default target not configured in database");
@@ -283,8 +286,7 @@ public class LaunchPreferenceServiceImpl implements LaunchPreferenceService {
 		List<TargetEntity> targetsToLookFor = this.retrieveTargetsToLookFor(host, user);
 
 		// Get the config corresponding to the name requested
-		LaunchConfigEntity launchConfigEntity = this.launchConfigRepository.findOptionalByName(configName)
-			.orElse(null);
+		LaunchConfigEntity launchConfigEntity = this.launchConfigRepository.findOptionalByName(configName).orElse(null);
 
 		// Get the prefered corresponding to the type requested: null = all, preferedType
 		// requested otherwise
@@ -392,9 +394,12 @@ public class LaunchPreferenceServiceImpl implements LaunchPreferenceService {
 					"Version not installed on server", WeasisLevelMessageType.WARN)));
 		}
 
-		// Set in the variables of freemarker. When the version is build-stamped, pin the launch
-		// codebase URL to the immutable <version>/<buildId> sub-directory so the whole session
-		// downloads a single coherent snapshot even if the version is re-uploaded meanwhile.
+		// Set in the variables of freemarker. When the version is build-stamped, pin the
+		// launch
+		// codebase URL to the immutable <version>/<buildId> sub-directory so the whole
+		// session
+		// downloads a single coherent snapshot even if the version is re-uploaded
+		// meanwhile.
 		String packageVersionSegment = packageVersionEntityToReturn.getQualifier() == null
 				? packageVersionEntityToReturn.getVersionNumber()
 				: packageVersionEntityToReturn.getVersionNumber() + packageVersionEntityToReturn.getQualifier();
@@ -655,7 +660,8 @@ public class LaunchPreferenceServiceImpl implements LaunchPreferenceService {
 				.orElse(null);
 
 			// Check if launch config is associated to a launch
-			if (this.launchRepository.existsByLaunchEntityPKLaunchConfigId(launchConfigFound.getId())) {
+			if (launchConfigFound != null
+					&& this.launchRepository.existsByLaunchEntityPKLaunchConfigId(launchConfigFound.getId())) {
 				// case there is a launch associated to the launch config:
 				throw new ConstraintException(
 						"Delete not done: a launch is associated to the launch config. Please remove launch before deleting launch config.");
@@ -668,11 +674,11 @@ public class LaunchPreferenceServiceImpl implements LaunchPreferenceService {
 		LOG.debug("deleteLaunchConfig");
 
 		// Retrieve the launch config
-		LaunchConfigEntity launchConfig = this.launchConfigRepository.findOptionalByName(launchConfigName)
-			.orElse(null);
-
+		LaunchConfigEntity launchConfig = this.launchConfigRepository.findOptionalByName(launchConfigName).orElse(null);
 		// Delete launch config
-		this.launchConfigRepository.delete(launchConfig);
+		if (launchConfig != null) {
+			this.launchConfigRepository.delete(launchConfig);
+		}
 	}
 
 	@Override
@@ -694,7 +700,8 @@ public class LaunchPreferenceServiceImpl implements LaunchPreferenceService {
 				.orElse(null);
 
 			// Check if launch prefered is associated to a launch
-			if (this.launchRepository.existsByLaunchEntityPKLaunchPreferredId(launchPreferedFound.getId())) {
+			if (launchPreferedFound != null
+					&& this.launchRepository.existsByLaunchEntityPKLaunchPreferredId(launchPreferedFound.getId())) {
 				// case there is a launch associated to the launch prefered:
 				throw new ConstraintException(
 						"Delete not done: a launch is associated to the launch prefered. Please remove launch before deleting launch prefered.");
@@ -792,8 +799,7 @@ public class LaunchPreferenceServiceImpl implements LaunchPreferenceService {
 		// Get the target corresponding to the name requested
 		TargetEntity targetEntity = this.targetRepository.findOptionalByNameIgnoreCase(targetName).orElse(null);
 		// Get the config corresponding to the name requested
-		LaunchConfigEntity launchConfigEntity = this.launchConfigRepository.findOptionalByName(configName)
-			.orElse(null);
+		LaunchConfigEntity launchConfigEntity = this.launchConfigRepository.findOptionalByName(configName).orElse(null);
 		// Get the prefered corresponding to the name requested
 		LaunchPreferredEntity launchPreferedEntity = this.launchPreferredRepository.findOptionalByName(preferedName)
 			.orElse(null);
