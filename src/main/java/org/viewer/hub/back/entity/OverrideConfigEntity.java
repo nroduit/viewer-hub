@@ -74,13 +74,14 @@ public class OverrideConfigEntity extends AuditEntity implements Serializable {
 	private TargetEntity target;
 
 	/**
-	 * Build stamp of the immutable S3 sub-directory (&lt;version&gt;/&lt;buildId&gt;/conf) the
-	 * properties of this configuration have been extracted from. Since the id of the
-	 * package version does not change when a version is re-uploaded (only its build id
-	 * does), this is what allows to detect that the properties in db have been generated
-	 * from a previous build and must be extracted again. Null when the configuration has
-	 * not been generated from a build stamped folder: legacy version uploaded before the
-	 * build id was introduced, or group configuration created from the front.
+	 * Build stamp of the immutable S3 sub-directory
+	 * (&lt;version&gt;/&lt;buildId&gt;/conf) the properties of this configuration have
+	 * been extracted from. Since the id of the package version does not change when a
+	 * version is re-uploaded (only its build id does), this is what allows to detect that
+	 * the properties in db have been generated from a previous build and must be
+	 * extracted again. Null when the configuration has not been generated from a build
+	 * stamped folder: legacy version uploaded before the build id was introduced, or
+	 * group configuration created from the front.
 	 */
 	@Column(name = "build_id")
 	@JsonIgnore

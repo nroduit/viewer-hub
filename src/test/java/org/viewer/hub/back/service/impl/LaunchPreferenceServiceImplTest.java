@@ -115,8 +115,7 @@ class LaunchPreferenceServiceImplTest {
 		// Define the behaviour of the mocks
 
 		// TargetRepository
-		when(this.targetRepositoryMock.findOptionalByNameIgnoreCase(anyString()))
-			.thenReturn(Optional.of(targetEntity));
+		when(this.targetRepositoryMock.findOptionalByNameIgnoreCase(anyString())).thenReturn(Optional.of(targetEntity));
 		when(this.targetRepositoryMock.findOptionalByNameIgnoreCaseAndType(anyString(), any(TargetType.class)))
 			.thenReturn(Optional.of(targetEntity));
 		when(this.targetRepositoryMock.existsByNameIgnoreCase(anyString())).thenReturn(false);

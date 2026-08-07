@@ -133,9 +133,9 @@ public class OverrideConfigServiceImpl implements OverrideConfigService {
 	}
 
 	/**
-	 * If the OverrideConfigEntity in parameter is already in db, replace the properties of
-	 * the entity found by the ones in parameter (orphan removal deletes the properties of
-	 * the previous build), otherwise prepare the new entity to be inserted.
+	 * If the OverrideConfigEntity in parameter is already in db, replace the properties
+	 * of the entity found by the ones in parameter (orphan removal deletes the properties
+	 * of the previous build), otherwise prepare the new entity to be inserted.
 	 * @param overrideConfig OverrideConfigEntity built from the configuration files
 	 * @return the entity to save
 	 */
@@ -146,8 +146,8 @@ public class OverrideConfigServiceImpl implements OverrideConfigService {
 				&& overrideConfig.getTarget().getId() != null
 						? this.overrideConfigRepository
 							.findOptionalByPackageVersionIdAndLaunchConfigIdAndTargetId(
-									overrideConfig.getPackageVersion().getId(), overrideConfig.getLaunchConfig().getId(),
-									overrideConfig.getTarget().getId())
+									overrideConfig.getPackageVersion().getId(),
+									overrideConfig.getLaunchConfig().getId(), overrideConfig.getTarget().getId())
 							.orElse(null)
 						: null;
 

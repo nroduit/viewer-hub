@@ -71,8 +71,7 @@ class BuildRetentionServiceTest {
 		this.buildRetentionService.cleanObsoleteBuildsForBasePath(BASE_PATH);
 
 		// Obsolete build deleted, current build kept
-		Mockito.verify(this.s3Service)
-			.deleteS3Objects(eq("%s/%s/%s/".formatted(BASE_PATH, VERSION, OBSOLETE_BUILD)));
+		Mockito.verify(this.s3Service).deleteS3Objects(eq("%s/%s/%s/".formatted(BASE_PATH, VERSION, OBSOLETE_BUILD)));
 		Mockito.verify(this.s3Service, Mockito.never())
 			.deleteS3Objects(eq("%s/%s/%s/".formatted(BASE_PATH, VERSION, CURRENT_BUILD)));
 	}
@@ -91,10 +90,12 @@ class BuildRetentionServiceTest {
 	@Test
 	void when_legacyVersionWithoutBuildStamp_should_deleteNothing() {
 		this.setUp(Duration.ofHours(24));
-		// Legacy layout: files directly under <version>/ (bundle/, conf/), no build id, no pointer
+		// Legacy layout: files directly under <version>/ (bundle/, conf/), no build id,
+		// no pointer
 		Mockito.when(this.s3Service.retrieveS3ObjectsLastModifiedFromPrefix(BASE_PATH))
 			.thenReturn(Map.of("%s/%s/bundle/felix.jar".formatted(BASE_PATH, VERSION),
-					Instant.now().minus(Duration.ofDays(10)), "%s/%s/conf/config.properties".formatted(BASE_PATH, VERSION),
+					Instant.now().minus(Duration.ofDays(10)),
+					"%s/%s/conf/config.properties".formatted(BASE_PATH, VERSION),
 					Instant.now().minus(Duration.ofDays(10))));
 
 		this.buildRetentionService.cleanObsoleteBuildsForBasePath(BASE_PATH);
