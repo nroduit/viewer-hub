@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2022-2025 Weasis Team and other contributors.
+ *  Copyright (c) 2022-2026 Weasis Team and other contributors.
  *
  *  This program and the accompanying materials are made available under the terms of the Eclipse
  *  Public License 2.0 which is available at https://www.eclipse.org/legal/epl-2.0, or the Apache
@@ -34,5 +34,7 @@ public class PackageUtil {
 	public static final String FREEMARKER_CONFIG_CACHE_KEY = "configCacheKey";
 
 	public static final String FREEMARKER_PROPERTIES_I18N_VERSION = "i18nVersion";
+
+	public static final String CURRENT_BUILD_POINTER_FILE = "current";
 
 }

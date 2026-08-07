@@ -18,6 +18,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.http.CacheControl;
 import org.springframework.http.converter.HttpMessageConverters;
 import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter;
 import org.springframework.http.converter.xml.JacksonXmlHttpMessageConverter;
@@ -32,6 +33,8 @@ import tools.jackson.dataformat.xml.XmlMapper;
 import tools.jackson.dataformat.xml.XmlWriteFeature;
 
 import java.io.IOException;
+import java.time.Duration;
+
 
 /**
  * Configuration for the Spring MVC part, serialization/deserialization Jackson, resources
@@ -111,6 +114,7 @@ public class WebConfiguration implements WebMvcConfigurer {
 		registry.addResourceHandler("/logo/**").addResourceLocations("classpath:META-INF/resources/logo/");
 		registry.addResourceHandler("/weasis/**")
 			.addResourceLocations("s3://%s/".formatted(this.s3config.getBucket()))
+			.setCacheControl(CacheControl.maxAge(Duration.ofDays(90)).cachePublic().immutable())
 			.resourceChain(true)
 			.addResolver(this.s3WeasisResourceResolver());
 	}

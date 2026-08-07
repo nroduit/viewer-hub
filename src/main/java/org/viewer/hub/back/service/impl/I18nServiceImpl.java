@@ -26,6 +26,7 @@ import org.viewer.hub.back.repository.I18nRepository;
 import org.viewer.hub.back.repository.specification.I18nVersionSpecification;
 import org.viewer.hub.back.service.I18nService;
 import org.viewer.hub.back.service.S3Service;
+import org.viewer.hub.back.util.PackageUtil;
 import org.viewer.hub.back.util.StringUtil;
 import org.viewer.hub.front.views.weasis.i18n.component.I18nFilter;
 import software.amazon.awssdk.services.s3.model.DeleteObjectsResponse;
@@ -35,12 +36,14 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
@@ -83,15 +86,25 @@ public class I18nServiceImpl implements I18nService {
 	@Override
 	public void handleI18nVersionToUpload(InputStream fileData, String fileName) {
 		try (fileData) {
-			// Create output directory where the zip file will be uploaded
-			Path outDir = Paths.get(this.viewerHubResourcesPackagesWeasisI18nPath)
-				.resolve(fileName.substring(I18N_PATTERN_NAME.length(), fileName.indexOf(ZIP_EXTENSION)));
+			// Version folder derived from the file name (ex: weasis-i18n-dist-4.0.0-SNAPSHOT.zip ->
+			// 4.0.0-SNAPSHOT)
+			String version = fileName.substring(I18N_PATTERN_NAME.length(), fileName.indexOf(ZIP_EXTENSION));
+
+			// Each upload lands in its own immutable build-stamped sub-directory
+			// (<version>/<buildId>/...) so a re-uploaded (e.g. SNAPSHOT) version never overwrites
+			// files a client may currently be downloading.
+			String buildId = UUID.randomUUID().toString();
+			Path outDir = Paths.get(this.viewerHubResourcesPackagesWeasisI18nPath).resolve(version).resolve(buildId);
 
 			// Upload files in S3
 			List<CompletableFuture<PutObjectResponse>> completableFutures = this.extractI18nFilesToUploadInS3(fileData,
 					outDir);
 
-			CompletableFuture.allOf(completableFutures.toArray(new CompletableFuture[completableFutures.size()]))
+			CompletableFuture.allOf(completableFutures.toArray(new CompletableFuture[0]))
+				// Atomic publish: only once every file of the build is durably written, flip the
+				// <version>/current pointer to this build id, then refresh the DB catalog. The new
+				// build is therefore never visible/served until it is complete.
+				.thenCompose(unused -> this.writeCurrentBuildPointer(version, buildId))
 				.whenComplete((result, throwable) -> {
 					if (throwable == null) {
 						// Refresh the DB
@@ -107,6 +120,62 @@ public class I18nServiceImpl implements I18nService {
 		}
 		catch (IOException e) {
 			throw new TechnicalException("Issue when uploading i18n:%s".formatted(e.getMessage()));
+		}
+	}
+
+	@Override
+	public String retrieveI18nBuildId(String i18nVersion) {
+		if (i18nVersion == null || i18nVersion.isBlank()) {
+			return null;
+		}
+		String versionNumber = i18nVersion.contains(StringUtil.HYPHEN)
+				? i18nVersion.substring(0, i18nVersion.indexOf(StringUtil.HYPHEN)) : i18nVersion;
+		String qualifier = i18nVersion.contains(StringUtil.HYPHEN)
+				? i18nVersion.substring(i18nVersion.indexOf(StringUtil.HYPHEN)) : null;
+		return this.i18nRepository.findAll()
+			.stream()
+			.filter(e -> Objects.equals(e.getVersionNumber(), versionNumber)
+					&& Objects.equals(e.getQualifier(), qualifier))
+			.map(I18nEntity::getBuildId)
+			.filter(Objects::nonNull)
+			.findFirst()
+			.orElse(null);
+	}
+
+	/**
+	 * Write the &lt;version&gt;/current pointer object with the given build id (the atomic publish
+	 * marker for an i18n version).
+	 * @param version Version folder name
+	 * @param buildId Build id to publish
+	 * @return CompletableFuture of the pointer upload
+	 */
+	private CompletableFuture<PutObjectResponse> writeCurrentBuildPointer(String version, String buildId) {
+		String pointerKey = "%s/%s/%s".formatted(this.viewerHubResourcesPackagesWeasisI18nPath, version,
+				PackageUtil.CURRENT_BUILD_POINTER_FILE);
+		return this.s3Service.uploadObjectInS3(new ByteArrayInputStream(buildId.getBytes(StandardCharsets.UTF_8)),
+				pointerKey);
+	}
+
+	/**
+	 * Read the active build id from the &lt;version&gt;/current pointer object.
+	 * @param version Version folder name
+	 * @return the active build id, or null when no pointer exists (legacy version)
+	 */
+	private String readCurrentBuildPointer(String version) {
+		String pointerKey = "%s/%s/%s".formatted(this.viewerHubResourcesPackagesWeasisI18nPath, version,
+				PackageUtil.CURRENT_BUILD_POINTER_FILE);
+		if (!this.s3Service.doesS3KeyExists(pointerKey)) {
+			return null;
+		}
+		try (InputStream is = this.s3Service.retrieveS3Object(pointerKey)) {
+			if (is == null) {
+				return null;
+			}
+			String buildId = new String(is.readAllBytes(), StandardCharsets.UTF_8).trim();
+			return buildId.isBlank() ? null : buildId;
+		}
+		catch (IOException e) {
+			throw new TechnicalException("Issue when reading i18n build pointer:%s".formatted(e.getMessage()));
 		}
 	}
 
@@ -247,47 +316,56 @@ public class I18nServiceImpl implements I18nService {
 	}
 
 	/**
-	 * Check if a i18n version is missing in DB and add it if necessary
+	 * Synchronise the i18n table with the versions available in S3: add missing versions and, for
+	 * every version, (re)set its build_id from the &lt;version&gt;/current pointer so a re-uploaded
+	 * (e.g. SNAPSHOT) version and a catalog rebuilt from S3 both converge on the active build.
 	 * @param availableWeasisI18nVersions versions to evaluate
 	 */
 	private void refreshI18nVersionsInDb(Set<String> availableWeasisI18nVersions) {
 		// Retrieve all i18n versions in db
 		List<I18nEntity> existingVersionsInDb = this.i18nRepository.findAll();
 
-		// Format the versions in xx.xx.xx-QUALIFIER
-		List<String> formattedExistingVersionsInDb = existingVersionsInDb.stream()
-			.map(e -> e.getQualifier() != null ? e.getVersionNumber() + e.getQualifier() : e.getVersionNumber())
-			.toList();
+		List<I18nEntity> entitiesToSave = new ArrayList<>();
+		for (String version : availableWeasisI18nVersions) {
+			if (version == null) {
+				continue;
+			}
+			// Split version folder name into version number / qualifier (qualifier keeps its
+			// leading hyphen, ex: 4.0.0-SNAPSHOT -> 4.0.0 + "-SNAPSHOT")
+			String versionNumber = version.contains(StringUtil.HYPHEN)
+					? version.substring(0, version.indexOf(StringUtil.HYPHEN)) : version;
+			String qualifier = version.contains(StringUtil.HYPHEN)
+					? version.substring(version.indexOf(StringUtil.HYPHEN)) : null;
 
-		// Retrieve the versions available in the weasis/i18n but not set in the db
-		List<String> versionsNotExistingInDb = new ArrayList<>(availableWeasisI18nVersions.stream()
-			.filter(Objects::nonNull)
-			.filter(av -> !formattedExistingVersionsInDb.contains(av))
-			.toList());
+			// Active build id for this version (null for a legacy version without pointer)
+			String buildId = this.readCurrentBuildPointer(version);
 
-		// Case no hyphen
-		Set<I18nEntity> versionsToAddInDb = versionsNotExistingInDb.stream()
-			.filter(v -> !v.contains(StringUtil.HYPHEN))
-			.map(v -> {
+			I18nEntity existing = existingVersionsInDb.stream()
+				.filter(e -> Objects.equals(e.getVersionNumber(), versionNumber)
+						&& Objects.equals(e.getQualifier(), qualifier))
+				.findFirst()
+				.orElse(null);
+
+			if (existing == null) {
+				// New version: create the catalog row
 				I18nEntity i18nEntity = new I18nEntity();
-				i18nEntity.setVersionNumber(v);
-				i18nEntity.setDescription("Version %s".formatted(v));
-				return i18nEntity;
-			})
-			.collect(Collectors.toSet());
+				i18nEntity.setVersionNumber(versionNumber);
+				i18nEntity.setQualifier(qualifier);
+				i18nEntity.setDescription("Version %s".formatted(version));
+				i18nEntity.setBuildId(buildId);
+				entitiesToSave.add(i18nEntity);
+			}
+			else if (buildId != null && !Objects.equals(existing.getBuildId(), buildId)) {
+				// Existing version re-uploaded with a new build: update the pinned build id
+				existing.setBuildId(buildId);
+				entitiesToSave.add(existing);
+			}
+		}
 
-		// Case hyphen
-		versionsToAddInDb.addAll(versionsNotExistingInDb.stream().filter(v -> v.contains(StringUtil.HYPHEN)).map(v -> {
-			I18nEntity i18nEntity = new I18nEntity();
-			String versionNumber = v.substring(0, v.indexOf(StringUtil.HYPHEN));
-			i18nEntity.setVersionNumber(versionNumber);
-			i18nEntity.setQualifier(v.substring(v.indexOf(StringUtil.HYPHEN)));
-			i18nEntity.setDescription("Version %s".formatted(v));
-			return i18nEntity;
-		}).collect(Collectors.toSet()));
-
-		// Save in the db the missing versions
-		this.i18nRepository.saveAll(versionsToAddInDb);
+		// Save the created/updated versions
+		if (!entitiesToSave.isEmpty()) {
+			this.i18nRepository.saveAll(entitiesToSave);
+		}
 	}
 
 }

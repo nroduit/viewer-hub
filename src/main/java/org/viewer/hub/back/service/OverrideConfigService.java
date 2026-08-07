@@ -67,7 +67,27 @@ public interface OverrideConfigService {
 			LaunchConfigEntity launchConfig, TargetEntity target);
 
 	/**
-	 * Save all OverrideConfigEntities in parameter
+	 * Check that the package version (ex: xx.xx.xx-QUALIFIER)/ config (ex:3d) / target
+	 * exists in the OverrideConfig repository <b>and</b> that its properties have been
+	 * generated from the build in parameter. The id of a package version does not change
+	 * when the version is re-uploaded (only its build id does): checking the build id is
+	 * therefore what allows to detect a configuration in db which is still the one of a
+	 * previous build and has to be extracted again from S3.
+	 * @param packageVersion Package version to evaluate
+	 * @param launchConfig Launch Config to evaluate
+	 * @param target Target to evaluate
+	 * @param buildId Build id currently published for the package version (null for a
+	 * legacy version without build stamped folder)
+	 * @return true if the override config exists and is up-to-date with the build in
+	 * parameter
+	 */
+	boolean existOverrideConfigWithVersionConfigTargetAndBuildId(PackageVersionEntity packageVersion,
+			LaunchConfigEntity launchConfig, TargetEntity target, String buildId);
+
+	/**
+	 * Save all OverrideConfigEntities in parameter: the OverrideConfigEntities which are
+	 * already in db are updated (their properties are replaced by the ones in parameter),
+	 * the other ones are created.
 	 * @param overrideConfigEntities OverrideConfigEntities to save
 	 */
 	void saveAll(Set<OverrideConfigEntity> overrideConfigEntities);

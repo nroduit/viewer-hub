@@ -40,6 +40,7 @@ import org.viewer.hub.back.repository.LaunchRepository;
 import org.viewer.hub.back.repository.LaunchRepositoryTest;
 import org.viewer.hub.back.repository.TargetRepository;
 import org.viewer.hub.back.service.GroupService;
+import org.viewer.hub.back.service.I18nService;
 import org.viewer.hub.back.service.LaunchPreferenceService;
 import org.viewer.hub.back.service.OverrideConfigService;
 import org.viewer.hub.back.service.PackageService;
@@ -82,6 +83,8 @@ class LaunchPreferenceServiceImplTest {
 	private final PackageService packageServiceMock = Mockito.mock(PackageService.class);
 
 	private final OverrideConfigService overrideConfigServiceMock = Mockito.mock(OverrideConfigService.class);
+
+	private final I18nService i18nServiceMock = Mockito.mock(I18nService.class);
 
 	private LaunchPreferenceService launchPreferenceService;
 
@@ -159,7 +162,7 @@ class LaunchPreferenceServiceImplTest {
 		// Build the mocked launch preference service
 		this.launchPreferenceService = new LaunchPreferenceServiceImpl(this.launchRepositoryMock,
 				this.launchConfigRepositoryMock, this.launchPreferedRepositoryMock, this.targetRepositoryMock,
-				this.groupServiceMock, this.packageServiceMock, this.overrideConfigServiceMock);
+				this.groupServiceMock, this.packageServiceMock, this.overrideConfigServiceMock, this.i18nServiceMock);
 	}
 
 	/**

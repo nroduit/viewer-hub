@@ -11,9 +11,6 @@
 
 package org.viewer.hub.back.service.impl;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotNull;
 import lombok.extern.slf4j.Slf4j;
@@ -54,11 +51,17 @@ import org.viewer.hub.front.views.weasis.bundle.override.component.RefreshPackag
 import software.amazon.awssdk.services.s3.model.DeleteObjectsResponse;
 import software.amazon.awssdk.services.s3.model.PutObjectResponse;
 import software.amazon.awssdk.transfer.s3.model.CompletedCopy;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.PropertyNamingStrategies;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -72,6 +75,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -173,22 +177,49 @@ public class PackageServiceImpl implements PackageService {
 	public void handlePackageVersionToUpload(InputStream fileData, String versionToUpload) {
 		try (fileData) {
 			if (versionToUpload != null && !versionToUpload.isBlank()) {
-				// Determine the output directory key where the zip file will be uploaded
-				Path outDir = Paths.get(this.viewerHubResourcesPackagesWeasisPackagePath).resolve(versionToUpload);
+				// Each upload lands in its own immutable build-stamped sub-directory
+				// (<version>/<buildId>/...) so a re-uploaded (e.g. SNAPSHOT) version never
+				// overwrites files a client may currently be downloading.
+				String buildId = UUID.randomUUID().toString();
+				Path outDir = Paths.get(this.viewerHubResourcesPackagesWeasisPackagePath)
+					.resolve(versionToUpload)
+					.resolve(buildId);
 
-				// Upload version package in S3,zip resource folder, check if the
-				// mapping-minimal-version.json file should be updated with a more
-				// recent version and refresh cache and db
+				// Upload version package in S3, then - strictly after every file is durably
+				// written - zip the resources folder, replace the mapping-minimal-version.json
+				// if a more recent one is provided, flip the <version>/current pointer to this
+				// build, and only then refresh the cache/db and the grid. Chaining the stages
+				// (instead of racing two independent allOf callbacks on the same futures list)
+				// guarantees the version never becomes visible/launchable until all of its files
+				// - including the generated resources.zip - are present in S3, so a client can
+				// never fetch a half-written package folder.
 
-				// Upload version package in S3
+				// 1. Upload version package files in S3
 				List<CompletableFuture<PutObjectResponse>> completableFutures = this.uploadVersionInS3(fileData,
 						outDir);
 
-				// Manage zip of the resources folder when all future are terminated
-				this.handleZipResourceFolder(fileData, completableFutures, outDir);
-
-				// When all uploads have been done
-				this.handleReplacementOfMappingMinimalVersionAndRefresh(completableFutures, outDir);
+				CompletableFuture.allOf(completableFutures.toArray(new CompletableFuture[0]))
+					// 2. Zip the resources folder at the root of the package folder
+					.thenCompose(unused -> {
+						resetInputStream(fileData);
+						return this.zipResourcesFolderToRootPackageFolder(fileData, outDir);
+					})
+					// 3. Replace mapping-minimal-version.json if a more recent one was imported
+					.thenCompose(unused -> this.compareReplaceMappingMinimalVersion(outDir))
+					// 4. Atomic publish: flip the <version>/current pointer to this build id
+					.thenCompose(unused -> this.writeCurrentBuildPointer(versionToUpload, buildId))
+					// 5. Everything is durably in S3: refresh cache/db and the front grid
+					.whenComplete((result, throwable) -> {
+						if (throwable == null) {
+							this.refreshAvailablePackageVersion();
+							this.applicationEventPublisher.publishEvent(new RefreshPackageGridEvent());
+						}
+						else {
+							throw new TechnicalException(
+									"Issue when uploading package version in S3, at least one future didn't end well:%s"
+										.formatted(throwable.getMessage()));
+						}
+					});
 			}
 		}
 		catch (IOException e) {
@@ -959,30 +990,59 @@ public class PackageServiceImpl implements PackageService {
 	 */
 	private CompletableFuture<DeleteObjectsResponse> deleteResourcePackageVersionInS3(
 			OverrideConfigEntity overrideConfigEntity) {
-		// Case delete the entire package version folder if launch config default and
-		// group is default
+		PackageVersionEntity packageVersion = overrideConfigEntity.getPackageVersion();
+
+		// Case delete the entire package version folder (all its builds and its current
+		// pointer) if launch config default and group is default
 		if (Objects.equals(overrideConfigEntity.getLaunchConfig().getName(), LaunchConfigType.DEFAULT.getCode())
 				&& Objects.equals(overrideConfigEntity.getTarget().getType(), TargetType.DEFAULT)) {
-			return this.s3Service.deleteS3Objects("%s/%s%s".formatted(this.viewerHubResourcesPackagesWeasisPackagePath,
-					overrideConfigEntity.getPackageVersion().getVersionNumber(),
-					overrideConfigEntity.getPackageVersion().getQualifier() == null ? StringUtil.EMPTY_STRING
-							: overrideConfigEntity.getPackageVersion().getQualifier()));
+			return this.s3Service.deleteS3Objects("%s/%s".formatted(this.viewerHubResourcesPackagesWeasisPackagePath,
+					retrieveVersionFolderName(packageVersion)));
 		}
 		// Case delete only the config version selected (properties file) only if the
-		// group is default
+		// group is default: the configuration files of a version live in the folder of
+		// the build currently published
 		else if (Objects.equals(overrideConfigEntity.getTarget().getType(), TargetType.DEFAULT)) {
-			boolean shouldUseJsonParsing = this.shouldUseJsonParsing(overrideConfigEntity.getPackageVersion());
-			return this.s3Service.deleteS3Objects("%s/%s%s%s/%s%s%s".formatted(
-					this.viewerHubResourcesPackagesWeasisPackagePath,
-					overrideConfigEntity.getPackageVersion().getVersionNumber(),
-					overrideConfigEntity.getPackageVersion().getQualifier() == null ? StringUtil.EMPTY_STRING
-							: overrideConfigEntity.getPackageVersion().getQualifier(),
-					PropertiesFileName.PATH_CONF_FOLDER,
+			boolean shouldUseJsonParsing = this.shouldUseJsonParsing(packageVersion);
+			return this.s3Service.deleteS3Objects("%s/%s%s%s".formatted(
+					this.retrieveConfigFolderKey(retrieveVersionFolderName(packageVersion),
+							packageVersion.getBuildId()),
 					shouldUseJsonParsing ? StringUtil.EMPTY_STRING : PropertiesFileName.EXT_PATTERN_NAME,
 					overrideConfigEntity.getLaunchConfig().getName(), shouldUseJsonParsing
 							? PropertiesFileName.EXTENSION_JSON_FILE : PropertiesFileName.EXTENSION_PROPERTIES_FILE));
 		}
 		return CompletableFuture.completedFuture(null);
+	}
+
+	/**
+	 * Retrieve the name of the S3 folder of a package version (ex: 4.9.0-QUALIFIER)
+	 * @param packageVersion PackageVersionEntity to evaluate
+	 * @return name of the folder of the version
+	 */
+	private static String retrieveVersionFolderName(PackageVersionEntity packageVersion) {
+		return "%s%s".formatted(packageVersion.getVersionNumber(),
+				packageVersion.getQualifier() == null ? StringUtil.EMPTY_STRING : packageVersion.getQualifier());
+	}
+
+	/**
+	 * Retrieve the S3 key of the folder containing the configuration files of a package
+	 * version. Config files live inside the immutable build-stamped sub-directory
+	 * (&lt;version&gt;/&lt;buildId&gt;/conf), except for legacy versions (null build id)
+	 * whose files are still at the top level (&lt;version&gt;/conf).
+	 * @param version Name of the folder of the version (ex: 4.9.0-QUALIFIER)
+	 * @param buildId Build id currently published for this version, null for a legacy
+	 * version
+	 * @return S3 key of the conf folder of the version
+	 */
+	private String retrieveConfigFolderKey(String version, String buildId) {
+		Path versionDir = buildId == null || buildId.isBlank()
+				? Paths.get(this.viewerHubResourcesPackagesWeasisPackagePath, version)
+				: Paths.get(this.viewerHubResourcesPackagesWeasisPackagePath, version, buildId);
+		// Note: PATH_CONF_FOLDER starts with a separator, so it has to be joined with
+		// Paths.get (Path.resolve would consider it as an absolute path and return only
+		// "/conf")
+		return PathUrlUtil
+			.pathWithS3Separator(Paths.get(versionDir.toString(), PropertiesFileName.PATH_CONF_FOLDER).toString());
 	}
 
 	/**
@@ -995,43 +1055,49 @@ public class PackageServiceImpl implements PackageService {
 		// Retrieve all package versions in db
 		List<PackageVersionEntity> existingVersionsInDb = this.packageVersionRepository.findAll();
 
-		// Format the versions in xx.xx.xx-QUALIFIER
-		List<String> formattedExistingVersionsInDb = existingVersionsInDb.stream()
-			.map(e -> e.getQualifier() != null ? e.getVersionNumber() + e.getQualifier() : e.getVersionNumber())
-			.toList();
+		List<PackageVersionEntity> entitiesToSave = new ArrayList<>();
+		for (String version : availableWeasisPackageVersions) {
+			if (version == null) {
+				continue;
+			}
+			// Split version folder name into version number / qualifier (qualifier keeps its
+			// leading hyphen, ex: 4.9.0-QUALIFIER -> 4.9.0 + "-QUALIFIER")
+			String versionNumber = version.contains(StringUtil.HYPHEN)
+					? version.substring(0, version.indexOf(StringUtil.HYPHEN)) : version;
+			String qualifier = version.contains(StringUtil.HYPHEN)
+					? version.substring(version.indexOf(StringUtil.HYPHEN)) : null;
 
-		// Retrieve the versions available in the weasis/package but not set in the db
-		List<String> versionsNotExistingInDb = new ArrayList<>(availableWeasisPackageVersions.stream()
-			.filter(Objects::nonNull)
-			.filter(av -> !formattedExistingVersionsInDb.contains(av))
-			.toList());
+			// Active build id for this version (null for a legacy version without pointer)
+			String buildId = this.readCurrentBuildPointer(version);
 
-		// Case no hyphen
-		Set<PackageVersionEntity> versionsToAddInDb = versionsNotExistingInDb.stream()
-			.filter(v -> !v.contains(StringUtil.HYPHEN))
-			.map(v -> {
+			PackageVersionEntity existing = existingVersionsInDb.stream()
+				.filter(e -> Objects.equals(e.getVersionNumber(), versionNumber)
+						&& Objects.equals(e.getQualifier(), qualifier))
+				.findFirst()
+				.orElse(null);
+
+			if (existing == null) {
+				// New version: create the catalog row
 				PackageVersionEntity packageVersionEntity = new PackageVersionEntity();
-				packageVersionEntity.setVersionNumber(v);
-				packageVersionEntity.setI18nVersion(this.retrieveI18nFromVersionNumber(v, minimalReleaseVersions));
-				packageVersionEntity.setDescription("Version %s".formatted(v));
-				return packageVersionEntity;
-			})
-			.collect(Collectors.toSet());
+				packageVersionEntity.setVersionNumber(versionNumber);
+				packageVersionEntity.setQualifier(qualifier);
+				packageVersionEntity
+					.setI18nVersion(this.retrieveI18nFromVersionNumber(versionNumber, minimalReleaseVersions));
+				packageVersionEntity.setDescription("Version %s".formatted(version));
+				packageVersionEntity.setBuildId(buildId);
+				entitiesToSave.add(packageVersionEntity);
+			}
+			else if (buildId != null && !Objects.equals(existing.getBuildId(), buildId)) {
+				// Existing version re-uploaded with a new build: update the pinned build id
+				existing.setBuildId(buildId);
+				entitiesToSave.add(existing);
+			}
+		}
 
-		// Case hyphen
-		versionsToAddInDb.addAll(versionsNotExistingInDb.stream().filter(v -> v.contains(StringUtil.HYPHEN)).map(v -> {
-			PackageVersionEntity packageVersionEntity = new PackageVersionEntity();
-			String versionNumber = v.substring(0, v.indexOf(StringUtil.HYPHEN));
-			packageVersionEntity.setVersionNumber(versionNumber);
-			packageVersionEntity.setQualifier(v.substring(v.indexOf(StringUtil.HYPHEN)));
-			packageVersionEntity
-				.setI18nVersion(this.retrieveI18nFromVersionNumber(versionNumber, minimalReleaseVersions));
-			packageVersionEntity.setDescription("Version %s".formatted(v));
-			return packageVersionEntity;
-		}).collect(Collectors.toSet()));
-
-		// Save in the db the missing versions
-		this.packageVersionRepository.saveAll(versionsToAddInDb);
+		// Save the created/updated versions
+		if (!entitiesToSave.isEmpty()) {
+			this.packageVersionRepository.saveAll(entitiesToSave);
+		}
 	}
 
 	/**
@@ -1069,7 +1135,9 @@ public class PackageServiceImpl implements PackageService {
 	}
 
 	/**
-	 * Load S3 configurations properties in db if not already present
+	 * Load S3 configurations properties in db if not already present or if they have been
+	 * generated from a previous build of the version (case of a version re-uploaded: the
+	 * id of the package version does not change, only its build id does)
 	 */
 	private void loadS3ConfigurationPropertiesInDb(Set<String> availableWeasisPackageVersions) {
 		// Retrieve default launch_config and target
@@ -1082,6 +1150,14 @@ public class PackageServiceImpl implements PackageService {
 			Set<OverrideConfigEntity> overrideConfigEntities = new HashSet<>();
 			PackageVersionEntity packageVersionEntity = this.retrievePackageVersionEntity(availableVersion);
 
+			// The catalog has just been refreshed: without the package version in db the
+			// key of the override configs to persist cannot be built
+			if (packageVersionEntity == null) {
+				LOG.warn("No package version found in db for version {}: configuration properties are not loaded",
+						availableVersion);
+				return;
+			}
+
 			// Flag to know if we should use json parsing or properties parsing of
 			// configuration files
 			boolean useJsonParsing = this.shouldUseJsonParsing(packageVersionEntity);
@@ -1089,11 +1165,8 @@ public class PackageServiceImpl implements PackageService {
 			// Needed to be effectively final
 			final OverrideConfigEntity[] defaultOverrideConfig = { null };
 			// Config folder key for this version
-			String configFolderKey = PathUrlUtil.pathWithS3Separator(
-					Paths
-						.get(this.viewerHubResourcesPackagesWeasisPackagePath, availableVersion,
-								PropertiesFileName.PATH_CONF_FOLDER)
-						.toString());
+			String buildId = packageVersionEntity.getBuildId();
+			String configFolderKey = this.retrieveConfigFolderKey(availableVersion, buildId);
 
 			// Default properties file key for this version
 			String defaultConfigPropertiesFileKey = PathUrlUtil.pathWithS3Separator(
@@ -1110,13 +1183,13 @@ public class PackageServiceImpl implements PackageService {
 				// properties and build overrideConfigEntity to persist
 				this.determineDefaultConfigurationFromS3ToPersist(defaultConfigPropertiesFileKey, packageVersionEntity,
 						defaultLaunchConfig, defaultTarget, defaultOverrideConfig, overrideConfigEntities,
-						useJsonParsing);
+						useJsonParsing, buildId);
 
 				// Browse content of folder in order to find other configs (with default
 				// found above)
 				this.s3Service.retrieveS3KeysFromPrefix(configFolderKey)
 					.forEach(key -> this.determineNotDefaultConfigurationFromS3ToPersist(key, packageVersionEntity,
-							defaultTarget, defaultOverrideConfig, overrideConfigEntities, useJsonParsing));
+							defaultTarget, defaultOverrideConfig, overrideConfigEntities, useJsonParsing, buildId));
 			}
 
 			// Modify the properties to take into account the environment properties
@@ -1173,20 +1246,29 @@ public class PackageServiceImpl implements PackageService {
 	 * @param overrideConfigEntities List of OverrideConfigEntity to persist
 	 * @param useJsonParsing Flag to know if json parsing of properties file should be
 	 * used
+	 * @param buildId Build currently published for the package version: the properties
+	 * are extracted again when the configuration in db comes from another build
 	 */
 	private void determineDefaultConfigurationFromS3ToPersist(String key, PackageVersionEntity packageVersionEntity,
 			LaunchConfigEntity defaultLaunchConfig, TargetEntity defaultTarget,
 			OverrideConfigEntity[] defaultOverrideConfig, Set<OverrideConfigEntity> overrideConfigEntities,
-			boolean useJsonParsing) {
+			boolean useJsonParsing, String buildId) {
 		try {
-			if (!this.overrideConfigService.existOverrideConfigWithVersionConfigTarget(packageVersionEntity,
-					defaultLaunchConfig, defaultTarget)) {
+			if (!this.overrideConfigService.existOverrideConfigWithVersionConfigTargetAndBuildId(packageVersionEntity,
+					defaultLaunchConfig, defaultTarget, buildId)) {
 				// Read the properties file and fill the entity to save
 				// Keep the default config in order to fill the other config (3d,
 				// dicomizer, etc..) with default values
 				defaultOverrideConfig[0] = this.extractS3PropertiesAndBuildConfigToPersist(key, defaultLaunchConfig,
-						packageVersionEntity, defaultTarget, null, useJsonParsing);
+						packageVersionEntity, defaultTarget, null, useJsonParsing, buildId);
 				overrideConfigEntities.add(defaultOverrideConfig[0]);
+			}
+			else if (packageVersionEntity != null && defaultLaunchConfig != null && defaultTarget != null) {
+				// Default configuration already up-to-date with the current build: reuse
+				// the one in db to fill the other configs (3d, dicomizer, etc..) which
+				// would still have to be extracted
+				defaultOverrideConfig[0] = this.overrideConfigService.retrieveProperties(packageVersionEntity.getId(),
+						defaultLaunchConfig.getId(), defaultTarget.getId());
 			}
 		}
 		catch (Exception e) {
@@ -1207,21 +1289,24 @@ public class PackageServiceImpl implements PackageService {
 	 * @param overrideConfigEntities List of OverrideConfigEntity to persist
 	 * @param useJsonParsing Flag to know if json parsing of properties file should be
 	 * used
+	 * @param buildId Build currently published for the package version: the properties
+	 * are extracted again when the configuration in db comes from another build
 	 */
 	private void determineNotDefaultConfigurationFromS3ToPersist(String key, PackageVersionEntity packageVersionEntity,
 			TargetEntity defaultTarget, OverrideConfigEntity[] defaultOverrideConfig,
-			Set<OverrideConfigEntity> overrideConfigEntities, boolean useJsonParsing) {
+			Set<OverrideConfigEntity> overrideConfigEntities, boolean useJsonParsing, String buildId) {
 		String fileName = Paths.get(key).getFileName().toString();
 		try {
 			// Retrieve the launch config based on the file name
 			LaunchConfigEntity launchConfigFound = this.retrieveLaunchConfigAssociatedToFileName(useJsonParsing,
 					fileName);
 
-			if (launchConfigFound != null && !this.overrideConfigService
-				.existOverrideConfigWithVersionConfigTarget(packageVersionEntity, launchConfigFound, defaultTarget)) {
+			if (launchConfigFound != null
+					&& !this.overrideConfigService.existOverrideConfigWithVersionConfigTargetAndBuildId(
+							packageVersionEntity, launchConfigFound, defaultTarget, buildId)) {
 				// Read the properties file and fill the entity to save
 				overrideConfigEntities.add(this.extractS3PropertiesAndBuildConfigToPersist(key, launchConfigFound,
-						packageVersionEntity, defaultTarget, defaultOverrideConfig[0], useJsonParsing));
+						packageVersionEntity, defaultTarget, defaultOverrideConfig[0], useJsonParsing, buildId));
 			}
 		}
 		catch (Exception e) {
@@ -1271,11 +1356,12 @@ public class PackageServiceImpl implements PackageService {
 	 * @param defaultOverrideConfig OverrideConfigEntity which corresponds to the default
 	 * @param useJsonParsing Flag to know if json parsing of properties file should be
 	 * used
+	 * @param buildId Build the properties have been extracted from
 	 * @return OverrideConfigEntity to persist
 	 */
 	private OverrideConfigEntity extractS3PropertiesAndBuildConfigToPersist(String key, LaunchConfigEntity launchConfig,
 			PackageVersionEntity packageVersion, TargetEntity target, OverrideConfigEntity defaultOverrideConfig,
-			boolean useJsonParsing) {
+			boolean useJsonParsing, String buildId) {
 		OverrideConfigEntity overrideConfigEntity;
 
 		// Read properties from file
@@ -1306,6 +1392,9 @@ public class PackageServiceImpl implements PackageService {
 		overrideConfigEntity.setPackageVersion(packageVersion);
 		overrideConfigEntity.setLaunchConfig(launchConfig);
 		overrideConfigEntity.setTarget(target);
+		// Keep track of the build the properties have been extracted from, so that a
+		// version re-uploaded with a new build id is detected and loaded again
+		overrideConfigEntity.setBuildId(buildId);
 
 		return overrideConfigEntity;
 	}
@@ -1333,8 +1422,10 @@ public class PackageServiceImpl implements PackageService {
 	 */
 	List<MinimalReleaseVersion> retrieveS3MinimalReleaseVersions(String key) {
 		try (InputStream responseInputStream = this.s3Service.retrieveS3Object(key)) {
-			ObjectMapper objectMapper = new ObjectMapper()
-				.setPropertyNamingStrategy(PropertyNamingStrategies.KEBAB_CASE);
+			ObjectMapper objectMapper = JsonMapper.builder()
+				.configureForJackson2()
+				.propertyNamingStrategy(PropertyNamingStrategies.KEBAB_CASE)
+				.build();
 
 			// Retrieve the minimal release versions
 			List<MinimalReleaseVersion> minimalReleaseVersions = objectMapper.readValue(responseInputStream,
@@ -1346,7 +1437,7 @@ public class PackageServiceImpl implements PackageService {
 
 			return minimalReleaseVersions;
 		}
-		catch (IOException e) {
+		catch (IOException | JacksonException e) {
 			throw new TechnicalException("Issue when trying to retrieve minimal release versions from file %s: %s"
 				.formatted(key, e.getMessage()));
 		}
@@ -1614,6 +1705,43 @@ public class PackageServiceImpl implements PackageService {
 		String versionNumber = version.contains(StringUtil.HYPHEN)
 				? version.substring(0, version.indexOf(StringUtil.HYPHEN)) : version;
 		return this.packageVersionRepository.findByVersionNumberAndQualifier(versionNumber, qualifier).orElse(null);
+	}
+
+	/**
+	 * Write the &lt;version&gt;/current pointer object with the given build id (the atomic publish
+	 * marker for a package version).
+	 * @param version Version folder name
+	 * @param buildId Build id to publish
+	 * @return CompletableFuture of the pointer upload
+	 */
+	private CompletableFuture<PutObjectResponse> writeCurrentBuildPointer(String version, String buildId) {
+		String pointerKey = "%s/%s/%s".formatted(this.viewerHubResourcesPackagesWeasisPackagePath, version,
+				PackageUtil.CURRENT_BUILD_POINTER_FILE);
+		return this.s3Service.uploadObjectInS3(new ByteArrayInputStream(buildId.getBytes(StandardCharsets.UTF_8)),
+				pointerKey);
+	}
+
+	/**
+	 * Read the active build id from the &lt;version&gt;/current pointer object.
+	 * @param version Version folder name
+	 * @return the active build id, or null when no pointer exists (legacy version)
+	 */
+	private String readCurrentBuildPointer(String version) {
+		String pointerKey = "%s/%s/%s".formatted(this.viewerHubResourcesPackagesWeasisPackagePath, version,
+				PackageUtil.CURRENT_BUILD_POINTER_FILE);
+		if (!this.s3Service.doesS3KeyExists(pointerKey)) {
+			return null;
+		}
+		try (InputStream is = this.s3Service.retrieveS3Object(pointerKey)) {
+			if (is == null) {
+				return null;
+			}
+			String buildId = new String(is.readAllBytes(), StandardCharsets.UTF_8).trim();
+			return buildId.isBlank() ? null : buildId;
+		}
+		catch (IOException e) {
+			throw new TechnicalException("Issue when reading package build pointer:%s".formatted(e.getMessage()));
+		}
 	}
 
 }
