@@ -35,7 +35,6 @@ import tools.jackson.dataformat.xml.XmlWriteFeature;
 import java.io.IOException;
 import java.time.Duration;
 
-
 /**
  * Configuration for the Spring MVC part, serialization/deserialization Jackson, resources
  * packages
