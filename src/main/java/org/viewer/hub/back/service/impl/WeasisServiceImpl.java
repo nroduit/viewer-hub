@@ -74,7 +74,7 @@ public class WeasisServiceImpl implements WeasisService {
 			Map<String, Set<Patient>> patientsByArchive, Authentication authentication) {
 		// Initialize manifest and set it in the cache with the flag build in progress to
 		// true
-		Manifest manifest = initializeManifest(key, searchCriteria, authentication);
+		Manifest manifest = initializeManifest(key, searchCriteria);
 
 		// Build manifest depending on the presence of patientsByArchive in parameter and
 		// the type of search criteria (IHE or non-IHE)
@@ -111,12 +111,10 @@ public class WeasisServiceImpl implements WeasisService {
 	 * Initialize manifest and set it in the cache with the flag build in progress to true
 	 * @param key Cache key
 	 * @param searchCriteria Search criteria
-	 * @param authentication Authentication: used to know depending on the connector if
-	 * basic or oAuth2 wado parameters should be used
 	 * @return Manifest initialized and set in the cache
 	 */
-	private Manifest initializeManifest(String key, SearchCriteria searchCriteria, Authentication authentication) {
-		Manifest manifest = new Manifest(authentication != null, searchCriteria);
+	private Manifest initializeManifest(String key, SearchCriteria searchCriteria) {
+		Manifest manifest = new Manifest(searchCriteria);
 		manifest.setBuildInProgress(true);
 		this.cacheService.putManifestIfAbsent(key, manifest);
 		return manifest;

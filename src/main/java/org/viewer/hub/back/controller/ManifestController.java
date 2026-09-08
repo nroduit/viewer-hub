@@ -59,16 +59,16 @@ public class ManifestController {
 	}
 
 	/**
-	 * Retrieve manifest corresponding to the key and produce it as xml format
+	 * Retrieve manifest corresponding to the key and produce it as xml or json format
 	 * @param key key of the manifest to retrieve
-	 * @return xml manifest found
+	 * @return xml or json manifest found
 	 */
 	@Operation(summary = "Retrieve manifest",
-			description = "Retrieve the XML manifest for Weasis and log kv for Kibana regarding request and manifest creation/retrieval")
-	@GetMapping(produces = { ApiVersion.V1_APPLICATION_XML_VALUE })
+			description = "Retrieve the XML or JSON manifest for Weasis and log kv for Kibana regarding request and manifest creation/retrieval")
+	@GetMapping(produces = { ApiVersion.V1_APPLICATION_XML_VALUE, ApiVersion.V1_APPLICATION_JSON_VALUE })
 	// @PreAuthorize("hasAuthority('viewerhub_search')")
 	// TODO temporary deactivate security: wait for Weasis to make secured calls
-	public Manifest retrieveXmlManifest(HttpServletRequest request, @Valid @NotBlank String key) {
+	public Manifest retrieveManifest(HttpServletRequest request, @Valid @NotBlank String key) {
 		LocalDateTime startTimeRetrieveManifest = LocalDateTime.now();
 
 		// currently quick and dirty: TODO: with spring-retry on condition instead of

@@ -79,9 +79,6 @@ public class Manifest implements Serializable {
 	private String uid;
 
 	@JsonIgnore
-	private boolean isRequestAuthenticated;
-
-	@JsonIgnore
 	private LocalDateTime startManifestRequest;
 
 	@JsonIgnore
@@ -96,8 +93,7 @@ public class Manifest implements Serializable {
 	@JsonIgnore
 	private String accessToken;
 
-	public Manifest(boolean isRequestAuthenticated, SearchCriteria searchCriteria) {
-		this.isRequestAuthenticated = isRequestAuthenticated;
+	public Manifest(SearchCriteria searchCriteria) {
 		this.startManifestRequest = LocalDateTime.now();
 		this.searchCriteria = searchCriteria;
 	}
