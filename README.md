@@ -3,6 +3,10 @@
 ViewerHub allows to manage various viewers on a IT Infrastructure. 
 
 ## Architecture
+
+![architecture.svg](src/main/resources/documentation/architecture.svg)
+
+
 ![high_level_architecture.svg](src/main/resources/documentation/high_level_architecture.svg)
 
 Note: Currently in our example Weasis is still using the authentication filled in the manifest to retrieve data from the pacs.
