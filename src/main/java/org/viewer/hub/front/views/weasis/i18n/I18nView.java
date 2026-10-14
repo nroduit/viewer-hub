@@ -128,7 +128,11 @@ public class I18nView extends AbstractView {
 
 		// Refresh button
 		this.refreshGridButton = new Button("Refresh", new Icon(VaadinIcon.REFRESH));
-		this.refreshGridButton.addClickListener(buttonClickEvent -> this.i18nDataProvider.refreshAll());
+		this.refreshGridButton.addClickListener(buttonClickEvent -> {
+			this.i18nDataProvider.refreshAll();
+			this.displayMessage(new Message(MessageLevel.SUCCESS, MessageFormat.TEXT, "Translations refreshed"),
+					MessageType.NOTIFICATION_MESSAGE);
+		});
 		this.refreshGridButton.setMinWidth("50%");
 		this.refreshGridButton.getElement().getThemeList().add("primary");
 	}
@@ -181,7 +185,7 @@ public class I18nView extends AbstractView {
 					this.i18nDataProvider.refreshAll();
 					// Display message
 					this.displayMessage(
-							new Message(MessageLevel.INFO, MessageFormat.TEXT, "%s deleted".formatted(itemSelected)),
+							new Message(MessageLevel.SUCCESS, MessageFormat.TEXT, "%s deleted".formatted(itemSelected)),
 							MessageType.NOTIFICATION_MESSAGE);
 				}
 				catch (Exception e) {

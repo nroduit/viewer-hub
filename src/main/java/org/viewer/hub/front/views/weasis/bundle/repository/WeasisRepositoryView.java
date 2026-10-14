@@ -22,6 +22,10 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.viewer.hub.back.model.Message;
+import org.viewer.hub.back.model.MessageFormat;
+import org.viewer.hub.back.model.MessageLevel;
+import org.viewer.hub.back.model.MessageType;
 import org.viewer.hub.back.model.asset.WeasisAssetModel;
 import org.viewer.hub.front.views.AbstractView;
 import org.viewer.hub.front.views.weasis.bundle.repository.component.PackageWeasisRepositoryGrid;
@@ -78,7 +82,11 @@ public class WeasisRepositoryView extends AbstractView {
 
 		// Refresh button
 		this.refreshGridButton = new Button("Refresh", new Icon(VaadinIcon.REFRESH));
-		this.refreshGridButton.addClickListener(buttonClickEvent -> this.weasisAssetDataProvider.refreshAll());
+		this.refreshGridButton.addClickListener(buttonClickEvent -> {
+			this.weasisAssetDataProvider.refreshAll();
+			this.displayMessage(new Message(MessageLevel.SUCCESS, MessageFormat.TEXT, "Available packages refreshed"),
+					MessageType.NOTIFICATION_MESSAGE);
+		});
 		this.refreshGridButton.setWidthFull();
 
 		this.refreshGridButton.getElement().getThemeList().add("primary");

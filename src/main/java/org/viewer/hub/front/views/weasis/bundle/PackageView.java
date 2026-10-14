@@ -17,6 +17,8 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
+import com.vaadin.flow.router.BeforeEnterEvent;
+import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -36,9 +38,17 @@ import org.viewer.hub.front.views.weasis.bundle.repository.WeasisRepositoryView;
 @Secured({ "ROLE_admin" })
 @Component
 @UIScope
-public class PackageView extends Composite<VerticalLayout> {
+public class PackageView extends Composite<VerticalLayout> implements BeforeEnterObserver {
 
 	public static final String ROUTE = "/package";
+
+	private static final String TAB_PARAM = "tab";
+
+	private static final String AVAILABLE_TAB_VALUE = "available";
+
+	private final Tabs tabs;
+
+	private final Tab availableTab;
 
 	private final OverrideView overrideView;
 
@@ -55,8 +65,8 @@ public class PackageView extends Composite<VerticalLayout> {
 		packageLayout.setSizeFull();
 
 		Tab installedTab = new Tab(LineAwesomeIcon.SERVER_SOLID.create(), new Span("Installed"));
-		Tab availableTab = new Tab(LineAwesomeIcon.DOWNLOAD_SOLID.create(), new Span("Available"));
-		Tabs tabs = new Tabs(installedTab, availableTab);
+		this.availableTab = new Tab(LineAwesomeIcon.DOWNLOAD_SOLID.create(), new Span("Available"));
+		this.tabs = new Tabs(installedTab, this.availableTab);
 
 		tabs.getStyle().set("flex-grow", "1");
 		tabs.setWidth("100%");
@@ -67,9 +77,17 @@ public class PackageView extends Composite<VerticalLayout> {
 			if (event.getSelectedTab().equals(installedTab)) {
 				content.add(this.overrideView);
 			}
-			else if (event.getSelectedTab().equals(availableTab)) {
+			else if (event.getSelectedTab().equals(this.availableTab)) {
 				content.add(this.weasisRepositoryView);
 			}
+			else {
+				// Unknown tab: nothing to display
+			}
+			// Keep the active tab in the URL so that a page refresh (F5) restores it
+			String url = event.getSelectedTab().equals(this.availableTab)
+					? "%s%s?%s=%s".formatted(AbstractView.WEASIS, ROUTE, TAB_PARAM, AVAILABLE_TAB_VALUE)
+					: "%s%s".formatted(AbstractView.WEASIS, ROUTE);
+			event.getSource().getUI().ifPresent(ui -> ui.getPage().getHistory().replaceState(null, url));
 		});
 
 		// Show the view override by default
@@ -78,6 +96,16 @@ public class PackageView extends Composite<VerticalLayout> {
 
 		packageLayout.add(tabs, content);
 		packageLayout.expand(content);
+	}
+
+	@Override
+	public void beforeEnter(BeforeEnterEvent event) {
+		boolean available = event.getLocation()
+			.getQueryParameters()
+			.getSingleParameter(TAB_PARAM)
+			.filter(AVAILABLE_TAB_VALUE::equals)
+			.isPresent();
+		this.tabs.setSelectedTab(available ? this.availableTab : this.tabs.getTabAt(0));
 	}
 
 }

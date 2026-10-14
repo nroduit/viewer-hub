@@ -188,7 +188,7 @@ public class ViewerSelectionDialog extends Dialog {
 
 			// Viewer selection has been created
 			viewerSelectionView.displayMessage(
-					new Message(MessageLevel.INFO, MessageFormat.TEXT, "Viewer selection rule has been created"),
+					new Message(MessageLevel.SUCCESS, MessageFormat.TEXT, "Viewer selection rule has been created"),
 					MessageType.NOTIFICATION_MESSAGE);
 			viewerSelectionView.getViewerSelectionGrid().getOriginalDataProvider().refreshAll();
 			this.close();
