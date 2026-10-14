@@ -16,6 +16,9 @@
  */
 vaadin-notification-card::part(overlay) {
 	padding: 0px;
+	border-radius: 8px;
+	background: transparent;
+	box-shadow: none;
 }
 
 vaadin-notification-card::part(content) {

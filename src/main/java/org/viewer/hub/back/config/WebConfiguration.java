@@ -60,9 +60,8 @@ public class WebConfiguration implements WebMvcConfigurer {
 	public void configureMessageConverters(HttpMessageConverters.ServerBuilder builder) {
 		// The builder is pre-populated with the default converters (String, byte[], JSON,
 		// ...);
-		// override the XML one (to keep the XML declaration) and the JSON one (to keep
-		// the
-		// Jackson 2 enum-by-name behaviour that clients and launch URLs rely on).
+		// Override the XML one (to keep the XML declaration) and the JSON one (to keep
+		// the Jackson 2 enum-by-name behavior that clients and launch URLs rely on).
 		builder.withXmlConverter(this.jacksonXmlHttpMessageConverter())
 			.withJsonConverter(this.jacksonJsonHttpMessageConverter());
 	}
@@ -71,7 +70,7 @@ public class WebConfiguration implements WebMvcConfigurer {
 	 * Setup of the json jackson mapper (Jackson 3 / tools.jackson).
 	 * <p>
 	 * Jackson 3 reads/writes enums using {@code toString()} by default; disabling the
-	 * enum {@code *_USING_TO_STRING} features restores the Jackson 2 behaviour of using
+	 * enum {@code *_USING_TO_STRING} features restores the Jackson 2 behavior of using
 	 * {@code name()}, so values such as {@code ViewerType} "WEASIS" keep (de)serializing
 	 * correctly. Other Jackson 3 defaults (ISO-8601 dates, discovered modules) are left
 	 * untouched.
@@ -93,9 +92,8 @@ public class WebConfiguration implements WebMvcConfigurer {
 	@Bean
 	public JacksonXmlHttpMessageConverter jacksonXmlHttpMessageConverter() {
 		// configureForJackson2() keeps the Jackson 2 serialization defaults
-		// (enum-as-name,
-		// dates-as-timestamps, no xsi:nil for null values, ...) so the manifest XML is
-		// unchanged.
+		// (enum-as-name, dates-as-timestamps, no xsi:nil for null values, ...)
+		// so the manifest XML is unchanged.
 		// enable(WRITE_XML_DECLARATION) adds the xml declaration tag to each xml
 		// serialization.
 		XmlMapper mapper = XmlMapper.builder()
@@ -111,11 +109,30 @@ public class WebConfiguration implements WebMvcConfigurer {
 		registry.addResourceHandler("/img/**").addResourceLocations("classpath:META-INF/resources/img/");
 		registry.addResourceHandler("/icons/**").addResourceLocations("classpath:META-INF/resources/icons/");
 		registry.addResourceHandler("/logo/**").addResourceLocations("classpath:META-INF/resources/logo/");
-		registry.addResourceHandler("/weasis/**")
+		// The UI routes (/weasis/package, /weasis/i18n, ...) share the /weasis prefix:
+		// the handlers must only match paths deeper than these routes, otherwise a page
+		// refresh (F5) on a route is served by the S3 resource handler instead of Vaadin
+		// and ends
+		// with a 404
+		this.addS3WeasisResourceHandler(registry, "/weasis/package/*/**", "package/");
+		this.addS3WeasisResourceHandler(registry, "/weasis/i18n/*/**", "i18n/");
+		this.addS3WeasisResourceHandler(registry, "/weasis/mapping-minimal-*.json", "");
+	}
+
+	/**
+	 * Register a resource handler serving files stored in S3
+	 * @param registry Registry
+	 * @param pattern Pattern of the requests to handle
+	 * @param resourcePathPrefix Part of the S3 path matched by the literal beginning of
+	 * the pattern, which is not part of the path given to the resolver
+	 */
+	private void addS3WeasisResourceHandler(ResourceHandlerRegistry registry, String pattern,
+			String resourcePathPrefix) {
+		registry.addResourceHandler(pattern)
 			.addResourceLocations("s3://%s/".formatted(this.s3config.getBucket()))
 			.setCacheControl(CacheControl.maxAge(Duration.ofDays(90)).cachePublic().immutable())
 			.resourceChain(true)
-			.addResolver(this.s3WeasisResourceResolver());
+			.addResolver(this.s3WeasisResourceResolver(resourcePathPrefix));
 	}
 
 	/**
@@ -123,19 +140,20 @@ public class WebConfiguration implements WebMvcConfigurer {
 	 * @return PathResourceResolver created
 	 */
 	@NotNull
-	private PathResourceResolver s3WeasisResourceResolver() {
+	private PathResourceResolver s3WeasisResourceResolver(String resourcePathPrefix) {
 		return new PathResourceResolver() {
 			@Override
 			protected Resource getResource(@NotNull String resourcePath, @NotNull Resource location)
 					throws IOException {
+				String fullResourcePath = resourcePathPrefix + resourcePath;
 				// Retrieve the s3 resource
 				Resource s3Resource = WebConfiguration.this.resourceLoader
 					.getResource("s3://%s/%s/%s".formatted(WebConfiguration.this.s3config.getBucket(),
-							WebConfiguration.this.viewerHubResourcesPackagesWeasisPath, resourcePath));
+							WebConfiguration.this.viewerHubResourcesPackagesWeasisPath, fullResourcePath));
 				if (s3Resource.exists() && s3Resource.isReadable()) {
 					return s3Resource;
 				}
-				return super.getResource(resourcePath, location);
+				return super.getResource(fullResourcePath, location);
 			}
 		};
 	}

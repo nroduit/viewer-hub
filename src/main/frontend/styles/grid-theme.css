@@ -24,3 +24,52 @@ vaadin-grid[theme~='row-stripes']::part(even-row-cell) {
   );
   background-repeat: repeat-x;
 }
+
+/* Package "Available" grid: row tint + left bar depending on the install status */
+vaadin-grid::part(package-installed) {
+  background-color: color-mix(in srgb, #679436 14%, transparent);
+}
+
+vaadin-grid::part(package-not-installed) {
+  background-color: color-mix(in srgb, #d7572b 12%, transparent);
+}
+
+vaadin-grid::part(package-installed first-column-cell) {
+  box-shadow: inset 4px 0 #679436;
+}
+
+vaadin-grid::part(package-not-installed first-column-cell) {
+  box-shadow: inset 4px 0 #d7572b;
+}
+
+vaadin-grid::part(package-not-installed) {
+  color: color-mix(in srgb, var(--vaadin-text-color, currentColor) 65%, transparent);
+}
+
+.package-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  padding: 0.15em 0.75em;
+  border-radius: 1em;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  white-space: nowrap;
+  border: 1px solid transparent;
+}
+
+.package-status-badge vaadin-icon {
+  width: 1.1em;
+  height: 1.1em;
+}
+
+.package-status-installed {
+  background: #679436;
+  color: #fff;
+}
+
+.package-status-not-installed {
+  background: transparent;
+  color: #d7572b;
+  border-color: #d7572b;
+}

@@ -24,7 +24,7 @@
 
     <!-- Properties -->
     <properties>
-        <revision>0.10.0</revision>
+        <revision>0.12.0</revision>
         <java-version>25</java-version>
         <jdk-version>25</jdk-version>
         <enforcer.jdk-version>[${jdk-version},)</enforcer.jdk-version>

@@ -14,11 +14,12 @@ package org.viewer.hub.front.components;
 import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.Html;
 import com.vaadin.flow.component.dependency.CssImport;
-import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import org.viewer.hub.back.model.Message;
+import org.viewer.hub.back.model.MessageFormat;
 import org.viewer.hub.back.model.MessageLevel;
 import org.viewer.hub.back.model.MessageType;
 
@@ -29,7 +30,6 @@ import java.io.Serial;
  * fenêtre.
  */
 
-@JsModule("@polymer/iron-icons/iron-icons.js")
 @CssImport(value = "./styles/message-box.css")
 public class MessageBox extends Composite<Div> {
 
@@ -43,14 +43,6 @@ public class MessageBox extends Composite<Div> {
 	private static final String CLASSNAME_WARN = "warn";
 
 	private static final String CLASSNAME_ERROR = "error";
-
-	private static final String ICONS_COLLECTION = "icons";
-
-	private static final String INFO_OUTLINE_ICON = "info-outline";
-
-	private static final String WARNING_ICON = "warning";
-
-	private static final String ERROR_OUTLINE_ICON = "error-outline";
 
 	public static final int DURATION_MSG_INFO_SUCCESS = 5000;
 
@@ -160,37 +152,20 @@ public class MessageBox extends Composite<Div> {
 		this.contentDiv.addClassName("message-box-content");
 
 		if (this.message != null) {
-			switch (this.message.getFormat()) {
-				case TEXT:
-					this.contentDiv.setText(this.message.getText());
-					break;
-				case HTML:
-					this.contentDiv.removeAll();
-					this.contentDiv.add(new Html("<span>" + this.message.getText() + "</span>"));
-					break;
-				default:
-					break;
-			}
+			this.fillContent();
+
 		}
 	}
 
 	private void createIcon() {
 		if (this.message != null) {
-			if (MessageLevel.INFO == this.message.getLevel()) {
-				this.icon = new Icon(ICONS_COLLECTION, INFO_OUTLINE_ICON);
-			}
-			else if (MessageLevel.SUCCESS == this.message.getLevel()) {
-				this.icon = new Icon(ICONS_COLLECTION, INFO_OUTLINE_ICON);
-			}
-			else if (MessageLevel.WARN == this.message.getLevel()) {
-				this.icon = new Icon(ICONS_COLLECTION, WARNING_ICON);
-			}
-			else if (MessageLevel.ERROR == this.message.getLevel()) {
-				this.icon = new Icon(ICONS_COLLECTION, ERROR_OUTLINE_ICON);
-			}
-			else {
-				this.icon = new Icon(ICONS_COLLECTION, INFO_OUTLINE_ICON);
-			}
+			VaadinIcon vaadinIcon = switch (this.message.getLevel()) {
+				case SUCCESS -> VaadinIcon.CHECK_CIRCLE;
+				case WARN -> VaadinIcon.WARNING;
+				case ERROR -> VaadinIcon.EXCLAMATION_CIRCLE;
+				default -> VaadinIcon.INFO_CIRCLE;
+			};
+			this.icon = vaadinIcon.create();
 		}
 	}
 
@@ -236,18 +211,37 @@ public class MessageBox extends Composite<Div> {
 
 	private void updateContentDiv() {
 		if (this.message != null) {
-			switch (this.message.getFormat()) {
-				case TEXT:
-					this.contentDiv.setText(this.message.getText());
-					break;
-				case HTML:
-					this.contentDiv.removeAll();
-					this.contentDiv.add(new Html("<span>" + this.message.getText() + "</span>"));
-					break;
-				default:
-					break;
-			}
+			this.fillContent();
+
 		}
+	}
+
+	private void fillContent() {
+		this.contentDiv.removeAll();
+
+		Div headingDiv = new Div();
+		headingDiv.addClassName("message-box-heading");
+		headingDiv.setText(this.getHeading());
+
+		Div textDiv = new Div();
+		textDiv.addClassName("message-box-text");
+		if (this.message.getFormat() == MessageFormat.HTML) {
+			textDiv.add(new Html("<span>" + this.message.getText() + "</span>"));
+		}
+		else {
+			textDiv.setText(this.message.getText());
+		}
+
+		this.contentDiv.add(headingDiv, textDiv);
+	}
+
+	private String getHeading() {
+		return switch (this.message.getLevel()) {
+			case SUCCESS -> "Success";
+			case WARN -> "Warning";
+			case ERROR -> "Error";
+			default -> "Information";
+		};
 	}
 
 }

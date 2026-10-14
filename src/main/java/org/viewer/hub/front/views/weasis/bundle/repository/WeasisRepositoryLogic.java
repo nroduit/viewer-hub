@@ -15,8 +15,10 @@ import com.vaadin.flow.data.provider.QuerySortOrder;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.event.EventListener;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.viewer.hub.back.controller.exception.TechnicalException;
 import org.viewer.hub.back.model.Message;
@@ -26,6 +28,7 @@ import org.viewer.hub.back.model.MessageType;
 import org.viewer.hub.back.model.asset.WeasisAssetModel;
 import org.viewer.hub.back.service.PackageService;
 import org.viewer.hub.back.service.WeasisRepositoryService;
+import org.viewer.hub.front.views.weasis.bundle.override.component.RefreshPackageGridEvent;
 import org.viewer.hub.front.views.weasis.bundle.repository.component.WeasisAssetFilter;
 
 import java.io.IOException;
@@ -51,6 +54,24 @@ public class WeasisRepositoryLogic {
 	public WeasisRepositoryLogic(WeasisRepositoryService weasisRepositoryService, PackageService packageService) {
 		this.weasisRepositoryService = weasisRepositoryService;
 		this.packageService = packageService;
+	}
+
+	/**
+	 * The package import is asynchronous: once the version is fully published, refresh
+	 * the grid so the status icons are up to date
+	 * @param refreshPackageGridEvent event sent when a package version has been published
+	 */
+	@Async
+	@EventListener
+	public void onRefreshPackageGridEvent(RefreshPackageGridEvent refreshPackageGridEvent) {
+		this.refreshGrid();
+	}
+
+	private void refreshGrid() {
+		if (this.weasisRepositoryView != null) {
+			this.weasisRepositoryView.getUI()
+				.ifPresent(ui -> ui.access(() -> this.weasisRepositoryView.getWeasisAssetDataProvider().refreshAll()));
+		}
 	}
 
 	/**
@@ -89,7 +110,7 @@ public class WeasisRepositoryLogic {
 					this.packageService.handlePackageVersionToUpload(fileDataInputStream, versionToUpload);
 					this.weasisRepositoryView
 						.displayMessage(
-								new Message(MessageLevel.INFO, MessageFormat.TEXT,
+								new Message(MessageLevel.SUCCESS, MessageFormat.TEXT,
 										"Package version %s has been uploaded"
 											.formatted(weasisAssetModel.getVersion())),
 								MessageType.NOTIFICATION_MESSAGE);
@@ -118,8 +139,9 @@ public class WeasisRepositoryLogic {
 	 */
 	public void removePackageVersion(WeasisAssetModel weasisAssetModel) {
 		this.weasisRepositoryService.removeResourcePackageVersion(weasisAssetModel);
+		this.weasisRepositoryView.getWeasisAssetDataProvider().refreshAll();
 		this.weasisRepositoryView.displayMessage(
-				new Message(MessageLevel.INFO, MessageFormat.TEXT,
+				new Message(MessageLevel.SUCCESS, MessageFormat.TEXT,
 						"Package version %s has been removed".formatted(weasisAssetModel.getVersion())),
 				MessageType.NOTIFICATION_MESSAGE);
 	}

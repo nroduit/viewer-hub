@@ -10,10 +10,10 @@
  */
 package org.viewer.hub.front.views.weasis.bundle.repository.component;
 
-import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.HeaderRow;
 import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
@@ -33,7 +33,7 @@ import java.time.format.DateTimeFormatter;
  */
 @Getter
 @Setter
-public class PackageWeasisRepositoryGrid extends Grid<WeasisAssetModel> {
+public final class PackageWeasisRepositoryGrid extends Grid<WeasisAssetModel> {
 
 	// Tooltips
 	public static final String TOOLTIP_FILTER_BY_ARTIFACT_NAME = "Filter by artifact name";
@@ -75,6 +75,10 @@ public class PackageWeasisRepositoryGrid extends Grid<WeasisAssetModel> {
 		// Case no assets in the repository or not connected to a nexus repository
 		this.setEmptyStateText(
 				"Nexus not connected or issue during connection or no assets built in the provided repository");
+
+		// Row color depending on the status
+		this.setPartNameGenerator(weasisAssetModel -> weasisAssetModel.isAlreadyInstalled() ? "package-installed"
+				: "package-not-installed");
 
 		// Build columns
 		// Status column
@@ -243,33 +247,26 @@ public class PackageWeasisRepositoryGrid extends Grid<WeasisAssetModel> {
 	 * @return column built
 	 */
 	private Column<WeasisAssetModel> addColumnStatus() {
-		return this.addComponentColumn(weasisAssetModel -> createStatusIcon(weasisAssetModel.isAlreadyInstalled()))
+		return this.addComponentColumn(weasisAssetModel -> createStatusBadge(weasisAssetModel.isAlreadyInstalled()))
 			.setTooltipGenerator(weasisAssetModel -> weasisAssetModel.isAlreadyInstalled()
 					? TOOLTIP_VERSION_ALREADY_INSTALLED : TOOLTIP_VERSION_NOT_YET_INSTALLED)
 			.setHeader("Status")
-			.setWidth("1%")
-			.setTextAlign(ColumnTextAlign.CENTER)
+			.setAutoWidth(true)
 			.setSortable(true)
 			.setKey("statusColumn");
 	}
 
 	/**
-	 * Build status icon
+	 * Build status badge: cloud icon and text
 	 * @param isAlreadyInstalled: check if version is already installed on server
-	 * @return Icon built
+	 * @return Badge built
 	 */
-	private Icon createStatusIcon(boolean isAlreadyInstalled) {
-		Icon icon;
-		if (isAlreadyInstalled) {
-			icon = VaadinIcon.CHECK_CIRCLE.create();
-			icon.setColor("#679436");
-		}
-		else {
-			icon = VaadinIcon.CLOSE_CIRCLE.create();
-			icon.setColor("#D7572B");
-		}
-		icon.setSize("1.5em");
-		return icon;
+	private static Span createStatusBadge(boolean isAlreadyInstalled) {
+		Icon icon = isAlreadyInstalled ? VaadinIcon.CLOUD.create() : VaadinIcon.CLOUD_DOWNLOAD_O.create();
+		Span badge = new Span(icon, new Span(isAlreadyInstalled ? "Installed" : "Not installed"));
+		badge.addClassNames("package-status-badge",
+				isAlreadyInstalled ? "package-status-installed" : "package-status-not-installed");
+		return badge;
 	}
 
 	/**

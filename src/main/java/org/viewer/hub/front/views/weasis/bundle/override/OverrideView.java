@@ -52,6 +52,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * View managing override of package configuration
@@ -81,7 +82,7 @@ public class OverrideView extends AbstractView {
 
 	private PackageOverrideGrid packageOverrideGrid;
 
-	private final OverrideDataProvider<OverrideConfigEntity> overrideDataProvider;
+	private final OverrideDataProvider overrideDataProvider;
 
 	@Getter
 	private PackageVersionUpload packageVersionUpload;
@@ -89,8 +90,7 @@ public class OverrideView extends AbstractView {
 	// private UI ui;
 
 	@Autowired
-	public OverrideView(final OverrideLogic overrideLogic,
-			final OverrideDataProvider<OverrideConfigEntity> overrideDataProvider) {
+	public OverrideView(final OverrideLogic overrideLogic, final OverrideDataProvider overrideDataProvider) {
 		this.overrideLogic = overrideLogic;
 		this.overrideDataProvider = overrideDataProvider;
 
@@ -184,7 +184,11 @@ public class OverrideView extends AbstractView {
 
 		// Refresh button
 		this.refreshGridButton = new Button("Refresh", new Icon(VaadinIcon.REFRESH));
-		this.refreshGridButton.addClickListener(buttonClickEvent -> this.overrideDataProvider.refreshAll());
+		this.refreshGridButton.addClickListener(buttonClickEvent -> {
+			this.overrideDataProvider.refreshAll();
+			this.displayMessage(new Message(MessageLevel.SUCCESS, MessageFormat.TEXT, "Installed packages refreshed"),
+					MessageType.NOTIFICATION_MESSAGE);
+		});
 		this.refreshGridButton.getElement().getThemeList().add("primary");
 
 		// Create new group config
@@ -227,7 +231,7 @@ public class OverrideView extends AbstractView {
 					if (overrideConfigUpdated != null) {
 						// OverrideConfig has been updated
 						this.displayMessage(
-								new Message(MessageLevel.INFO, MessageFormat.TEXT,
+								new Message(MessageLevel.SUCCESS, MessageFormat.TEXT,
 										String.format("Override config %s has been updated", overrideConfigUpdated)),
 								MessageType.NOTIFICATION_MESSAGE);
 					}
@@ -271,7 +275,10 @@ public class OverrideView extends AbstractView {
 	private DomEventListener packageOverrideGridContextMenuEventListener(
 			GridContextMenu<OverrideConfigEntity> ctxMenu) {
 		return e -> {
-			Set<OverrideConfigEntity> items = this.packageOverrideGrid.getSelectedItems();
+			Set<OverrideConfigEntity> items = this.packageOverrideGrid.getSelectedItems()
+				.stream()
+				.filter(o -> !OverrideDataProvider.isVersionNode(o))
+				.collect(Collectors.toSet());
 			ctxMenu.removeAll();
 			if (items.isEmpty()) {
 				ctxMenu.addItem("Please select a version in the grid");
@@ -305,7 +312,7 @@ public class OverrideView extends AbstractView {
 					this.overrideDataProvider.refreshAll();
 					// Display message
 					this.displayMessage(
-							new Message(MessageLevel.INFO, MessageFormat.TEXT, "%s deleted".formatted(itemSelected)),
+							new Message(MessageLevel.SUCCESS, MessageFormat.TEXT, "%s deleted".formatted(itemSelected)),
 							MessageType.NOTIFICATION_MESSAGE);
 				}
 				catch (Exception e) {
@@ -354,7 +361,7 @@ public class OverrideView extends AbstractView {
 				if (overrideConfigCreated != null) {
 					// OverrideConfig has been created
 					this.displayMessage(
-							new Message(MessageLevel.INFO, MessageFormat.TEXT,
+							new Message(MessageLevel.SUCCESS, MessageFormat.TEXT,
 									String.format("Override config %s has been created", overrideConfigCreated)),
 							MessageType.NOTIFICATION_MESSAGE);
 					this.packageOverrideGrid.getOverrideDataProvider().refreshAll();
@@ -390,7 +397,7 @@ public class OverrideView extends AbstractView {
 			try {
 				this.overrideLogic.deleteMappingMinimalVersionFile();
 				this.displayMessage(
-						new Message(MessageLevel.INFO, MessageFormat.TEXT,
+						new Message(MessageLevel.SUCCESS, MessageFormat.TEXT,
 								"File mapping-minimal-version.json has been deleted"),
 						MessageType.NOTIFICATION_MESSAGE);
 			}

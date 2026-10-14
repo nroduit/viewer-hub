@@ -233,7 +233,7 @@ public class AssociationView extends AbstractView {
 				if (hasBeenCreated) {
 					// Target has been created
 					this.displayMessage(
-							new Message(MessageLevel.INFO, MessageFormat.TEXT,
+							new Message(MessageLevel.SUCCESS, MessageFormat.TEXT,
 									String.format("Target %s has been created", targetToCreate)),
 							MessageType.NOTIFICATION_MESSAGE);
 					this.associationGrid.getOriginalDataProvider().refreshAll();

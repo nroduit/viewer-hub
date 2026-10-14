@@ -10,8 +10,14 @@
  */
 package org.viewer.hub.front.views.weasis.bundle.override.component;
 
-import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.HeaderRow;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.treegrid.TreeGrid;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.value.ValueChangeMode;
@@ -19,6 +25,7 @@ import com.vaadin.flow.function.ValueProvider;
 import lombok.Getter;
 import lombok.Setter;
 import org.viewer.hub.back.entity.OverrideConfigEntity;
+import org.viewer.hub.back.entity.PackageVersionEntity;
 import org.viewer.hub.back.entity.WeasisPropertyEntity;
 import org.viewer.hub.front.components.UIUtil;
 import org.viewer.hub.front.views.weasis.bundle.override.OverrideDataProvider;
@@ -31,7 +38,7 @@ import java.util.Objects;
  */
 @Getter
 @Setter
-public class PackageOverrideGrid extends Grid<OverrideConfigEntity> {
+public final class PackageOverrideGrid extends TreeGrid<OverrideConfigEntity> {
 
 	@Serial
 	private static final long serialVersionUID = 846447925124975065L;
@@ -49,7 +56,7 @@ public class PackageOverrideGrid extends Grid<OverrideConfigEntity> {
 	private OverrideConfigFilter overrideConfigFilter;
 
 	// DataProvider
-	private final OverrideDataProvider<OverrideConfigEntity> overrideDataProvider;
+	private final OverrideDataProvider overrideDataProvider;
 
 	private OverrideConfigGridItemDetail overrideConfigGridItemDetail;
 
@@ -60,11 +67,19 @@ public class PackageOverrideGrid extends Grid<OverrideConfigEntity> {
 	 * Constructor
 	 * @param overrideDataProvider Data provider for override configs
 	 */
-	public PackageOverrideGrid(OverrideDataProvider<OverrideConfigEntity> overrideDataProvider,
+	public PackageOverrideGrid(OverrideDataProvider overrideDataProvider,
 			ValueProvider<OverrideConfigEntity, GroupComboBox> comboBoxGroupValueProvider) {
 		super();
 		this.overrideDataProvider = overrideDataProvider;
 		this.comboBoxGroupValueProvider = comboBoxGroupValueProvider;
+
+		// Row details are toggled on click of an override config only, not of a version
+		this.setDetailsVisibleOnClick(false);
+		this.addItemClickListener(event -> {
+			if (!OverrideDataProvider.isVersionNode(event.getItem())) {
+				this.setDetailsVisible(event.getItem(), !this.isDetailsVisible(event.getItem()));
+			}
+		});
 
 		// Set size for the grid
 		this.setWidthFull();
@@ -197,15 +212,32 @@ public class PackageOverrideGrid extends Grid<OverrideConfigEntity> {
 	}
 
 	/**
+	 * Cell of the package version: folder icon and version number for a version node,
+	 * full version (with qualifier) for an override config
+	 * @param overrideConfigEntity item to display
+	 * @return component built
+	 */
+	private static Component createPackageVersionCell(OverrideConfigEntity overrideConfigEntity) {
+		PackageVersionEntity packageVersion = overrideConfigEntity.getPackageVersion();
+		if (OverrideDataProvider.isVersionNode(overrideConfigEntity)) {
+			Icon folderIcon = VaadinIcon.FOLDER_O.create();
+			folderIcon.setSize("1em");
+			HorizontalLayout layout = new HorizontalLayout(folderIcon, new Span(packageVersion.getVersionNumber()));
+			folderIcon.getStyle().set("margin-right", "0.75em");
+			layout.setSpacing(false);
+			layout.setAlignItems(FlexComponent.Alignment.CENTER);
+			return layout;
+		}
+		return new Span((packageVersion.getQualifier() == null) ? packageVersion.getVersionNumber()
+				: (packageVersion.getVersionNumber() + packageVersion.getQualifier()));
+	}
+
+	/**
 	 * Add column Package version
 	 * @return column built
 	 */
 	private Column<OverrideConfigEntity> addColumnPackageVersion() {
-		return this
-			.addColumn(overrideConfigEntity -> overrideConfigEntity.getPackageVersion().getQualifier() == null
-					? overrideConfigEntity.getPackageVersion().getVersionNumber()
-					: overrideConfigEntity.getPackageVersion().getVersionNumber()
-							+ overrideConfigEntity.getPackageVersion().getQualifier())
+		return this.addComponentHierarchyColumn(PackageOverrideGrid::createPackageVersionCell)
 			.setHeader("Package version")
 			.setWidth("20%")
 			.setSortable(false)
@@ -217,7 +249,9 @@ public class PackageOverrideGrid extends Grid<OverrideConfigEntity> {
 	 * @return column built
 	 */
 	private Column<OverrideConfigEntity> addColumnLaunchConfig() {
-		return this.addColumn(overrideConfigEntity -> overrideConfigEntity.getLaunchConfig().getName())
+		return this
+			.addColumn(overrideConfigEntity -> OverrideDataProvider.isVersionNode(overrideConfigEntity) ? ""
+					: overrideConfigEntity.getLaunchConfig().getName())
 			.setHeader("Launch config")
 			.setWidth("20%")
 			.setSortable(false)
@@ -230,12 +264,13 @@ public class PackageOverrideGrid extends Grid<OverrideConfigEntity> {
 	 */
 	private Column<OverrideConfigEntity> addColumnWeasisProfile() {
 		return this
-			.addColumn(overrideConfigEntity -> overrideConfigEntity.getWeasisPropertyEntities()
-				.stream()
-				.filter(p -> Objects.equals(p.getCode(), "weasis.profile"))
-				.findFirst()
-				.orElse(WeasisPropertyEntity.builder().value("").build())
-				.getValue())
+			.addColumn(overrideConfigEntity -> OverrideDataProvider.isVersionNode(overrideConfigEntity) ? ""
+					: overrideConfigEntity.getWeasisPropertyEntities()
+						.stream()
+						.filter(p -> Objects.equals(p.getCode(), "weasis.profile"))
+						.findFirst()
+						.orElse(WeasisPropertyEntity.builder().value("").build())
+						.getValue())
 			.setHeader("Weasis profile")
 			.setWidth("20%")
 			.setSortable(false)
@@ -247,7 +282,9 @@ public class PackageOverrideGrid extends Grid<OverrideConfigEntity> {
 	 * @return column built
 	 */
 	private Column<OverrideConfigEntity> addColumnGroup() {
-		return this.addComponentColumn(this.comboBoxGroupValueProvider)
+		return this
+			.addComponentColumn(overrideConfigEntity -> OverrideDataProvider.isVersionNode(overrideConfigEntity)
+					? new Span() : this.comboBoxGroupValueProvider.apply(overrideConfigEntity))
 			.setHeader("Group")
 			.setWidth("20%")
 			.setSortable(false)
