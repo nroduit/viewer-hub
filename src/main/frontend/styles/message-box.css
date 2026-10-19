@@ -41,11 +41,11 @@
 }
 
 .message-box-layout.warn {
-	border-color: #ff9800;
+	--message-accent: #ff9800;
 }
 
 .message-box-layout.error {
-	border-color: #F44336;
+	--message-accent: #F44336;
 }
 
 .message-box-title {

@@ -128,6 +128,8 @@ public class PackageServiceImpl implements PackageService {
 
 	private final EnvironmentOverrideProperties environmentOverrideProperties;
 
+	private final PackageVersionRefresher packageVersionRefresher;
+
 	/**
 	 * Autowired constructor
 	 */
@@ -136,7 +138,8 @@ public class PackageServiceImpl implements PackageService {
 			final OverrideConfigService overrideConfigService, final LaunchConfigRepository launchConfigRepository,
 			final TargetService targetService, final S3Service s3Service,
 			final ApplicationEventPublisher applicationEventPublisher,
-			final EnvironmentOverrideProperties environmentOverrideProperties) {
+			final EnvironmentOverrideProperties environmentOverrideProperties,
+			final PackageVersionRefresher packageVersionRefresher) {
 		this.cacheService = cacheService;
 		this.packageVersionRepository = packageVersionRepository;
 		this.overrideConfigService = overrideConfigService;
@@ -145,12 +148,18 @@ public class PackageServiceImpl implements PackageService {
 		this.s3Service = s3Service;
 		this.applicationEventPublisher = applicationEventPublisher;
 		this.environmentOverrideProperties = environmentOverrideProperties;
+		this.packageVersionRefresher = packageVersionRefresher;
 	}
 
 	@Override
-	// Every 24h
-	@Scheduled(fixedRate = 24 * 60 * 60 * 1000)
+	// Every 8h
+	@Scheduled(fixedRate = 8 * 60 * 60 * 1000)
 	public void refreshAvailablePackageVersion() {
+		// Failures are handled by the circuit breaker fallback of the refresher
+		this.packageVersionRefresher.refresh(this::doRefreshAvailablePackageVersion);
+	}
+
+	private void doRefreshAvailablePackageVersion() {
 		// Check if json file containing the mapping of minimal versions is present
 		if (this.doesMappingMinimalVersionFileExists()) {
 

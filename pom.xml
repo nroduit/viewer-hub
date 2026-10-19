@@ -19,12 +19,11 @@
     <groupId>org.viewer.hub</groupId>
     <artifactId>viewer-hub</artifactId>
     <name>${project.artifactId}</name>
-    <version>${revision}</version>
+    <version>0.13.0-SNAPSHOT</version>
     <description>Viewer Hub</description>
 
     <!-- Properties -->
     <properties>
-        <revision>0.12.0</revision>
         <java-version>25</java-version>
         <jdk-version>25</jdk-version>
         <enforcer.jdk-version>[${jdk-version},)</enforcer.jdk-version>
@@ -67,6 +66,7 @@
         <!-- The Vaadin frontend is excluded from JaCoCo (see the production profile); mirror that
              exclusion here so SonarCloud does not count its lines as 0%-covered in the denominator. -->
         <sonar.coverage.exclusions>**/org/viewer/hub/front/**/*,**/weasis/**/*</sonar.coverage.exclusions>
+        <resilience4j.version>2.4.0</resilience4j.version>
     </properties>
 
     <repositories>
@@ -93,6 +93,79 @@
 
     <dependencyManagement>
         <dependencies>
+
+            <!-- Align all the resilience4j modules on the version supporting Spring Boot 4  -->
+            <dependency>
+                <groupId>io.github.resilience4j</groupId>
+                <artifactId>resilience4j-core</artifactId>
+                <version>${resilience4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.github.resilience4j</groupId>
+                <artifactId>resilience4j-circuitbreaker</artifactId>
+                <version>${resilience4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.github.resilience4j</groupId>
+                <artifactId>resilience4j-circularbuffer</artifactId>
+                <version>${resilience4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.github.resilience4j</groupId>
+                <artifactId>resilience4j-consumer</artifactId>
+                <version>${resilience4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.github.resilience4j</groupId>
+                <artifactId>resilience4j-framework-common</artifactId>
+                <version>${resilience4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.github.resilience4j</groupId>
+                <artifactId>resilience4j-annotations</artifactId>
+                <version>${resilience4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.github.resilience4j</groupId>
+                <artifactId>resilience4j-micrometer</artifactId>
+                <version>${resilience4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.github.resilience4j</groupId>
+                <artifactId>resilience4j-spring6</artifactId>
+                <version>${resilience4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.github.resilience4j</groupId>
+                <artifactId>resilience4j-ratelimiter</artifactId>
+                <version>${resilience4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.github.resilience4j</groupId>
+                <artifactId>resilience4j-retry</artifactId>
+                <version>${resilience4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.github.resilience4j</groupId>
+                <artifactId>resilience4j-bulkhead</artifactId>
+                <version>${resilience4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.github.resilience4j</groupId>
+                <artifactId>resilience4j-timelimiter</artifactId>
+                <version>${resilience4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.github.resilience4j</groupId>
+                <artifactId>resilience4j-reactor</artifactId>
+                <version>${resilience4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.github.resilience4j</groupId>
+                <artifactId>resilience4j-cache</artifactId>
+                <version>${resilience4j.version}</version>
+            </dependency>
+
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
@@ -308,6 +381,20 @@
             <groupId>software.amazon.awssdk.crt</groupId>
             <artifactId>aws-crt</artifactId>
             <version>0.48.2</version>
+        </dependency>
+
+        <!-- =============== -->
+        <!-- Circuit breaker -->
+        <!-- =============== -->
+        <!-- Resilience4j annotations (@CircuitBreaker) for Spring Boot 4, requires AspectJ support -->
+        <dependency>
+            <groupId>io.github.resilience4j</groupId>
+            <artifactId>resilience4j-spring-boot4</artifactId>
+            <version>${resilience4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-aspectj</artifactId>
         </dependency>
 
         <!-- =========== -->
