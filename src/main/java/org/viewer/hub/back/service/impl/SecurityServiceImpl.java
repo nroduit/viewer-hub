@@ -29,7 +29,11 @@ import org.viewer.hub.back.enums.ConnectorType;
 import org.viewer.hub.back.model.manifest.ArcQuery;
 import org.viewer.hub.back.model.manifest.HttpTag;
 import org.viewer.hub.back.model.manifest.Manifest;
+import org.viewer.hub.back.model.property.ConnectorAuthenticationProperty;
+import org.viewer.hub.back.model.property.ConnectorBasicAuthProperty;
+import org.viewer.hub.back.model.property.ConnectorOauth2AuthProperty;
 import org.viewer.hub.back.model.property.ConnectorProperty;
+import org.viewer.hub.back.model.property.ConnectorServerProperty;
 import org.viewer.hub.back.service.ConnectorService;
 import org.viewer.hub.back.service.SecurityService;
 
@@ -96,57 +100,8 @@ public class SecurityServiceImpl implements SecurityService {
 	 */
 	private void handleDicomWebManifestAuthentication(Authentication authentication, ArcQuery arcQuery,
 			ConnectorProperty connectorProperty) {
-		String basicPort = retrieveProperty(connectorProperty.getDicomWebConnector()
-			.getWadoRs()
-			.getAuthentication()
-			.getBasic()
-			.getServer()
-			.getPort());
-		basicPort = StringUtils.isNotBlank(basicPort) ? ":%s".formatted(basicPort) : "";
-
-		String basicContext = retrieveProperty(connectorProperty.getDicomWebConnector()
-			.getWadoRs()
-			.getAuthentication()
-			.getBasic()
-			.getServer()
-			.getContext());
-
-		String oAuth2Port = retrieveProperty(connectorProperty.getDicomWebConnector()
-			.getWadoRs()
-			.getAuthentication()
-			.getOauth2()
-			.getServer()
-			.getPort());
-		oAuth2Port = StringUtils.isNotBlank(oAuth2Port) ? ":%s".formatted(oAuth2Port) : "";
-
-		String oAuth2Context = retrieveProperty(connectorProperty.getDicomWebConnector()
-			.getWadoRs()
-			.getAuthentication()
-			.getOauth2()
-			.getServer()
-			.getContext());
-
-		handleArcQueryManifestAuthentication(arcQuery, connectorProperty, authentication,
-				connectorProperty.getDicomWebConnector().getWadoRs().getAuthentication().getType(),
-				String.format("%s%s%s",
-						connectorProperty.getDicomWebConnector()
-							.getWadoRs()
-							.getAuthentication()
-							.getBasic()
-							.getServer()
-							.getUrl(),
-						basicPort, basicContext),
-				connectorProperty.getDicomWebConnector().getWadoRs().getAuthentication().getBasic().getLogin(),
-				connectorProperty.getDicomWebConnector().getWadoRs().getAuthentication().getBasic().getPassword(),
-				String.format("%s%s%s",
-						connectorProperty.getDicomWebConnector()
-							.getWadoRs()
-							.getAuthentication()
-							.getOauth2()
-							.getServer()
-							.getUrl(),
-						oAuth2Port, oAuth2Context),
-				connectorProperty.getDicomWebConnector().getWadoRs().getAuthentication().getOauth2().getOidcId());
+		handleManifestAuthentication(authentication, arcQuery, connectorProperty,
+				connectorProperty.getDicomWebConnector().getWadoRs().getAuthentication());
 	}
 
 	/**
@@ -157,49 +112,8 @@ public class SecurityServiceImpl implements SecurityService {
 	 */
 	private void handleDicomManifestAuthentication(Authentication authentication, ArcQuery arcQuery,
 			ConnectorProperty connectorProperty) {
-		String basicPort = retrieveProperty(
-				connectorProperty.getDicomConnector().getWado().getAuthentication().getBasic().getServer().getPort());
-		basicPort = StringUtils.isNotBlank(basicPort) ? ":%s".formatted(basicPort) : "";
-
-		String basicContext = retrieveProperty(connectorProperty.getDicomConnector()
-			.getWado()
-			.getAuthentication()
-			.getBasic()
-			.getServer()
-			.getContext());
-
-		String oAuth2Port = retrieveProperty(
-				connectorProperty.getDicomConnector().getWado().getAuthentication().getOauth2().getServer().getPort());
-		oAuth2Port = StringUtils.isNotBlank(oAuth2Port) ? ":%s".formatted(oAuth2Port) : "";
-
-		String oAuth2Context = retrieveProperty(connectorProperty.getDicomConnector()
-			.getWado()
-			.getAuthentication()
-			.getOauth2()
-			.getServer()
-			.getContext());
-
-		handleArcQueryManifestAuthentication(arcQuery, connectorProperty, authentication,
-				connectorProperty.getDicomConnector().getWado().getAuthentication().getType(),
-				String.format("%s%s%s",
-						connectorProperty.getDicomConnector()
-							.getWado()
-							.getAuthentication()
-							.getBasic()
-							.getServer()
-							.getUrl(),
-						basicPort, basicContext),
-				connectorProperty.getDicomConnector().getWado().getAuthentication().getBasic().getLogin(),
-				connectorProperty.getDicomConnector().getWado().getAuthentication().getBasic().getPassword(),
-				String.format("%s%s%s",
-						connectorProperty.getDicomConnector()
-							.getWado()
-							.getAuthentication()
-							.getOauth2()
-							.getServer()
-							.getUrl(),
-						oAuth2Port, oAuth2Context),
-				connectorProperty.getDicomConnector().getWado().getAuthentication().getOauth2().getOidcId());
+		handleManifestAuthentication(authentication, arcQuery, connectorProperty,
+				connectorProperty.getDicomConnector().getWado().getAuthentication());
 	}
 
 	/**
@@ -210,41 +124,38 @@ public class SecurityServiceImpl implements SecurityService {
 	 */
 	private void handleDbManifestAuthentication(Authentication authentication, ArcQuery arcQuery,
 			ConnectorProperty connectorProperty) {
-		String basicPort = retrieveProperty(
-				connectorProperty.getDbConnector().getWado().getAuthentication().getBasic().getServer().getPort());
-		basicPort = StringUtils.isNotBlank(basicPort) ? ":%s".formatted(basicPort) : "";
+		handleManifestAuthentication(authentication, arcQuery, connectorProperty,
+				connectorProperty.getDbConnector().getWado().getAuthentication());
+	}
 
-		String basicContext = retrieveProperty(
-				connectorProperty.getDbConnector().getWado().getAuthentication().getBasic().getServer().getContext());
+	/**
+	 * Handle manifest authentication from the authentication properties. The oauth2 or
+	 * basic section (and its server) may be absent when not used.
+	 */
+	private void handleManifestAuthentication(Authentication authentication, ArcQuery arcQuery,
+			ConnectorProperty connectorProperty, ConnectorAuthenticationProperty authProperty) {
+		ConnectorBasicAuthProperty basic = authProperty.getBasic();
+		ConnectorOauth2AuthProperty oauth2 = authProperty.getOauth2();
 
-		String oAuth2Port = retrieveProperty(
-				connectorProperty.getDbConnector().getWado().getAuthentication().getOauth2().getServer().getPort());
-		oAuth2Port = StringUtils.isNotBlank(oAuth2Port) ? ":%s".formatted(oAuth2Port) : "";
+		handleArcQueryManifestAuthentication(arcQuery, connectorProperty, authentication, authProperty.getType(),
+				buildServerUrl(basic != null ? basic.getServer() : null), basic != null ? basic.getLogin() : null,
+				basic != null ? basic.getPassword() : null, buildServerUrl(oauth2 != null ? oauth2.getServer() : null),
+				oauth2 != null ? oauth2.getOidcId() : null);
+	}
 
-		String oAuth2Context = retrieveProperty(
-				connectorProperty.getDbConnector().getWado().getAuthentication().getOauth2().getServer().getContext());
-
-		handleArcQueryManifestAuthentication(arcQuery, connectorProperty, authentication,
-				connectorProperty.getDbConnector().getWado().getAuthentication().getType(),
-				String.format("%s%s%s",
-						connectorProperty.getDbConnector()
-							.getWado()
-							.getAuthentication()
-							.getBasic()
-							.getServer()
-							.getUrl(),
-						basicPort, basicContext),
-				connectorProperty.getDbConnector().getWado().getAuthentication().getBasic().getLogin(),
-				connectorProperty.getDbConnector().getWado().getAuthentication().getBasic().getPassword(),
-				String.format("%s%s%s",
-						connectorProperty.getDbConnector()
-							.getWado()
-							.getAuthentication()
-							.getOauth2()
-							.getServer()
-							.getUrl(),
-						oAuth2Port, oAuth2Context),
-				connectorProperty.getDbConnector().getWado().getAuthentication().getOauth2().getOidcId());
+	/**
+	 * Build the url (url + port + context) from the server property
+	 * @param server Server property (can be null)
+	 * @return the url or null if no server is defined
+	 */
+	private String buildServerUrl(ConnectorServerProperty server) {
+		if (server == null) {
+			return null;
+		}
+		String port = retrieveProperty(server.getPort());
+		port = StringUtils.isNotBlank(port) ? ":%s".formatted(port) : "";
+		String context = retrieveProperty(server.getContext());
+		return String.format("%s%s%s", server.getUrl(), port, context);
 	}
 
 	/**

@@ -112,6 +112,20 @@ viewer-hub:
       enabled: true
       grace-period: PT24H
 
+# - Circuit breakers (Resilience4j)
+resilience4j:
+  circuitbreaker:
+    instances:
+      # Refresh of the package versions (S3 + DB) in the cache, retried by PackageVersionRefreshRetryJob
+      packageVersionRefresh:
+        sliding-window-type: COUNT_BASED
+        sliding-window-size: 3 # Calls evaluated
+        minimum-number-of-calls: 3
+        failure-rate-threshold: 100 # Open the circuit when the 3 calls failed
+        wait-duration-in-open-state: 5m
+        automatic-transition-from-open-to-half-open-enabled: true
+        permitted-number-of-calls-in-half-open-state: 1
+
 server:
 # Enable response compression: currently not working
   compression:

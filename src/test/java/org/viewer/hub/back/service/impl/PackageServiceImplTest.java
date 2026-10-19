@@ -18,6 +18,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -94,6 +95,9 @@ class PackageServiceImplTest {
 
 	@Mock
 	private EnvironmentOverrideProperties environmentOverrideProperties;
+
+	@Spy
+	private PackageVersionRefresher packageVersionRefresher = new PackageVersionRefresher();
 
 	@InjectMocks
 	private PackageServiceImpl packageService;
@@ -228,6 +232,17 @@ class PackageServiceImplTest {
 		// Test results
 		assertThat(availablePackageVersionMapping.size()).isEqualTo(48);
 		assertThat(availablePackageVersionMapping.equals(toCompare)).isTrue();
+	}
+
+	@Test
+	void when_refreshingAvailablePackageVersion_should_runItThroughTheCircuitBreakerRefresher() {
+		Mockito.when(this.s3Service.doesS3KeyExists(any())).thenReturn(false);
+
+		this.packageService.refreshAvailablePackageVersion();
+
+		Mockito.verify(this.packageVersionRefresher).refresh(any());
+		Mockito.verify(this.s3Service).doesS3KeyExists(any());
+		assertThat(this.packageVersionRefresher.isPending()).isFalse();
 	}
 
 	@Test
