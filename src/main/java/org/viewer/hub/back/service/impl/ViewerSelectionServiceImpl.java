@@ -72,6 +72,22 @@ public class ViewerSelectionServiceImpl implements ViewerSelectionService {
 	@Override
 	public ViewerType retrieveViewerTypeFromViewerSelectionRules(SearchCriteria searchCriteria,
 			Map<String, Set<Patient>> patientsByArchive) {
+		return evaluate(searchCriteria, patientsByArchive).viewer();
+	}
+
+	@Override
+	public String describeViewerSelectionRule(SearchCriteria searchCriteria,
+			Map<String, Set<Patient>> patientsByArchive) {
+		return evaluate(searchCriteria, patientsByArchive).rule();
+	}
+
+	/**
+	 * Viewer selected and explanation of the choice
+	 */
+	private record Selection(ViewerType viewer, String rule) {
+	}
+
+	private Selection evaluate(SearchCriteria searchCriteria, Map<String, Set<Patient>> patientsByArchive) {
 		// Retrieve default viewer
 		ViewerType defaultViewer = viewerSelectionRepository.findByArchive(ViewerSelectionType.DEFAULT.name())
 			.stream()
@@ -81,19 +97,19 @@ public class ViewerSelectionServiceImpl implements ViewerSelectionService {
 
 		// If viewer is specified in search criteria, bypass selection rules
 		if (searchCriteria != null && searchCriteria.getViewer() != null) {
-			return searchCriteria.getViewer();
+			return new Selection(searchCriteria.getViewer(), "Viewer requested in the request");
 		}
 
 		// Only Weasis supports multiple archives for now, so if multiple archives are
 		// requested, bypass selection rules and return Weasis viewer
 		if ((searchCriteria != null && searchCriteria.getArchive() != null && searchCriteria.getArchive().size() > 1)
 				|| (patientsByArchive != null && patientsByArchive.size() > 1)) {
-			return ViewerType.WEASIS;
+			return new Selection(ViewerType.WEASIS, "Multiple archives: Weasis");
 		}
 
 		// If no patients found, bypass selection rules and return default viewer
 		if (patientsByArchive == null || patientsByArchive.isEmpty()) {
-			return defaultViewer;
+			return new Selection(defaultViewer, "Default viewer (no patient to evaluate)");
 		}
 
 		// Extract all modalities from patients
@@ -109,12 +125,23 @@ public class ViewerSelectionServiceImpl implements ViewerSelectionService {
 		// Get all viewer selection rules sorted by priority (reversed for highest
 		// priority first)
 		// Find first matching rule
-		return retrieveViewerSelection(Sort.Direction.DESC).stream()
+		List<ViewerSelectionEntity> rules = retrieveViewerSelection(Sort.Direction.DESC);
+		return rules.stream()
 			.filter(entity -> viewerSelectionRulesMatchingCondition(patientsByArchive, entity, retrievedModalities))
 			.findFirst()
-			.map(ViewerSelectionEntity::getViewer)
+			.map(entity -> new Selection(entity.getViewer(), describe(entity, rules.size())))
 			// Fallback to default rule if no matching rule found
-			.orElse(defaultViewer);
+			.orElse(new Selection(defaultViewer, "Default viewer (no matching rule)"));
+	}
+
+	/**
+	 * Rule number as displayed in the grid: 1 for the rule evaluated first
+	 */
+	private static String describe(ViewerSelectionEntity entity, int totalRules) {
+		String modalities = entity.getModalities() == null || entity.getModalities().isEmpty() ? "any"
+				: entity.getModalities().stream().map(ModalityType::name).collect(Collectors.joining(","));
+		return "Rule #" + (totalRules - entity.getPriority()) + " (archive: " + entity.getArchive() + ", modalities: "
+				+ modalities + ")";
 	}
 
 	@Override

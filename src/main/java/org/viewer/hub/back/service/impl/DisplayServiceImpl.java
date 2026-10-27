@@ -11,6 +11,7 @@
 
 package org.viewer.hub.back.service.impl;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
@@ -27,6 +28,7 @@ import java.util.Objects;
 import java.util.Set;
 
 @Service
+@Slf4j
 public class DisplayServiceImpl implements DisplayService {
 
 	// Services
@@ -42,38 +44,57 @@ public class DisplayServiceImpl implements DisplayService {
 
 	private final ConnectorQueryService connectorQueryService;
 
+	private final DisplayRequestMonitoringService displayRequestMonitoringService;
+
 	@Autowired
 	public DisplayServiceImpl(final ViewerSelectionService viewerSelectionService,
 			final WeasisDisplayService weasisDisplayService, final OhifDisplayService ohifDisplayService,
 			final SlicerDisplayService slicerDisplayService, final MicroDicomDisplayService microDicomDisplayService,
-			final ConnectorQueryService connectorQueryService) {
+			final ConnectorQueryService connectorQueryService,
+			final DisplayRequestMonitoringService displayRequestMonitoringService) {
 		this.viewerSelectionService = viewerSelectionService;
 		this.weasisDisplayService = weasisDisplayService;
 		this.ohifDisplayService = ohifDisplayService;
 		this.slicerDisplayService = slicerDisplayService;
 		this.microDicomDisplayService = microDicomDisplayService;
 		this.connectorQueryService = connectorQueryService;
+		this.displayRequestMonitoringService = displayRequestMonitoringService;
 	}
 
 	@Override
 	public String viewerLaunchUrl(SearchCriteria searchCriteria, Authentication authentication) {
-		Map<String, Set<Patient>> patientsByArchive = null;
-		// Specific case for Weasis: if Weasis directly requested as a viewer, determine
-		// patients later in the process in a
-		// separated thread in order to increase launch speed of Weasis
-		if (!Objects.equals(searchCriteria.getViewer(), ViewerType.WEASIS)) {
-			// Retrieve patients map depending on search criteria
-			patientsByArchive = searchCriteria instanceof ArchiveSearchCriteria
-					? this.connectorQueryService.retrievePatientsByArchiveWithoutIHESearchCriteria(
-							(ArchiveSearchCriteria) searchCriteria, authentication)
-					: this.connectorQueryService.retrievePatientsByArchiveWithIHESearchCriteria(
-							(IHESearchCriteria) searchCriteria, authentication);
-		}
+		long startNanos = System.nanoTime();
+		ViewerType viewerType = searchCriteria.getViewer();
+		try {
+			Map<String, Set<Patient>> patientsByArchive = null;
+			// Specific case for Weasis: if Weasis directly requested as a viewer,
+			// determine
+			// patients later in the process in a
+			// separated thread in order to increase launch speed of Weasis
+			if (!Objects.equals(searchCriteria.getViewer(), ViewerType.WEASIS)) {
+				// Retrieve patients map depending on search criteria
+				patientsByArchive = searchCriteria instanceof ArchiveSearchCriteria
+						? this.connectorQueryService.retrievePatientsByArchiveWithoutIHESearchCriteria(
+								(ArchiveSearchCriteria) searchCriteria, authentication)
+						: this.connectorQueryService.retrievePatientsByArchiveWithIHESearchCriteria(
+								(IHESearchCriteria) searchCriteria, authentication);
+			}
 
-		// Select viewer and retrieve viewer launch URL
-		return retrieveViewerLaunchUrl(
-				viewerSelectionService.retrieveViewerTypeFromViewerSelectionRules(searchCriteria, patientsByArchive),
-				searchCriteria, patientsByArchive, authentication);
+			// Select viewer and retrieve viewer launch URL
+			viewerType = viewerSelectionService.retrieveViewerTypeFromViewerSelectionRules(searchCriteria,
+					patientsByArchive);
+			String url = retrieveViewerLaunchUrl(viewerType, searchCriteria, patientsByArchive, authentication);
+			String selectionRule = this.viewerSelectionService.describeViewerSelectionRule(searchCriteria,
+					patientsByArchive);
+			this.displayRequestMonitoringService.recordRequest(searchCriteria, authentication, viewerType,
+					selectionRule, startNanos, null);
+			return url;
+		}
+		catch (RuntimeException e) {
+			this.displayRequestMonitoringService.recordRequest(searchCriteria, authentication, viewerType, null,
+					startNanos, e);
+			throw e;
+		}
 	}
 
 	/**

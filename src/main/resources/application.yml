@@ -58,6 +58,9 @@ spring:
   jpa:
     properties:
       hibernate:
+        jdbc:
+          batch_size: 50
+        order_inserts: true
         id:
           db_structure_naming_strategy: legacy
 
@@ -111,7 +114,10 @@ viewer-hub:
     build-retention:
       enabled: true
       grace-period: PT24H
-
+  # - Monitoring of the viewer requests
+  monitoring:
+    # Time zone of the recorded dates
+    time-zone: Europe/Zurich
 # - Circuit breakers (Resilience4j)
 resilience4j:
   circuitbreaker:

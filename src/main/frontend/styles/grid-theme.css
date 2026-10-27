@@ -25,15 +25,7 @@ vaadin-grid[theme~='row-stripes']::part(even-row-cell) {
   background-repeat: repeat-x;
 }
 
-/* Package "Available" grid: row tint + left bar depending on the install status */
-vaadin-grid::part(package-installed) {
-  background-color: color-mix(in srgb, #679436 14%, transparent);
-}
-
-vaadin-grid::part(package-not-installed) {
-  background-color: color-mix(in srgb, #d7572b 12%, transparent);
-}
-
+/* Package "Available" grid: left bar depending on the install status */
 vaadin-grid::part(package-installed first-column-cell) {
   box-shadow: inset 4px 0 #679436;
 }
@@ -44,6 +36,15 @@ vaadin-grid::part(package-not-installed first-column-cell) {
 
 vaadin-grid::part(package-not-installed) {
   color: color-mix(in srgb, var(--vaadin-text-color, currentColor) 65%, transparent);
+}
+
+/* Monitoring activity grid: left bar depending on the status of the request */
+vaadin-grid::part(request-success first-column-cell) {
+  box-shadow: inset 4px 0 var(--aura-green);
+}
+
+vaadin-grid::part(request-error first-column-cell) {
+  box-shadow: inset 4px 0 var(--aura-red);
 }
 
 .package-status-badge {

@@ -255,3 +255,72 @@ Orthanc
 ```
 http://localhost:8081/display?viewer=MICRODICOM&studyUID=1.3.12.2.1107.5.1.4.54023.30000004093013443132800000021&archive=orthanc-local
 ```
+
+## Package versions refresh and circuit breaker
+
+The available Weasis package versions (S3 + DB) are computed into the cache by `PackageServiceImpl.refreshAvailablePackageVersion()`, executed through `PackageVersionRefresher`.
+If this computation fails (S3, DB, network...), it is automatically retried until it succeeds, protected by
+the Resilience4j `@CircuitBreaker` annotation (circuit breaker `packageVersionRefresh`, with a fallback method).
+
+Triggers of the refresh:
+- Every 8h (and at startup)
+- Retry job (`PackageVersionRefreshRetryJob`) every minute, only when the last refresh failed and the circuit is not open
+- Upload / deletion of a package version
+
+```
+ Refresh triggers (8h, retry job, upload/delete)
+                     |
+                     v
+       refreshAvailablePackageVersion()
+                     |
+                     v
+          +----------------------+
+          |   Circuit breaker    |
+          +----------------------+
+           |CLOSED     |OPEN          |HALF-OPEN
+           |           |(5 min)       |(1 trial call)
+           v           v              v
+       run refresh   call rejected   run refresh
+                     -> fallback
+           |
+     +-----+------+
+  success       failure (S3/DB/network)
+     |              |
+     |              v
+     |        fallback: log warn, pending = true
+     v              (cache untouched until the computation completes)
+  pending = false
+```
+
+Example of an outage and its recovery:
+
+```
+t=0      Refresh                  -> failure 1/3  circuit CLOSED      pending=true
+t=1min   Retry job                -> failure 2/3  circuit CLOSED      pending=true
+t=2min   Retry job                -> failure 3/3  circuit OPEN        pending=true
+t=3..6min Retry job               no retry while the circuit is OPEN
+t=7min   5 min elapsed            circuit HALF-OPEN (automatic)
+t<=8min  Retry job (trial call)   -> failure      circuit OPEN (5 min)
+...      one trial every ~6 min while the outage lasts
+t=N      Outage solved
+t<=N+6min Retry job (trial call)  -> success      circuit CLOSED      pending=false
+```
+
+Notes:
+- The retry job runs every minute: it retries when the circuit is closed or half-open (1 min), and does nothing while it is open (5 min).
+  The open state also protects against the other callers (upload, deletion).
+- There is no timeout on the refresh: a call blocked forever is neither a success nor a failure (rely on the S3/DB client timeouts).
+- If a failure happens after the cache has been cleared, the cache may stay partial until the next retry.
+- The annotation only applies to calls going through the Spring proxy: `PackageServiceImpl` therefore delegates the refresh (as a `Runnable`) to the `PackageVersionRefresher` bean, which holds the `@CircuitBreaker` and the pending state.
+
+Circuit breaker properties (`application.yml`, `resilience4j.circuitbreaker.instances.packageVersionRefresh`):
+
+| Property | Default | Description |
+|----------|---------|-------------|
+| `sliding-window-size` / `minimum-number-of-calls` | `3` | Calls evaluated before opening the circuit |
+| `failure-rate-threshold` | `100` | Percentage of failures opening the circuit |
+| `wait-duration-in-open-state` | `5m` | Time in open state before the trial call |
+| `permitted-number-of-calls-in-half-open-state` | `1` | Trial calls in half-open state |
+
+Retry job: `viewer-hub.package-version-refresh.retry-delay-ms` (default `60000`), delay between two executions (retry when the circuit is closed or half-open).
+

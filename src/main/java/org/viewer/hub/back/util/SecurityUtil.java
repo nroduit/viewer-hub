@@ -16,12 +16,15 @@ import com.vaadin.flow.shared.ApplicationConstants;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.core.oidc.user.OidcUser;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Component;
 import org.viewer.hub.back.enums.SecurityRole;
 
@@ -95,6 +98,27 @@ public final class SecurityUtil {
 			}
 		}
 		return isAccessGranted;
+	}
+
+	/**
+	 * Resolve the user name from the authentication: preferred_username claim of the
+	 * JWT/OIDC token, otherwise its subject
+	 * @param authentication Authentication (can be null)
+	 * @return the user name or null if the call is not authenticated
+	 */
+	public static String resolveUsername(Authentication authentication) {
+		if (authentication == null || authentication instanceof AnonymousAuthenticationToken
+				|| !authentication.isAuthenticated()) {
+			return null;
+		}
+		Object principal = authentication.getPrincipal();
+		if (principal instanceof Jwt jwt) {
+			return StringUtils.firstNonBlank(jwt.getClaimAsString("preferred_username"), jwt.getSubject());
+		}
+		if (principal instanceof OidcUser oidcUser) {
+			return StringUtils.firstNonBlank(oidcUser.getPreferredUsername(), oidcUser.getSubject());
+		}
+		return authentication.getName();
 	}
 
 	/**

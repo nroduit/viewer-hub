@@ -44,6 +44,7 @@ import org.viewer.hub.back.constant.EndPoint;
 import org.viewer.hub.back.util.SecurityUtil;
 import org.viewer.hub.front.components.ToggleButtonTheme;
 import org.viewer.hub.front.views.AbstractView;
+import org.viewer.hub.front.views.monitoring.MonitoringView;
 
 import java.util.List;
 
@@ -110,12 +111,29 @@ public class MainLayout extends AppLayout implements AfterNavigationObserver {
 		// Build the settings side nav
 		buildSettingsSideNav(menuEntries, nav);
 
-		// weasisLink.setPrefixComponent(new Image("logo/weasis.svg", "Weasis"));
-
 		// Build the weasis side nav
 		buildWeasisSideNav(menuEntries, nav);
 
+		// Monitoring: top level entry below Weasis
+		buildMonitoringSideNav(menuEntries, nav);
+
 		return nav;
+	}
+
+	/**
+	 * Build the Monitoring entry (same level as Weasis and Settings)
+	 * @param menuEntries List of menu available
+	 * @param nav SideNav to populate
+	 */
+	private static void buildMonitoringSideNav(List<MenuEntry> menuEntries, SideNav nav) {
+		menuEntries.forEach(entry -> {
+			if (entry.path().equals("/" + MonitoringView.ROUTE) && entry.menuClass() != null
+					&& SecurityUtil.isAccessGranted(entry.menuClass())) {
+				SideNavItem item = new SideNavItem(entry.title(), entry.path());
+				item.setPrefixComponent(VaadinIcon.PIE_BAR_CHART.create());
+				nav.addItem(item);
+			}
+		});
 	}
 
 	/**
@@ -125,6 +143,8 @@ public class MainLayout extends AppLayout implements AfterNavigationObserver {
 	 */
 	private static void buildWeasisSideNav(List<MenuEntry> menuEntries, SideNav nav) {
 		SideNavItem weasisLink = new SideNavItem("Weasis");
+		// SvgIcon gets the same sizing/alignment as the other menu icons
+		weasisLink.setPrefixComponent(new SvgIcon("logo/weasis.svg"));
 		// Menu for Weasis: not filtered yet by application
 		menuEntries.forEach(entry -> {
 			if (entry.path().startsWith("/" + AbstractView.WEASIS) && entry.menuClass() != null
@@ -148,6 +168,7 @@ public class MainLayout extends AppLayout implements AfterNavigationObserver {
 	private static void buildSettingsSideNav(List<MenuEntry> menuEntries, SideNav nav) {
 		// SideNav for Settings
 		SideNavItem settingsLink = new SideNavItem("Settings");
+		settingsLink.setPrefixComponent(LineAwesomeIcon.COG_SOLID.create());
 		// Menu for Settings
 		menuEntries.forEach(entry -> {
 			if ((entry.path().startsWith("/" + AbstractView.SETTINGS) || entry.path().equals("/"))

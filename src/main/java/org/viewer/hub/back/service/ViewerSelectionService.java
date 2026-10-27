@@ -63,6 +63,15 @@ public interface ViewerSelectionService {
 			Map<String, Set<Patient>> patientsByArchive);
 
 	/**
+	 * Describe why the viewer was selected (requested viewer, multiple archives, rule
+	 * matched, default viewer...)
+	 * @param searchCriteria Search criteria of the request
+	 * @param patientsByArchive Set of patients retrieved gather by archive
+	 * @return the explanation of the selection
+	 */
+	String describeViewerSelectionRule(SearchCriteria searchCriteria, Map<String, Set<Patient>> patientsByArchive);
+
+	/**
 	 * Count total number of viewer selection entities
 	 * @return total count of viewer selection entities
 	 */

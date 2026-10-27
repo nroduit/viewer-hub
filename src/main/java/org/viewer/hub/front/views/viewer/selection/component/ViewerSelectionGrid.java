@@ -76,6 +76,8 @@ public class ViewerSelectionGrid extends Grid<ViewerSelectionEntity> {
 		// Build columns
 		// Drag icon
 		this.addDragIcon();
+		// Rule number (same as "Rule #n" in the monitoring)
+		this.addRuleNumberColumn();
 		// Modality column
 		this.addModalityColumn();
 		// Archive
@@ -130,6 +132,19 @@ public class ViewerSelectionGrid extends Grid<ViewerSelectionEntity> {
 			dragIcon.getStyle().set("padding", "0.30em");
 			return dragIcon;
 		});
+	}
+
+	/**
+	 * Add rule number column
+	 * @return column rule number
+	 */
+	private Column<ViewerSelectionEntity> addRuleNumberColumn() {
+		return this
+			.addColumn(entity -> Objects.equals(entity.getArchive(), ViewerSelectionType.DEFAULT.name()) ? ""
+					: "#" + (this.viewerSelectionLogic.countViewerSelection() - entity.getPriority()))
+			.setHeader("Rule")
+			.setWidth("6%")
+			.setSortable(false);
 	}
 
 	/**
