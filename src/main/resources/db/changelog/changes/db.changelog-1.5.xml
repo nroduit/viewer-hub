@@ -1,0 +1,80 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<!--
+  ~  Copyright (c) 2022-2026 Weasis Team and other contributors.
+  ~
+  ~  This program and the accompanying materials are made available under the terms of the Eclipse
+  ~  Public License 2.0 which is available at https://www.eclipse.org/legal/epl-2.0, or the Apache
+  ~  License, Version 2.0 which is available at https://www.apache.org/licenses/LICENSE-2.0.
+  ~
+  ~  SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
+  ~
+  -->
+
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.0.xsd">
+
+    <!-- Monitoring: one row per viewer launch request received on /display -->
+    <changeSet author="viewer-hub" id="1.5-1">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="display_request_monitoring"/>
+            </not>
+        </preConditions>
+        <createTable tableName="display_request_monitoring">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="display_request_monitoring_pkey"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="viewer" type="VARCHAR(100)"/>
+            <column name="request_type" type="VARCHAR(20)"/>
+            <column name="query_level" type="VARCHAR(20)"/>
+            <column name="http_method" type="VARCHAR(10)"/>
+            <column name="authenticated" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="jwt_user" type="VARCHAR(255)"/>
+            <column name="request_user" type="VARCHAR(255)"/>
+            <column name="host" type="VARCHAR(255)"/>
+            <column name="client" type="VARCHAR(255)"/>
+            <column name="selection_rule" type="VARCHAR(500)"/>
+            <column name="archive" type="VARCHAR(1000)"/>
+            <column name="patient_id" type="VARCHAR(1000)"/>
+            <column name="study_uid" type="VARCHAR(2000)"/>
+            <column name="series_uid" type="VARCHAR(2000)"/>
+            <column name="object_uid" type="VARCHAR(2000)"/>
+            <column name="accession_number" type="VARCHAR(1000)"/>
+            <column name="duration_ms" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="success" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="error_message" type="VARCHAR(1000)"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="viewer-hub" id="1.5-2">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists tableName="display_request_monitoring" indexName="display_request_monitoring_created_at_index"/>
+            </not>
+        </preConditions>
+        <createIndex indexName="display_request_monitoring_created_at_index" tableName="display_request_monitoring">
+            <column name="created_at"/>
+        </createIndex>
+    </changeSet>
+
+    <!-- Ids come from a sequence (allocation size 50) so that the requests can be inserted by batch -->
+    <changeSet author="viewer-hub" id="1.5-3">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <sequenceExists sequenceName="display_request_monitoring_seq"/>
+            </not>
+        </preConditions>
+        <createSequence sequenceName="display_request_monitoring_seq" startValue="1" incrementBy="50"/>
+    </changeSet>
+
+</databaseChangeLog>

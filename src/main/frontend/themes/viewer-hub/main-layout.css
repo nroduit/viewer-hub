@@ -9,6 +9,10 @@
  *
  */
 
+vaadin-app-layout {
+  --vaadin-app-layout-drawer-width: 22rem;
+}
+
 vaadin-scroller[slot="drawer"] {
   padding: 0.5rem;
   /* Prevent a horizontal scrollbar in the drawer: only vertical scrolling is wanted. */

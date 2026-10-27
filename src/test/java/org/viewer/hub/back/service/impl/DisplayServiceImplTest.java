@@ -59,6 +59,9 @@ class DisplayServiceImplTest {
 	@Mock
 	private ConnectorQueryService connectorQueryService;
 
+	@Mock
+	private DisplayRequestMonitoringService displayRequestMonitoringService;
+
 	@InjectMocks
 	private DisplayServiceImpl displayService;
 
