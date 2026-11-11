@@ -156,6 +156,22 @@ public class AssociationServiceImpl implements AssociationService {
 	}
 
 	@Override
+	public TargetEntity setGroupActive(TargetEntity group, boolean active) {
+		if (!Objects.equals(TargetType.USER_GROUP, group.getType())
+				&& !Objects.equals(TargetType.HOST_GROUP, group.getType())) {
+			throw new IllegalArgumentException("Only a group can be deactivated: " + group.getName());
+		}
+		// Reload the persisted group so a stale in-memory copy never overwrites other
+		// fields and the state is always applied on the current database row
+		TargetEntity persisted = this.targetService.retrieveTargetsByIds(Collections.singletonList(group.getId()))
+			.stream()
+			.findFirst()
+			.orElseThrow(() -> new IllegalArgumentException("Group not found: " + group.getName()));
+		persisted.setActive(active);
+		return this.targetService.createTargets(Collections.singletonList(persisted)).getFirst();
+	}
+
+	@Override
 	public List<LaunchEntity> retrieveLaunches(@Valid TargetEntity targetEntity) {
 		// Retrieve launches/launch config/launch prefered corresponding to the target
 		List<LaunchEntity> launches = this.launchService.retrieveLaunchesById(targetEntity);

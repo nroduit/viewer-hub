@@ -81,6 +81,15 @@ public interface AssociationService {
 	boolean createTarget(TargetEntity targetToCreate);
 
 	/**
+	 * Activate or deactivate a group. A deactivated group keeps its members and
+	 * associations but is ignored when resolving the launch configuration.
+	 * @param group Group to update
+	 * @param active New state
+	 * @return the group updated
+	 */
+	TargetEntity setGroupActive(TargetEntity group, boolean active);
+
+	/**
 	 * Retrieve the launch models corresponding to the target id in parameter
 	 * @param targetEntity Target
 	 * @return launch models found

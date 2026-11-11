@@ -105,6 +105,15 @@ public class AssociationLogic {
 	}
 
 	/**
+	 * Activate or deactivate a group
+	 * @param group Group
+	 * @param active New state
+	 */
+	public TargetEntity setGroupActive(TargetEntity group, boolean active) {
+		return this.associationService.setGroupActive(group, active);
+	}
+
+	/**
 	 * Retrieve the launches corresponding to the target id in parameter
 	 * @param target Target
 	 * @return launch found

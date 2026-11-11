@@ -589,7 +589,7 @@ class LaunchPreferenceControllerIntegrationTests {
 					+ "        \"value\":\"LaunchValueSecond\" \n" + "    }\n" + "]"))
 			.andExpect(MockMvcResultMatchers.status().isOk())
 			.andExpect(MockMvcResultMatchers.content()
-				.string("[{\"config\":{\"id\":1,\"name\":\"LaunchConfigNameFirst\"},\"preferred\":{\"id\":1,\"name\":\"PreferedNameFirst\",\"type\":\"config\"},\"target\":{\"id\":1,\"name\":\"TARGETNAMEFIRST\",\"type\":\"USER\"},\"selection\":\"LaunchValueFirst\"},{\"config\":{\"id\":2,\"name\":\"LaunchConfigNameSecond\"},\"preferred\":{\"id\":2,\"name\":\"PreferedNameSecond\",\"type\":\"config\"},\"target\":{\"id\":2,\"name\":\"TARGETNAMESECOND\",\"type\":\"USER\"},\"selection\":\"LaunchValueSecond\"}]"));
+				.string("[{\"config\":{\"id\":1,\"name\":\"LaunchConfigNameFirst\"},\"preferred\":{\"id\":1,\"name\":\"PreferedNameFirst\",\"type\":\"config\"},\"target\":{\"active\":true,\"id\":1,\"name\":\"TARGETNAMEFIRST\",\"type\":\"USER\"},\"selection\":\"LaunchValueFirst\"},{\"config\":{\"id\":2,\"name\":\"LaunchConfigNameSecond\"},\"preferred\":{\"id\":2,\"name\":\"PreferedNameSecond\",\"type\":\"config\"},\"target\":{\"active\":true,\"id\":2,\"name\":\"TARGETNAMESECOND\",\"type\":\"USER\"},\"selection\":\"LaunchValueSecond\"}]"));
 
 	}
 
@@ -902,7 +902,7 @@ class LaunchPreferenceControllerIntegrationTests {
 		this.mockMvc.perform(MockMvcRequestBuilders.get("/weasisconfig/ws/preferences/launch/group/groupName"))
 			.andExpect(MockMvcResultMatchers.status().isOk())
 			.andExpect(MockMvcResultMatchers.content()
-				.string("[{\"config\":{\"id\":1,\"name\":\"LaunchConfigName\"},\"preferred\":{\"id\":2,\"name\":\"Property\",\"type\":\"pro\"},\"target\":{\"id\":2,\"name\":\"TARGETNAME\",\"type\":\"HOST\"},\"selection\":\"property\"}]"));
+				.string("[{\"config\":{\"id\":1,\"name\":\"LaunchConfigName\"},\"preferred\":{\"id\":2,\"name\":\"Property\",\"type\":\"pro\"},\"target\":{\"active\":true,\"id\":2,\"name\":\"TARGETNAME\",\"type\":\"HOST\"},\"selection\":\"property\"}]"));
 
 	}
 

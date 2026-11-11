@@ -470,7 +470,7 @@ class GroupControllerIntegrationTests {
 				.contentType(MediaType.APPLICATION_JSON_VALUE))
 			.andExpect(MockMvcResultMatchers.status().isOk())
 			.andExpect(MockMvcResultMatchers.content()
-				.string("[{\"id\":888,\"name\":\"GROUPNAMEA\",\"type\":\"USERGROUP\"},{\"id\":999,\"name\":\"GROUPNAMEB\",\"type\":\"USERGROUP\"}]"));
+				.string("[{\"active\":true,\"id\":888,\"name\":\"GROUPNAMEA\",\"type\":\"USERGROUP\"},{\"active\":true,\"id\":999,\"name\":\"GROUPNAMEB\",\"type\":\"USERGROUP\"}]"));
 	}
 
 	/**
@@ -501,7 +501,7 @@ class GroupControllerIntegrationTests {
 				.contentType(MediaType.APPLICATION_JSON_VALUE))
 			.andExpect(MockMvcResultMatchers.status().isOk())
 			.andExpect(MockMvcResultMatchers.content()
-				.string("[{\"id\":888,\"name\":\"GROUPNAMEA\",\"type\":\"HOSTGROUP\"},{\"id\":999,\"name\":\"GROUPNAMEB\",\"type\":\"HOSTGROUP\"}]"));
+				.string("[{\"active\":true,\"id\":888,\"name\":\"GROUPNAMEA\",\"type\":\"HOSTGROUP\"},{\"active\":true,\"id\":999,\"name\":\"GROUPNAMEB\",\"type\":\"HOSTGROUP\"}]"));
 
 	}
 
@@ -575,7 +575,7 @@ class GroupControllerIntegrationTests {
 		this.mockMvc.perform(MockMvcRequestBuilders.get("/weasisconfig/ws/group/users/groupName"))
 			.andExpect(MockMvcResultMatchers.status().isOk())
 			.andExpect(MockMvcResultMatchers.content()
-				.string("[{\"id\":888,\"name\":\"USERA\",\"type\":\"USER\"},{\"id\":999,\"name\":\"USERB\",\"type\":\"USER\"}]"));
+				.string("[{\"active\":true,\"id\":888,\"name\":\"USERA\",\"type\":\"USER\"},{\"active\":true,\"id\":999,\"name\":\"USERB\",\"type\":\"USER\"}]"));
 
 	}
 
@@ -611,7 +611,7 @@ class GroupControllerIntegrationTests {
 		this.mockMvc.perform(MockMvcRequestBuilders.get("/weasisconfig/ws/group/hosts/groupName"))
 			.andExpect(MockMvcResultMatchers.status().isOk())
 			.andExpect(MockMvcResultMatchers.content()
-				.string("[{\"id\":888,\"name\":\"HOSTA\",\"type\":\"HOST\"},{\"id\":999,\"name\":\"HOSTB\",\"type\":\"HOST\"}]"));
+				.string("[{\"active\":true,\"id\":888,\"name\":\"HOSTA\",\"type\":\"HOST\"},{\"active\":true,\"id\":999,\"name\":\"HOSTB\",\"type\":\"HOST\"}]"));
 
 	}
 

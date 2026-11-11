@@ -30,6 +30,12 @@ import org.viewer.hub.back.service.TargetService;
 
 import java.util.Collections;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 @ExtendWith(MockitoExtension.class)
 class AssociationServiceImplTest {
 
@@ -149,6 +155,87 @@ class AssociationServiceImplTest {
 		// Test result
 		Mockito.verify(this.targetServiceMock, Mockito.times(1)).targetExistsByName(Mockito.anyString());
 		Mockito.verify(this.targetServiceMock, Mockito.times(1)).createTargets(Mockito.anyList());
+	}
+
+	@Test
+	void setGroupActive_with_userGroup_should_deactivateAndPersist() {
+		TargetEntity group = this.buildTarget(10L, "UserGroup", TargetType.USER_GROUP, true);
+		TargetEntity persisted = this.buildTarget(10L, "UserGroup", TargetType.USER_GROUP, true);
+		Mockito.when(this.targetServiceMock.retrieveTargetsByIds(Collections.singletonList(10L)))
+			.thenReturn(Collections.singletonList(persisted));
+		Mockito.when(this.targetServiceMock.createTargets(Mockito.anyList()))
+			.thenAnswer(invocation -> invocation.getArgument(0));
+
+		TargetEntity result = this.associationService.setGroupActive(group, false);
+
+		assertFalse(result.isActive());
+		assertSame(persisted, result);
+		Mockito.verify(this.targetServiceMock).createTargets(Collections.singletonList(persisted));
+	}
+
+	@Test
+	void setGroupActive_with_hostGroup_should_reactivateAndPersist() {
+		TargetEntity group = this.buildTarget(11L, "HostGroup", TargetType.HOST_GROUP, false);
+		TargetEntity persisted = this.buildTarget(11L, "HostGroup", TargetType.HOST_GROUP, false);
+		Mockito.when(this.targetServiceMock.retrieveTargetsByIds(Collections.singletonList(11L)))
+			.thenReturn(Collections.singletonList(persisted));
+		Mockito.when(this.targetServiceMock.createTargets(Mockito.anyList()))
+			.thenAnswer(invocation -> invocation.getArgument(0));
+
+		TargetEntity result = this.associationService.setGroupActive(group, true);
+
+		assertTrue(result.isActive());
+		Mockito.verify(this.targetServiceMock).createTargets(Collections.singletonList(persisted));
+	}
+
+	@Test
+	void setGroupActive_should_applyStateOnReloadedEntityNotOnStaleCopy() {
+		TargetEntity stale = this.buildTarget(12L, "StaleName", TargetType.USER_GROUP, true);
+		TargetEntity persisted = this.buildTarget(12L, "CurrentName", TargetType.USER_GROUP, true);
+		Mockito.when(this.targetServiceMock.retrieveTargetsByIds(Collections.singletonList(12L)))
+			.thenReturn(Collections.singletonList(persisted));
+		Mockito.when(this.targetServiceMock.createTargets(Mockito.anyList()))
+			.thenAnswer(invocation -> invocation.getArgument(0));
+
+		TargetEntity result = this.associationService.setGroupActive(stale, false);
+
+		// TargetEntity normalizes names to upper case
+		assertEquals("CURRENTNAME", result.getName());
+		assertSame(persisted, result);
+		assertFalse(result.isActive());
+		assertTrue(stale.isActive());
+	}
+
+	@Test
+	void setGroupActive_with_nonGroupTarget_should_throwAndNotPersist() {
+		for (TargetType type : new TargetType[] { TargetType.USER, TargetType.HOST }) {
+			TargetEntity target = this.buildTarget(13L, "Target", type, true);
+
+			assertThrows(IllegalArgumentException.class, () -> this.associationService.setGroupActive(target, false));
+		}
+
+		Mockito.verify(this.targetServiceMock, Mockito.never()).retrieveTargetsByIds(Mockito.anyList());
+		Mockito.verify(this.targetServiceMock, Mockito.never()).createTargets(Mockito.anyList());
+	}
+
+	@Test
+	void setGroupActive_with_unknownGroup_should_throwAndNotPersist() {
+		TargetEntity group = this.buildTarget(14L, "Missing", TargetType.USER_GROUP, true);
+		Mockito.when(this.targetServiceMock.retrieveTargetsByIds(Collections.singletonList(14L)))
+			.thenReturn(Collections.emptyList());
+
+		assertThrows(IllegalArgumentException.class, () -> this.associationService.setGroupActive(group, false));
+
+		Mockito.verify(this.targetServiceMock, Mockito.never()).createTargets(Mockito.anyList());
+	}
+
+	private TargetEntity buildTarget(Long id, String name, TargetType type, boolean active) {
+		TargetEntity target = new TargetEntity();
+		target.setId(id);
+		target.setName(name);
+		target.setType(type);
+		target.setActive(active);
+		return target;
 	}
 
 }

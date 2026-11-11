@@ -19,6 +19,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import org.vaadin.artur.spring.dataprovider.FilterablePageableDataProvider;
+import org.viewer.hub.back.model.AssociationModel;
 import org.viewer.hub.back.model.AssociationModelFilter;
 
 import java.util.List;
@@ -52,6 +53,14 @@ public class AssociationDataProvider<T> extends FilterablePageableDataProvider<T
 	protected Page<T> fetchFromBackEnd(Query<T, AssociationModelFilter> query, Pageable pageable) {
 		AssociationModelFilter filter = query.getFilter().orElse(new AssociationModelFilter());
 		return (Page<T>) this.associationLogic.retrieveAssociationModels(filter, pageable);
+	}
+
+	@Override
+	public Object getId(T item) {
+		// Stable id: AssociationModel equals/hashCode include the mutable
+		// belongToMemberOf list, which breaks the grid row tracking once edited
+		return item instanceof AssociationModel model && model.getTarget() != null ? model.getTarget().getId()
+				: super.getId(item);
 	}
 
 	@Override

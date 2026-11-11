@@ -1,0 +1,31 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<!--
+  ~  Copyright (c) 2022-2026 Weasis Team and other contributors.
+  ~
+  ~  This program and the accompanying materials are made available under the terms of the Eclipse
+  ~  Public License 2.0 which is available at https://www.eclipse.org/legal/epl-2.0, or the Apache
+  ~  License, Version 2.0 which is available at https://www.apache.org/licenses/LICENSE-2.0.
+  ~
+  ~  SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
+  ~
+  -->
+
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.0.xsd">
+
+    <!-- Group deactivation: a deactivated group keeps its members but is ignored at launch resolution -->
+    <changeSet author="viewer-hub" id="1.6-1">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="target" columnName="active"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="target">
+            <column name="active" type="BOOLEAN" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+</databaseChangeLog>

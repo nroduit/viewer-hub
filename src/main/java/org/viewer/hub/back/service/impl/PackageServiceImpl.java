@@ -344,19 +344,19 @@ public class PackageServiceImpl implements PackageService {
 
 	@Override
 	public boolean doesVersionNumberAlreadyExists(String version) {
-		return version != null && !this.packageVersionRepository
-			.findByVersionNumber(version.contains(StringUtil.HYPHEN) ? version.split(StringUtil.HYPHEN)[0] : version)
-			.isEmpty();
+		return !this.retrievePackageVersionByVersionNumber(version).isEmpty();
 	}
 
 	@Override
 	public List<PackageVersionEntity> retrievePackageVersionByVersionNumber(String version) {
-		List<PackageVersionEntity> packageVersionEntities = new ArrayList<>();
-		if (version != null) {
-			packageVersionEntities = this.packageVersionRepository.findByVersionNumber(
-					version.contains(StringUtil.HYPHEN) ? version.split(StringUtil.HYPHEN)[0] : version);
-		}
-		return packageVersionEntities;
+		return Optional.ofNullable(version).filter(StringUtils::isNotBlank).flatMap(v -> {
+			// The qualifier is stored with its hyphen (ex: -TEST), null when absent
+			int hyphenIndex = v.indexOf(StringUtil.HYPHEN);
+			return hyphenIndex >= 0
+					? this.packageVersionRepository.findByVersionNumberAndQualifier(v.substring(0, hyphenIndex),
+							v.substring(hyphenIndex))
+					: this.packageVersionRepository.findByVersionNumberAndQualifier(v, null);
+		}).stream().toList();
 	}
 
 	@Override
@@ -524,12 +524,7 @@ public class PackageServiceImpl implements PackageService {
 
 		// Check if a packageVersionEntity is already present in the database
 		if (StringUtils.isNotBlank(versionToImport)) {
-			isImportCoherentVersionNotAlreadyInstalledOnServer = versionToImport.contains(StringUtil.HYPHEN)
-					? packageVersionRepository
-						.findByVersionNumberAndQualifier(versionToImport.split(StringUtil.HYPHEN)[0],
-								"%s%s".formatted(StringUtil.HYPHEN, versionToImport.split(StringUtil.HYPHEN)[1]))
-						.isEmpty()
-					: packageVersionRepository.findByVersionNumber(versionToImport) == null;
+			isImportCoherentVersionNotAlreadyInstalledOnServer = !doesVersionNumberAlreadyExists(versionToImport);
 		}
 
 		return isImportCoherentVersionNotAlreadyInstalledOnServer;

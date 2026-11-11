@@ -147,7 +147,7 @@ class TargetControllerIntegrationTests {
 						+ "    }\n" + "]"))
 			.andExpect(MockMvcResultMatchers.status().isOk())
 			.andExpect(MockMvcResultMatchers.content()
-				.string("[{\"id\":1,\"name\":\"TARGET HOST\",\"type\":\"HOST\"},{\"id\":2,\"name\":\"TARGET HOSTGROUP\",\"type\":\"HOSTGROUP\"},{\"id\":3,\"name\":\"TARGET USERGROUP\",\"type\":\"USERGROUP\"},{\"id\":4,\"name\":\"TARGET USER\",\"type\":\"USER\"}]"));
+				.string("[{\"active\":true,\"id\":1,\"name\":\"TARGET HOST\",\"type\":\"HOST\"},{\"active\":true,\"id\":2,\"name\":\"TARGET HOSTGROUP\",\"type\":\"HOSTGROUP\"},{\"active\":true,\"id\":3,\"name\":\"TARGET USERGROUP\",\"type\":\"USERGROUP\"},{\"active\":true,\"id\":4,\"name\":\"TARGET USER\",\"type\":\"USER\"}]"));
 
 	}
 

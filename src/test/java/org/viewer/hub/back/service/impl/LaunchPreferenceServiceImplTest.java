@@ -14,6 +14,7 @@ package org.viewer.hub.back.service.impl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.jpa.domain.Specification;
@@ -199,6 +200,37 @@ class LaunchPreferenceServiceImplTest {
 		assertEquals("LaunchConfigName", launchEntities.get(0).getAssociatedConfig().getName());
 		assertEquals("launch", launchEntities.get(0).getAssociatedPreferred().getName());
 		assertEquals("TARGETNAME", launchEntities.get(0).getAssociatedTarget().getName());
+	}
+
+	/**
+	 * Test method retrieveLaunchesByHostUserConfigPreferedTypeOrderByTargets with a
+	 * deactivated group
+	 * <p>
+	 * Expected: the deactivated group is not part of the targets looked for
+	 */
+	@Test
+	void shouldIgnoreDeactivatedGroupWhenRetrievingLaunches() {
+		TargetEntity inactiveGroup = new TargetEntity();
+		inactiveGroup.setId(2L);
+		inactiveGroup.setName("TestGroup");
+		inactiveGroup.setType(TargetType.USER_GROUP);
+		inactiveGroup.setActive(false);
+		when(this.targetRepositoryMock.findById(Mockito.anyLong())).thenReturn(Optional.of(inactiveGroup));
+
+		LaunchPreferenceService spy = Mockito.spy(this.launchPreferenceService);
+		spy.retrieveLaunchesByHostUserConfigPreferedTypeOrderByTargets(null, "user", "default", null);
+
+		org.mockito.ArgumentCaptor<List<TargetEntity>> captor = ArgumentCaptor.forClass(List.class);
+		Mockito.verify(spy).fillAssociatedEntitiesLaunches(captor.capture(), any(), any(), any());
+		assertEquals(1, captor.getValue().size());
+		assertEquals(TargetType.USER, captor.getValue().get(0).getType());
+
+		// Reactivated group is looked for again
+		inactiveGroup.setActive(true);
+		LaunchPreferenceService spy2 = Mockito.spy(this.launchPreferenceService);
+		spy2.retrieveLaunchesByHostUserConfigPreferedTypeOrderByTargets(null, "user", "default", null);
+		Mockito.verify(spy2).fillAssociatedEntitiesLaunches(captor.capture(), any(), any(), any());
+		assertEquals(2, captor.getValue().size());
 	}
 
 	/**
