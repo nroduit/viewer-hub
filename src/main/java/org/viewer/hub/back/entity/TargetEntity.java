@@ -46,6 +46,8 @@ public class TargetEntity implements Serializable {
 
 	private TargetType type;
 
+	private boolean active = true;
+
 	@Id
 	@Column(name = "id", nullable = false)
 	@GeneratedValue(strategy = GenerationType.AUTO)
@@ -84,6 +86,18 @@ public class TargetEntity implements Serializable {
 
 	public void setType(TargetType type) {
 		this.type = type;
+	}
+
+	@Basic
+	@Column(name = "active", nullable = false)
+	@JacksonXmlProperty(localName = "Active")
+	@Schema(description = "False when the group is deactivated: members and associations are kept but the group is ignored when resolving the launch configuration")
+	public boolean isActive() {
+		return this.active;
+	}
+
+	public void setActive(boolean active) {
+		this.active = active;
 	}
 
 	@Override

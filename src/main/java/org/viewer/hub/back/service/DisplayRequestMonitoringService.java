@@ -86,6 +86,12 @@ public interface DisplayRequestMonitoringService {
 	DashboardData dashboard(DisplayRequestMonitoringFilter filter);
 
 	/**
+	 * Distinct clients of the recorded requests, sorted
+	 * @return client names
+	 */
+	List<String> distinctClients();
+
+	/**
 	 * Delete all the recorded requests (reset of the statistics)
 	 * @return number of requests deleted
 	 */

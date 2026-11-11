@@ -167,7 +167,7 @@ public class MonitoringView extends AbstractView implements BeforeEnterObserver 
 
 	private final TextField host = new TextField("Host");
 
-	private final TextField client = new TextField("Client");
+	private final ComboBox<String> client = new ComboBox<>("Client");
 
 	private final Select<String> queryLevel = new Select<>();
 
@@ -196,6 +196,10 @@ public class MonitoringView extends AbstractView implements BeforeEnterObserver 
 	private LocalDateTime relativeFrom;
 
 	private boolean updatingRange;
+
+	private boolean resetting;
+
+	private transient List<String> knownClients;
 
 	@Autowired
 	public MonitoringView(DisplayRequestMonitoringService displayRequestMonitoringService,
@@ -234,14 +238,30 @@ public class MonitoringView extends AbstractView implements BeforeEnterObserver 
 			if (e.getValue() != QuickRange.CUSTOM_RANGE) {
 				this.clearDates();
 			}
+			if (!this.resetting) {
+				this.search();
+			}
 		});
 		DatePicker.DatePickerI18n dateFormat = new DatePicker.DatePickerI18n().setDateFormat("dd/MM/yyyy");
 		this.fromPicker.setI18n(dateFormat);
 		this.toPicker.setI18n(dateFormat);
-		this.fromPicker.addValueChangeListener(e -> this.markCustomRange(e.isFromClient()));
-		this.toPicker.addValueChangeListener(e -> this.markCustomRange(e.isFromClient()));
+		this.fromPicker.addValueChangeListener(e -> this.onDateChanged(e.isFromClient()));
+		this.toPicker.addValueChangeListener(e -> this.onDateChanged(e.isFromClient()));
 
 		this.applyQuickRange();
+
+		this.client.setClearButtonVisible(true);
+		this.client.setAllowCustomValue(true);
+		this.client.addCustomValueSetListener(e -> {
+			this.client.setValue(e.getDetail());
+			this.search();
+		});
+		this.client.addValueChangeListener(e -> {
+			if (e.isFromClient()) {
+				this.search();
+			}
+		});
+		this.refreshClients();
 
 		this.viewers.setItems(Arrays.stream(ViewerType.values()).map(ViewerType::getCode).toList());
 		this.viewers.setPlaceholder(ALL);
@@ -256,7 +276,7 @@ public class MonitoringView extends AbstractView implements BeforeEnterObserver 
 
 		this.user.setPlaceholder("JWT user or request user");
 		for (TextField field : Arrays.asList(this.user, this.patientId, this.studyUid, this.seriesUid, this.objectUid,
-				this.accessionNumber, this.host, this.client)) {
+				this.accessionNumber, this.host)) {
 			field.setClearButtonVisible(true);
 			field.addKeyPressListener(Key.ENTER, e -> this.search());
 		}
@@ -461,6 +481,14 @@ public class MonitoringView extends AbstractView implements BeforeEnterObserver 
 			.setWidth("6rem")
 			.setFlexGrow(0);
 
+		// The details of a day row are empty: only the request rows can open them
+		this.activityGrid.setDetailsVisibleOnClick(false);
+		this.activityGrid.addItemClickListener(e -> {
+			ActivityNode node = e.getItem();
+			if (node != null && node.request() != null) {
+				this.activityGrid.setDetailsVisible(node, !this.activityGrid.isDetailsVisible(node));
+			}
+		});
 		this.activityGrid.setItemDetailsRenderer(new com.vaadin.flow.data.renderer.ComponentRenderer<>(node -> {
 			DisplayRequestMonitoringEntity request = node.request();
 			Div details = new Div();
@@ -539,7 +567,8 @@ public class MonitoringView extends AbstractView implements BeforeEnterObserver 
 		Span name = new Span(label + ": ");
 		name.getStyle().set("font-weight", "600");
 		Div line = new Div(name, new Span(value));
-		line.getStyle().set("overflow-wrap", "anywhere");
+		line.getStyle().set("overflow", "hidden").set("text-overflow", "ellipsis").set("white-space", "nowrap");
+		line.getElement().setAttribute("title", label + ": " + value);
 		cell.add(line);
 	}
 
@@ -554,22 +583,16 @@ public class MonitoringView extends AbstractView implements BeforeEnterObserver 
 
 	private Grid.Column<ActivityNode> activityTextColumn(String header, String sortProperty, int weight,
 			Function<DisplayRequestMonitoringEntity, String> value) {
-		return this.activityGrid.addComponentColumn(n -> {
-			Span text = new Span();
-			if (n.request() != null) {
-				String content = StringUtils.defaultString(value.apply(n.request()));
-				text.setText(content);
-				text.getElement().setAttribute("title", content);
-			}
-			text.getStyle()
-				.set("display", "block")
-				.set("overflow", "hidden")
-				.set("text-overflow", "ellipsis")
-				.set("white-space", "nowrap");
-			return text;
-			// Columns share the available width (no horizontal scrollbar), the text is
-			// cut with "..."
-		}).setHeader(header).setSortProperty(sortProperty).setWidth("0").setFlexGrow(weight).setResizable(true);
+		Function<ActivityNode, String> text = n -> n.request() == null ? ""
+				: StringUtils.defaultString(value.apply(n.request()));
+		// The grid cut the text with "..." and the tooltip shows the full value
+		return this.activityGrid.addColumn(text::apply)
+			.setTooltipGenerator(text::apply)
+			.setHeader(header)
+			.setSortProperty(sortProperty)
+			.setWidth("0")
+			.setFlexGrow(weight)
+			.setResizable(true);
 	}
 
 	private void activityColumn(String header, String sortProperty,
@@ -635,6 +658,7 @@ public class MonitoringView extends AbstractView implements BeforeEnterObserver 
 	private void search() {
 		// Relative period: recompute it from "now"
 		this.applyQuickRange();
+		this.refreshClients();
 		this.appliedFilter = this.readFilter();
 		DisplayRequestMonitoringFilter filter = this.appliedFilter;
 
@@ -809,9 +833,30 @@ public class MonitoringView extends AbstractView implements BeforeEnterObserver 
 		}
 	}
 
-	private void markCustomRange(boolean fromClient) {
-		if (fromClient && !this.updatingRange) {
+	private void onDateChanged(boolean fromClient) {
+		if (!fromClient || this.updatingRange) {
+			return;
+		}
+		if (this.quickRange.getValue() == QuickRange.CUSTOM_RANGE) {
+			this.search();
+		}
+		else {
+			// Switching to the custom range reloads the content
 			this.quickRange.setValue(QuickRange.CUSTOM_RANGE);
+		}
+	}
+
+	private void refreshClients() {
+		String current = this.client.getValue();
+		List<String> clients = new java.util.ArrayList<>(this.displayRequestMonitoringService.distinctClients());
+		if (current != null && !clients.contains(current)) {
+			clients.add(current);
+		}
+		// Replacing the items of the combo box while it is used would clear its value
+		if (!clients.equals(this.knownClients)) {
+			this.knownClients = clients;
+			this.client.setItems(clients);
+			this.client.setValue(current);
 		}
 	}
 
@@ -824,15 +869,22 @@ public class MonitoringView extends AbstractView implements BeforeEnterObserver 
 	}
 
 	private void resetFilters() {
-		this.clearDates();
-		this.quickRange.setValue(QuickRange.LAST_24_HOURS);
+		this.resetting = true;
+		try {
+			this.clearDates();
+			this.quickRange.setValue(QuickRange.LAST_24_HOURS);
+		}
+		finally {
+			this.resetting = false;
+		}
 		this.viewers.clear();
 		this.queryLevel.setValue(ALL);
 		this.status.setValue(ANY_STATUS);
 		Arrays
 			.asList(this.user, this.patientId, this.studyUid, this.seriesUid, this.objectUid, this.accessionNumber,
-					this.host, this.client)
+					this.host)
 			.forEach(TextField::clear);
+		this.client.clear();
 		this.archive.clear();
 		this.search();
 	}

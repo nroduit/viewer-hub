@@ -100,10 +100,7 @@ public class DisplayController {
 			return launchViewerByEvaluatingQueryParams(request, authentication, params, ArchiveSearchCriteria.class);
 		}
 		finally {
-			// Reset the authentication in order to force OAuth2 to login
-			// again and get a new fresh access token when using oauth2Login in
-			// SecurityConfiguration
-			SecurityContextHolder.getContext().setAuthentication(null);
+			resetAuthentication();
 		}
 	}
 
@@ -127,10 +124,7 @@ public class DisplayController {
 			return this.launchViewerWithoutIHEParameters(request, authentication, params);
 		}
 		finally {
-			// Reset the authentication in order to force OAuth2 to login
-			// again and get a new fresh access token when using oauth2Login in
-			// SecurityConfiguration
-			SecurityContextHolder.getContext().setAuthentication(null);
+			resetAuthentication();
 		}
 	}
 
@@ -153,10 +147,7 @@ public class DisplayController {
 			return launchViewerByEvaluatingQueryParams(request, authentication, params, IHESearchCriteria.class);
 		}
 		finally {
-			// Reset the authentication in order to force OAuth2 to login
-			// again and get a new fresh access token when using oauth2Login in
-			// SecurityConfiguration
-			SecurityContextHolder.getContext().setAuthentication(null);
+			resetAuthentication();
 		}
 	}
 
@@ -181,11 +172,18 @@ public class DisplayController {
 			return this.launchViewerWithIHEParameters(request, authentication, params);
 		}
 		finally {
-			// Reset the authentication in order to force OAuth2 to login
-			// again and get a new fresh access token when using oauth2Login in
-			// SecurityConfiguration
-			SecurityContextHolder.getContext().setAuthentication(null);
+			resetAuthentication();
 		}
+	}
+
+	/**
+	 * Reset the authentication for the current request only, in order to force OAuth2 to
+	 * login again and get a fresh access token. A new empty context is used instead of
+	 * mutating the current one, which is shared with the HTTP session and would log out
+	 * the other tabs (Vaadin UI) of the same user.
+	 */
+	private static void resetAuthentication() {
+		SecurityContextHolder.setContext(SecurityContextHolder.createEmptyContext());
 	}
 
 	@Operation(summary = "Launch a viewer (Post)(IHE)(Not Authenticated)",

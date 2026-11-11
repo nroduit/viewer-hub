@@ -232,6 +232,12 @@ public class DisplayRequestMonitoringServiceImpl implements DisplayRequestMonito
 	}
 
 	@Override
+	@Transactional(readOnly = true)
+	public List<String> distinctClients() {
+		return this.displayRequestMonitoringRepository.findDistinctClients();
+	}
+
+	@Override
 	@Transactional
 	public long deleteAll() {
 		long count = this.displayRequestMonitoringRepository.count();

@@ -48,8 +48,10 @@ import org.viewer.hub.front.views.weasis.association.component.LaunchGrid;
 
 import java.io.Serial;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
@@ -83,6 +85,11 @@ public class AssociationView extends AbstractView {
 
 	private SplitLayout launchLayout;
 
+	// Combo boxes of the rows rendered, by target id
+	private final transient Map<Long, MultiSelectComboBox<TargetEntity>> rowComboBoxes = new HashMap<>();
+
+	private boolean syncingRows;
+
 	@Autowired
 	public AssociationView(AssociationLogic associationLogic,
 			AssociationDataProvider<AssociationModel> associationDataProvider) {
@@ -105,7 +112,7 @@ public class AssociationView extends AbstractView {
 	private void buildComponents() {
 		// Grid + data provider
 		this.associationGrid = new AssociationGrid(this.associationDataProvider,
-				this.createMultiSelectComboBoxBelongToMemberOfValueProvider());
+				this.createMultiSelectComboBoxBelongToMemberOfValueProvider(), this::groupActiveListener);
 		this.associationDataProvider.setFilter(this.associationGrid.getAssociationModelFilter());
 		this.associationGrid.setDataProvider(this.associationDataProvider);
 
@@ -183,11 +190,52 @@ public class AssociationView extends AbstractView {
 			// Change listener => refresh model + update in backend
 			multiselectComboBox.addValueChangeListener(event -> {
 				associationModel.setBelongToMemberOf(new ArrayList<>(event.getValue()));
+				if (this.syncingRows) {
+					return;
+				}
 				this.associationLogic.updateAssociationModel(associationModel);
+				this.syncCounterpartRows(associationModel.getTarget(), event.getOldValue(), event.getValue());
 			});
 
+			this.rowComboBoxes.put(associationModel.getTarget().getId(), multiselectComboBox);
 			return multiselectComboBox;
 		};
+	}
+
+	/**
+	 * Reflect an association change in the rows already displayed for the counterpart
+	 * targets (e.g. the user added to a group), without reloading the grid
+	 * @param changedTarget Target whose associations have been edited
+	 * @param oldValue Associations before the change
+	 * @param newValue Associations after the change
+	 */
+	private void syncCounterpartRows(TargetEntity changedTarget, Set<TargetEntity> oldValue,
+			Set<TargetEntity> newValue) {
+		Set<TargetEntity> added = new HashSet<>(newValue);
+		added.removeAll(oldValue);
+		Set<TargetEntity> removed = new HashSet<>(oldValue);
+		removed.removeAll(newValue);
+
+		this.syncingRows = true;
+		try {
+			added.forEach(target -> this.updateCounterpartRow(target, changedTarget, true));
+			removed.forEach(target -> this.updateCounterpartRow(target, changedTarget, false));
+		}
+		finally {
+			this.syncingRows = false;
+		}
+	}
+
+	private void updateCounterpartRow(TargetEntity rowTarget, TargetEntity changedTarget, boolean add) {
+		MultiSelectComboBox<TargetEntity> comboBox = this.rowComboBoxes.get(rowTarget.getId());
+		if (comboBox == null || !comboBox.isAttached()) {
+			this.rowComboBoxes.remove(rowTarget.getId());
+			return;
+		}
+		Set<TargetEntity> values = new HashSet<>(comboBox.getValue());
+		if (add ? values.add(changedTarget) : values.remove(changedTarget)) {
+			comboBox.setValue(values);
+		}
 	}
 
 	/**
@@ -208,6 +256,20 @@ public class AssociationView extends AbstractView {
 								&& Objects.equals(TargetType.USER, item.getType())
 						|| Objects.equals(TargetType.HOST_GROUP, associationModel.getTarget().getType())
 								&& Objects.equals(TargetType.HOST, item.getType()));
+	}
+
+	/**
+	 * Listener on the activation/deactivation of a group
+	 * @param associationModel Row of the group
+	 * @param active New state
+	 */
+	private void groupActiveListener(AssociationModel associationModel, boolean active) {
+		TargetEntity updated = this.associationLogic.setGroupActive(associationModel.getTarget(), active);
+		associationModel.setTarget(updated);
+		this.displayMessage(
+				new Message(MessageLevel.SUCCESS, MessageFormat.TEXT, String.format("Group %s has been %s",
+						associationModel.getTarget().getName(), active ? "activated" : "deactivated")),
+				MessageType.NOTIFICATION_MESSAGE);
 	}
 
 	/**

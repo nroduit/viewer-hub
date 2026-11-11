@@ -16,6 +16,8 @@ import com.vaadin.flow.component.combobox.MultiSelectComboBox;
 import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.HeaderRow;
+import com.vaadin.flow.component.checkbox.Checkbox;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.function.ValueProvider;
@@ -24,6 +26,8 @@ import org.viewer.hub.back.enums.TargetType;
 import org.viewer.hub.back.model.AssociationModel;
 import org.viewer.hub.back.model.AssociationModelFilter;
 import org.viewer.hub.front.views.weasis.association.AssociationDataProvider;
+
+import java.util.function.BiConsumer;
 
 /**
  * Grid for the association view
@@ -42,31 +46,71 @@ public class AssociationGrid extends Grid<AssociationModel> {
 	// Value provider for column BelongToMemberOf
 	private final ValueProvider<AssociationModel, MultiSelectComboBox<TargetEntity>> multiSelectComboBoxBelongToMemberOfValueProvider;
 
+	// Called when the active state of a group is toggled
+	private final transient BiConsumer<AssociationModel, Boolean> groupActiveListener;
+
 	/**
 	 * Constructor
 	 * @param originalDataProvider Original data provider
 	 * @param multiSelectComboBoxBelongToMemberOfValueProvider Value provider for column
 	 * BelongToMemberOf
+	 * @param groupActiveListener Listener on the activation/deactivation of a group
 	 */
 	public AssociationGrid(AssociationDataProvider<AssociationModel> originalDataProvider,
-			ValueProvider<AssociationModel, MultiSelectComboBox<TargetEntity>> multiSelectComboBoxBelongToMemberOfValueProvider) {
+			ValueProvider<AssociationModel, MultiSelectComboBox<TargetEntity>> multiSelectComboBoxBelongToMemberOfValueProvider,
+			BiConsumer<AssociationModel, Boolean> groupActiveListener) {
 
 		this.originalDataProvider = originalDataProvider;
 		this.multiSelectComboBoxBelongToMemberOfValueProvider = multiSelectComboBoxBelongToMemberOfValueProvider;
+		this.groupActiveListener = groupActiveListener;
 
 		// Set size for the grid
 		this.setWidthFull();
+
+		// Deactivated groups are greyed out
+		this.setPartNameGenerator(
+				associationModel -> isGroup(associationModel) && !associationModel.getTarget().isActive()
+						? "inactive-group" : null);
 
 		// Build columns
 		// Target name
 		Column<AssociationModel> targetNameColumn = this.addColumnTargetName();
 		// Target Type
 		Column<AssociationModel> targetTypeColumn = this.addColumnTargetType();
+		// Active (groups only)
+		this.addColumnActive();
 		// Belongs to/Member of
 		Column<AssociationModel> belongToMemberOfColumn = this.addColumnBelongToMemberOf();
 
 		// Create filters on rows
 		this.createFiltersOnRows(targetNameColumn, targetTypeColumn, belongToMemberOfColumn);
+	}
+
+	private static boolean isGroup(AssociationModel associationModel) {
+		TargetType type = associationModel.getTarget().getType();
+		return type == TargetType.USER_GROUP || type == TargetType.HOST_GROUP;
+	}
+
+	/**
+	 * Add column active: checkbox displayed for groups only
+	 * @return column built
+	 */
+	private Column<AssociationModel> addColumnActive() {
+		return this.addComponentColumn(associationModel -> {
+			if (!isGroup(associationModel)) {
+				return new Span();
+			}
+			Checkbox checkbox = new Checkbox(associationModel.getTarget().isActive());
+			checkbox.setTooltipText("Deactivated groups keep their members but are ignored at launch");
+			checkbox.addValueChangeListener(event -> {
+				if (!event.isFromClient()) {
+					return;
+				}
+				this.groupActiveListener.accept(associationModel, event.getValue());
+				this.originalDataProvider.refreshItem(associationModel);
+			});
+			return checkbox;
+		}).setHeader("Active").setWidth("8%").setTextAlign(ColumnTextAlign.CENTER).setSortable(false);
 	}
 
 	/**

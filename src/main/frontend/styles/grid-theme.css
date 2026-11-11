@@ -38,6 +38,12 @@ vaadin-grid::part(package-not-installed) {
   color: color-mix(in srgb, var(--vaadin-text-color, currentColor) 65%, transparent);
 }
 
+/* Association grid: deactivated groups are greyed out */
+vaadin-grid::part(inactive-group) {
+  color: color-mix(in srgb, var(--vaadin-text-color, currentColor) 50%, transparent);
+  font-style: italic;
+}
+
 /* Monitoring activity grid: left bar depending on the status of the request */
 vaadin-grid::part(request-success first-column-cell) {
   box-shadow: inset 4px 0 var(--aura-green);

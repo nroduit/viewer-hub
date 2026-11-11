@@ -12,6 +12,7 @@
 package org.viewer.hub.back.service.impl;
 
 import jakarta.validation.constraints.NotNull;
+import org.assertj.core.api.AssertionsForClassTypes;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -65,7 +66,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anySet;
 
@@ -183,6 +184,55 @@ class PackageServiceImplTest {
 	}
 
 	@Test
+	void when_checkingVersionAlreadyExists_withQualifierNotInstalled_should_returnFalse() {
+		Mockito.when(this.packageVersionRepository.findByVersionNumberAndQualifier("1.0.0", "-MGR"))
+			.thenReturn(Optional.empty());
+
+		AssertionsForClassTypes.assertThat(this.packageService.doesVersionNumberAlreadyExists("1.0.0-MGR")).isFalse();
+		Mockito.verify(this.packageVersionRepository, Mockito.never()).findByVersionNumber(any());
+	}
+
+	@Test
+	void when_checkingVersionAlreadyExists_withQualifierInstalled_should_returnTrue() {
+		Mockito.when(this.packageVersionRepository.findByVersionNumberAndQualifier("1.0.0", "-TEST"))
+			.thenReturn(Optional.of(new PackageVersionEntity()));
+
+		AssertionsForClassTypes.assertThat(this.packageService.doesVersionNumberAlreadyExists("1.0.0-TEST")).isTrue();
+	}
+
+	@Test
+	void when_checkingVersionAlreadyExists_withoutQualifier_should_searchWithNullQualifier() {
+		Mockito.when(this.packageVersionRepository.findByVersionNumberAndQualifier("1.0.0", null))
+			.thenReturn(Optional.of(new PackageVersionEntity()));
+
+		AssertionsForClassTypes.assertThat(this.packageService.doesVersionNumberAlreadyExists("1.0.0")).isTrue();
+	}
+
+	@Test
+	void when_checkingVersionAlreadyExists_withNullOrBlankVersion_should_returnFalse() {
+		AssertionsForClassTypes.assertThat(this.packageService.doesVersionNumberAlreadyExists(null)).isFalse();
+		AssertionsForClassTypes.assertThat(this.packageService.doesVersionNumberAlreadyExists(" ")).isFalse();
+		Mockito.verifyNoInteractions(this.packageVersionRepository);
+	}
+
+	@Test
+	void when_retrievingPackageVersionByVersionNumber_withQualifier_should_returnOnlyExactVersion() {
+		PackageVersionEntity entity = new PackageVersionEntity();
+		Mockito.when(this.packageVersionRepository.findByVersionNumberAndQualifier("1.0.0", "-TEST"))
+			.thenReturn(Optional.of(entity));
+		Mockito.when(this.packageVersionRepository.findByVersionNumberAndQualifier("1.0.0", "-MGR"))
+			.thenReturn(Optional.empty());
+
+		assertThat(this.packageService.retrievePackageVersionByVersionNumber("1.0.0-TEST")).containsExactly(entity);
+		assertThat(this.packageService.retrievePackageVersionByVersionNumber("1.0.0-MGR")).isEmpty();
+	}
+
+	@Test
+	void when_retrievingPackageVersionByVersionNumber_withNullVersion_should_returnEmptyList() {
+		assertThat(this.packageService.retrievePackageVersionByVersionNumber(null)).isEmpty();
+	}
+
+	@Test
 	void when_retrieveAvailableWeasisPackageVersions_should_retrieveFolderNamesInWeasisPackage()
 			throws IOException, URISyntaxException {
 		// Call method
@@ -192,8 +242,10 @@ class PackageServiceImplTest {
 						.toURI())));
 
 		// Test results
-		assertThat(availableWeasisPackageVersions.size()).isEqualTo(10);
-		assertThat(availableWeasisPackageVersions.containsAll(buildAvailableWeasisPackageVersions())).isTrue();
+		AssertionsForClassTypes.assertThat(availableWeasisPackageVersions.size()).isEqualTo(10);
+		AssertionsForClassTypes
+			.assertThat(availableWeasisPackageVersions.containsAll(buildAvailableWeasisPackageVersions()))
+			.isTrue();
 	}
 
 	@Test
@@ -211,8 +263,8 @@ class PackageServiceImplTest {
 		minimalReleaseVersionExample.setReleaseVersion("4.0.3");
 		minimalReleaseVersionExample.setMinimalVersion("4.0.0");
 		minimalReleaseVersionExample.setI18nVersion("3.0.0-SNAPSHOT");
-		assertThat(minimalReleaseVersions.size()).isEqualTo(16);
-		assertThat(minimalReleaseVersions.contains(minimalReleaseVersionExample)).isTrue();
+		AssertionsForClassTypes.assertThat(minimalReleaseVersions.size()).isEqualTo(16);
+		AssertionsForClassTypes.assertThat(minimalReleaseVersions.contains(minimalReleaseVersionExample)).isTrue();
 	}
 
 	@Test
@@ -230,8 +282,8 @@ class PackageServiceImplTest {
 			.determineAvailablePackageVersionMapping(availableWeasisPackageVersions, minimalReleaseVersions);
 
 		// Test results
-		assertThat(availablePackageVersionMapping.size()).isEqualTo(48);
-		assertThat(availablePackageVersionMapping.equals(toCompare)).isTrue();
+		AssertionsForClassTypes.assertThat(availablePackageVersionMapping.size()).isEqualTo(48);
+		AssertionsForClassTypes.assertThat(availablePackageVersionMapping.equals(toCompare)).isTrue();
 	}
 
 	@Test
@@ -242,7 +294,7 @@ class PackageServiceImplTest {
 
 		Mockito.verify(this.packageVersionRefresher).refresh(any());
 		Mockito.verify(this.s3Service).doesS3KeyExists(any());
-		assertThat(this.packageVersionRefresher.isPending()).isFalse();
+		AssertionsForClassTypes.assertThat(this.packageVersionRefresher.isPending()).isFalse();
 	}
 
 	@Test
@@ -354,7 +406,7 @@ class PackageServiceImplTest {
 		this.packageService.refreshAvailablePackageVersion();
 
 		// Test results: the version in db is pinned on the new build
-		assertThat(packageVersionInDb.getBuildId()).isEqualTo(newBuildId);
+		AssertionsForClassTypes.assertThat(packageVersionInDb.getBuildId()).isEqualTo(newBuildId);
 
 		// The existence check takes the new build id into account
 		Mockito.verify(this.overrideConfigService, Mockito.atLeastOnce())
@@ -367,15 +419,17 @@ class PackageServiceImplTest {
 		Mockito.verify(this.overrideConfigService, Mockito.atLeastOnce()).saveAll(captor.capture());
 		Set<OverrideConfigEntity> savedOverrideConfigs = captor.getValue();
 
-		assertThat(savedOverrideConfigs.size()).isEqualTo(1);
+		AssertionsForClassTypes.assertThat(savedOverrideConfigs.size()).isEqualTo(1);
 		OverrideConfigEntity savedOverrideConfig = savedOverrideConfigs.iterator().next();
-		assertThat(savedOverrideConfig.getBuildId()).isEqualTo(newBuildId);
-		assertThat(savedOverrideConfig.getPackageVersion()).isEqualTo(packageVersionInDb);
-		assertThat(savedOverrideConfig.getLaunchConfig()).isEqualTo(defaultLaunchConfig);
-		assertThat(savedOverrideConfig.getTarget()).isEqualTo(defaultTarget);
-		assertThat(savedOverrideConfig.getWeasisPropertyEntities().size()).isEqualTo(1);
-		assertThat(savedOverrideConfig.getWeasisPropertyEntities().get(0).getCode()).isEqualTo("weasis.name");
-		assertThat(savedOverrideConfig.getWeasisPropertyEntities().get(0).getValue()).isEqualTo("Weasis new build");
+		AssertionsForClassTypes.assertThat(savedOverrideConfig.getBuildId()).isEqualTo(newBuildId);
+		AssertionsForClassTypes.assertThat(savedOverrideConfig.getPackageVersion()).isEqualTo(packageVersionInDb);
+		AssertionsForClassTypes.assertThat(savedOverrideConfig.getLaunchConfig()).isEqualTo(defaultLaunchConfig);
+		AssertionsForClassTypes.assertThat(savedOverrideConfig.getTarget()).isEqualTo(defaultTarget);
+		AssertionsForClassTypes.assertThat(savedOverrideConfig.getWeasisPropertyEntities().size()).isEqualTo(1);
+		AssertionsForClassTypes.assertThat(savedOverrideConfig.getWeasisPropertyEntities().get(0).getCode())
+			.isEqualTo("weasis.name");
+		AssertionsForClassTypes.assertThat(savedOverrideConfig.getWeasisPropertyEntities().get(0).getValue())
+			.isEqualTo("Weasis new build");
 	}
 
 	@NotNull
@@ -418,7 +472,8 @@ class PackageServiceImplTest {
 		// published
 		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
 		Mockito.verify(this.s3Service, Mockito.times(1)).deleteS3Objects(captor.capture());
-		assertThat(captor.getValue()).isEqualTo("resources/packages/weasis/package/4.5.0-TEST/build-42/conf/3d.json");
+		AssertionsForClassTypes.assertThat(captor.getValue())
+			.isEqualTo("resources/packages/weasis/package/4.5.0-TEST/build-42/conf/3d.json");
 	}
 
 	@Test
@@ -438,7 +493,8 @@ class PackageServiceImplTest {
 		// Test results
 		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
 		Mockito.verify(this.s3Service, Mockito.times(1)).deleteS3Objects(captor.capture());
-		assertThat(captor.getValue()).isEqualTo("resources/packages/weasis/package/4.5.0-TEST/conf/3d.json");
+		AssertionsForClassTypes.assertThat(captor.getValue())
+			.isEqualTo("resources/packages/weasis/package/4.5.0-TEST/conf/3d.json");
 	}
 
 	@Test
@@ -459,7 +515,7 @@ class PackageServiceImplTest {
 		// Test results
 		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
 		Mockito.verify(this.s3Service, Mockito.times(1)).deleteS3Objects(captor.capture());
-		assertThat(captor.getValue()).isEqualTo("resources/packages/weasis/package/4.5.0-TEST");
+		AssertionsForClassTypes.assertThat(captor.getValue()).isEqualTo("resources/packages/weasis/package/4.5.0-TEST");
 		Mockito.verify(this.overrideConfigService, Mockito.times(1))
 			.deleteAllOverrideConfigEntitiesByPackageVersion(overrideConfigEntity.getPackageVersion());
 		Mockito.verify(this.packageVersionRepository, Mockito.times(1))
@@ -487,18 +543,18 @@ class PackageServiceImplTest {
 
 		// Call and test method
 		PackageVersionEntity toTest = this.packageService.retrieveAvailablePackageVersionToUse("4.0.3", "-MGR");
-		assertThat(toTest.getVersionNumber() + toTest.getQualifier()).isEqualTo("4.0.2-MGR");
+		AssertionsForClassTypes.assertThat(toTest.getVersionNumber() + toTest.getQualifier()).isEqualTo("4.0.2-MGR");
 
 		toTest = this.packageService.retrieveAvailablePackageVersionToUse(null, null);
-		assertThat(toTest.getVersionNumber()).isEqualTo("4.0.1");
-		assertThat(toTest.getQualifier()).isNull();
+		AssertionsForClassTypes.assertThat(toTest.getVersionNumber()).isEqualTo("4.0.1");
+		AssertionsForClassTypes.assertThat(toTest.getQualifier()).isNull();
 
 		toTest = this.packageService.retrieveAvailablePackageVersionToUse("4.0.3", null);
-		assertThat(toTest.getVersionNumber()).isEqualTo("4.0.1");
-		assertThat(toTest.getQualifier()).isNull();
+		AssertionsForClassTypes.assertThat(toTest.getVersionNumber()).isEqualTo("4.0.1");
+		AssertionsForClassTypes.assertThat(toTest.getQualifier()).isNull();
 
 		toTest = this.packageService.retrieveAvailablePackageVersionToUse(null, "-MGR");
-		assertThat(toTest.getVersionNumber() + toTest.getQualifier()).isEqualTo("4.0.2-MGR");
+		AssertionsForClassTypes.assertThat(toTest.getVersionNumber() + toTest.getQualifier()).isEqualTo("4.0.2-MGR");
 	}
 
 	@Test
@@ -528,7 +584,7 @@ class PackageServiceImplTest {
 				.thenReturn(Optional.of(new PackageVersionEntity()));
 
 			// Test service
-			assertThat(this.packageService.isImportCoherent(fileData)).isFalse();
+			AssertionsForClassTypes.assertThat(this.packageService.isImportCoherent(fileData)).isFalse();
 		}
 	}
 
@@ -555,7 +611,7 @@ class PackageServiceImplTest {
 				.thenReturn(Optional.empty());
 
 			// Test service
-			assertThat(this.packageService.isImportCoherent(fileData)).isFalse();
+			AssertionsForClassTypes.assertThat(this.packageService.isImportCoherent(fileData)).isFalse();
 		}
 	}
 
@@ -601,7 +657,7 @@ class PackageServiceImplTest {
 			Mockito.when(this.s3Service.doesS3KeyExists(Mockito.eq("test"))).thenReturn(true);
 
 			// Test service
-			assertThat(this.packageService.isImportCoherent(fileData)).isFalse();
+			AssertionsForClassTypes.assertThat(this.packageService.isImportCoherent(fileData)).isFalse();
 		}
 	}
 
@@ -647,7 +703,7 @@ class PackageServiceImplTest {
 			Mockito.when(this.s3Service.doesS3KeyExists(Mockito.eq("test"))).thenReturn(true);
 
 			// Test service
-			assertThat(this.packageService.isImportCoherent(fileData)).isTrue();
+			AssertionsForClassTypes.assertThat(this.packageService.isImportCoherent(fileData)).isTrue();
 		}
 	}
 
@@ -683,7 +739,7 @@ class PackageServiceImplTest {
 
 			// Test service: should be incoherent as a version in the compatibility
 			// file (4.6.0) is greater than the version being uploaded (4.5.2-MGR)
-			assertThat(this.packageService.isImportCoherent(fileData)).isFalse();
+			AssertionsForClassTypes.assertThat(this.packageService.isImportCoherent(fileData)).isFalse();
 		}
 	}
 

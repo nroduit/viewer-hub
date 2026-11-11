@@ -12,6 +12,7 @@
 package org.viewer.hub.back.repository;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -26,6 +27,31 @@ import org.viewer.hub.back.entity.DisplayRequestMonitoringEntity;
 public interface DisplayRequestMonitoringRepository extends JpaRepository<DisplayRequestMonitoringEntity, Long>,
 		JpaSpecificationExecutor<DisplayRequestMonitoringEntity> {
 
+	/**
+	 * Requests having a non-empty client
+	 * @param empty empty string, excluded from the results
+	 * @return matching requests
+	 */
+	List<DisplayRequestMonitoringEntity> findByClientIsNotNullAndClientNot(String empty);
+
+	/**
+	 * Distinct clients of the recorded requests, sorted alphabetically
+	 * @return client names
+	 */
+	default List<String> findDistinctClients() {
+		return this.findByClientIsNotNullAndClientNot("")
+			.stream()
+			.map(DisplayRequestMonitoringEntity::getClient)
+			.distinct()
+			.sorted()
+			.toList();
+	}
+
+	/**
+	 * Delete the requests recorded before the given date (retention)
+	 * @param limit requests older than this date are deleted
+	 * @return number of requests deleted
+	 */
 	@Transactional
 	@Modifying
 	@Query("DELETE FROM DisplayRequestMonitoringEntity e WHERE e.createdAt < :limit")

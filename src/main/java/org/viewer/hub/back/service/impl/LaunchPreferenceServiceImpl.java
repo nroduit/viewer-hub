@@ -498,6 +498,7 @@ public class LaunchPreferenceServiceImpl implements LaunchPreferenceService {
 					.map(g -> this.targetRepository.findById(g.getGroupEntityPK().getGroupId()))
 					.filter(Optional::isPresent)
 					.map(Optional::get)
+					.filter(TargetEntity::isActive)
 					.toList();
 				// Add the groups corresponding to the target
 				targetsToLookFor.addAll(groupsTargets);
