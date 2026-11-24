@@ -43,6 +43,7 @@ import org.vaadin.lineawesome.LineAwesomeIcon;
 import org.viewer.hub.back.constant.EndPoint;
 import org.viewer.hub.back.util.SecurityUtil;
 import org.viewer.hub.front.components.ToggleButtonTheme;
+import org.viewer.hub.front.help.HelpView;
 import org.viewer.hub.front.views.AbstractView;
 import org.viewer.hub.front.views.monitoring.MonitoringView;
 
@@ -117,7 +118,26 @@ public class MainLayout extends AppLayout implements AfterNavigationObserver {
 		// Monitoring: top level entry below Weasis
 		buildMonitoringSideNav(menuEntries, nav);
 
+		// Help: top level entry
+		buildHelpSideNav(menuEntries, nav);
+
 		return nav;
+	}
+
+	/**
+	 * Build the Help entry (same level as Weasis and Settings)
+	 * @param menuEntries List of menu available
+	 * @param nav SideNav to populate
+	 */
+	private static void buildHelpSideNav(List<MenuEntry> menuEntries, SideNav nav) {
+		menuEntries.forEach(entry -> {
+			if (entry.path().equals("/" + HelpView.ROUTE) && entry.menuClass() != null
+					&& SecurityUtil.isAccessGranted(entry.menuClass())) {
+				SideNavItem item = new SideNavItem(entry.title(), entry.path());
+				item.setPrefixComponent(LineAwesomeIcon.INFO_SOLID.create());
+				nav.addItem(item);
+			}
+		});
 	}
 
 	/**

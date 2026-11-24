@@ -131,7 +131,7 @@ public class ViewerSelectionGrid extends Grid<ViewerSelectionEntity> {
 			dragIcon.setTooltipText("Drag & drop to update rule priority");
 			dragIcon.getStyle().set("padding", "0.30em");
 			return dragIcon;
-		});
+		}).setWidth("70px").setFlexGrow(0);
 	}
 
 	/**
@@ -143,7 +143,8 @@ public class ViewerSelectionGrid extends Grid<ViewerSelectionEntity> {
 			.addColumn(entity -> Objects.equals(entity.getArchive(), ViewerSelectionType.DEFAULT.name()) ? ""
 					: "#" + (this.viewerSelectionLogic.countViewerSelection() - entity.getPriority()))
 			.setHeader("Rule")
-			.setWidth("6%")
+			.setWidth("90px")
+			.setFlexGrow(0)
 			.setSortable(false);
 	}
 
@@ -177,7 +178,7 @@ public class ViewerSelectionGrid extends Grid<ViewerSelectionEntity> {
 				});
 				return modalityComboBox;
 			}
-		}).setHeader("Modality").setWidth("45%").setSortable(false).setKey("modalities");
+		}).setHeader("Modality").setFlexGrow(4).setWidth("0").setSortable(false).setKey("modalities");
 	}
 
 	/**
@@ -201,7 +202,7 @@ public class ViewerSelectionGrid extends Grid<ViewerSelectionEntity> {
 				}
 			});
 			return archiveSelect;
-		}).setHeader("Archive").setWidth("20%").setSortable(false).setKey("archive");
+		}).setHeader("Archive").setFlexGrow(2).setWidth("0").setSortable(false).setKey("archive");
 	}
 
 	/**
@@ -226,7 +227,7 @@ public class ViewerSelectionGrid extends Grid<ViewerSelectionEntity> {
 				}
 			});
 			return viewerSelect;
-		}).setHeader("Viewer").setWidth("20%").setSortable(false);
+		}).setHeader("Viewer").setFlexGrow(2).setWidth("0").setSortable(false);
 	}
 
 	/**
@@ -251,10 +252,9 @@ public class ViewerSelectionGrid extends Grid<ViewerSelectionEntity> {
 			HorizontalLayout layoutWithoutSpacing = new HorizontalLayout();
 			layoutWithoutSpacing.setPadding(true);
 			layoutWithoutSpacing.add(deleteButton);
-			layoutWithoutSpacing.setWidth("10%");
 
 			return layoutWithoutSpacing;
-		});
+		}).setWidth("90px").setFlexGrow(0);
 	}
 
 	/**

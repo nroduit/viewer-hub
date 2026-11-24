@@ -21,13 +21,11 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.BinderValidationStatus;
-import com.vaadin.flow.dom.DomEventListener;
 import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.streams.UploadHandler;
 import com.vaadin.flow.spring.annotation.UIScope;
-import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -52,7 +50,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * View managing override of package configuration
@@ -261,65 +258,75 @@ public class OverrideView extends AbstractView {
 	 */
 	private void createPackageOverrideGridContextMenu() {
 		GridContextMenu<OverrideConfigEntity> ctxMenu = this.packageOverrideGrid.addContextMenu();
-		this.packageOverrideGrid.getElement()
-			.addEventListener("vaadin-context-menu-before-open",
-					this.packageOverrideGridContextMenuEventListener(ctxMenu));
+		// Called with the right-clicked row before the menu opens
+		ctxMenu.setDynamicContentHandler(item -> this.populateContextMenu(ctxMenu, item));
 	}
 
 	/**
-	 * Right-click on the grid
+	 * Select the right-clicked row and build the menu matching it
 	 * @param ctxMenu Context menu
-	 * @return DomEventListener
+	 * @param item Right-clicked item, null when the click is outside any row
+	 * @return false to prevent the menu from opening
 	 */
-	@NotNull
-	private DomEventListener packageOverrideGridContextMenuEventListener(
-			GridContextMenu<OverrideConfigEntity> ctxMenu) {
-		return e -> {
-			Set<OverrideConfigEntity> items = this.packageOverrideGrid.getSelectedItems()
-				.stream()
-				.filter(o -> !OverrideDataProvider.isVersionNode(o))
-				.collect(Collectors.toSet());
-			ctxMenu.removeAll();
-			if (items.isEmpty()) {
-				ctxMenu.addItem("Please select a version in the grid");
-			}
-			else {
-				// Dynamically populate the ctx menu
-				this.buildDeleteItemContextMenu(ctxMenu, items);
-			}
-		};
+	private boolean populateContextMenu(GridContextMenu<OverrideConfigEntity> ctxMenu, OverrideConfigEntity item) {
+		ctxMenu.removeAll();
+		if (item == null) {
+			return false;
+		}
+		this.packageOverrideGrid.select(item);
+
+		if (OverrideDataProvider.isVersionNode(item)) {
+			String versionNumber = item.getPackageVersion().getVersionNumber();
+			this.addDeleteMenuItem(ctxMenu, "Delete version",
+					"Version %s and all its configurations".formatted(versionNumber),
+					() -> this.confirmDeleteVersionNumber(versionNumber));
+		}
+		else {
+			String itemSelected = "%s%s › %s › %s".formatted(item.getPackageVersion().getVersionNumber(),
+					item.getPackageVersion().getQualifier() == null ? "" : item.getPackageVersion().getQualifier(),
+					item.getLaunchConfig().getName(), item.getTarget().getName());
+			this.addDeleteMenuItem(ctxMenu, "Delete configuration", itemSelected,
+					() -> this.deleteAndNotify(itemSelected, () -> this.overrideLogic.deleteVersion(item)));
+		}
+		return true;
+	}
+
+	private void addDeleteMenuItem(GridContextMenu<OverrideConfigEntity> ctxMenu, String heading, String text,
+			Runnable action) {
+		GridMenuItem<OverrideConfigEntity> menuItem = ctxMenu.addItem(createDeleteMenuItemContent(heading, text));
+		menuItem.getElement().getClassList().add("ctx-menu-item-danger");
+		menuItem.addMenuItemClickListener(ev -> action.run());
 	}
 
 	/**
-	 * Delete context menu
-	 * @param ctxMenu context menu
-	 * @param items Items
+	 * Ask for confirmation then delete all the package versions of a version number
+	 * @param versionNumber Version number (ex: 4.7.1.0)
 	 */
-	private void buildDeleteItemContextMenu(GridContextMenu<OverrideConfigEntity> ctxMenu,
-			Set<OverrideConfigEntity> items) {
-		for (OverrideConfigEntity o : items) {
-			String itemSelected = "%s%s/%s/%s".formatted(o.getPackageVersion().getVersionNumber(),
-					o.getPackageVersion().getQualifier() == null ? "" : o.getPackageVersion().getQualifier(),
-					o.getLaunchConfig().getName(), o.getTarget().getName());
-			GridMenuItem<OverrideConfigEntity> deleteContextMenuItem = ctxMenu
-				.addItem("Delete %s ?".formatted(itemSelected));
-			deleteContextMenuItem.addComponentAsFirst(VaadinIcon.TRASH.create());
-			deleteContextMenuItem.addMenuItemClickListener((ev) -> ev.getItem().ifPresent((ov) -> {
-				try {
-					// Delete version in volume
-					this.overrideLogic.deleteVersion(ov);
-					// Refresh grid
-					this.overrideDataProvider.refreshAll();
-					// Display message
-					this.displayMessage(
-							new Message(MessageLevel.SUCCESS, MessageFormat.TEXT, "%s deleted".formatted(itemSelected)),
-							MessageType.NOTIFICATION_MESSAGE);
-				}
-				catch (Exception e) {
-					this.displayMessage(new Message(MessageLevel.ERROR, MessageFormat.TEXT,
-							"%s not deleted".formatted(itemSelected)), MessageType.NOTIFICATION_MESSAGE);
-				}
-			}));
+	private void confirmDeleteVersionNumber(String versionNumber) {
+		ConfirmDialog confirmDialog = new ConfirmDialog();
+		confirmDialog.setHeader("Delete version %s".formatted(versionNumber));
+		confirmDialog.setText(
+				"Are you sure you want to delete the version %s with all its configurations? ".formatted(versionNumber)
+						+ "This action is irreversible.");
+		confirmDialog.setCancelable(true);
+		confirmDialog.setConfirmText("Delete");
+		confirmDialog.setConfirmButtonTheme("error primary");
+		confirmDialog.addConfirmListener(event -> this.deleteAndNotify("Version %s".formatted(versionNumber),
+				() -> this.overrideLogic.deleteAllVersionsOfVersionNumber(versionNumber)));
+		confirmDialog.open();
+	}
+
+	private void deleteAndNotify(String label, Runnable deletion) {
+		try {
+			deletion.run();
+			this.packageOverrideGrid.deselectAll();
+			this.overrideDataProvider.refreshAll();
+			this.displayMessage(new Message(MessageLevel.SUCCESS, MessageFormat.TEXT, "%s deleted".formatted(label)),
+					MessageType.NOTIFICATION_MESSAGE);
+		}
+		catch (Exception e) {
+			this.displayMessage(new Message(MessageLevel.ERROR, MessageFormat.TEXT, "%s not deleted".formatted(label)),
+					MessageType.NOTIFICATION_MESSAGE);
 		}
 	}
 

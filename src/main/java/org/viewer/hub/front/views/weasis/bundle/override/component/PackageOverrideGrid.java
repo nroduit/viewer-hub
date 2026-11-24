@@ -73,11 +73,21 @@ public final class PackageOverrideGrid extends TreeGrid<OverrideConfigEntity> {
 		this.overrideDataProvider = overrideDataProvider;
 		this.comboBoxGroupValueProvider = comboBoxGroupValueProvider;
 
-		// Row details are toggled on click of an override config only, not of a version
+		// Row details are toggled on click of an override config, a version is
+		// expanded/collapsed
 		this.setDetailsVisibleOnClick(false);
 		this.addItemClickListener(event -> {
-			if (!OverrideDataProvider.isVersionNode(event.getItem())) {
-				this.setDetailsVisible(event.getItem(), !this.isDetailsVisible(event.getItem()));
+			OverrideConfigEntity item = event.getItem();
+			if (OverrideDataProvider.isVersionNode(item)) {
+				if (this.isExpanded(item)) {
+					this.collapse(item);
+				}
+				else {
+					this.expand(item);
+				}
+			}
+			else {
+				this.setDetailsVisible(item, !this.isDetailsVisible(item));
 			}
 		});
 

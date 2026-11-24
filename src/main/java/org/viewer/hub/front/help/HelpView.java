@@ -12,15 +12,23 @@
 
 package org.viewer.hub.front.help;
 
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.dependency.Uses;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.H2;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.orderedlayout.FlexLayout;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.Version;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.SpringBootVersion;
+import org.springframework.core.SpringVersion;
 import org.vaadin.lineawesome.LineAwesomeIconUrl;
 
 @PageTitle(HelpView.VIEW_NAME)
@@ -33,74 +41,78 @@ public class HelpView extends VerticalLayout {
 
 	public static final String ROUTE = "help";
 
-	public HelpView() {
+	private static final String UNKNOWN = "Unknown";
+
+	private final String appVersion;
+
+	public HelpView(@Value("${spring.application.version:Development}") String appVersion) {
+		this.appVersion = appVersion;
 		this.setSizeFull();
-		H1 heading = new H1("Help");
+		this.setPadding(true);
+		this.setSpacing(true);
+		this.getStyle().set("font-size", "1.1rem").set("gap", "2rem").set("overflow-y", "auto");
 
-		H2 genDocHead = new H2("General Documentation");
+		// Cards stacked vertically: Documentation above About
+		FlexLayout cards = new FlexLayout(createDocumentationSection(), createAboutSection());
+		cards.setFlexDirection(FlexLayout.FlexDirection.COLUMN);
+		cards.getStyle().set("gap", "2rem").set("align-items", "flex-start");
 
-		// General documentation
+		this.add(new H1("Help"), cards);
+	}
+
+	private static VerticalLayout createCard(String title) {
+		VerticalLayout card = new VerticalLayout();
+		card.setSpacing(false);
+		card.setPadding(false);
+		card.setWidth("auto");
+		card.getStyle()
+			.set("border", "1px solid color-mix(in srgb, currentColor 20%, transparent)")
+			.set("border-radius", "8px")
+			.set("padding", "1.5rem 2rem")
+			.set("min-width", "28rem")
+			.set("gap", "0.5rem");
+		H2 heading = new H2(title);
+		heading.getStyle().set("margin", "0 0 1rem 0");
+		card.add(heading);
+		return card;
+	}
+
+	private static Component createDocumentationSection() {
+		VerticalLayout card = createCard("Documentation");
 		Anchor generalDoc = new Anchor("https://weasis.org/en/viewer-hub/", "General documentation");
 		generalDoc.setTarget("_blank");
+		card.add(generalDoc);
+		return card;
+	}
 
-		// Features
-		H2 featuresHead = new H2("Features");
+	private Component createAboutSection() {
+		VerticalLayout aboutLayout = createCard("About");
 
-		// Weasis viewer launch
-		Anchor weasisViewerLaunchFeature = new Anchor("https://weasis.org/en/viewer-hub/api/index.html",
-				"Weasis viewer launch");
-		weasisViewerLaunchFeature.setTarget("_blank");
+		String springVersion = SpringVersion.getVersion();
+		String springBootVersion = SpringBootVersion.getVersion();
 
-		// Association
-		Anchor associationFeature = new Anchor("https://weasis.org/en/viewer-hub/user-guide/groups/index.html",
-				"Association of user or host to groups");
-		associationFeature.setTarget("_blank");
+		aboutLayout.add(row("Viewer-Hub", appVersion), row("Vaadin", Version.getFullVersion()),
+				row("Spring", springVersion != null ? springVersion : UNKNOWN),
+				row("Spring Boot", springBootVersion != null ? springBootVersion : UNKNOWN),
+				row("Java", "%s (%s)".formatted(System.getProperty("java.version"), System.getProperty("java.vendor"))),
+				row("System", "%s %s (%s)".formatted(System.getProperty("os.name"), System.getProperty("os.version"),
+						System.getProperty("os.arch"))));
+		return aboutLayout;
+	}
 
-		// Manifest construction and storage
-		Anchor manifestFeature = new Anchor("https://weasis.org/en/viewer-hub/manifest/index.html",
-				"Manifest construction and storage");
-		manifestFeature.setTarget("_blank");
-
-		// Package version
-		Anchor packageVersioningFeature = new Anchor(
-				"https://weasis.org/en/viewer-hub/user-guide/versioning/index.html",
-				"Weasis package management: versioning");
-		packageVersioningFeature.setTarget("_blank");
-
-		// Specific groups launch
-		Anchor packageQualifierLaunchFeature = new Anchor(
-				"https://weasis.org/en/viewer-hub/user-guide/qualifier/index.html",
-				"Weasis package management: qualifier");
-		packageQualifierLaunchFeature.setTarget("_blank");
-		// Versions management of i18n translations used by Weasis
-		Anchor i18nTranslationsFeature = new Anchor(
-				"https://weasis.org/en/viewer-hub/user-guide/translation/index.html",
-				" Versions management of i18n translations used by Weasis");
-		i18nTranslationsFeature.setTarget("_blank");
-
-		// Compatibility management between versions of Weasis installed on clients
-		// and versions of resources uploaded in viewer-hub (storage on Minio S3 +
-		// cache)
-		Anchor compatibilityFeature = new Anchor("https://weasis.org/en/viewer-hub/user-guide/package/index.html",
-				"Compatibility management of Weasis versions");
-		compatibilityFeature.setTarget("_blank");
-
-		// Pacs connectors
-		Anchor pacsConnectorFeature = new Anchor("https://weasis.org/en/viewer-hub/connectors/index.html",
-				"Pacs connector management");
-		pacsConnectorFeature.setTarget("_blank");
-
-		// Cryptography of launch urls
-		Anchor launchUrlCryptographyFeature = new Anchor("https://weasis.org/en/viewer-hub/-cryptography/index.html",
-				"Cryptography of launch urls");
-		launchUrlCryptographyFeature.setTarget("_blank");
-
-		// Add links
-		VerticalLayout layout = new VerticalLayout();
-		layout.add(heading, genDocHead, generalDoc, featuresHead, weasisViewerLaunchFeature, associationFeature,
-				manifestFeature, packageVersioningFeature, packageQualifierLaunchFeature, i18nTranslationsFeature,
-				compatibilityFeature, pacsConnectorFeature, launchUrlCryptographyFeature);
-		this.add(layout);
+	private static Component row(String label, String value) {
+		Span name = new Span(label);
+		name.getStyle().set("font-weight", "600").set("min-width", "9rem");
+		Span val = new Span(value);
+		val.getStyle().set("opacity", "0.85");
+		HorizontalLayout row = new HorizontalLayout(name, val);
+		row.setSpacing(true);
+		row.setPadding(false);
+		row.setWidthFull();
+		row.getStyle()
+			.set("padding", "0.6rem 0")
+			.set("border-bottom", "1px solid color-mix(in srgb, currentColor 10%, transparent)");
+		return row;
 	}
 
 }

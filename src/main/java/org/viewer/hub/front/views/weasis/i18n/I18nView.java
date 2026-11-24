@@ -18,12 +18,10 @@ import com.vaadin.flow.component.grid.contextmenu.GridMenuItem;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.dom.DomEventListener;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.streams.UploadHandler;
-import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.annotation.Secured;
@@ -40,7 +38,6 @@ import org.viewer.hub.front.views.weasis.i18n.component.I18nUpload;
 
 import java.io.ByteArrayInputStream;
 import java.io.Serial;
-import java.util.Set;
 
 import static org.viewer.hub.back.constant.PropertiesFileName.I18N_PATTERN_NAME;
 
@@ -142,58 +139,46 @@ public class I18nView extends AbstractView {
 	 */
 	private void createI18nGridContextMenu() {
 		GridContextMenu<I18nEntity> ctxMenu = this.i18nGrid.addContextMenu();
-		this.i18nGrid.getElement()
-			.addEventListener("vaadin-context-menu-before-open", this.i18nGridContextMenuEventListener(ctxMenu));
+		// Called with the right-clicked row before the menu opens
+		ctxMenu.setDynamicContentHandler(item -> this.populateContextMenu(ctxMenu, item));
 	}
 
 	/**
-	 * Right-click on the grid
+	 * Select the right-clicked row and build the menu matching it
 	 * @param ctxMenu Context menu
-	 * @return DomEventListener
+	 * @param ov Right-clicked item, null when the click is outside any row
+	 * @return false to prevent the menu from opening
 	 */
-	@NotNull
-	private DomEventListener i18nGridContextMenuEventListener(GridContextMenu<I18nEntity> ctxMenu) {
-		return e -> {
-			Set<I18nEntity> items = this.i18nGrid.getSelectedItems();
-			ctxMenu.removeAll();
-			if (items.isEmpty()) {
-				ctxMenu.addItem("Please select a version in the grid");
-			}
-			else {
-				// Dynamically populate the ctx menu
-				this.buildDeleteItemContextMenu(ctxMenu, items);
-			}
-		};
-	}
-
-	/**
-	 * Delete context menu
-	 * @param ctxMenu context menu
-	 * @param items Items
-	 */
-	private void buildDeleteItemContextMenu(GridContextMenu<I18nEntity> ctxMenu, Set<I18nEntity> items) {
-		for (I18nEntity i : items) {
-			String itemSelected = "%s%s".formatted(i.getVersionNumber(),
-					i.getQualifier() == null ? "" : i.getQualifier());
-			GridMenuItem<I18nEntity> deleteContextMenuItem = ctxMenu.addItem("Delete %s ?".formatted(itemSelected));
-			deleteContextMenuItem.addComponentAsFirst(VaadinIcon.TRASH.create());
-			deleteContextMenuItem.addMenuItemClickListener(ev -> ev.getItem().ifPresent(ov -> {
-				try {
-					// Delete version in volume
-					this.i18nLogic.deleteVersion(ov);
-					// Refresh grid
-					this.i18nDataProvider.refreshAll();
-					// Display message
-					this.displayMessage(
-							new Message(MessageLevel.SUCCESS, MessageFormat.TEXT, "%s deleted".formatted(itemSelected)),
-							MessageType.NOTIFICATION_MESSAGE);
-				}
-				catch (Exception e) {
-					this.displayMessage(new Message(MessageLevel.ERROR, MessageFormat.TEXT,
-							"%s not deleted".formatted(itemSelected)), MessageType.NOTIFICATION_MESSAGE);
-				}
-			}));
+	private boolean populateContextMenu(GridContextMenu<I18nEntity> ctxMenu, I18nEntity ov) {
+		ctxMenu.removeAll();
+		if (ov == null) {
+			return false;
 		}
+		this.i18nGrid.select(ov);
+
+		String itemSelected = "%s%s".formatted(ov.getVersionNumber(),
+				ov.getQualifier() == null ? "" : ov.getQualifier());
+		GridMenuItem<I18nEntity> deleteContextMenuItem = ctxMenu
+			.addItem(createDeleteMenuItemContent("Delete", "Version %s".formatted(itemSelected)));
+		deleteContextMenuItem.getElement().getClassList().add("ctx-menu-item-danger");
+		deleteContextMenuItem.addMenuItemClickListener(ev -> {
+			try {
+				// Delete version in volume
+				this.i18nLogic.deleteVersion(ov);
+				// Refresh grid
+				this.i18nDataProvider.refreshAll();
+				// Display message
+				this.displayMessage(
+						new Message(MessageLevel.SUCCESS, MessageFormat.TEXT, "%s deleted".formatted(itemSelected)),
+						MessageType.NOTIFICATION_MESSAGE);
+			}
+			catch (Exception e) {
+				this.displayMessage(
+						new Message(MessageLevel.ERROR, MessageFormat.TEXT, "%s not deleted".formatted(itemSelected)),
+						MessageType.NOTIFICATION_MESSAGE);
+			}
+		});
+		return true;
 	}
 
 	/**

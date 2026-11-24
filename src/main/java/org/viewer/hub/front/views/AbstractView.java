@@ -13,6 +13,7 @@ package org.viewer.hub.front.views;
 
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.Notification.Position;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -25,6 +26,7 @@ import java.io.Serial;
 
 @CssImport("./styles/notification-theme.css")
 @CssImport("./styles/grid-theme.css")
+@CssImport("./styles/context-menu-theme.css")
 public abstract class AbstractView extends Div {
 
 	@Serial
@@ -72,6 +74,28 @@ public abstract class AbstractView extends Div {
 		if (this.messageBox != null) {
 			this.mainLayout.remove(this.messageBox);
 		}
+	}
+
+	/**
+	 * Build the content of a danger context menu item, styled like the notifications
+	 * @param heading Small uppercase title
+	 * @param text Description
+	 * @return Item content
+	 */
+	protected static Div createDeleteMenuItemContent(String heading, String text) {
+		Div icon = new Div(VaadinIcon.TRASH.create());
+		icon.addClassName("ctx-menu-icon");
+
+		Div headingDiv = new Div(heading);
+		headingDiv.addClassName("ctx-menu-heading");
+		Div textDiv = new Div(text);
+		textDiv.addClassName("ctx-menu-text");
+		Div content = new Div(headingDiv, textDiv);
+		content.addClassName("ctx-menu-content");
+
+		Div body = new Div(icon, content);
+		body.addClassName("ctx-menu-body");
+		return body;
 	}
 
 }

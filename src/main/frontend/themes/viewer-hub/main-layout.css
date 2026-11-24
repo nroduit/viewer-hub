@@ -9,6 +9,10 @@
  *
  */
 
+html {
+  --aura-base-font-size: 15;
+}
+
 vaadin-app-layout {
   --vaadin-app-layout-drawer-width: 22rem;
 }
