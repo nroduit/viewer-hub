@@ -17,12 +17,10 @@ Note: Currently in our example Weasis is still using the authentication filled i
 https://weasis.org/en/viewer-hub/index.html
 
 ## Main functionalities
-
 - Launch of multiple viewers (Weasis, OHIF, 3D Slicer, MicroDicom) with several launch endpoints, including IHE IID Profile-compatible launch
 - Viewer selection rules based on a combination of list of modalities and archive
 - Creation and association of user or machine groups
-- Creation of an xml file (manifest) containing the studies, series and instances to be downloaded.
-  This file will then be transmitted to Weasis to load the images into the viewer.
+- Creation of an xml file (manifest) containing the studies, series and instances to be downloaded. This file will then be transmitted to Weasis to load the images into the viewer.
 - Manifest storage in a redis cache
 - Storage of resources required by the different versions of Weasis on Minio/S3
 - Creation of versions of Weasis launched only for certain groups
@@ -110,13 +108,11 @@ As an example, you can import the file "dicom-example" located in the folders "d
 ## Orthanc
 
 In order to access to the pacs orthanc:
-
 ```
 http://localhost:8042
 ```
 
 Use the following credentials:
-
 - User: `orthanc-user`
 - Password: `password`
 
@@ -152,7 +148,6 @@ As an example, you can import the file "dicom-example" located in the folders "d
 ## Viewer Hub
 
 In order to access to viewer-hub:
-
 ```
 http://localhost:8081
 ```
@@ -166,7 +161,6 @@ Password: password
 ## Eureka
 
 Once ViewerHub launched, it is possible to see the registration of the service at this address:
-
 ```
 http://localhost:8761
 ```
@@ -188,13 +182,11 @@ If there is an issue with the cors when testing and launching below urls in loca
 Spring profile "connectors-dicom-no-gtw":
 
 Dcm4chee:
-
 ```
 http://localhost:8081/display?viewer=WEASIS&studyUID=1.3.12.2.1107.5.1.4.54023.30000004093013443132800000021&archive=dcm4chee-local
 ```
 
 Orthanc:
-
 ```
 http://localhost:8081/display?viewer=WEASIS&studyUID=1.3.12.2.1107.5.1.4.54023.30000004093013443132800000021&archive=orthanc-local
 ```
@@ -202,13 +194,11 @@ http://localhost:8081/display?viewer=WEASIS&studyUID=1.3.12.2.1107.5.1.4.54023.3
 Spring profile "connectors-dicom-gtw":
 
 Dcm4chee:
-
 ```
 http://localhost:8081/display/auth?viewer=WEASIS&studyUID=1.3.12.2.1107.5.1.4.54023.30000004093013443132800000021&archive=dcm4chee-local
 ```
 
 Orthanc:
-
 ```
 http://localhost:8081/display/auth?viewer=WEASIS&studyUID=1.3.12.2.1107.5.1.4.54023.30000004093013443132800000021&archive=orthanc-local
 ```
@@ -218,13 +208,11 @@ http://localhost:8081/display/auth?viewer=WEASIS&studyUID=1.3.12.2.1107.5.1.4.54
 Spring profile "connectors-dicom-no-gtw":
 
 Dcm4chee
-
 ```
 http://localhost:8081/display?viewer=OHIF&studyUID=1.3.12.2.1107.5.1.4.54023.30000004093013443132800000021&archive=dcm4chee-local
 ```
 
 Orthanc
-
 ```
 http://localhost:8081/display?viewer=OHIF&studyUID=1.3.12.2.1107.5.1.4.54023.30000004093013443132800000021&archive=orthanc-local
 ```
@@ -232,13 +220,11 @@ http://localhost:8081/display?viewer=OHIF&studyUID=1.3.12.2.1107.5.1.4.54023.300
 Spring profile "connectors-dicom-gtw" or "connectors-dicomweb-gtw":
 
 Dcm4chee
-
 ```
 http://localhost:8081/display/auth?viewer=OHIF&studyUID=1.3.12.2.1107.5.1.4.54023.30000004093013443132800000021&archive=dcm4chee-local
 ```
 
 Orthanc
-
 ```
 http://localhost:8081/display/auth?viewer=OHIF&studyUID=1.3.12.2.1107.5.1.4.54023.30000004093013443132800000021&archive=orthanc-local
 ```
@@ -250,13 +236,11 @@ You need to install 3D Slicer in your machine to use it.
 Spring profile "connectors-dicom-gtw" or "connectors-dicomweb-gtw":
 
 Dcm4chee
-
 ```
 http://localhost:8081/display/auth?viewer=SLICER&studyUID=1.3.12.2.1107.5.1.4.54023.30000004093013443132800000021&archive=dcm4chee-local
 ```
 
 Orthanc
-
 ```
 http://localhost:8081/display/auth?viewer=SLICER&studyUID=1.3.12.2.1107.5.1.4.54023.30000004093013443132800000021&archive=orthanc-local
 ```
@@ -269,13 +253,11 @@ You also need to add the MICRODICOM AET to the Dcm4chee pacs and to configure th
 Spring profile "connectors-dicom-no-gtw":
 
 Dcm4chee
-
 ```
 http://localhost:8081/display?viewer=MICRODICOM&studyUID=1.3.12.2.1107.5.1.4.54023.30000004093013443132800000021&archive=dcm4chee-local
 ```
 
 Orthanc
-
 ```
 http://localhost:8081/display?viewer=MICRODICOM&studyUID=1.3.12.2.1107.5.1.4.54023.30000004093013443132800000021&archive=orthanc-local
 ```
@@ -283,10 +265,10 @@ http://localhost:8081/display?viewer=MICRODICOM&studyUID=1.3.12.2.1107.5.1.4.540
 ## Package versions refresh and circuit breaker
 
 The available Weasis package versions (S3 + DB) are computed into the cache by `PackageServiceImpl.refreshAvailablePackageVersion()`, executed through `PackageVersionRefresher`.
-If this computation fails (S3, DB, network...), it is automatically retried until it succeeds, protected by the Resilience4j `@CircuitBreaker` annotation (circuit breaker `packageVersionRefresh`, with a fallback method).
+If this computation fails (S3, DB, network...), it is automatically retried until it succeeds, protected by
+the Resilience4j `@CircuitBreaker` annotation (circuit breaker `packageVersionRefresh`, with a fallback method).
 
 Triggers of the refresh:
-
 - Every 8h (and at startup)
 - Retry job (`PackageVersionRefreshRetryJob`) every minute, only when the last refresh failed and the circuit is not open
 - Upload / deletion of a package version
@@ -331,7 +313,6 @@ t<=N+6min Retry job (trial call)  -> success      circuit CLOSED      pending=fa
 ```
 
 Notes:
-
 - The retry job runs every minute: it retries when the circuit is closed or half-open (1 min), and does nothing while it is open (5 min).
   The open state also protects against the other callers (upload, deletion).
 - There is no timeout on the refresh: a call blocked forever is neither a success nor a failure (rely on the S3/DB client timeouts).
@@ -348,3 +329,4 @@ Circuit breaker properties (`application.yml`, `resilience4j.circuitbreaker.inst
 | `permitted-number-of-calls-in-half-open-state` | `1` | Trial calls in half-open state |
 
 Retry job: `viewer-hub.package-version-refresh.retry-delay-ms` (default `60000`), delay between two executions (retry when the circuit is closed or half-open).
+

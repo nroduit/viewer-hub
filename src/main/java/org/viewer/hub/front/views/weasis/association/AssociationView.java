@@ -15,15 +15,20 @@ import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.accordion.Accordion;
 import com.vaadin.flow.component.accordion.AccordionPanel;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox.ItemFilter;
 import com.vaadin.flow.component.combobox.MultiSelectComboBox;
 import com.vaadin.flow.component.details.DetailsVariant;
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.H3;
+import com.vaadin.flow.component.html.H4;
 import com.vaadin.flow.component.html.NativeLabel;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.data.binder.BinderValidationStatus;
 import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.router.Menu;
@@ -83,7 +88,9 @@ public class AssociationView extends AbstractView {
 
 	private Accordion belongToMemberOfAccordion;
 
-	private SplitLayout launchLayout;
+	private VerticalLayout drawer;
+
+	private H3 drawerTitle;
 
 	// Combo boxes of the rows rendered, by target id
 	private final transient Map<Long, MultiSelectComboBox<TargetEntity>> rowComboBoxes = new HashMap<>();
@@ -128,11 +135,6 @@ public class AssociationView extends AbstractView {
 	 * Add components in the view
 	 */
 	private void addComponentsView() {
-		SplitLayout layout = new SplitLayout();
-		layout.setOrientation(SplitLayout.Orientation.VERTICAL);
-		layout.setSplitterPosition(75);
-		layout.setSizeFull();
-
 		// Grid layout association
 		VerticalLayout gridLayout = new VerticalLayout();
 		Button buttonAddTarget = new Button("Add Target", new Icon(VaadinIcon.PLUS));
@@ -140,27 +142,69 @@ public class AssociationView extends AbstractView {
 		buttonAddTarget.setWidthFull();
 		this.associationGrid.asSingleSelect().addValueChangeListener(this::selectedRowAssociationGridListener);
 		gridLayout.add(buttonAddTarget, this.associationGrid);
+		this.associationGrid.setSizeFull();
+		gridLayout.setFlexGrow(1, this.associationGrid);
 		gridLayout.setSizeFull();
 
-		// Launch Layout
-		this.launchLayout = new SplitLayout();
-		this.launchLayout.setSplitterPosition(50);
+		// Side drawer displayed over the grid when a row is selected
+		this.buildDrawer();
 
-		// Selected target preferences
-		this.launchLayout.addToPrimary(new NativeLabel("Select row to see preferences..."));
-		// Inherited preferences
-		this.launchLayout.addToSecondary(this.belongToMemberOfAccordion);
-		this.launchLayout.setPrimaryStyle("min-width", "50%");
-		this.launchLayout.setSecondaryStyle("min-width", "50%");
-		this.launchLayout.setSizeFull();
+		// Container: full width grid + drawer positioned over its right side
+		Div container = new Div(gridLayout, this.drawer);
+		container.getStyle().set("position", "relative").set("overflow", "hidden").set("min-height", "400px");
+		container.setSizeFull();
+		this.add(container);
+		this.setSizeFull();
+		this.getStyle().set("overflow-x", "hidden");
+	}
 
-		// Add in split layout
-		layout.addToPrimary(gridLayout);
-		layout.setPrimaryStyle("min-height", "750px");
-		layout.addToSecondary(this.launchLayout);
-		layout.setSecondaryStyle("min-height", "350px");
-		this.setWidth("100%");
-		this.add(layout);
+	/**
+	 * Build the side drawer showing the details of the selected target
+	 */
+	private void buildDrawer() {
+		this.drawerTitle = new H3();
+		this.drawerTitle.getStyle().set("margin", "0").set("flex", "1");
+
+		Button closeButton = new Button(new Icon(VaadinIcon.CLOSE_SMALL));
+		closeButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY, ButtonVariant.LUMO_ICON);
+		closeButton.setAriaLabel("Close");
+		closeButton.addClickListener(event -> this.associationGrid.deselectAll());
+
+		HorizontalLayout header = new HorizontalLayout(this.drawerTitle, closeButton);
+		header.setWidthFull();
+		header.setAlignItems(FlexComponent.Alignment.CENTER);
+
+		this.selectedLaunchGrid.setWidthFull();
+		this.selectedLaunchGrid.setHeight("280px");
+		this.selectedLaunchGrid.setMinHeight("280px");
+		this.belongToMemberOfAccordion.setWidthFull();
+
+		VerticalLayout content = new VerticalLayout(new H4("Preferences"), this.selectedLaunchGrid,
+				new H4("Inherited preferences"), this.belongToMemberOfAccordion);
+		content.setPadding(false);
+		content.setWidthFull();
+		content.setAlignItems(FlexComponent.Alignment.STRETCH);
+
+		Div scrollContent = new Div(content);
+		scrollContent.setWidthFull();
+		scrollContent.getStyle().set("overflow-y", "auto").set("flex", "1").set("min-height", "0");
+
+		this.drawer = new VerticalLayout(header, scrollContent);
+		this.drawer.setPadding(true);
+		this.drawer.setSpacing(false);
+		this.drawer.setAlignItems(FlexComponent.Alignment.STRETCH);
+		this.drawer.setWidth("45%");
+		this.drawer.setMinWidth("480px");
+		this.drawer.getStyle()
+			.set("position", "fixed")
+			.set("top", "0")
+			.set("right", "0")
+			.set("bottom", "0")
+			.set("z-index", "10")
+			.set("box-sizing", "border-box")
+			.set("background-color", "var(--aura-background-color, Canvas)")
+			.set("box-shadow", "-4px 0 12px rgba(0, 0, 0, 0.25)");
+		this.drawer.setVisible(false);
 	}
 
 	/**
@@ -326,15 +370,13 @@ public class AssociationView extends AbstractView {
 
 		// Retrieve the preferences of the target selected
 		List<LaunchEntity> launchesSelected = new ArrayList<>();
-		if (associationModelSelected != null && associationModelSelected.getTarget() != null) {
-			this.launchLayout.addToPrimary(this.selectedLaunchGrid);
+		boolean hasSelection = associationModelSelected != null && associationModelSelected.getTarget() != null;
+		if (hasSelection) {
 			launchesSelected = this.associationLogic.retrieveLaunches(associationModelSelected.getTarget());
 			this.selectedLaunchGrid.setItems(launchesSelected);
+			this.drawerTitle.setText(associationModelSelected.getTarget().getName());
 		}
-		else {
-			this.launchLayout.addToPrimary(new NativeLabel("Select row to see preferences..."));
-			this.launchLayout.setPrimaryStyle("min-width", "50%");
-		}
+		this.drawer.setVisible(hasSelection);
 
 		// Retrieve the BelongToMemberOf preferences
 		Set<LaunchEntity> launchDuplicates = this.buildLaunchesBelongToMemberOfAccordion(associationModelSelected,

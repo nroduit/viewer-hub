@@ -17,6 +17,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.TestingAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -33,6 +35,7 @@ import org.viewer.hub.back.constant.ParamName;
 import org.viewer.hub.back.enums.IHERequestType;
 import org.viewer.hub.back.model.searchcriteria.ArchiveSearchCriteria;
 import org.viewer.hub.back.model.searchcriteria.IHESearchCriteria;
+import org.viewer.hub.back.model.searchcriteria.SearchCriteria;
 import org.viewer.hub.back.model.searchcriteria.WeasisArchiveSearchCriteria;
 import org.viewer.hub.back.service.CryptographyService;
 import org.viewer.hub.back.service.DisplayService;
@@ -183,6 +186,168 @@ class DisplayControllerIntegrationTests {
 
 		// Post and test results
 		this.launchWeasisWithIHEParametersPostRequestInvalidDataShouldBeBadRequest(weasisIHESearchCriteria);
+	}
+
+	@Test
+	void when_launchAuthViewerWithoutIHEParameters_with_validData_and_getRequest_should_redirectToLaunchUrl()
+			throws Exception {
+		Mockito.when(this.displayService.viewerLaunchUrl(Mockito.any(), Mockito.any())).thenReturn("launchUrl");
+
+		this.mockMvc
+			.perform(MockMvcRequestBuilders.get(EndPoint.DISPLAY_PATH + EndPoint.AUTH_PATH)
+				.principal(authenticatedUser())
+				.param(ParamName.USER, "test")
+				.param(ParamName.CONFIG, "extCfg"))
+			.andExpect(MockMvcResultMatchers.status().is3xxRedirection())
+			.andExpect(MockMvcResultMatchers.redirectedUrl("launchUrl"));
+
+		Mockito.verify(this.cryptographyService).decode(Mockito.any(SearchCriteria.class));
+	}
+
+	@Test
+	void when_launchAuthViewerWithoutIHEParameters_with_invalidData_and_getRequest_should_beBadRequest()
+			throws Exception {
+		this.mockMvc
+			.perform(MockMvcRequestBuilders.get(EndPoint.DISPLAY_PATH + EndPoint.AUTH_PATH)
+				.principal(authenticatedUser())
+				.param(ParamName.USER, "test")
+				.param(ParamName.CONFIG, "extCfg")
+				.param(ParamName.ARCHIVE, "archiveNotExisting"))
+			.andExpect(MockMvcResultMatchers.status().isBadRequest());
+
+		Mockito.verify(this.displayService, Mockito.never()).viewerLaunchUrl(Mockito.any(), Mockito.any());
+	}
+
+	@Test
+	void when_launchAuthViewerWithIHEParameters_with_validData_and_getRequest_should_redirectToLaunchUrl()
+			throws Exception {
+		Mockito.when(this.displayService.viewerLaunchUrl(Mockito.any(), Mockito.any())).thenReturn("launchUrl");
+
+		this.mockMvc
+			.perform(MockMvcRequestBuilders.get(EndPoint.DISPLAY_PATH + EndPoint.AUTH_IHE_INVOKE_IMAGE_DISPLAY_PATH)
+				.principal(authenticatedUser())
+				.param(ParamName.USER, "test")
+				.param(ParamName.CONFIG, "extCfg")
+				.param(ParamName.REQUEST_TYPE, IHERequestType.PATIENT.getCode())
+				.param(ParamName.PATIENT_ID, "patientId"))
+			.andExpect(MockMvcResultMatchers.status().is3xxRedirection())
+			.andExpect(MockMvcResultMatchers.redirectedUrl("launchUrl"));
+	}
+
+	@Test
+	void when_launchAuthViewerWithIHEParameters_with_invalidData_and_getRequest_should_beBadRequest() throws Exception {
+		this.mockMvc
+			.perform(MockMvcRequestBuilders.get(EndPoint.DISPLAY_PATH + EndPoint.AUTH_IHE_INVOKE_IMAGE_DISPLAY_PATH)
+				.principal(authenticatedUser())
+				.param(ParamName.USER, "test")
+				.param(ParamName.CONFIG, "extCfg")
+				.param(ParamName.REQUEST_TYPE, IHERequestType.PATIENT.getCode()))
+			.andExpect(MockMvcResultMatchers.status().isBadRequest());
+
+		Mockito.verify(this.displayService, Mockito.never()).viewerLaunchUrl(Mockito.any(), Mockito.any());
+	}
+
+	@Test
+	void when_launchAuthViewerWithoutIHEParameters_with_validData_and_postRequest_should_redirectToLaunchUrl()
+			throws Exception {
+		Mockito.when(this.displayService.viewerLaunchUrl(Mockito.any(), Mockito.any())).thenReturn("launchUrl");
+		WeasisArchiveSearchCriteria criteria = new WeasisArchiveSearchCriteria();
+		criteria.setUser("test");
+		criteria.setConfig("config");
+
+		this.mockMvc
+			.perform(MockMvcRequestBuilders.post(EndPoint.DISPLAY_PATH + EndPoint.AUTH_PATH)
+				.principal(authenticatedUser())
+				.contentType(MediaType.APPLICATION_JSON_VALUE)
+				.content(new ObjectMapper().writeValueAsString(criteria)))
+			.andExpect(MockMvcResultMatchers.status().is3xxRedirection())
+			.andExpect(MockMvcResultMatchers.redirectedUrl("launchUrl"));
+	}
+
+	@Test
+	void when_launchAuthViewerWithoutIHEParameters_with_invalidData_and_postRequest_should_beBadRequest()
+			throws Exception {
+		ArchiveSearchCriteria criteria = new ArchiveSearchCriteria();
+		criteria.setArchive(new LinkedHashSet<>(List.of("archiveNotExisting")));
+
+		this.mockMvc
+			.perform(MockMvcRequestBuilders.post(EndPoint.DISPLAY_PATH + EndPoint.AUTH_PATH)
+				.principal(authenticatedUser())
+				.contentType(MediaType.APPLICATION_JSON_VALUE)
+				.content(new ObjectMapper().writeValueAsString(criteria)))
+			.andExpect(MockMvcResultMatchers.status().isBadRequest());
+	}
+
+	@Test
+	void when_launchAuthViewerWithIHEParameters_with_validData_and_postRequest_should_redirectToLaunchUrl()
+			throws Exception {
+		Mockito.when(this.displayService.viewerLaunchUrl(Mockito.any(), Mockito.any())).thenReturn("launchUrl");
+		IHESearchCriteria criteria = new IHESearchCriteria();
+		criteria.setUser("test");
+		criteria.setRequestType(IHERequestType.PATIENT);
+		criteria.setPatientID("patientId");
+
+		this.mockMvc
+			.perform(MockMvcRequestBuilders.post(EndPoint.DISPLAY_PATH + EndPoint.AUTH_IHE_INVOKE_IMAGE_DISPLAY_PATH)
+				.principal(authenticatedUser())
+				.contentType(MediaType.APPLICATION_JSON_VALUE)
+				.content(new ObjectMapper().writeValueAsString(criteria)))
+			.andExpect(MockMvcResultMatchers.status().is3xxRedirection())
+			.andExpect(MockMvcResultMatchers.redirectedUrl("launchUrl"));
+	}
+
+	@Test
+	void when_launchAuthViewerWithIHEParameters_with_invalidData_and_postRequest_should_beBadRequest()
+			throws Exception {
+		IHESearchCriteria criteria = new IHESearchCriteria();
+		criteria.setUser("test");
+		criteria.setRequestType(IHERequestType.PATIENT);
+
+		this.mockMvc
+			.perform(MockMvcRequestBuilders.post(EndPoint.DISPLAY_PATH + EndPoint.AUTH_IHE_INVOKE_IMAGE_DISPLAY_PATH)
+				.principal(authenticatedUser())
+				.contentType(MediaType.APPLICATION_JSON_VALUE)
+				.content(new ObjectMapper().writeValueAsString(criteria)))
+			.andExpect(MockMvcResultMatchers.status().isBadRequest());
+	}
+
+	@Test
+	void when_launchViewerWithoutIHEParameters_with_iheParams_and_getRequest_should_beBadRequest() throws Exception {
+		this.mockMvc
+			.perform(MockMvcRequestBuilders.get(EndPoint.DISPLAY_PATH)
+				.param(ParamName.USER, "test")
+				.param(ParamName.CONFIG, "extCfg")
+				.param(ParamName.REQUEST_TYPE, IHERequestType.PATIENT.getCode())
+				.param(ParamName.PATIENT_ID, "patientId"))
+			.andExpect(MockMvcResultMatchers.status().isBadRequest());
+
+		Mockito.verify(this.displayService, Mockito.never()).viewerLaunchUrl(Mockito.any(), Mockito.any());
+	}
+
+	@Test
+	void when_launchViewerWithoutIHEParameters_with_validData_and_getRequest_should_redirectToLaunchUrl()
+			throws Exception {
+		Mockito.when(this.displayService.viewerLaunchUrl(Mockito.any(), Mockito.any())).thenReturn("launchUrl");
+
+		this.mockMvc
+			.perform(MockMvcRequestBuilders.get(EndPoint.DISPLAY_PATH)
+				.param(ParamName.USER, "test")
+				.param(ParamName.CONFIG, "extCfg"))
+			.andExpect(MockMvcResultMatchers.redirectedUrl("launchUrl"));
+
+		Mockito.verify(this.cryptographyService).decode(Mockito.any(SearchCriteria.class));
+	}
+
+	@Test
+	void when_launchViewerWithIHEParameters_with_postRequest_and_noBody_should_beBadRequest() throws Exception {
+		this.mockMvc
+			.perform(MockMvcRequestBuilders.post(EndPoint.DISPLAY_PATH + EndPoint.IHE_INVOKE_IMAGE_DISPLAY_PATH)
+				.contentType(MediaType.APPLICATION_JSON_VALUE))
+			.andExpect(MockMvcResultMatchers.status().isBadRequest());
+	}
+
+	private static Authentication authenticatedUser() {
+		return new TestingAuthenticationToken("user", "password", "collaborator", "viewer_display");
 	}
 
 	private void launchWeasisWithoutIHEParametersPostRequestInvalidDataShouldBeBadRequest(

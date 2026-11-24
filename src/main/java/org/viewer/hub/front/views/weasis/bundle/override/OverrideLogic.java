@@ -16,6 +16,7 @@ import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -24,6 +25,8 @@ import org.viewer.hub.back.entity.LaunchConfigEntity;
 import org.viewer.hub.back.entity.OverrideConfigEntity;
 import org.viewer.hub.back.entity.PackageVersionEntity;
 import org.viewer.hub.back.entity.TargetEntity;
+import org.viewer.hub.back.enums.LaunchConfigType;
+import org.viewer.hub.back.enums.TargetType;
 import org.viewer.hub.back.model.Message;
 import org.viewer.hub.back.model.MessageFormat;
 import org.viewer.hub.back.model.MessageLevel;
@@ -36,6 +39,8 @@ import org.viewer.hub.front.views.weasis.bundle.override.component.RefreshPackag
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -139,6 +144,27 @@ public class OverrideLogic {
 	public void deleteVersion(OverrideConfigEntity overrideConfigEntity) {
 		// Delete resource in volume
 		this.packageService.deleteResourcePackageVersion(overrideConfigEntity);
+	}
+
+	/**
+	 * Delete every package version (all qualifiers) sharing a version number (ex:
+	 * 4.7.1.0), with all their configs
+	 * @param versionNumber version number to delete
+	 * @return number of package versions deleted
+	 */
+	public int deleteAllVersionsOfVersionNumber(String versionNumber) {
+		List<OverrideConfigEntity> defaultConfigs = this.overrideConfigService
+			.retrieveOverrideConfigsPageable(new OverrideConfigFilter(), PageRequest.of(0, Integer.MAX_VALUE))
+			.getContent()
+			.stream()
+			.filter(o -> o.getPackageVersion() != null
+					&& Objects.equals(o.getPackageVersion().getVersionNumber(), versionNumber))
+			.filter(o -> o.getLaunchConfig() != null && o.getTarget() != null
+					&& Objects.equals(o.getLaunchConfig().getName(), LaunchConfigType.DEFAULT.getCode())
+					&& Objects.equals(o.getTarget().getType(), TargetType.DEFAULT))
+			.toList();
+		defaultConfigs.forEach(this::deleteVersion);
+		return defaultConfigs.size();
 	}
 
 	/**

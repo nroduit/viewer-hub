@@ -1,0 +1,118 @@
+/*
+ *  Copyright (c) 2022-2026 Weasis Team and other contributors.
+ *
+ *  This program and the accompanying materials are made available under the terms of the Eclipse
+ *  Public License 2.0 which is available at https://www.eclipse.org/legal/epl-2.0, or the Apache
+ *  License, Version 2.0 which is available at https://www.apache.org/licenses/LICENSE-2.0.
+ *
+ *  SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
+ *
+ */
+
+/*
+ * Context menu styled like the message boxes / notifications: rounded card, same
+ * shadow and background, colored accent bar on the left of each item.
+ */
+vaadin-context-menu::part(overlay) {
+	border-radius: 8px;
+	overflow: hidden;
+	padding: 0 !important;
+	background-color: light-dark(#ffffff, #262b36);
+	box-shadow: 0 2px 10px rgba(0, 0, 0, .25);
+}
+
+vaadin-context-menu::part(content) {
+	padding: 0 !important;
+}
+
+vaadin-context-menu-item {
+	--ctx-accent: #2196F3;
+	display: flex;
+	align-items: stretch;
+	min-width: 320px;
+	padding: 0 !important;
+	margin: 0 !important;
+	border-radius: 0;
+	color: light-dark(#2f3b4a, #e6e9ef);
+	line-height: 18px;
+	cursor: pointer;
+	outline: none !important;
+	box-shadow: none !important;
+}
+
+vaadin-context-menu-item::part(checkmark) {
+	display: none !important;
+}
+
+vaadin-context-menu-item::part(content) {
+	flex: 1;
+	display: block;
+	padding: 0 !important;
+	gap: 0 !important;
+}
+
+vaadin-context-menu-item .ctx-menu-body {
+	display: flex;
+	align-items: stretch;
+}
+
+vaadin-context-menu-item .ctx-menu-icon {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex: none;
+	width: 44px;
+	color: #ffffff;
+	background-color: var(--ctx-accent);
+}
+
+vaadin-context-menu-item .ctx-menu-icon vaadin-icon {
+	width: 22px;
+	height: 22px;
+	color: #ffffff;
+}
+
+vaadin-context-menu-item .ctx-menu-content {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	padding: 6px 16px;
+}
+
+vaadin-context-menu-item .ctx-menu-heading {
+	color: var(--ctx-accent);
+	font-size: 0.8rem;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+	line-height: 16px;
+	margin-bottom: 0;
+}
+
+vaadin-context-menu-item .ctx-menu-text {
+	color: light-dark(#2f3b4a, #e6e9ef);
+}
+
+vaadin-context-menu-item.ctx-menu-item-danger {
+	--ctx-accent: #F44336;
+}
+
+vaadin-context-menu-item.ctx-menu-item-info {
+	--ctx-accent: #ff9800;
+	cursor: default;
+}
+
+vaadin-context-menu-item:hover:not([disabled]),
+vaadin-context-menu-item[focused]:not([disabled]) {
+	background-color: color-mix(in srgb, var(--ctx-accent) 12%, transparent);
+}
+
+vaadin-context-menu-list-box {
+	padding: 0 !important;
+}
+vaadin-context-menu,
+vaadin-context-menu-list-box {
+	--vaadin-item-overlay-padding: 0;
+	--aura-item-overlay-padding-block: 0px;
+	--aura-item-overlay-padding-inline: 0px;
+}

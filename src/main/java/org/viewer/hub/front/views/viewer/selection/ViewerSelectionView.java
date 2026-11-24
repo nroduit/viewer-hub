@@ -100,10 +100,13 @@ public class ViewerSelectionView extends AbstractView {
 		addRuleButton.addClickListener(event -> this.addRuleButtonListener());
 		addRuleButton.setWidthFull();
 		gridLayout.add(addRuleButton, this.viewerSelectionGrid);
+		this.viewerSelectionGrid.setSizeFull();
+		gridLayout.setFlexGrow(1, this.viewerSelectionGrid);
 		gridLayout.setSizeFull();
 
 		this.add(gridLayout);
 		this.setSizeFull();
+		this.getStyle().set("overflow-x", "hidden");
 	}
 
 	/**

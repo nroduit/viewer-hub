@@ -176,16 +176,7 @@ public class DisplayController {
 		}
 	}
 
-	/**
-	 * Reset the authentication for the current request only, in order to force OAuth2 to
-	 * login again and get a fresh access token. A new empty context is used instead of
-	 * mutating the current one, which is shared with the HTTP session and would log out
-	 * the other tabs (Vaadin UI) of the same user.
-	 */
-	private static void resetAuthentication() {
-		SecurityContextHolder.setContext(SecurityContextHolder.createEmptyContext());
-	}
-
+	@Deprecated(forRemoval = true)
 	@Operation(summary = "Launch a viewer (Post)(IHE)(Not Authenticated)",
 			description = "Launch a viewer depending on IHE search criteria: not authenticated version => search criteria in body")
 	@ApiResponse(responseCode = "302", description = "Found: redirect to the selected viewer launch URL")
@@ -197,6 +188,7 @@ public class DisplayController {
 		return this.launchViewer(null, iheSearchCriteria);
 	}
 
+	@Deprecated(forRemoval = true)
 	@Operation(summary = "Launch a viewer (Post)(Regular)(Not Authenticated)",
 			description = "Launch a viewer depending on search criteria: not authenticated version => search criteria in body")
 	@ApiResponse(responseCode = "302", description = "Found: redirect to the selected viewer launch URL")
@@ -206,6 +198,43 @@ public class DisplayController {
 	public RedirectView launchViewerWithoutIHEParameters(HttpServletRequest request,
 			@RequestBody @Valid ArchiveSearchCriteria archiveSearchCriteria) {
 		return this.launchViewer(null, archiveSearchCriteria);
+	}
+
+	@Operation(summary = "Launch a viewer (Post)(IHE)(Authenticated)",
+			description = "Launch a viewer depending on IHE search criteria: authenticated version => search criteria in body")
+	@ApiResponse(responseCode = "302", description = "Found: redirect to the selected viewer launch URL")
+	@ApiResponse(responseCode = "400",
+			description = "Bad request: IHE search criteria body invalid or unrecognized viewer type")
+	@PostMapping(value = EndPoint.AUTH_IHE_INVOKE_IMAGE_DISPLAY_PATH,
+			produces = { ApiVersion.V1_APPLICATION_JSON_VALUE })
+	@PreAuthorize("hasAuthority('viewer_display')")
+	public RedirectView launchAuthViewerWithIHEParameters(HttpServletRequest request,
+			@Parameter(hidden = true, required = true) @NotNull Authentication authentication,
+			@RequestBody @Valid IHESearchCriteria iheSearchCriteria) {
+		return this.launchViewer(authentication, iheSearchCriteria);
+	}
+
+	@Operation(summary = "Launch a viewer (Post)(Regular)(Authenticated)",
+			description = "Launch a viewer depending on search criteria: authenticated version => search criteria in body")
+	@ApiResponse(responseCode = "302", description = "Found: redirect to the selected viewer launch URL")
+	@ApiResponse(responseCode = "400",
+			description = "Bad request: archive search criteria body invalid or unrecognized viewer type")
+	@PostMapping(value = EndPoint.AUTH_PATH, produces = { ApiVersion.V1_APPLICATION_JSON_VALUE })
+	@PreAuthorize("hasAuthority('viewer_display')")
+	public RedirectView launchAuthViewerWithoutIHEParameters(HttpServletRequest request,
+			@Parameter(hidden = true, required = true) @NotNull Authentication authentication,
+			@RequestBody @Valid ArchiveSearchCriteria archiveSearchCriteria) {
+		return this.launchViewer(authentication, archiveSearchCriteria);
+	}
+
+	/**
+	 * Reset the authentication for the current request only, in order to force OAuth2 to
+	 * login again and get a fresh access token. A new empty context is used instead of
+	 * mutating the current one, which is shared with the HTTP session and would log out
+	 * the other tabs (Vaadin UI) of the same user.
+	 */
+	private static void resetAuthentication() {
+		SecurityContextHolder.setContext(SecurityContextHolder.createEmptyContext());
 	}
 
 	/**
